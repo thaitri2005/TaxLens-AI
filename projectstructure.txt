@@ -1,0 +1,2498 @@
+# TaxLens AI 
+
+**Working title:** **TaxLens AI**
+**Project type:** Cloud-native regulatory intelligence and LLMOps platform
+**Target users:** Accountants, auditors, tax consultants, accounting firms, and in-house tax professionals
+**Primary cloud:** Microsoft Azure
+**Primary portfolio objective:** Demonstrate end-to-end AI platform engineering rather than another PDF chatbot.
+
+**Implementation rule:** This is a long-term blueprint, not a claim that every component is required on day one. The build should start as a modular monolith and add infrastructure only when a measurable workload or portfolio objective justifies it. Sections below label the intended **MVP**, **later release**, or **stretch** scope without removing the long-term architecture.
+
+The project’s central idea remains:
+
+> TaxLens continuously collects Vietnamese tax regulations, structures and versions them, detects relevant changes, and helps tax professionals understand what changed, why it matters, and where the conclusion came from.
+
+This preserves the original vision of a hybrid structured–unstructured system using Blob Storage, PostgreSQL, pgvector, Airflow, FastAPI, LangGraph, Azure OpenAI, authentication, monitoring, evaluation, and automated deployment. The practical path is to introduce these in phases rather than operate all of them in the first local environment.
+
+---
+
+# 1. Product Definition
+
+## 1.1 The problem
+
+Tax professionals currently have to:
+
+1. Notice that a new legal document has been issued.
+2. Find and download it.
+3. determine whether it concerns their work or clients.
+4. Read a potentially long document.
+5. Identify amendments, replacements, or referenced regulations.
+6. Compare it with the previous version.
+7. Write a summary.
+8. Explain the impact to colleagues or clients.
+9. Continue monitoring later guidance and amendments.
+
+The difficult part is not merely finding legislation. It is answering:
+
+* What changed?
+* When does it become effective?
+* Which taxpayers or transactions are affected?
+* Does it replace an older regulation?
+* Which sections should I read?
+* What action should I consider?
+* How confident is the system?
+* What source supports the answer?
+
+## 1.2 The solution
+
+TaxLens performs four broad jobs:
+
+### Regulatory ingestion
+
+It checks selected government sources, detects new or changed documents, downloads them, extracts text and metadata, and records the ingestion history.
+
+### Regulatory knowledge management
+
+It stores original files, normalized text, legal metadata, relationships, versions, chunks, embeddings, and processing status.
+
+### Regulatory intelligence
+
+It produces summaries, comparisons, timelines, topic classifications, affected-audience tags, and organization-specific impact analysis.
+
+### User delivery
+
+It provides dashboards, search, cited question answering, saved topics, alerts, document comparison, and periodic regulatory digests.
+
+---
+
+# 2. Deliberate Scope
+
+## 2.1 Initial legal domain
+
+Start with **Vietnamese tax regulation only**.
+
+Do not begin with all Vietnamese law.
+
+The first supported categories should be:
+
+* Value-added tax
+* Corporate income tax
+* Personal income tax
+* Tax administration
+* Electronic invoices
+* Import and export tax
+* Customs-related tax obligations
+
+This scope is already large enough to justify the architecture while keeping collection, labeling, evaluation, and demonstration manageable.
+
+## 2.2 Initial document types
+
+Support these first:
+
+* Laws
+* Decrees
+* Circulars
+* Resolutions
+* Decisions
+* Official tax guidance
+* Consolidated legal documents, where available
+
+## 2.3 Initial data-source policy
+
+For the portfolio version:
+
+* Use a curated seed corpus for reliability.
+* Implement one or two real source connectors.
+* Design the system so that more connectors can be added later.
+* Do not make the live demo entirely dependent on fragile government websites.
+* Preserve downloaded source files so the demo continues to work when a website changes.
+
+## 2.4 Language
+
+The source corpus is primarily Vietnamese.
+
+The system should support:
+
+* Vietnamese questions and answers
+* English questions over Vietnamese legal sources
+* Vietnamese citations regardless of answer language
+* Optional bilingual summaries later
+
+---
+
+# 3. Core User Workflows
+
+## 3.1 Regulatory monitoring
+
+A tax professional opens the dashboard and sees:
+
+* New documents
+* Recently effective documents
+* Upcoming effective dates
+* Recently amended documents
+* Documents relevant to saved tax topics
+* Documents that failed processing
+* Weekly regulatory summary
+
+## 3.2 Document discovery
+
+The user searches by:
+
+* Document number
+* Title
+* Issuing agency
+* Tax category
+* Issue date
+* Effective date
+* Status
+* Free-text keyword
+* Semantic meaning
+
+## 3.3 Cited question answering
+
+Example:
+
+> What changed recently in electronic invoice requirements?
+
+TaxLens should:
+
+1. Understand the user’s intent.
+2. apply metadata filters.
+3. Retrieve relevant chunks.
+4. Rerank the results.
+5. Generate an answer.
+6. Attach document-level and article-level citations.
+7. State uncertainty when evidence is insufficient.
+
+## 3.4 Regulation comparison
+
+Example:
+
+> Compare the latest circular with the regulation it replaced.
+
+The system should produce:
+
+* Added provisions
+* Removed provisions
+* Modified thresholds
+* Changed deadlines
+* Changed affected entities
+* New obligations
+* Relaxed obligations
+* Relevant source passages
+* Effective-date transition notes
+
+## 3.5 Impact analysis
+
+Example:
+
+> I advise small e-commerce companies. Does this regulation affect my clients?
+
+The system should use:
+
+* The regulation
+* User profile or saved business context
+* Tax topic
+* Company characteristics
+* Retrieved legal evidence
+
+The response should separate:
+
+* Confirmed legal requirements
+* Likely implications
+* Suggested review actions
+* Uncertain or context-dependent points
+
+It must avoid presenting AI output as formal legal advice.
+
+## 3.6 Notifications
+
+Users can subscribe to:
+
+* A tax category
+* A legal document
+* An issuing authority
+* Keywords
+* A saved company profile
+* Effective-date reminders
+
+Possible notification channels:
+
+* In-app notification
+* Email
+* Weekly digest
+* Later: Microsoft Teams, Slack, or webhooks
+
+---
+
+# 4. High-Level System Architecture
+
+The diagram below is the target architecture. For the first vertical slice, run ingestion and processing as repeatable CLI/worker commands and keep the same module boundaries. Add Airflow after there are multiple scheduled workflows that need retries, backfills, and operational visibility.
+
+```text
+Official Sources / Seed Corpus
+              │
+              ▼
+       Source Connectors
+              │
+              ▼
+       Apache Airflow DAGs
+              │
+     ┌────────┴─────────┐
+     ▼                  ▼
+Change Detection    Crawl Metadata
+     │                  │
+     ▼                  ▼
+Azure Blob Storage   PostgreSQL
+Original Documents   Crawl Jobs
+     │
+     ▼
+Text Extraction / OCR
+     │
+     ▼
+Document Normalization
+     │
+     ▼
+Metadata Extraction and Validation
+     │
+     ├───────────────► PostgreSQL
+     │                  Legal Metadata
+     ▼
+Version and Relationship Resolution
+     │
+     ▼
+Chunking and Indexing
+     │
+     ├───────────────► PostgreSQL Full-Text Search
+     └───────────────► pgvector Embeddings
+                            │
+                            ▼
+                    FastAPI Application
+                            │
+               ┌────────────┼────────────┐
+               ▼            ▼            ▼
+             Auth       Search API    LangGraph
+                                          │
+                              ┌───────────┼───────────┐
+                              ▼           ▼           ▼
+                           Retrieve     Compare     Analyze
+                              │           │           │
+                              └───────────┴───────────┘
+                                          │
+                                          ▼
+                                       OpenAI
+                                          │
+                                          ▼
+                                Answer + Citations
+                                          │
+                                          ▼
+                                Next.js Frontend
+```
+
+---
+
+# 5. Azure Service Mapping
+
+## 5.1 Resource group
+
+One resource group for the portfolio deployment:
+
+```text
+rg-taxlens-dev
+```
+
+A later production-like structure could use:
+
+```text
+rg-taxlens-shared
+rg-taxlens-dev
+rg-taxlens-prod
+```
+
+## 5.2 Azure Blob Storage
+
+Use Blob Storage for immutable and generated artifacts.
+
+Suggested containers:
+
+```text
+raw-documents/
+normalized-text/
+ocr-output/
+generated-reports/
+evaluation-datasets/
+pipeline-artifacts/
+```
+
+Example path:
+
+```text
+raw-documents/
+  source=thuvienphapluat-or-official-source/
+  year=2026/
+  document_id=31-2026-tt-btc/
+  original.pdf
+```
+
+Blob Storage contains:
+
+* Original PDFs
+* HTML snapshots
+* OCR JSON
+* Extracted text
+* Document images
+* Generated comparison reports
+* Evaluation data exports
+
+PostgreSQL should store the blob path rather than the file itself.
+
+## 5.3 Azure Database for PostgreSQL
+
+Use PostgreSQL as the system of record.
+
+It stores:
+
+* Users
+* Organizations
+* Subscription settings
+* Documents
+* Document versions
+* Metadata
+* Relationships
+* Chunks
+* Vector embeddings
+* Processing jobs
+* Alerts
+* Chat sessions
+* Model usage
+* Evaluation results
+
+Required extensions:
+
+```sql
+vector
+pg_trgm
+uuid-ossp
+```
+
+PostgreSQL can provide both:
+
+* Relational querying
+* Keyword/full-text retrieval
+* Vector retrieval through pgvector
+
+This avoids adding a separate vector database before the scale requires it.
+
+## 5.4 Azure AI Document Intelligence
+
+Use only when necessary.
+
+Processing logic:
+
+```text
+Is the PDF text-readable?
+    │
+    ├── Yes → native PDF extraction
+    │
+    └── No  → Azure AI Document Intelligence OCR
+```
+
+This avoids paying for OCR on digitally generated PDFs.
+
+## 5.5 Azure OpenAI
+
+Use it for:
+
+* Metadata extraction when deterministic parsing fails
+* Legal topic classification
+* Summarization
+* Structured comparison
+* Query interpretation
+* Answer generation
+* Impact-analysis drafting
+* Evaluation assistance
+
+Use an embedding deployment separately from the chat deployment.
+
+The exact model should be configurable through environment variables rather than hard-coded.
+
+## 5.6 Azure Key Vault
+
+Store:
+
+* Azure OpenAI credentials
+* Database password
+* JWT signing secret
+* Email provider credentials
+* Crawler credentials, where applicable
+* Storage access secrets
+* OAuth secrets
+
+For the first local version, `.env` can be used. The cloud deployment should retrieve secrets through managed identity or Key Vault references.
+
+## 5.7 Azure Container Registry
+
+Store versioned application images:
+
+```text
+taxlens-api
+taxlens-worker
+taxlens-airflow
+taxlens-frontend
+```
+
+Example tag convention:
+
+```text
+taxlens-api:git-a6f39d2
+taxlens-api:v0.3.0
+```
+
+## 5.8 Runtime platform
+
+There should be two deployment tiers.
+
+### Realistic MVP deployment
+
+Use:
+
+* Azure Container Apps or App Service for FastAPI
+* Azure Container Apps for workers
+* Managed PostgreSQL
+* Blob Storage
+* Key Vault
+* Azure Container Registry
+* Static Web Apps or Container Apps for the frontend
+
+This is more affordable and realistically maintainable.
+
+### CV stretch deployment
+
+Demonstrate AKS configuration through infrastructure code:
+
+* FastAPI deployment
+* Background worker deployment
+* Airflow deployment
+* Frontend deployment
+* Ingress
+* Autoscaling
+* Health checks
+* Secrets
+* ConfigMaps
+* Resource limits
+
+You do not need to keep an expensive AKS cluster running continuously. The repository can still contain a valid AKS deployment path.
+
+## 5.9 Cost and effectiveness guardrails
+
+The Azure mapping is a target deployment blueprint, not a requirement to keep every service running during development. Use this order:
+
+1. local Docker Compose with PostgreSQL/pgvector and a seed corpus;
+2. one low-cost Azure development environment with API, Blob Storage, PostgreSQL, and secrets;
+3. add workers, scheduling, OCR, monitoring, and managed identity as the corresponding workflow becomes real;
+4. keep AKS, high availability, and production resource groups as infrastructure-code demonstrations unless sustained usage justifies them.
+
+Control spend and improve effectiveness by:
+
+* extracting native PDF text before using paid OCR;
+* caching normalized text, metadata, embeddings, and evaluation results;
+* embedding high-priority or recently changed documents first;
+* recording model, token, latency, and estimated-cost data for every request;
+* setting a development budget and disabling nonessential resources outside demos;
+* measuring citation correctness and answer usefulness before increasing model size or adding infrastructure.
+
+Azure prices vary by region, agreement, and usage. Use the Azure Pricing Calculator immediately before provisioning rather than hard-coding a monthly estimate in this blueprint.
+
+---
+
+# 6. Application Components
+
+## 6.1 Source Connector Layer
+
+Each source connector should implement the same interface.
+
+```python
+class SourceConnector:
+    def list_documents(self, since: datetime) -> list[SourceDocument]:
+        ...
+
+    def fetch_document(self, document: SourceDocument) -> bytes:
+        ...
+
+    def fetch_metadata(self, document: SourceDocument) -> dict:
+        ...
+```
+
+Responsibilities:
+
+* Discover source documents
+* Extract source URLs
+* Retrieve source metadata
+* Download files
+* Respect retry and rate limits
+* Record crawl timestamps
+* Return standardized objects
+
+Each connector should be isolated because source websites will change independently.
+
+Suggested folder:
+
+```text
+ingestion/connectors/
+  base.py
+  official_tax_portal.py
+  ministry_of_finance.py
+  seed_corpus.py
+```
+
+## 6.2 Change Detection Service
+
+Do not rely only on titles or URLs.
+
+Calculate:
+
+* File checksum
+* Normalized-text checksum
+* Source-page checksum
+* Last-modified information
+* Document number
+* Version identifiers
+
+Possible outcomes:
+
+```text
+NEW_DOCUMENT
+UNCHANGED
+NEW_SOURCE_COPY
+CONTENT_UPDATED
+METADATA_UPDATED
+PROCESSING_RETRY
+```
+
+Every ingestion should be idempotent. Running the same DAG twice must not create duplicate legal records.
+
+## 6.3 Extraction Service
+
+Extraction sequence:
+
+```text
+Download
+   ↓
+Validate MIME type
+   ↓
+Detect file format
+   ↓
+Attempt native text extraction
+   ↓
+Measure extraction quality
+   ↓
+OCR if quality is insufficient
+   ↓
+Normalize encoding and whitespace
+   ↓
+Preserve page boundaries
+   ↓
+Store normalized output
+```
+
+Extraction quality signals could include:
+
+* Number of extracted characters
+* Ratio of alphabetic characters
+* Broken-character frequency
+* Empty-page percentage
+* Page count consistency
+
+## 6.4 Metadata Extraction Service
+
+Important fields:
+
+```text
+document_number
+title
+document_type
+issuing_agency
+signing_authority
+issue_date
+effective_date
+expiration_date
+publication_date
+tax_categories
+legal_status
+official_source_url
+language
+referenced_documents
+amended_documents
+replaced_documents
+superseded_by
+applicable_entities
+geographic_scope
+```
+
+Use three extraction layers:
+
+1. Deterministic parsing and regular expressions
+2. Source-page metadata
+3. LLM structured extraction
+
+The LLM output should be validated with a Pydantic schema.
+
+## 6.5 Legal Versioning Service
+
+This is one of the project’s most important differentiators.
+
+Distinguish between:
+
+* Different documents
+* Different versions of the same document
+* An amendment to another document
+* A replacement document
+* A consolidated version
+* A guidance document referencing a regulation
+
+Suggested entities:
+
+```text
+LegalDocument
+LegalDocumentVersion
+LegalRelationship
+```
+
+Example relationships:
+
+```text
+AMENDS
+REPEALS
+REPLACES
+GUIDES
+REFERENCES
+CONSOLIDATES
+EXTENDS
+IMPLEMENTS
+```
+
+## 6.6 Classification Service
+
+Classify each document by:
+
+* Tax category
+* Document type
+* Affected taxpayer group
+* Business process
+* Risk level
+* Urgency
+* Effective-date horizon
+
+Possible affected groups:
+
+* Individuals
+* SMEs
+* Large enterprises
+* Foreign-invested enterprises
+* E-commerce sellers
+* Exporters
+* Importers
+* Employers
+* Accounting firms
+* Tax agents
+
+Initially, use a controlled taxonomy rather than unconstrained labels.
+
+## 6.7 Chunking Service
+
+Chunk legal documents according to legal structure, not arbitrary token windows.
+
+Preferred hierarchy:
+
+```text
+Document
+  └── Chapter
+       └── Section
+            └── Article
+                 └── Clause
+                      └── Point
+```
+
+Chunking priority:
+
+1. Article-level chunks
+2. Clause-level chunks for long articles
+3. Token-based fallback only when structural parsing fails
+
+Each chunk should retain:
+
+```text
+document_id
+version_id
+article_number
+clause_number
+section_heading
+page_start
+page_end
+effective_date
+tax_category
+legal_status
+text
+token_count
+```
+
+This is critical for useful citations.
+
+## 6.8 Embedding Service
+
+The original concept discussed lazy embedding. Keep it, but use a hybrid policy rather than fully lazy embedding.
+
+### Eagerly embed
+
+* Titles
+* Abstracts
+* Metadata summaries
+* Frequently used documents
+* New high-priority regulations
+* Article headings
+
+### Lazily embed
+
+* Long document bodies
+* Historical low-demand documents
+* Attachments
+* Rarely queried guidance
+* Archived or superseded materials
+
+Workflow:
+
+```text
+New document arrives
+      ↓
+Metadata and text stored
+      ↓
+Priority score calculated
+      ↓
+High priority?
+  ├── Yes → Embed immediately
+  └── No  → Mark EMBEDDING_PENDING
+                    ↓
+             Embed on demand
+                    ↓
+               Cache forever
+```
+
+However, fully embedding a carefully selected seed corpus is preferable for a reliable interview demo.
+
+## 6.9 Retrieval Service
+
+Use hybrid retrieval:
+
+```text
+Structured filters
+        +
+PostgreSQL full-text search
+        +
+pgvector semantic search
+        +
+Reranking
+```
+
+Retrieval stages:
+
+1. Query classification
+2. Metadata extraction from question
+3. Apply date, category, agency, and status filters
+4. Keyword search
+5. Vector search
+6. Reciprocal-rank or weighted fusion
+7. Reranking
+8. Context assembly
+9. Citation validation
+
+Example:
+
+> What VAT changes became effective in July 2026?
+
+The system should infer:
+
+```json
+{
+  "category": "VAT",
+  "effective_date_from": "2026-07-01",
+  "effective_date_to": "2026-07-31",
+  "status": "effective"
+}
+```
+
+Then it searches only the relevant legal subset.
+
+## 6.10 LangGraph Agent
+
+Do not create an unrestricted “autonomous legal agent.”
+
+Use a controlled workflow graph.
+
+```text
+START
+  │
+  ▼
+Authenticate and Load User Context
+  │
+  ▼
+Intent Classification
+  │
+  ├── Document Lookup
+  ├── Regulatory Question
+  ├── Change Summary
+  ├── Document Comparison
+  ├── Impact Analysis
+  └── Unsupported Request
+          │
+          ▼
+Query Planning
+          │
+          ▼
+Structured Filters
+          │
+          ▼
+Hybrid Retrieval
+          │
+          ▼
+Evidence Sufficiency Check
+          │
+      ┌───┴────┐
+      │        │
+Enough     Insufficient
+      │        │
+      ▼        ▼
+Analysis   Clarify or refuse conclusion
+      │
+      ▼
+Citation Validation
+      │
+      ▼
+Response Generation
+      │
+      ▼
+Logging and Evaluation
+      │
+      ▼
+END
+```
+
+The graph provides CV value because it demonstrates:
+
+* Stateful LLM workflows
+* Tool calling
+* Routing
+* Evidence checks
+* Deterministic control
+* Error handling
+* Observability
+
+## 6.11 Notification Service
+
+Notification trigger types:
+
+```text
+NEW_DOCUMENT
+DOCUMENT_UPDATED
+EFFECTIVE_SOON
+DOCUMENT_EFFECTIVE
+TOPIC_MATCH
+SAVED_PROFILE_MATCH
+WEEKLY_DIGEST
+```
+
+Suggested workflow:
+
+```text
+New processed document
+      ↓
+Match subscription rules
+      ↓
+Generate concise summary
+      ↓
+Create notification record
+      ↓
+Queue delivery
+      ↓
+Send email or in-app alert
+      ↓
+Record delivery status
+```
+
+Redis can support queues and deduplication locally. In Azure, Storage Queues or Service Bus can be used later.
+
+---
+
+# 7. Database Domain Model
+
+## 7.1 Identity and organizations
+
+### `users`
+
+```text
+id
+email
+password_hash
+full_name
+role
+is_active
+created_at
+last_login_at
+```
+
+### `organizations`
+
+```text
+id
+name
+organization_type
+plan
+created_at
+```
+
+### `organization_members`
+
+```text
+organization_id
+user_id
+membership_role
+joined_at
+```
+
+### `api_usage`
+
+```text
+id
+organization_id
+user_id
+endpoint
+input_tokens
+output_tokens
+estimated_cost
+created_at
+```
+
+## 7.2 Legal content
+
+### `legal_documents`
+
+Represents the conceptual legal instrument.
+
+```text
+id
+canonical_number
+canonical_title
+document_type
+issuing_agency_id
+primary_tax_category
+current_status
+created_at
+updated_at
+```
+
+### `legal_document_versions`
+
+Represents an individual version or source copy.
+
+```text
+id
+document_id
+version_label
+issue_date
+effective_date
+expiration_date
+publication_date
+source_url
+blob_path
+text_blob_path
+content_hash
+metadata_hash
+processing_status
+embedding_status
+created_at
+```
+
+### `legal_relationships`
+
+```text
+id
+source_document_id
+target_document_id
+relationship_type
+source_article
+target_article
+confidence
+extraction_method
+verified
+created_at
+```
+
+### `document_chunks`
+
+```text
+id
+version_id
+chunk_index
+article_number
+clause_number
+heading
+text
+page_start
+page_end
+token_count
+search_vector
+embedding vector(...)
+metadata jsonb
+created_at
+```
+
+### `agencies`
+
+```text
+id
+name
+abbreviation
+agency_type
+```
+
+### `tax_categories`
+
+```text
+id
+code
+name_vi
+name_en
+parent_id
+```
+
+### `document_tax_categories`
+
+```text
+document_id
+tax_category_id
+confidence
+source
+```
+
+## 7.3 Ingestion and operations
+
+### `source_connectors`
+
+```text
+id
+name
+base_url
+connector_type
+enabled
+last_successful_run
+```
+
+### `crawl_jobs`
+
+```text
+id
+connector_id
+started_at
+finished_at
+status
+documents_discovered
+documents_downloaded
+documents_failed
+error_summary
+```
+
+### `processing_jobs`
+
+```text
+id
+version_id
+job_type
+status
+attempt_count
+started_at
+finished_at
+error_message
+```
+
+## 7.4 User intelligence
+
+### `subscriptions`
+
+```text
+id
+user_id
+organization_id
+subscription_type
+filter_config jsonb
+delivery_channel
+frequency
+enabled
+```
+
+### `notifications`
+
+```text
+id
+user_id
+document_id
+notification_type
+title
+body
+status
+created_at
+delivered_at
+```
+
+### `company_profiles`
+
+```text
+id
+organization_id
+name
+industry
+company_size
+taxpayer_type
+business_activities jsonb
+locations jsonb
+custom_context
+```
+
+## 7.5 Chat and LLMOps
+
+### `chat_sessions`
+
+```text
+id
+user_id
+organization_id
+title
+created_at
+updated_at
+```
+
+### `chat_messages`
+
+```text
+id
+session_id
+role
+content
+intent
+model
+prompt_version_id
+input_tokens
+output_tokens
+latency_ms
+created_at
+```
+
+### `message_citations`
+
+```text
+id
+message_id
+chunk_id
+citation_order
+support_score
+```
+
+### `prompt_versions`
+
+```text
+id
+name
+version
+template
+model_config jsonb
+created_at
+active
+```
+
+### `evaluation_runs`
+
+```text
+id
+name
+dataset_version
+pipeline_version
+started_at
+finished_at
+status
+```
+
+### `evaluation_results`
+
+```text
+id
+evaluation_run_id
+question_id
+answer_id
+retrieval_precision
+retrieval_recall
+faithfulness
+answer_relevance
+citation_correctness
+latency_ms
+estimated_cost
+```
+
+---
+
+# 8. API Structure
+
+Base path:
+
+```text
+/api/v1
+```
+
+## 8.1 Authentication
+
+```http
+POST /auth/register
+POST /auth/login
+POST /auth/refresh
+POST /auth/logout
+GET  /auth/me
+```
+
+## 8.2 Documents
+
+```http
+GET  /documents
+GET  /documents/{document_id}
+GET  /documents/{document_id}/versions
+GET  /documents/{document_id}/relationships
+GET  /documents/{document_id}/timeline
+POST /documents/upload
+```
+
+## 8.3 Search
+
+```http
+POST /search
+GET  /search/suggestions
+GET  /search/facets
+```
+
+Search request:
+
+```json
+{
+  "query": "electronic invoice requirements",
+  "tax_categories": ["electronic_invoices"],
+  "effective_from": "2026-01-01",
+  "status": ["effective"],
+  "limit": 10
+}
+```
+
+## 8.4 Intelligence
+
+```http
+POST /intelligence/ask
+POST /intelligence/compare
+POST /intelligence/impact
+GET  /intelligence/weekly-summary
+GET  /intelligence/recent-changes
+```
+
+## 8.5 Subscriptions and notifications
+
+```http
+GET    /subscriptions
+POST   /subscriptions
+PATCH  /subscriptions/{id}
+DELETE /subscriptions/{id}
+
+GET    /notifications
+PATCH  /notifications/{id}/read
+```
+
+## 8.6 System operations
+
+Admin-only:
+
+```http
+POST /admin/ingestion/run
+GET  /admin/ingestion/jobs
+POST /admin/documents/{id}/reprocess
+POST /admin/documents/{id}/embed
+GET  /admin/system/health
+GET  /admin/system/usage
+```
+
+---
+
+# 9. Frontend Structure
+
+Use **Next.js with TypeScript**.
+
+## 9.1 Main pages
+
+```text
+/login
+/register
+/dashboard
+/documents
+/documents/[id]
+/search
+/ask
+/compare
+/alerts
+/company-profiles
+/settings
+/admin/pipeline
+/admin/evaluation
+```
+
+## 9.2 Dashboard
+
+Show:
+
+* Number of newly detected documents
+* Tax categories with the most activity
+* Documents becoming effective soon
+* Latest major changes
+* Saved-topic matches
+* Recent queries
+* Ingestion health
+* Weekly summary
+
+## 9.3 Document page
+
+Display:
+
+* Document title and number
+* Legal status
+* Issuing agency
+* Issue and effective dates
+* Tax categories
+* Original PDF
+* Structured text
+* Related documents
+* Version timeline
+* “Ask about this document”
+* “Compare with previous version”
+
+## 9.4 Ask page
+
+Include:
+
+* Chat interface
+* Metadata filters
+* Source panel
+* Clickable citations
+* Retrieved document list
+* Confidence or evidence-status indicator
+* Copy/export answer
+* Feedback control
+
+## 9.5 Comparison page
+
+The interface should allow:
+
+* Automatic comparison with predecessor
+* Manual selection of two documents
+* Side-by-side source display
+* Structured difference summary
+* Added/removed/modified classifications
+* Citation links for every reported difference
+
+---
+
+# 10. Airflow DAG Structure
+
+Airflow is the target scheduler for continuous ingestion, weekly digests, and evaluation. It is not required to make the first search/Q&A demo work. Start with the same task functions behind CLI commands; then place those functions in DAGs once the processing path is stable and idempotent.
+
+## 10.1 Daily discovery DAG
+
+```text
+tax_regulation_discovery_daily
+```
+
+Tasks:
+
+```text
+start
+  ↓
+load_connector_configuration
+  ↓
+discover_source_documents
+  ↓
+normalize_discovery_results
+  ↓
+compare_against_catalog
+  ↓
+branch_new_or_changed
+  ├── no_changes → record_success
+  └── changes
+         ↓
+      download_documents
+         ↓
+      calculate_checksums
+         ↓
+      persist_raw_files
+         ↓
+      create_processing_jobs
+         ↓
+      trigger_processing_dag
+         ↓
+      record_success
+```
+
+## 10.2 Document processing DAG
+
+```text
+tax_document_processing
+```
+
+```text
+validate_file
+  ↓
+extract_native_text
+  ↓
+assess_text_quality
+  ↓
+branch_ocr_required
+  ├── no → normalize_text
+  └── yes → document_intelligence_ocr → normalize_text
+  ↓
+extract_metadata
+  ↓
+validate_metadata
+  ↓
+resolve_document_identity
+  ↓
+resolve_legal_relationships
+  ↓
+classify_tax_topics
+  ↓
+structure_legal_sections
+  ↓
+create_chunks
+  ↓
+calculate_embedding_priority
+  ↓
+embed_priority_chunks
+  ↓
+index_full_text
+  ↓
+mark_document_ready
+  ↓
+trigger_notifications
+```
+
+## 10.3 Weekly summary DAG
+
+```text
+weekly_regulatory_digest
+```
+
+```text
+select_weekly_documents
+  ↓
+group_by_tax_category
+  ↓
+generate_change_summaries
+  ↓
+generate_digest
+  ↓
+match_user_subscriptions
+  ↓
+queue_notifications
+```
+
+## 10.4 Evaluation DAG
+
+```text
+nightly_rag_evaluation
+```
+
+```text
+load_evaluation_dataset
+  ↓
+run_current_retrieval_pipeline
+  ↓
+generate_answers
+  ↓
+calculate_retrieval_metrics
+  ↓
+calculate_generation_metrics
+  ↓
+compare_against_baseline
+  ↓
+log_to_mlflow
+  ↓
+alert_on_regression
+```
+
+---
+
+# 11. Repository Structure
+
+```text
+taxlens-ai/
+│
+├── README.md
+├── LICENSE
+├── Makefile
+├── pyproject.toml
+├── docker-compose.yml
+├── .env.example
+│
+├── apps/
+│   ├── api/
+│   │   ├── app/
+│   │   │   ├── main.py
+│   │   │   ├── config.py
+│   │   │   ├── dependencies.py
+│   │   │   ├── middleware/
+│   │   │   ├── api/
+│   │   │   │   └── v1/
+│   │   │   │       ├── auth.py
+│   │   │   │       ├── documents.py
+│   │   │   │       ├── search.py
+│   │   │   │       ├── intelligence.py
+│   │   │   │       ├── subscriptions.py
+│   │   │   │       └── admin.py
+│   │   │   └── schemas/
+│   │   ├── tests/
+│   │   └── Dockerfile
+│   │
+│   ├── worker/
+│   │   ├── worker/
+│   │   │   ├── main.py
+│   │   │   ├── tasks/
+│   │   │   └── queues/
+│   │   └── Dockerfile
+│   │
+│   └── web/
+│       ├── app/
+│       ├── components/
+│       ├── lib/
+│       ├── public/
+│       ├── tests/
+│       └── Dockerfile
+│
+├── packages/
+│   ├── ingestion/
+│   │   ├── connectors/
+│   │   ├── discovery/
+│   │   ├── download/
+│   │   └── change_detection/
+│   │
+│   ├── document_processing/
+│   │   ├── extraction/
+│   │   ├── ocr/
+│   │   ├── normalization/
+│   │   ├── metadata/
+│   │   ├── legal_parser/
+│   │   ├── versioning/
+│   │   └── chunking/
+│   │
+│   ├── retrieval/
+│   │   ├── keyword/
+│   │   ├── semantic/
+│   │   ├── hybrid/
+│   │   ├── reranking/
+│   │   └── citations/
+│   │
+│   ├── agents/
+│   │   ├── graph.py
+│   │   ├── state.py
+│   │   ├── nodes/
+│   │   ├── tools/
+│   │   └── prompts/
+│   │
+│   ├── evaluation/
+│   │   ├── datasets/
+│   │   ├── metrics/
+│   │   ├── runners/
+│   │   └── reports/
+│   │
+│   ├── notifications/
+│   ├── observability/
+│   └── shared/
+│
+├── airflow/
+│   ├── dags/
+│   ├── plugins/
+│   ├── tests/
+│   └── Dockerfile
+│
+├── database/
+│   ├── migrations/
+│   ├── seeds/
+│   ├── models/
+│   └── queries/
+│
+├── infra/
+│   ├── terraform/
+│   │   ├── modules/
+│   │   ├── environments/
+│   │   │   ├── dev/
+│   │   │   └── prod/
+│   │   └── README.md
+│   ├── kubernetes/
+│   │   ├── base/
+│   │   └── overlays/
+│   └── helm/
+│
+├── monitoring/
+│   ├── prometheus/
+│   ├── grafana/
+│   └── alerts/
+│
+├── scripts/
+│   ├── seed_corpus.py
+│   ├── create_admin.py
+│   ├── run_evaluation.py
+│   └── export_demo_data.py
+│
+├── docs/
+│   ├── architecture.md
+│   ├── data-model.md
+│   ├── ingestion.md
+│   ├── rag-evaluation.md
+│   ├── security.md
+│   ├── deployment.md
+│   └── demo-script.md
+│
+└── .github/
+    └── workflows/
+        ├── ci.yml
+        ├── build-images.yml
+        ├── deploy-dev.yml
+        ├── terraform-plan.yml
+        └── nightly-evaluation.yml
+```
+
+This is the complete target repository structure. The first implementation may use the same modules inside one Python package and omit optional runtime folders until their phase begins. In particular, `apps/worker`, `airflow`, `monitoring`, `infra/kubernetes`, and `packages/agents` should not block the core MVP.
+
+---
+
+# 12. Local Development Environment
+
+Use Docker Compose profiles so the default environment stays affordable and easy to start.
+
+### Default profile
+
+Use Docker Compose for:
+
+```text
+postgres
+api
+frontend
+```
+
+### Optional `platform` profile
+
+Add these only when their related phase is being developed:
+
+```text
+redis                 # queue/cache phase
+worker                # asynchronous processing phase
+airflow-webserver     # scheduled-ingestion phase
+airflow-scheduler
+airflow-triggerer
+prometheus            # operations phase
+grafana
+mlflow                # evaluation-experiment phase
+mailhog               # notification phase
+```
+
+The local workflow should be:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Then:
+
+```text
+Frontend:     http://localhost:3000
+FastAPI:      http://localhost:8000
+API docs:     http://localhost:8000/docs
+Airflow:      http://localhost:8080
+Grafana:      http://localhost:3001
+Prometheus:   http://localhost:9090
+MLflow:       http://localhost:5000
+MailHog:      http://localhost:8025
+```
+
+This keeps the core demo runnable with one command while retaining a full local platform profile for the later CV demonstration.
+
+---
+
+# 13. CI/CD Pipeline
+
+## Pull request pipeline
+
+```text
+Pull request opened
+      ↓
+Python formatting check
+      ↓
+Linting
+      ↓
+Type checking
+      ↓
+Unit tests
+      ↓
+API integration tests
+      ↓
+Frontend lint and tests
+      ↓
+Security scan
+      ↓
+Docker build verification
+      ↓
+Terraform validation
+```
+
+Suggested tools:
+
+* Ruff
+* MyPy
+* Pytest
+* Alembic
+* ESLint
+* Vitest or Jest
+* Trivy
+* Terraform validate
+* GitHub Actions
+
+## Main branch pipeline
+
+```text
+Merge to main
+      ↓
+Run CI
+      ↓
+Build Docker images
+      ↓
+Tag with Git SHA
+      ↓
+Push to Azure Container Registry
+      ↓
+Run database migrations
+      ↓
+Deploy development environment
+      ↓
+Run smoke tests
+```
+
+## Release pipeline
+
+```text
+Version tag created
+      ↓
+Build versioned images
+      ↓
+Terraform plan
+      ↓
+Deploy application
+      ↓
+Run post-deployment checks
+      ↓
+Publish release notes
+```
+
+---
+
+# 14. Observability
+
+## 14.1 Application metrics
+
+Track:
+
+* API request volume
+* Error rate
+* P50/P95/P99 latency
+* Active users
+* Search latency
+* Chat latency
+* Authentication failures
+
+## 14.2 Ingestion metrics
+
+Track:
+
+* Sources checked
+* Documents discovered
+* Documents downloaded
+* Duplicate documents
+* OCR rate
+* Processing failures
+* Average processing time
+* Embedding backlog
+* Last successful connector run
+
+## 14.3 Retrieval metrics
+
+Track:
+
+* Retrieval latency
+* Keyword/vector contribution
+* Number of retrieved chunks
+* Empty retrieval rate
+* Reranking latency
+* Citation count
+* Unsupported-answer rate
+
+## 14.4 LLM metrics
+
+Track:
+
+* Input tokens
+* Output tokens
+* Cost estimate
+* Model latency
+* Model error rate
+* Prompt version
+* JSON parsing failures
+* Evidence-insufficiency rate
+
+## 14.5 Alerting examples
+
+```text
+Crawler has failed for 24 hours
+Document processing failure rate > 10%
+No new document checks completed
+P95 API latency > threshold
+Retrieval returns no evidence too frequently
+Evaluation faithfulness falls below baseline
+Daily token cost exceeds budget
+```
+
+---
+
+# 15. MLflow and LLMOps
+
+MLflow should not be added merely as decoration.
+
+Use it to compare retrieval and generation configurations.
+
+Log:
+
+```text
+embedding_model
+chat_model
+chunking_strategy
+chunk_size
+chunk_overlap
+retrieval_top_k
+keyword_weight
+vector_weight
+reranker
+prompt_version
+temperature
+evaluation_dataset_version
+```
+
+Metrics:
+
+```text
+Recall@K
+Precision@K
+MRR
+nDCG
+Context precision
+Context recall
+Faithfulness
+Answer relevance
+Citation correctness
+Latency
+Estimated cost
+```
+
+Artifacts:
+
+* Evaluation report
+* Failed-question examples
+* Retrieved context
+* Generated answer
+* Prompt template
+* Configuration snapshot
+
+This lets you make evidence-based claims such as:
+
+> Hybrid retrieval improved Recall@10 from 0.71 to 0.84 while preserving citation correctness and keeping median retrieval latency below 500 ms.
+
+That is far stronger than saying, “I used RAGAS.”
+
+---
+
+# 16. Evaluation Dataset
+
+Create a manually reviewed dataset of approximately **75–150 questions**.
+
+Categories:
+
+* Direct fact lookup
+* Effective-date questions
+* Issuing-authority questions
+* Topic-specific search
+* Multi-document synthesis
+* Amendment identification
+* Version comparison
+* Applicability questions
+* Questions with no supported answer
+* Adversarial or misleading questions
+
+Each record should contain:
+
+```json
+{
+  "question": "...",
+  "intent": "comparison",
+  "expected_document_ids": ["..."],
+  "expected_article_ids": ["..."],
+  "reference_answer": "...",
+  "answerable": true,
+  "difficulty": "medium",
+  "tax_category": "VAT"
+}
+```
+
+The evaluation should distinguish:
+
+* Retrieval failure
+* Reranking failure
+* Context assembly failure
+* Generation failure
+* Citation failure
+* Source-data failure
+
+---
+
+# 17. Security and SaaS Elements
+
+## Authentication
+
+For the MVP:
+
+* Email and password
+* Secure password hashing
+* JWT access tokens
+* Refresh-token rotation
+* Role-based access
+
+Roles:
+
+```text
+USER
+ORGANIZATION_ADMIN
+SYSTEM_ADMIN
+```
+
+## Authorization
+
+Enforce organization isolation for:
+
+* Chat history
+* Company profiles
+* Saved searches
+* Alerts
+* Usage records
+* Uploaded documents
+
+## Rate limits
+
+Apply limits by:
+
+* User
+* Organization
+* Endpoint
+* Subscription tier
+
+## Data protection
+
+* Encrypt traffic with HTTPS
+* Use Key Vault
+* Avoid storing secrets in GitHub
+* Validate uploaded files
+* Limit file size and MIME types
+* Sanitize rendered content
+* Do not expose private Blob URLs directly
+* Log administrative actions
+
+## Subscription model
+
+You do not need real payment processing initially.
+
+Implement:
+
+```text
+FREE
+PRO
+TEAM
+```
+
+with fields for:
+
+* Monthly query quota
+* Number of alerts
+* Number of company profiles
+* Comparison access
+* Export access
+* Team members
+
+This demonstrates SaaS architecture without getting trapped in payment integration.
+
+---
+
+# 18. What the MVP Must Include
+
+The MVP should be a complete vertical slice, not every feature.
+
+Use two gates to avoid confusing “portfolio-complete” with “first runnable”:
+
+* **Core MVP:** a curated corpus, one connector or seed loader, extraction, metadata, legal schema, article-aware chunks, hybrid retrieval, cited Q&A, one comparison workflow, API/UI, tests, and local Docker Compose.
+* **Portfolio MVP:** the core MVP plus the cloud deployment, Airflow ingestion, authentication, monitoring, evaluation automation, and CI/CD listed below.
+
+Build the core MVP first. Every portfolio-MVP component should have a working local fallback so cloud credentials or a fragile source website cannot block development.
+
+## Portfolio MVP target
+
+### Data engineering
+
+* Curated corpus of tax regulations
+* At least one working source connector
+* Airflow ingestion DAG
+* Change detection with checksums
+* Blob Storage
+* Text extraction
+* Metadata extraction
+* PostgreSQL legal schema
+* Article-aware chunking
+* Hybrid search
+* pgvector
+
+### AI
+
+* Cited regulatory Q&A
+* Intent routing
+* Evidence-sufficiency check
+* One comparison workflow
+* Prompt versioning
+* Evaluation dataset
+* Automated retrieval evaluation
+
+### Application engineering
+
+* FastAPI backend
+* Next.js frontend
+* Authentication
+* User-specific chat history
+* Document browser
+* Search interface
+* Docker Compose
+* Tests
+* GitHub Actions
+
+### Cloud and operations
+
+* Terraform
+* Azure Container Registry
+* Deployed API and frontend
+* Managed PostgreSQL
+* Blob Storage
+* Key Vault
+* Monitoring dashboard
+* Token and latency tracking
+
+---
+
+# 19. Post-MVP Releases
+
+## Version 0.2 — Monitoring and alerts
+
+* Saved topics
+* In-app alerts
+* Weekly email digest
+* Upcoming effective-date reminders
+* Processing administration page
+
+## Version 0.3 — Version intelligence
+
+* Document timelines
+* Amendment relationships
+* Automated predecessor resolution
+* Side-by-side comparison
+* Structured change reports
+
+## Version 0.4 — Professional impact analysis
+
+* Company profiles
+* Accountant/client profiles
+* Organization-specific impact summaries
+* Suggested action checklists
+* Saved impact reports
+
+## Version 0.5 — Multi-tenant SaaS demonstration
+
+* Organizations
+* Team membership
+* Usage quotas
+* Admin dashboard
+* Plan enforcement
+* Audit logs
+
+## Stretch version
+
+* Azure AD authentication
+* AKS deployment
+* Helm chart
+* Service Bus
+* More source connectors
+* Human review workflow
+* Verified relationship graph
+* Vietnamese–English bilingual output
+* Export to PDF or Word
+* Teams integration
+
+---
+
+# 20. Recommended Build Order
+
+## Phase 1 — Foundation
+
+Build:
+
+* Repository
+* Docker Compose
+* PostgreSQL
+* Alembic
+* FastAPI skeleton
+* Next.js skeleton
+* Health endpoint
+* CI pipeline
+
+Keep this phase local-first. Do not provision Azure, Airflow, Redis, or MLflow before the API, database migrations, and seed workflow start successfully from a clean checkout.
+
+Deliverable:
+
+```text
+docker compose up
+```
+
+starts the core platform.
+
+## Phase 2 — Legal data model
+
+Build:
+
+* Document schema
+* Version schema
+* Relationship schema
+* Chunk schema
+* Tax taxonomy
+* Seed-data loader
+
+Deliverable:
+
+A browsable legal corpus in PostgreSQL and Blob Storage.
+
+## Phase 3 — Processing pipeline
+
+Build:
+
+* PDF extraction
+* OCR fallback
+* Metadata extraction
+* Legal section parsing
+* Chunking
+* Processing statuses
+* Retry handling
+
+Deliverable:
+
+One command processes raw documents into searchable legal records.
+
+## Phase 4 — Retrieval
+
+Build:
+
+* Full-text search
+* Embedding generation
+* Vector search
+* Hybrid fusion
+* Reranking
+* Citation construction
+
+Deliverable:
+
+A search endpoint returning correctly ranked source passages.
+
+## Phase 5 — Regulatory Q&A
+
+Build:
+
+* A tested workflow state; introduce LangGraph when branching workflows justify it
+* Intent router
+* Retrieval node
+* Sufficiency check
+* Answer node
+* Citation validator
+* Conversation logging
+
+Deliverable:
+
+Cited answers grounded in legal passages.
+
+## Phase 6 — Continuous ingestion
+
+Build:
+
+* Source connector
+* Discovery command first, then a discovery DAG
+* Change detection
+* Processing DAG
+* Job dashboard
+* Error metrics
+
+Deliverable:
+
+A scheduled pipeline that adds new documents idempotently.
+
+## Phase 7 — User product
+
+Build:
+
+* Authentication
+* Dashboard
+* Document browser
+* Search UI
+* Chat UI
+* Citation panel
+* Query history
+
+Deliverable:
+
+A usable application rather than an API demo.
+
+## Phase 8 — LLMOps
+
+Build:
+
+* Evaluation dataset
+* Baseline retrieval experiment
+* RAG evaluation runner
+* Metric/report artifacts first; add MLflow logging when experiments need central tracking
+* Nightly evaluation
+* Regression alert
+
+Deliverable:
+
+Evidence that the system’s quality is measured.
+
+## Phase 9 — Azure deployment
+
+Build:
+
+* Terraform modules
+* Azure resources
+* Container registry
+* Deployment workflow
+* Key Vault integration
+* Monitoring dashboard
+
+Deliverable:
+
+A publicly accessible cloud deployment.
+
+## Phase 10 — Differentiating feature
+
+Build **one** deeply:
+
+* Document comparison, preferably
+* Or regulatory alerts
+* Or company-specific impact analysis
+
+For the CV, document versioning and comparison are probably the strongest first differentiator.
+
+---
+
+# 21. What Not to Add Initially
+
+Do not add these merely to accumulate keywords:
+
+* Kafka
+* Spark
+* Neo4j
+* A separate vector database
+* Multiple microservices
+* Multiple LLM vendors
+* Distributed model serving
+* Fine-tuning
+* GPU infrastructure
+* Autonomous web agents
+* Payment processing
+* A mobile application
+
+They introduce complexity without improving the first demonstration.
+
+The project already provides enough engineering depth through:
+
+* Scheduled ingestion
+* Hybrid storage
+* Legal versioning
+* Structured metadata
+* Vector retrieval
+* LLM workflows
+* Evaluation
+* Authentication
+* Azure deployment
+* CI/CD
+* Observability
+
+---
+
+# 22. Primary Demo Scenario
+
+The final demonstration should tell one coherent story.
+
+## Step 1: A new circular is discovered
+
+The Airflow dashboard shows:
+
+* Source checked
+* New file found
+* Checksum calculated
+* File stored in Blob Storage
+
+## Step 2: The document is processed
+
+Show:
+
+* Extracted text
+* Metadata
+* Tax category
+* Effective date
+* Processing status
+* Chunk count
+* Embedding status
+
+## Step 3: The user receives an alert
+
+Example:
+
+> New electronic-invoice regulation detected. Effective 1 October 2026. Potential relevance: e-commerce sellers and accounting service providers.
+
+## Step 4: The user asks a question
+
+> What changed, and which clients should I review?
+
+The system:
+
+* Routes the query
+* Retrieves evidence
+* Produces a structured answer
+* Cites the exact articles
+* States any uncertainty
+
+## Step 5: The user compares versions
+
+Show:
+
+* Previous document
+* New document
+* Added requirements
+* Removed requirements
+* Changed deadlines
+* Article-level citations
+
+## Step 6: Show operations
+
+Open:
+
+* Airflow
+* Grafana
+* MLflow
+* GitHub Actions
+* Azure resources
+
+This proves the project is an operated AI platform, not just a frontend connected to an LLM.
+
+---
+
+# 23. CV Positioning
+
+## Project title
+
+**TaxLens AI — Cloud-Native Regulatory Intelligence Platform**
+
+## One-line description
+
+Designed and deployed an Azure-based regulatory intelligence platform that continuously ingests Vietnamese tax regulations, versions legal documents, performs hybrid retrieval, and generates evidence-grounded analysis for accountants and auditors.
+
+## Potential bullets after implementation
+
+* Engineered an Airflow-based ingestion pipeline to detect, extract, classify, version, and index Vietnamese tax regulations across Azure Blob Storage and PostgreSQL.
+* Developed a hybrid legal retrieval system combining PostgreSQL full-text search, pgvector semantic search, metadata filtering, and reranking for article-level cited responses.
+* Built a LangGraph workflow for regulatory Q&A, document comparison, evidence validation, and user-specific impact analysis through FastAPI and Azure OpenAI.
+* Implemented an LLMOps evaluation pipeline with MLflow, retrieval metrics, faithfulness testing, prompt versioning, latency monitoring, and regression checks.
+* Containerized the platform and automated infrastructure and deployment using Docker, Terraform, GitHub Actions, Azure Container Registry, Key Vault, and managed Azure services.
+
+Only insert measured numbers once the benchmarks genuinely exist.
+
+---
+
+# 24. Final Technology Stack
+
+| Layer                  | Technology                                 |
+| ---------------------- | ------------------------------------------ |
+| Frontend               | Next.js, TypeScript                        |
+| Backend                | FastAPI, Python, Pydantic                  |
+| Workflow orchestration | Apache Airflow                             |
+| LLM workflow           | LangGraph                                  |
+| Relational database    | Azure Database for PostgreSQL              |
+| Vector retrieval       | pgvector                                   |
+| Keyword retrieval      | PostgreSQL full-text search                |
+| Object storage         | Azure Blob Storage                         |
+| OCR                    | Azure AI Document Intelligence             |
+| LLM                    | Azure OpenAI                               |
+| Embeddings             | Azure OpenAI embedding deployment          |
+| Cache/queue locally    | Redis                                      |
+| Cloud queue later      | Azure Storage Queue or Service Bus         |
+| Secrets                | Azure Key Vault                            |
+| Containers             | Docker, Docker Compose                     |
+| Registry               | Azure Container Registry                   |
+| Deployment             | Container Apps/App Service; AKS as stretch |
+| Infrastructure         | Terraform                                  |
+| CI/CD                  | GitHub Actions                             |
+| Metrics                | Prometheus                                 |
+| Dashboards             | Grafana                                    |
+| Experiment tracking    | MLflow                                     |
+| Testing                | Pytest, Playwright/Vitest                  |
+| Migrations             | Alembic                                    |
+| Code quality           | Ruff, MyPy, ESLint                         |
+| Security scan          | Trivy                                      |
+
+The stack above is the long-term target. For the core MVP, the minimum active stack is FastAPI, Next.js, PostgreSQL with pgvector, local object storage, native document extraction, one model adapter, Docker Compose, pytest, and Alembic. Airflow, LangGraph, MLflow, Redis, and managed Azure services are introduced at the phases defined in section 20.
+
+---
+
+# 25. The Project’s Core Identity
+
+The project should always be described in this order:
+
+1. **Continuous regulatory ingestion**
+2. **Structured legal data and versioning**
+3. **Hybrid legal retrieval**
+4. **Evidence-grounded AI analysis**
+5. **Alerts and professional workflows**
+6. **LLMOps evaluation**
+7. **Azure deployment and operations**
+
+Never lead with:
+
+> “It is a chatbot for Vietnamese tax law.”
+
+Lead with:
+
+> **TaxLens AI is a cloud-native regulatory intelligence platform that continuously collects and versions Vietnamese tax regulations, detects changes, and delivers cited analysis to accountants and auditors.**
+
+That is the established project structure we should treat as the master blueprint going forward.

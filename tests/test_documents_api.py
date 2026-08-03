@@ -1,0 +1,58 @@
+from datetime import date
+
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
+
+from taxlens.api.main import create_app
+from taxlens.db import get_db_session
+from taxlens.legal_data.models import DocumentVersion, LegalDocument
+
+
+def test_document_endpoints_return_persisted_documents() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    LegalDocument.metadata.create_all(engine)
+    with Session(engine) as session:
+        document = LegalDocument(
+            document_number="01/2025/TT-BTC",
+            title="Sample document",
+            document_type="CIRCULAR",
+            issuing_agency="Ministry of Finance",
+        )
+        session.add(document)
+        session.flush()
+        session.add(
+            DocumentVersion(
+                document_id=document.id,
+                issue_date=date(2025, 1, 1),
+                effective_date=date(2025, 2, 1),
+                legal_status="EFFECTIVE",
+                raw_content_hash="a" * 64,
+                raw_artifact_key="raw/doc.txt",
+            )
+        )
+        session.commit()
+        document_id = document.id
+
+    app = create_app()
+
+    def override_session():
+        with Session(engine) as session:
+            yield session
+
+    app.dependency_overrides[get_db_session] = override_session
+    client = TestClient(app)
+
+    list_response = client.get("/documents")
+    detail_response = client.get(f"/documents/{document_id}")
+
+    assert list_response.status_code == 200
+    assert list_response.json()[0]["document_number"] == "01/2025/TT-BTC"
+    assert detail_response.status_code == 200
+    assert detail_response.json()["versions"][0]["legal_status"] == "EFFECTIVE"
+

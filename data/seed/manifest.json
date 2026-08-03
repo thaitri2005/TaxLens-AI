@@ -1,0 +1,29 @@
+[
+  {
+    "source_name": "seed-corpus",
+    "source_url": "https://example.invalid/taxlens/31-2025-tt-btc",
+    "source_document_id": "31-2025-tt-btc",
+    "document_number": "31/2025/TT-BTC",
+    "title": "Sample electronic invoice guidance",
+    "document_type": "CIRCULAR",
+    "issuing_agency": "Ministry of Finance",
+    "issue_date": "2025-06-01",
+    "effective_date": "2025-07-01",
+    "legal_status": "EFFECTIVE",
+    "content_file": "documents/31-2025-tt-btc.txt"
+  },
+  {
+    "source_name": "seed-corpus",
+    "source_url": "https://example.invalid/taxlens/02-2024-tt-btc",
+    "source_document_id": "02-2024-tt-btc",
+    "document_number": "02/2024/TT-BTC",
+    "title": "Sample VAT administration guidance",
+    "document_type": "CIRCULAR",
+    "issuing_agency": "Ministry of Finance",
+    "issue_date": "2024-01-15",
+    "effective_date": "2024-02-01",
+    "legal_status": "SUPERSEDED",
+    "content_file": "documents/02-2024-tt-btc.txt"
+  }
+]
+
