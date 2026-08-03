@@ -1,6 +1,7 @@
 import uuid
 from datetime import date, datetime
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     Date,
     DateTime,
@@ -112,4 +113,25 @@ class DocumentChunk(Base):
     content: Mapped[str] = mapped_column(Text)
     content_tsv: Mapped[str | None] = mapped_column(Text)
     token_count: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+
+
+class DocumentEmbedding(Base):
+    __tablename__ = "document_embeddings"
+    __table_args__ = (
+        UniqueConstraint(
+            "document_chunk_id",
+            "model_id",
+            "model_revision",
+            name="uq_document_embedding_model_revision",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    document_chunk_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("document_chunks.id"))
+    model_id: Mapped[str] = mapped_column(String(255))
+    model_revision: Mapped[str] = mapped_column(String(64))
+    dimensions: Mapped[int] = mapped_column(Integer)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    embedding: Mapped[list[float]] = mapped_column(Vector(384))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())

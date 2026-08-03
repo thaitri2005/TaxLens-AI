@@ -41,4 +41,3 @@ def test_seed_ingestion_is_idempotent(tmp_path: Path) -> None:
             "raw-documents/source=seed-corpus/year=2025/"
             f"document=01-2025-tt-btc/{first_result.raw_content_hash}.txt"
         )
-

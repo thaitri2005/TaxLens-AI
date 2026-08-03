@@ -111,4 +111,3 @@ def _create_engine_with_search_data():
         )
         session.commit()
     return engine
-

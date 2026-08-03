@@ -31,6 +31,7 @@ The initial Compose profile runs PostgreSQL/pgvector and the API only. Workers, 
 docker compose exec -T api alembic upgrade head
 docker compose exec -T api python scripts/seed.py
 docker compose exec -T api python scripts/process_corpus.py
+docker compose exec -T api python scripts/embed_corpus.py
 Invoke-RestMethod 'http://localhost:8000/search?q=invoice&legal_status=EFFECTIVE' |
   ConvertTo-Json -Depth 5
 ```

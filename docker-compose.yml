@@ -27,6 +27,7 @@ services:
       DATABASE_USER: taxlens
       DATABASE_PASSWORD: taxlens
       LOCAL_STORAGE_PATH: /workspace/data/local
+      EMBEDDING_MODEL_PATH: /opt/taxlens-models/multilingual-e5-small
     ports:
       - "8000:8000"
     volumes:
@@ -38,4 +39,3 @@ services:
 
 volumes:
   postgres_data:
-

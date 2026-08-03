@@ -12,7 +12,7 @@ The project’s central idea remains:
 
 > TaxLens continuously collects Vietnamese tax regulations, structures and versions them, detects relevant changes, and helps tax professionals understand what changed, why it matters, and where the conclusion came from.
 
-This preserves the original vision of a hybrid structured–unstructured system using Blob Storage, PostgreSQL, pgvector, Airflow, FastAPI, LangGraph, Azure OpenAI, authentication, monitoring, evaluation, and automated deployment. The practical path is to introduce these in phases rather than operate all of them in the first local environment.
+This preserves the original vision of a hybrid structured–unstructured system using Blob Storage, PostgreSQL, pgvector, Airflow, FastAPI, a self-hosted multilingual embedding model, optional Azure OpenAI for later generative workflows, authentication, monitoring, evaluation, and automated deployment. The practical path is to introduce these in phases rather than operate all of them in the first local environment.
 
 ---
 
@@ -267,7 +267,7 @@ Chunking and Indexing
      └───────────────► pgvector Embeddings
                             │
                             ▼
-                    FastAPI Application
+          FastAPI Application + Local Embedding Runtime
                             │
                ┌────────────┼────────────┐
                ▼            ▼            ▼
@@ -403,8 +403,6 @@ This avoids paying for OCR on digitally generated PDFs.
 
 Use it for:
 
-* Metadata extraction when deterministic parsing fails
-* Legal topic classification
 * Summarization
 * Structured comparison
 * Query interpretation
@@ -412,15 +410,37 @@ Use it for:
 * Impact-analysis drafting
 * Evaluation assistance
 
-Use an embedding deployment separately from the chat deployment.
+Azure OpenAI is **not** the default embedding provider. It remains an optional, later integration for generative analysis after retrieval quality is established.
 
 The exact model should be configurable through environment variables rather than hard-coded.
+
+## 5.5a Self-hosted embeddings
+
+The default embedding model is `intfloat/multilingual-e5-small`, packaged into the FastAPI Docker image from a pinned Hugging Face revision. The model runs on CPU inside the API container and writes vectors to pgvector in PostgreSQL.
+
+Use it through one internal embedding interface:
+
+```text
+embed_passages([chunk text]) → normalized vectors
+embed_query(question)        → normalized vector
+```
+
+The implementation must:
+
+* prepend `passage: ` to indexed chunks and `query: ` to search queries;
+* configure a maximum input length of 512 tokens and log truncation;
+* persist model ID, pinned revision, vector dimension, content hash, and embedding timestamp;
+* cache vectors by chunk-content hash and model revision;
+* load the model once per container process, not once per request;
+* download model files during Docker image build, not at Container Apps startup.
+
+This removes per-vector API charges and external embedding network calls. Tradeoffs are a larger container image, CPU/memory use, and slower scale-from-zero cold starts. Start with one warm Container Apps replica for demos or accept the cold-start delay; split the embedding workload into a worker only if measured API latency requires it.
 
 ## 5.6 Azure Key Vault
 
 Store:
 
-* Azure OpenAI credentials
+* Azure OpenAI credentials, only when generative features are enabled
 * Database password
 * JWT signing secret
 * Email provider credentials
@@ -497,6 +517,8 @@ Control spend and improve effectiveness by:
 * extracting native PDF text before using paid OCR;
 * caching normalized text, metadata, embeddings, and evaluation results;
 * embedding high-priority or recently changed documents first;
+* pinning the Hugging Face model revision so an image rebuild cannot silently change vectors;
+* measuring embedding throughput, CPU time, image size, and cold-start latency;
 * recording model, token, latency, and estimated-cost data for every request;
 * setting a development budget and disabling nonessential resources outside demos;
 * measuring citation correctness and answer usefulness before increasing model size or adding infrastructure.
@@ -740,7 +762,7 @@ This is critical for useful citations.
 
 ## 6.8 Embedding Service
 
-The original concept discussed lazy embedding. Keep it, but use a hybrid policy rather than fully lazy embedding.
+The default implementation is a local `multilingual-e5-small` runtime in the FastAPI image, with pgvector storing its output. Keep a provider interface so a managed embedding service can be evaluated later, but do not add an external embedding API to the MVP.
 
 ### Eagerly embed
 
@@ -777,7 +799,7 @@ High priority?
                Cache forever
 ```
 
-However, fully embedding a carefully selected seed corpus is preferable for a reliable interview demo.
+For the initial corpus, fully embed every article-aware chunk after processing. Lazy embedding remains useful only for later historical imports and large attachments.
 
 ## 6.9 Retrieval Service
 
@@ -788,7 +810,7 @@ Structured filters
         +
 PostgreSQL full-text search
         +
-pgvector semantic search
+pgvector semantic search from local E5 embeddings
         +
 Reranking
 ```
@@ -2453,8 +2475,8 @@ Only insert measured numbers once the benchmarks genuinely exist.
 | Keyword retrieval      | PostgreSQL full-text search                |
 | Object storage         | Azure Blob Storage                         |
 | OCR                    | Azure AI Document Intelligence             |
-| LLM                    | Azure OpenAI                               |
-| Embeddings             | Azure OpenAI embedding deployment          |
+| Generative LLM         | Azure OpenAI later, behind a provider adapter |
+| Embeddings             | Self-hosted `intfloat/multilingual-e5-small` in FastAPI image |
 | Cache/queue locally    | Redis                                      |
 | Cloud queue later      | Azure Storage Queue or Service Bus         |
 | Secrets                | Azure Key Vault                            |

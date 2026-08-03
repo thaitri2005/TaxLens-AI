@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     database_user: str = "taxlens"
     database_password: str = "taxlens"
     local_storage_path: str = "./data/local"
+    embedding_model_id: str = "intfloat/multilingual-e5-small"
+    embedding_model_revision: str = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+    embedding_model_path: str = "./data/models/multilingual-e5-small"
+    embedding_dimensions: int = 384
+    embedding_max_tokens: int = 512
+    embedding_batch_size: int = 32
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

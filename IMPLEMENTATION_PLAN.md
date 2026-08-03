@@ -139,7 +139,7 @@ Create short records for:
 - CLI processing before Airflow;
 - native extraction before OCR;
 - deterministic diff before LLM summary;
-- model-provider adapter;
+- self-hosted embedding adapter with an optional future managed-provider adapter;
 - citation and no-answer policy.
 
 **Acceptance criteria:** each decision states context, decision, alternatives, consequences, and revisit trigger.
@@ -414,7 +414,19 @@ Implement PostgreSQL full-text search with Vietnamese-aware normalization as far
 
 ### Work package 5.2 — Embeddings
 
-Create an embedding adapter with model name and dimensions stored beside vectors. Embed titles, metadata summaries, and selected chunks first. Make embedding jobs resumable and idempotent.
+Implement a self-hosted embedding adapter using `intfloat/multilingual-e5-small`, pinned to a specific Hugging Face revision and packaged into the FastAPI image during Docker build. Do not download model files at runtime.
+
+Implement:
+
+- `embed_passages()` and `embed_query()` methods with the required `passage: ` and `query: ` prefixes;
+- CPU-only model loading once per application process;
+- 512-token maximum input handling with truncation metrics;
+- a `document_embeddings` table storing chunk ID, model ID, revision, vector dimension, content hash, vector, and timestamp;
+- pgvector cosine-similarity search and a vector index chosen from measured corpus size;
+- an idempotent `scripts/embed_corpus.py` command that skips unchanged chunk/model-revision pairs;
+- Docker build steps that snapshot the model into the image and an offline-mode test proving requests do not require Hugging Face access.
+
+The initial model is intentionally small and CPU-friendly. Treat embedding latency, container memory, image size, cold-start time, and retrieval metrics as acceptance criteria; upgrade to a larger or managed model only if the evaluation dataset justifies the cost.
 
 ### Work package 5.3 — Hybrid retrieval
 
@@ -426,6 +438,8 @@ query parsing → metadata filters → FTS + vector candidates
 ```
 
 Return a stable result schema with score components and provenance.
+
+Start with reciprocal-rank fusion (RRF) of the existing full-text rank and pgvector cosine results. Return separate keyword, vector, and fused scores so tuning remains observable.
 
 ### Work package 5.4 — Reranking
 
@@ -446,7 +460,7 @@ Construct citations from stored metadata, never from model-generated text. A cit
 
 ### Work package 6.1 — Model adapter
 
-Define a provider-neutral interface for chat and structured output. Record model deployment, prompt version, token counts, latency, and estimated cost. Do not hard-code a model name.
+Define a provider-neutral interface for chat and structured output. Record model deployment, prompt version, token counts, latency, and estimated cost. Do not hard-code a model name. This interface is separate from the local embedding adapter.
 
 ### Work package 6.2 — Intent and query planning
 
@@ -813,6 +827,7 @@ The default local profile should contain only PostgreSQL/pgvector, API, frontend
 
 - use deterministic parsing before LLM extraction;
 - cache embeddings by normalized-text hash and model name;
+- package the pinned embedding model into the image and monitor image size, memory, CPU, and cold starts;
 - cache safe metadata and summary results;
 - cap document context and output tokens;
 - use a small model for classification and a stronger model only where evaluation shows value;
@@ -853,7 +868,7 @@ These estimates assume one developer working part-time to full-time and a prepar
 | M0 | scope, source policy, decisions | end of week 1 |
 | M1 | local foundation and schema | end of week 2 |
 | M2 | ingestion and processing | end of week 3 |
-| M3 | hybrid retrieval and citations | end of week 4 |
+| M3 | self-hosted embeddings, hybrid retrieval, and citations | end of week 4 |
 | M4 | Q&A, comparison, API, UI | end of week 6 |
 | M5 | evaluation and hardening | end of week 7 |
 | M6 | low-cost Azure deployment | end of week 8 |
@@ -888,13 +903,23 @@ Cost impact:
 6. Does it alter legal provenance or citation behavior?
 7. Does it change security, privacy, or source licensing assumptions?
 
+### 2026-08-04 — Self-hosted embedding default
+
+```text
+Change: Replace Azure OpenAI embeddings with a pinned intfloat/multilingual-e5-small model in the FastAPI image.
+Reason: Avoid per-vector API cost and keep Vietnamese/English retrieval available without external inference calls.
+Affected phase/module: Phase 5 embeddings and hybrid retrieval; Docker image; pgvector schema.
+Migration or compatibility impact: Add a versioned embedding table and re-embed all chunks when model ID or revision changes.
+Cost impact: Higher image size, CPU/memory use, and cold-start cost; no per-vector provider charge.
+```
+
 ### Current assumptions to revisit
 
 - the seed corpus is legally usable for the intended demo;
 - one source connector is sufficient for the first release;
 - PostgreSQL remains sufficient for the initial corpus size;
 - article parsing quality is adequate for the selected document types;
-- Azure OpenAI/model availability matches the selected deployment region;
+- the pinned `multilingual-e5-small` model revision remains available under its MIT license and meets Vietnamese/English retrieval quality targets;
 - local Docker Compose remains the fastest contributor workflow.
 
 ---

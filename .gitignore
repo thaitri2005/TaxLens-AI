@@ -10,5 +10,7 @@ htmlcov/
 node_modules/
 .next/
 data/local/
+data/models/
 artifacts/
-
+.docker-build*.log
+.embedding*.log

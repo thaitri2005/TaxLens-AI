@@ -55,4 +55,3 @@ def test_document_endpoints_return_persisted_documents() -> None:
     assert list_response.json()[0]["document_number"] == "01/2025/TT-BTC"
     assert detail_response.status_code == 200
     assert detail_response.json()["versions"][0]["legal_status"] == "EFFECTIVE"
-

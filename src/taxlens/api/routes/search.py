@@ -1,12 +1,19 @@
 import uuid
 from datetime import date
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from taxlens.db import get_db_session
-from taxlens.retrieval.search import SearchFilters, search_chunks
+from taxlens.retrieval.embeddings import get_embedding_provider
+from taxlens.retrieval.search import (
+    SearchFilters,
+    hybrid_search_chunks,
+    keyword_search_chunks,
+    semantic_search_chunks,
+)
 
 router = APIRouter(prefix="/search", tags=["search"])
 
@@ -26,7 +33,9 @@ class SearchCitation(BaseModel):
 
 class SearchHit(BaseModel):
     chunk_id: uuid.UUID
-    score: float
+    keyword_score: float | None
+    vector_score: float | None
+    fused_score: float
     content: str
     citation: SearchCitation
 
@@ -40,6 +49,7 @@ def search(
     issuing_agency: str | None = Query(default=None, max_length=255),
     effective_from: date | None = None,
     effective_to: date | None = None,
+    mode: Literal["keyword", "semantic", "hybrid"] = "hybrid",
     limit: int = Query(default=20, ge=1, le=100),
     session: Session = Depends(get_db_session),
 ) -> list[SearchHit]:
@@ -51,11 +61,33 @@ def search(
         effective_from=effective_from,
         effective_to=effective_to,
     )
-    results = search_chunks(session, q, filters, limit)
+    if mode == "keyword":
+        results = keyword_search_chunks(session, q, filters, limit)
+    else:
+        provider = (
+            get_embedding_provider()
+            if session.get_bind().dialect.name == "postgresql"
+            else None
+        )
+        if mode == "semantic" and provider is not None:
+            query_embedding = provider.embed_query(q)
+            results = semantic_search_chunks(
+                session,
+                query_embedding.vectors[0],
+                provider,
+                filters,
+                limit,
+            )
+        elif mode == "semantic":
+            results = []
+        else:
+            results = hybrid_search_chunks(session, q, provider, filters, limit)
     return [
         SearchHit(
             chunk_id=result.chunk.id,
-            score=result.score,
+            keyword_score=result.keyword_score,
+            vector_score=result.vector_score,
+            fused_score=result.fused_score,
             content=result.chunk.content,
             citation=SearchCitation(
                 document_id=result.document.id,
@@ -72,4 +104,3 @@ def search(
         )
         for result in results
     ]
-
