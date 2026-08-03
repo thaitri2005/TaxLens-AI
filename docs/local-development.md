@@ -25,3 +25,15 @@ mypy src
 
 The initial Compose profile runs PostgreSQL/pgvector and the API only. Workers, Airflow, MLflow, and monitoring are added in later phases.
 
+## Seed, process, and search the sample corpus
+
+```powershell
+docker compose exec -T api alembic upgrade head
+docker compose exec -T api python scripts/seed.py
+docker compose exec -T api python scripts/process_corpus.py
+Invoke-RestMethod 'http://localhost:8000/search?q=invoice&legal_status=EFFECTIVE' |
+  ConvertTo-Json -Depth 5
+```
+
+The search endpoint supports `document_number`, `document_type`, `legal_status`,
+`issuing_agency`, `effective_from`, `effective_to`, and `limit` filters.

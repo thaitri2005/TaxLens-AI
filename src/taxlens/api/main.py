@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Response, status
 
 from taxlens.api.routes.documents import router as documents_router
+from taxlens.api.routes.search import router as search_router
 from taxlens.config import get_settings
 from taxlens.db import database_is_ready
 
@@ -24,6 +25,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
     app.include_router(documents_router)
+    app.include_router(search_router)
 
     @app.middleware("http")
     async def request_id_middleware(
