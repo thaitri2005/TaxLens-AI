@@ -130,6 +130,8 @@ python scripts/evaluate_tax_retrieval.py
 
 The evaluation output includes fused ranking scores and stored official source
 URLs so retrieval quality and provenance can be inspected together.
+Document-level evaluation de-duplicates chunks from the same document while
+preserving their first-ranked order.
 
 The labeled tax baseline currently reports `Hit@5`, Recall@5, and MRR for four
 queries. Treat these numbers as a regression baseline, not a quality claim: the

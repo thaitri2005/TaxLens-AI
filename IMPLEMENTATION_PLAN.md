@@ -895,19 +895,20 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   boundary, and initial search, Q&A, documents, and comparison views.
 - **M4 frontend hardening:** in progress. Deep document navigation, richer
   citation interactions, frontend tests, and accessibility checks remain.
-- **M5:** in progress. A four-case labeled retrieval dataset, repeatable
-  aggregate evaluator, source-aware retrieval filters, and source provenance
-  in document summaries are implemented and tested. Document detail responses
-  now include processing status, error code, and indexed chunk count. Corpus
-  expansion and visible frontend filter/status controls remain.
+- **M5:** complete for the current local MVP scope. The labeled retrieval
+  dataset and evaluator now report unique document rankings; source-aware
+  filters, source provenance, processing status, error codes, chunk counts,
+  and frontend source/type filters are implemented and tested. Corpus quality
+  remains a measured backlog: the current baseline is `Hit@5=0.25`,
+  `Recall@5=0.25`, and `MRR=0.25` because coverage is still sparse.
 
-### Next major milestone — M5 corpus and reliability hardening
+### Next major milestone — M6 deployment hardening
 
-Add a small number of text-extractable official tax documents, expose
-processing failures and source coverage through safe API responses, and add
-frontend source/category filters. Re-run the labeled evaluation after each
-corpus import. Keep ranking optimization, OCR, authentication, notifications,
-Airflow, Azure deployment, and visual polish out of this milestone.
+Prepare the separated API and web services for a low-cost hosted environment:
+secret configuration, authentication boundary, rate limits, health checks,
+managed PostgreSQL/pgvector, and reproducible Azure Container Apps deployment.
+Keep OCR and ranking optimization out of M6. Expand the official corpus as an
+independent data-quality backlog and re-run the evaluator after each import.
 
 After M5, begin deployment hardening and Azure planning.
 

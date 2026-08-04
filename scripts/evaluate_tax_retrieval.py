@@ -6,7 +6,7 @@ from taxlens.config import get_settings
 from taxlens.db import SessionLocal
 from taxlens.evaluation.metrics import evaluate_retrieval
 from taxlens.retrieval.embeddings import get_embedding_provider
-from taxlens.retrieval.search import SearchFilters, hybrid_search_chunks
+from taxlens.retrieval.search import SearchFilters, SearchResult, hybrid_search_chunks
 
 
 def main() -> None:
@@ -31,7 +31,7 @@ def main() -> None:
                 SearchFilters(),
                 limit=arguments.k,
             )
-            ranked_documents = [result.document.document_number for result in results]
+            ranked_documents = _unique_document_numbers(results)
             metrics = evaluate_retrieval(
                 ranked_documents,
                 set(case["relevant_document_numbers"]),
@@ -60,6 +60,17 @@ def main() -> None:
         "cases": reports,
     }
     print(json.dumps(output, ensure_ascii=False, indent=2))
+
+
+def _unique_document_numbers(results: list[SearchResult]) -> list[str]:
+    ranked_documents: list[str] = []
+    seen: set[str] = set()
+    for result in results:
+        document_number = result.document.document_number
+        if document_number not in seen:
+            seen.add(document_number)
+            ranked_documents.append(document_number)
+    return ranked_documents
 
 
 if __name__ == "__main__":
