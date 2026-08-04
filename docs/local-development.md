@@ -103,4 +103,7 @@ docker compose up --build -d web
 Open `http://localhost:3000`. The workspace includes search, cited Q&A,
 document browsing, and article-level version comparison. The web container can
 be rebuilt independently of the slower API image.
+
+Selecting a document opens its indexed detail view, including stored versions,
+article headings, passage text, and page ranges when available.
 ```
