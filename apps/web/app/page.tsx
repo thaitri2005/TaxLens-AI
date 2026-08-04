@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 type View = "search" | "ask" | "compare" | "documents";
 type Citation = { document_number: string; article_number: string | null; page_start: number | null; page_end: number | null; source_url: string | null };
 type SearchHit = { chunk_id: string; content: string; fused_score: number; citation: Citation };
-type Document = { id: string; document_number: string; title: string; document_type: string; issuing_agency: string | null };
+type Document = { id: string; document_number: string; title: string; document_type: string; issuing_agency: string | null; source_name: string | null };
 type DocumentDetail = Document & { id: string; versions: { id: string; issue_date: string | null; effective_date: string | null; legal_status: string; raw_artifact_key: string }[] };
 type Chunk = { id: string; version_id: string; article_number: string | null; clause_number: string | null; heading: string | null; page_start: number | null; page_end: number | null; content: string };
 type Claim = { text: string; citation_numbers: number[] };

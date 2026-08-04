@@ -24,6 +24,7 @@ RRF_K = 60
 class SearchFilters:
     document_number: str | None = None
     document_type: str | None = None
+    source_name: str | None = None
     legal_status: str | None = None
     issuing_agency: str | None = None
     effective_from: date | None = None
@@ -218,6 +219,8 @@ def _apply_filters(statement: Select[Any], filters: SearchFilters) -> Select[Any
         )
     if filters.document_type is not None:
         statement = statement.where(LegalDocument.document_type == filters.document_type)
+    if filters.source_name is not None:
+        statement = statement.where(SourceRecord.source_name == filters.source_name)
     if filters.legal_status is not None:
         statement = statement.where(DocumentVersion.legal_status == filters.legal_status)
     if filters.issuing_agency is not None:

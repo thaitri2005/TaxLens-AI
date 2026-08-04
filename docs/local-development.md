@@ -136,6 +136,11 @@ queries. Treat these numbers as a regression baseline, not a quality claim: the
 current corpus contains sparse text-extractable tax content and several
 official scanned PDFs marked `OCR_REQUIRED`.
 
+Search accepts `source_name`, `document_type`, `legal_status`, and
+`issuing_agency` filters. The document library accepts the same source,
+document-type, and agency filters, and returns the stored source name with each
+document summary.
+
 ## Web workspace
 
 The web client runs as a separate Next.js container and proxies

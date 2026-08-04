@@ -895,19 +895,20 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   boundary, and initial search, Q&A, documents, and comparison views.
 - **M4 frontend hardening:** in progress. Deep document navigation, richer
   citation interactions, frontend tests, and accessibility checks remain.
-- **M5:** partially started. Metrics and telemetry exist, but there is no
-  persisted labeled retrieval dataset or repeatable aggregate evaluation run.
+- **M5:** in progress. A four-case labeled retrieval dataset, repeatable
+  aggregate evaluator, source-aware retrieval filters, and source provenance
+  in document summaries are implemented and tested. Corpus expansion,
+  processing-status reporting, and frontend filter controls remain.
 
-### Next major milestone — M4 product vertical slice
+### Next major milestone — M5 corpus and reliability hardening
 
-Build the smallest usable web client against the existing API. It should
-support document browsing, keyword/hybrid search, cited Q&A, and version
-comparison. Keep authentication, notifications, Airflow, Azure deployment,
-and visual polish out of this milestone. The acceptance test is that a user
-can complete the core demo without PowerShell or direct API calls.
+Add a small number of text-extractable official tax documents, expose
+processing failures and source coverage through safe API responses, and add
+frontend source/category filters. Re-run the labeled evaluation after each
+corpus import. Keep ranking optimization, OCR, authentication, notifications,
+Airflow, Azure deployment, and visual polish out of this milestone.
 
-After the UI vertical slice, complete M5 with a small labeled retrieval set and
-automated regression checks before beginning Azure deployment.
+After M5, begin deployment hardening and Azure planning.
 
 ---
 

@@ -7,7 +7,12 @@ from sqlalchemy.pool import StaticPool
 
 from taxlens.api.main import create_app
 from taxlens.db import get_db_session
-from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
+from taxlens.legal_data.models import (
+    DocumentChunk,
+    DocumentVersion,
+    LegalDocument,
+    SourceRecord,
+)
 from taxlens.retrieval.citations import build_citation
 from taxlens.retrieval.reranking import NoOpReranker
 from taxlens.retrieval.search import SearchFilters, search_chunks
@@ -51,6 +56,23 @@ def test_search_api_returns_citation_ready_results() -> None:
     assert payload[0]["citation"]["source_artifact_key"] == "raw/31-2025.txt"
 
 
+def test_search_api_filters_by_official_source() -> None:
+    engine = _create_engine_with_search_data()
+    app = create_app()
+
+    def override_session():
+        with Session(engine) as session:
+            yield session
+
+    app.dependency_overrides[get_db_session] = override_session
+    client = TestClient(app)
+
+    response = client.get("/search", params={"q": "invoice", "source_name": "mof-vbpq"})
+
+    assert response.status_code == 200
+    assert response.json()[0]["citation"]["document_number"] == "31/2025/TT-BTC"
+
+
 def test_citation_builder_uses_stored_provenance_and_noop_reranker_preserves_order() -> None:
     engine = _create_engine_with_search_data()
     with Session(engine) as session:
@@ -91,8 +113,16 @@ def _create_engine_with_search_data():
         )
         session.add_all([effective_document, superseded_document])
         session.flush()
+        source_record = SourceRecord(
+            source_name="mof-vbpq",
+            source_url="https://example.test/31-2025.pdf",
+            source_document_id="31-2025",
+        )
+        session.add(source_record)
+        session.flush()
         effective_version = DocumentVersion(
             document_id=effective_document.id,
+            source_record_id=source_record.id,
             version_label="2025",
             issue_date=date(2025, 6, 1),
             effective_date=date(2025, 7, 1),

@@ -49,6 +49,7 @@ def search(
     q: str = Query(min_length=1, max_length=500),
     document_number: str | None = Query(default=None, max_length=100),
     document_type: str | None = Query(default=None, max_length=50),
+    source_name: str | None = Query(default=None, max_length=120),
     legal_status: str | None = Query(default=None, max_length=50),
     issuing_agency: str | None = Query(default=None, max_length=255),
     effective_from: date | None = None,
@@ -60,6 +61,7 @@ def search(
     filters = SearchFilters(
         document_number=document_number,
         document_type=document_type,
+        source_name=source_name,
         legal_status=legal_status,
         issuing_agency=issuing_agency,
         effective_from=effective_from,

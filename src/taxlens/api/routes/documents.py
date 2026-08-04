@@ -7,7 +7,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from taxlens.db import get_db_session
-from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
+from taxlens.legal_data.models import (
+    DocumentChunk,
+    DocumentVersion,
+    LegalDocument,
+    SourceRecord,
+)
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -18,6 +23,7 @@ class DocumentSummary(BaseModel):
     title: str
     document_type: str
     issuing_agency: str | None
+    source_name: str | None
 
 
 class VersionSummary(BaseModel):
@@ -46,12 +52,27 @@ class ChunkSummary(BaseModel):
 @router.get("", response_model=list[DocumentSummary])
 def list_documents(
     limit: int = Query(default=50, ge=1, le=100),
+    source_name: str | None = Query(default=None, max_length=120),
+    document_type: str | None = Query(default=None, max_length=50),
+    issuing_agency: str | None = Query(default=None, max_length=255),
     session: Session = Depends(get_db_session),
 ) -> list[DocumentSummary]:
-    documents = session.scalars(
-        select(LegalDocument).order_by(LegalDocument.document_number).limit(limit)
-    ).all()
-    return [_document_summary(document) for document in documents]
+    statement = (
+        select(LegalDocument)
+        .outerjoin(DocumentVersion, DocumentVersion.document_id == LegalDocument.id)
+        .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
+        .distinct()
+        .order_by(LegalDocument.document_number)
+    )
+    if source_name is not None:
+        statement = statement.where(SourceRecord.source_name == source_name)
+    if document_type is not None:
+        statement = statement.where(LegalDocument.document_type == document_type)
+    if issuing_agency is not None:
+        statement = statement.where(LegalDocument.issuing_agency.ilike(f"%{issuing_agency}%"))
+    documents = session.scalars(statement.limit(limit)).all()
+    source_names = _source_names_by_document(session, [document.id for document in documents])
+    return [_document_summary(document, source_names.get(document.id)) for document in documents]
 
 
 @router.get("/{document_id}", response_model=DocumentDetail)
@@ -68,8 +89,9 @@ def get_document(
         .where(DocumentVersion.document_id == document.id)
         .order_by(DocumentVersion.issue_date.desc(), DocumentVersion.created_at.desc())
     ).all()
+    source_name = _source_names_by_document(session, [document.id]).get(document.id)
     return DocumentDetail(
-        **_document_summary(document).model_dump(),
+        **_document_summary(document, source_name).model_dump(),
         versions=[
             VersionSummary(
                 id=version.id,
@@ -113,11 +135,30 @@ def list_document_chunks(
     ]
 
 
-def _document_summary(document: LegalDocument) -> DocumentSummary:
+def _document_summary(document: LegalDocument, source_name: str | None = None) -> DocumentSummary:
     return DocumentSummary(
         id=document.id,
         document_number=document.document_number,
         title=document.title,
         document_type=document.document_type,
         issuing_agency=document.issuing_agency,
+        source_name=source_name,
     )
+
+
+def _source_names_by_document(
+    session: Session, document_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, str]:
+    if not document_ids:
+        return {}
+    rows = session.execute(
+        select(DocumentVersion.document_id, SourceRecord.source_name)
+        .join(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
+        .where(DocumentVersion.document_id.in_(document_ids))
+        .order_by(DocumentVersion.created_at.desc())
+    ).all()
+    source_names: dict[uuid.UUID, str] = {}
+    for document_id, source_name in rows:
+        if document_id not in source_names:
+            source_names[document_id] = source_name
+    return source_names
