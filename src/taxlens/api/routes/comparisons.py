@@ -6,7 +6,14 @@ from sqlalchemy.orm import Session
 
 from taxlens.api.routes.search import SearchCitation
 from taxlens.db import get_db_session
-from taxlens.intelligence.comparison import ComparisonError, DocumentComparison, compare_documents
+from taxlens.intelligence.chat import get_chat_provider
+from taxlens.intelligence.comparison import (
+    ComparisonError,
+    ComparisonSummary,
+    DocumentComparison,
+    compare_documents,
+    summarize_comparison,
+)
 from taxlens.retrieval.citations import Citation
 
 router = APIRouter(prefix="/comparisons", tags=["comparisons"])
@@ -34,6 +41,15 @@ class ComparisonResponse(BaseModel):
     changes: list[ArticleChangeResponse]
 
 
+class ComparisonSummaryResponse(BaseModel):
+    comparison: ComparisonResponse
+    summary: str
+    practical_impact: str
+    uncertainties: list[str]
+    referenced_change_keys: list[str]
+    disclaimer: str
+
+
 @router.post("", response_model=ComparisonResponse)
 def compare(
     request: ComparisonRequest,
@@ -48,6 +64,25 @@ def compare(
     except ComparisonError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
     return _to_response(result)
+
+
+@router.post("/summary", response_model=ComparisonSummaryResponse)
+def summarize(
+    request: ComparisonRequest,
+    session: Session = Depends(get_db_session),
+) -> ComparisonSummaryResponse:
+    try:
+        comparison = compare_documents(
+            session,
+            request.before_document_number,
+            request.after_document_number,
+        )
+        result = summarize_comparison(comparison, get_chat_provider())
+    except ComparisonError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)
+        ) from error
+    return _summary_response(result)
 
 
 def _to_response(result: DocumentComparison) -> ComparisonResponse:
@@ -67,6 +102,17 @@ def _to_response(result: DocumentComparison) -> ComparisonResponse:
             )
             for change in result.changes
         ],
+    )
+
+
+def _summary_response(result: ComparisonSummary) -> ComparisonSummaryResponse:
+    return ComparisonSummaryResponse(
+        comparison=_to_response(result.comparison),
+        summary=result.summary,
+        practical_impact=result.practical_impact,
+        uncertainties=result.uncertainties,
+        referenced_change_keys=list(result.referenced_change_keys),
+        disclaimer="This summary explains source differences and is not legal or tax advice.",
     )
 
 
