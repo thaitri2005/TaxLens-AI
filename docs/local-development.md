@@ -62,6 +62,7 @@ Discovery is read-only and does not download or ingest documents:
 ```powershell
 python scripts/discover_sources.py --source mof
 python scripts/discover_sources.py --source government
+```
 
 To persist a small batch of discovered official PDFs, use an explicit limit:
 
@@ -75,6 +76,29 @@ stored under local object storage and remain idempotent by content hash. The
 Ministry of Finance portal currently renders its catalog dynamically, so its
 connector is retained for safe official URL fetching while catalog discovery
 will need a portal-specific endpoint or export in a later iteration.
+
+For a repeatable development corpus, ingest a small Government Portal batch:
+
+```powershell
+docker compose exec -T api python scripts/ingest_sources.py --source government --limit 4 --download
+docker compose exec -T api python scripts/process_corpus.py
+docker compose exec -T api python scripts/embed_corpus.py
+```
+
+This is intentionally a bounded demo corpus, not a production crawl.
+
+For a portal with dynamic catalog rendering, ingest an explicitly selected
+official PDF instead:
+
+```powershell
+docker compose exec -T api python scripts/ingest_sources.py --source mof `
+  --url https://vbpq.mof.gov.vn/DKC.FileManagement/FileStorage/File/247067 `
+  --document-number 11/2024/TT-BTC `
+  --title "Quy định mức thu, chế độ thu, nộp, quản lý và sử dụng phí khai thác và sử dụng tài liệu địa chất, khoáng sản" `
+  --issue-date 2024-02-05 --download
+```
+
+The explicit URL path is also bounded and idempotent.
 
 Processing now extracts basic document type, issuing agency, and issue date
 when the official catalog exposes them. PDF chunks retain page start/end

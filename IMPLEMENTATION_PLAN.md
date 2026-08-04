@@ -1041,3 +1041,15 @@ evaluation command uses a small Vietnamese smoke set and reports fused scores,
 article numbers, and page bounds. This validates infrastructure rather than
 legal-answer accuracy; a labeled retrieval set is still needed for Recall@K
 and MRR measurements.
+
+The first real corpus validation is complete with four Government Portal
+documents: 22 new chunks were processed and embedded, and browser-facing
+search returned official source URLs with article/page citations. The next
+corpus task is to add one or two explicitly selected Ministry of Finance PDFs;
+automated MOF catalog discovery remains deferred because that portal renders
+its catalog dynamically.
+
+The ingestion CLI now accepts `--url`, `--document-number`, `--title`, and
+`--issue-date` for an explicitly selected official PDF. This supports safe MOF
+development imports without pretending that dynamic catalog discovery is
+complete.

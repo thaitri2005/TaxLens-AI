@@ -99,7 +99,7 @@ def semantic_search_chunks(
             chunk=chunk,
             version=version,
             document=document,
-            source_url=source_url,
+            source_url=source_url.source_url if source_url is not None else None,
             vector_score=float(score_value),
             fused_score=float(score_value),
         )

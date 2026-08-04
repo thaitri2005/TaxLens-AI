@@ -81,6 +81,7 @@ class LocalE5Embedder:
             add_special_tokens=True,
             truncation=False,
             return_attention_mask=False,
+            verbose=False,
         )
         return sum(len(token_ids) > self._max_tokens for token_ids in tokens["input_ids"])
 
