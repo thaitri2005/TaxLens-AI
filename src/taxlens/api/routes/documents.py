@@ -33,6 +33,7 @@ class VersionSummary(BaseModel):
     effective_date: date | None
     legal_status: str
     raw_artifact_key: str
+    source_url: str | None
     processing_status: str | None
     processing_error_code: str | None
     chunk_count: int
@@ -97,6 +98,7 @@ def get_document(
     processing = _processing_by_version(session, version_ids)
     chunk_counts = _chunk_counts_by_version(session, version_ids)
     source_name = _source_names_by_document(session, [document.id]).get(document.id)
+    source_urls = _source_urls_by_version(session, version_ids)
     return DocumentDetail(
         **_document_summary(document, source_name).model_dump(),
         versions=[
@@ -106,6 +108,7 @@ def get_document(
                 effective_date=version.effective_date,
                 legal_status=version.legal_status,
                 raw_artifact_key=version.raw_artifact_key,
+                source_url=source_urls.get(version.id),
                 processing_status=processing.get(version.id, (None, None))[0],
                 processing_error_code=processing.get(version.id, (None, None))[1],
                 chunk_count=chunk_counts.get(version.id, 0),
@@ -189,6 +192,19 @@ def _processing_by_version(
         if job.document_version_id not in statuses:
             statuses[job.document_version_id] = (job.status, job.error_code)
     return statuses
+
+
+def _source_urls_by_version(
+    session: Session, version_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, str]:
+    if not version_ids:
+        return {}
+    rows = session.execute(
+        select(DocumentVersion.id, SourceRecord.source_url)
+        .join(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
+        .where(DocumentVersion.id.in_(version_ids))
+    ).all()
+    return {version_id: source_url for version_id, source_url in rows}
 
 
 def _chunk_counts_by_version(

@@ -11,6 +11,7 @@ class Citation:
     version_id: UUID
     document_number: str
     title: str
+    heading: str | None
     version_label: str | None
     legal_status: str
     effective_date: date | None
@@ -28,6 +29,7 @@ def build_citation(result: SearchResult) -> Citation:
         version_id=result.version.id,
         document_number=result.document.document_number,
         title=result.document.title,
+        heading=result.chunk.heading,
         version_label=result.version.version_label,
         legal_status=result.version.legal_status,
         effective_date=result.version.effective_date,

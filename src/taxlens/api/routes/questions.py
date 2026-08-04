@@ -76,6 +76,7 @@ def _to_response(result: QuestionAnswer) -> QuestionResponse:
                 version_id=citation.version_id,
                 document_number=citation.document_number,
                 title=citation.title,
+                heading=citation.heading,
                 version_label=citation.version_label,
                 legal_status=citation.legal_status,
                 effective_date=citation.effective_date,

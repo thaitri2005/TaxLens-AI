@@ -1,3 +1,4 @@
+import re
 import uuid
 from datetime import date
 from typing import Literal
@@ -24,6 +25,7 @@ class SearchCitation(BaseModel):
     version_id: uuid.UUID
     document_number: str
     title: str
+    heading: str | None
     version_label: str | None
     legal_status: str
     effective_date: date | None
@@ -40,6 +42,7 @@ class SearchHit(BaseModel):
     keyword_score: float | None
     vector_score: float | None
     fused_score: float
+    snippet: str
     content: str
     citation: SearchCitation
 
@@ -94,6 +97,7 @@ def search(
             keyword_score=result.keyword_score,
             vector_score=result.vector_score,
             fused_score=result.fused_score,
+            snippet=_build_snippet(result.chunk.content, q),
             content=result.chunk.content,
             citation=_to_search_citation(build_citation(result)),
         )
@@ -107,6 +111,7 @@ def _to_search_citation(citation: Citation) -> SearchCitation:
         version_id=citation.version_id,
         document_number=citation.document_number,
         title=citation.title,
+        heading=citation.heading,
         version_label=citation.version_label,
         legal_status=citation.legal_status,
         effective_date=citation.effective_date,
@@ -117,3 +122,25 @@ def _to_search_citation(citation: Citation) -> SearchCitation:
         source_artifact_key=citation.source_artifact_key,
         source_url=citation.source_url,
     )
+
+
+def _build_snippet(content: str, query: str, maximum_length: int = 260) -> str:
+    normalized = re.sub(r"\s+", " ", content).strip()
+    if len(normalized) <= maximum_length:
+        return normalized
+
+    terms = [term.casefold() for term in re.findall(r"\S+", query) if len(term) > 2]
+    sentences = [sentence.strip() for sentence in re.split(r"(?<=[.!?])\s+", normalized)]
+    relevant_sentences = [
+        sentence
+        for sentence in sentences
+        if any(term in sentence.casefold() for term in terms)
+    ]
+    if relevant_sentences:
+        normalized = max(
+            relevant_sentences,
+            key=lambda sentence: sum(sentence.casefold().count(term) for term in terms),
+        )
+    if len(normalized) <= maximum_length:
+        return normalized
+    return normalized[: maximum_length - 1].rsplit(" ", 1)[0] + "…"

@@ -53,7 +53,9 @@ def test_search_api_returns_citation_ready_results() -> None:
     assert payload[0]["citation"]["version_label"] == "2025"
     assert payload[0]["citation"]["effective_date"] == "2025-07-01"
     assert payload[0]["citation"]["article_number"] == "1"
+    assert payload[0]["citation"]["heading"] == "Electronic invoices"
     assert payload[0]["citation"]["source_artifact_key"] == "raw/31-2025.txt"
+    assert payload[0]["snippet"] == payload[0]["content"]
 
 
 def test_search_api_filters_by_official_source() -> None:

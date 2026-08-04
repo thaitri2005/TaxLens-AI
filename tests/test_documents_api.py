@@ -80,3 +80,4 @@ def test_document_endpoints_return_persisted_documents() -> None:
     assert detail_response.json()["source_name"] == "government-portal"
     assert detail_response.json()["versions"][0]["processing_status"] == "COMPLETED"
     assert detail_response.json()["versions"][0]["chunk_count"] == 0
+    assert detail_response.json()["versions"][0]["source_url"] == "https://example.test/01-2025.pdf"
