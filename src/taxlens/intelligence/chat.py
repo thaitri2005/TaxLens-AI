@@ -6,6 +6,7 @@ from typing import Literal, Protocol
 import httpx
 
 from taxlens.config import Settings, get_settings
+from taxlens.intelligence.telemetry import ModelCallTelemetry, record_model_call
 
 ChatRole = Literal["system", "user", "assistant"]
 
@@ -34,6 +35,7 @@ class ChatResponse:
     provider_name: str | None
     input_tokens: int | None
     output_tokens: int | None
+    latency_ms: float = 0.0
 
 
 class ChatProvider(Protocol):
@@ -51,6 +53,9 @@ class HuggingFaceChatProvider:
         self._client = client or httpx.Client(timeout=self._timeout_seconds)
 
     def complete(self, request: ChatRequest) -> ChatResponse:
+        from time import perf_counter
+
+        started_at = perf_counter()
         if not self._token:
             raise ChatProviderError("HF_TOKEN is required to call Hugging Face chat inference")
 
@@ -79,6 +84,16 @@ class HuggingFaceChatProvider:
             )
             response.raise_for_status()
         except httpx.HTTPError as error:
+            record_model_call(
+                ModelCallTelemetry(
+                    model=self._model,
+                    provider=None,
+                    latency_ms=(perf_counter() - started_at) * 1000,
+                    input_tokens=None,
+                    output_tokens=None,
+                    outcome="error",
+                )
+            )
             raise ChatProviderError("Hugging Face chat inference request failed") from error
 
         payload = response.json()
@@ -93,12 +108,24 @@ class HuggingFaceChatProvider:
 
         usage_value = payload.get("usage", {})
         usage = usage_value if isinstance(usage_value, dict) else {}
+        latency_ms = (perf_counter() - started_at) * 1000
+        record_model_call(
+            ModelCallTelemetry(
+                model=self._model,
+                provider=_provider_name(payload),
+                latency_ms=latency_ms,
+                input_tokens=_optional_int(usage.get("prompt_tokens")),
+                output_tokens=_optional_int(usage.get("completion_tokens")),
+                outcome="success",
+            )
+        )
         return ChatResponse(
             content=content,
             requested_model=self._model,
             provider_name=_provider_name(payload),
             input_tokens=_optional_int(usage.get("prompt_tokens")),
             output_tokens=_optional_int(usage.get("completion_tokens")),
+            latency_ms=latency_ms,
         )
 
 
