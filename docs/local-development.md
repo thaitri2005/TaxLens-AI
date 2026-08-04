@@ -34,6 +34,11 @@ docker compose exec -T api python scripts/process_corpus.py
 docker compose exec -T api python scripts/embed_corpus.py
 Invoke-RestMethod 'http://localhost:8000/search?q=invoice&legal_status=EFFECTIVE' |
   ConvertTo-Json -Depth 5
+
+Invoke-RestMethod -Method Post 'http://localhost:8000/comparisons' `
+  -ContentType 'application/json' `
+  -Body '{"before_document_number":"02/2024/TT-BTC","after_document_number":"31/2025/TT-BTC"}' |
+  ConvertTo-Json -Depth 8
 ```
 
 The search endpoint supports `document_number`, `document_type`, `legal_status`,
