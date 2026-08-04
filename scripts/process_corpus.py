@@ -24,9 +24,11 @@ def main() -> None:
 
     processed = sum(result.status == "PROCESSED" for result in results)
     unchanged = sum(result.status == "UNCHANGED" for result in results)
+    failed = sum(result.status == "FAILED" for result in results)
     chunk_count = sum(result.chunk_count for result in results)
     print(
-        f"Processing complete: {processed} processed, {unchanged} unchanged, {chunk_count} chunks"
+        f"Processing complete: {processed} processed, {unchanged} unchanged, "
+        f"{failed} failed, {chunk_count} chunks"
     )
 
 

@@ -75,4 +75,9 @@ stored under local object storage and remain idempotent by content hash. The
 Ministry of Finance portal currently renders its catalog dynamically, so its
 connector is retained for safe official URL fetching while catalog discovery
 will need a portal-specific endpoint or export in a later iteration.
+
+Processing now extracts basic document type, issuing agency, and issue date
+when the official catalog exposes them. PDF chunks retain page start/end
+metadata, and extraction failures are recorded on the processing job so one
+bad document does not terminate the whole batch.
 ```

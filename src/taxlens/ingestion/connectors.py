@@ -5,7 +5,7 @@ import re
 import time
 from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from typing import Protocol, TypedDict
 from urllib.parse import urljoin, urlparse
 
@@ -25,6 +25,9 @@ class SourceDocument:
     source_url: str
     content_url: str
     content_type: str = "application/pdf"
+    document_type: str = "official_pdf"
+    issuing_agency: str | None = None
+    issue_date: date | None = None
 
 
 class SourceConnector(Protocol):
@@ -88,6 +91,9 @@ class OfficialPortalConnector:
                     title=current_title or document_number,
                     source_url=current_source_url,
                     content_url=content_url,
+                    document_type=_document_type(document_number),
+                    issuing_agency=_ISSUING_AGENCIES.get(self.source_name),
+                    issue_date=_extract_issue_date(current_title),
                 )
             )
         return _deduplicate_documents(documents)
@@ -174,6 +180,11 @@ _DOCUMENT_NUMBER_PATTERN = re.compile(
     r"\b\d{1,3}/\d{4}/[A-ZĐ]{1,10}-[A-ZĐ]{1,10}\b",
     re.IGNORECASE,
 )
+_DATE_PATTERN = re.compile(r"\b(\d{2})[/-](\d{2})[/-](\d{4})\b")
+_ISSUING_AGENCIES = {
+    "government-portal": "Government of Vietnam",
+    "mof-vbpq": "Ministry of Finance",
+}
 
 
 def _extract_links(html: str) -> Iterator[tuple[str, str]]:
@@ -188,6 +199,20 @@ def _extract_links(html: str) -> Iterator[tuple[str, str]]:
 
 def _is_pdf_url(url: str) -> bool:
     return urlparse(url).path.lower().endswith(".pdf")
+
+
+def _document_type(document_number: str) -> str:
+    return document_number.rsplit("/", 1)[-1].upper()
+
+
+def _extract_issue_date(title: str) -> date | None:
+    match = _DATE_PATTERN.search(title)
+    if match is None:
+        return None
+    try:
+        return datetime.strptime(match.group(0).replace("/", "-"), "%d-%m-%Y").date()
+    except ValueError:
+        return None
 
 
 def _deduplicate_documents(documents: list[SourceDocument]) -> list[SourceDocument]:

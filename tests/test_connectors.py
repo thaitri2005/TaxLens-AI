@@ -33,6 +33,25 @@ def test_official_connector_discovers_pdf_documents_and_deduplicates_links() -> 
     assert documents[0].title == "31/2025/TT-BTC guidance"
 
 
+def test_official_connector_extracts_basic_document_metadata() -> None:
+    html = '<a href="/files/304/2026/304_2026_nd-cp.pdf">304/2026/NĐ-CP 03/08/2026</a>'
+    client = httpx.Client(
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, text=html))
+    )
+    connector = OfficialPortalConnector(
+        source_name="government-portal",
+        catalog_url="https://vanban.chinhphu.vn/he-thong-van-ban?classid=1",
+        allowed_host=("vanban.chinhphu.vn", "datafiles.chinhphu.vn"),
+        client=client,
+    )
+
+    document = connector.list_documents()[0]
+
+    assert document.document_type == "NĐ-CP"
+    assert document.issuing_agency == "Government of Vietnam"
+    assert document.issue_date.isoformat() == "2026-08-03"
+
+
 def test_official_connector_fetches_pdf_and_metadata() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         if request.method == "HEAD":

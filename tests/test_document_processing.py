@@ -27,6 +27,13 @@ def test_article_parser_uses_structural_headings() -> None:
     assert "Second content" in chunks[1].content
 
 
+def test_article_parser_preserves_page_bounds() -> None:
+    text = "Article 1. First\nContent\n\f\nArticle 2. Second\nMore content"
+    chunks = build_article_chunks(text, [0, text.index("Article 2")])
+
+    assert [(chunk.page_start, chunk.page_end) for chunk in chunks] == [(1, 1), (2, 2)]
+
+
 def test_processing_creates_chunks_and_is_idempotent(tmp_path: Path) -> None:
     engine = create_engine("sqlite+pysqlite:///:memory:")
     LegalDocument.metadata.create_all(engine)

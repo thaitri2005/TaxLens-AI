@@ -1000,3 +1000,9 @@ automated discovery is enabled.
 bulk downloads. Remote documents reuse the existing checksum-idempotent seed
 ingestion path. PDFs are stored as raw artifacts and extracted with `pypdf`
 before normalization and article chunking.
+
+The processing path now populates basic metadata available in catalog titles,
+preserves page bounds on chunks, and records extraction failures in
+`processing_jobs`. Effective dates, legal status classification, OCR, and
+cross-page legal structure remain follow-up work rather than blockers for the
+first real-source retrieval slice.
