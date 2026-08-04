@@ -16,6 +16,7 @@ dependencies = [
   "psycopg[binary]>=3.2,<4.0",
   "alembic>=1.14,<2.0",
   "pgvector>=0.3,<1.0",
+  "pypdf>=5.0,<6.0",
   "sentence-transformers>=3.3,<4.0",
   "uvicorn[standard]>=0.32,<1.0",
 ]

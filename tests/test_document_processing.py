@@ -1,11 +1,17 @@
 from datetime import date
+from io import BytesIO
 from pathlib import Path
 from uuid import UUID
 
+from pypdf import PdfWriter
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from taxlens.document_processing.process import build_article_chunks, process_document_version
+from taxlens.document_processing.process import (
+    build_article_chunks,
+    extract_text,
+    process_document_version,
+)
 from taxlens.ingestion.seed import SeedDocument, ingest_seed_document
 from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
 from taxlens.storage.local import LocalObjectStorage
@@ -55,3 +61,12 @@ def test_processing_creates_chunks_and_is_idempotent(tmp_path: Path) -> None:
         assert chunks[0].article_number == "1"
         assert version.normalized_artifact_key is not None
         assert storage.exists(version.normalized_artifact_key)
+
+
+def test_extract_text_accepts_pdf_artifacts() -> None:
+    writer = PdfWriter()
+    writer.add_blank_page(width=72, height=72)
+    buffer = BytesIO()
+    writer.write(buffer)
+
+    assert extract_text(buffer.getvalue(), "raw/example.pdf") == ""

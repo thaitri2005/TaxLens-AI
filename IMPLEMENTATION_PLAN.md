@@ -977,3 +977,26 @@ The core MVP is complete when:
 - tests and documentation pass in CI.
 
 The portfolio deployment is complete only when the same workflows run in Azure through reproducible infrastructure and smoke-tested deployment steps.
+
+---
+
+## 22. Current Source-Ingestion Milestone
+
+The first real-source slice uses two official Vietnamese government sources:
+
+1. Ministry of Finance legal database: `https://vbpq.mof.gov.vn/`.
+2. Government legal portal: `https://vanban.chinhphu.vn/he-thong-van-ban?classid=1`.
+
+Both are represented through the same connector contract with HTTPS host
+allowlisting, retries, PDF signature validation, metadata access, and injected
+HTTP clients for tests. The Government portal currently supports catalog
+discovery of PDF attachments. The Ministry portal renders its catalog
+dynamically in the current environment, so its connector safely supports the
+official host but requires a portal-specific endpoint or export before broad
+automated discovery is enabled.
+
+`scripts/ingest_sources.py` is intentionally bounded. It discovers by default;
+`--download` is required to persist documents, and `--limit` prevents accidental
+bulk downloads. Remote documents reuse the existing checksum-idempotent seed
+ingestion path. PDFs are stored as raw artifacts and extracted with `pypdf`
+before normalization and article chunking.

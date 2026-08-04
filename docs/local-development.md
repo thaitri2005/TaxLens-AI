@@ -54,3 +54,25 @@ The search endpoint supports `document_number`, `document_type`, `legal_status`,
 For the intelligence-workflow milestone, set `HF_TOKEN=hf_...` in your local `.env` file. Do not commit it or place it in `.env.example`. `HF_CHAT_MODEL` and `HF_CHAT_ROUTING_POLICY` select the model and routed provider policy independently, so changing either never requires a code change.
 
 The next cited-Q&A endpoint will call the chat provider only when query planning and evidence-sufficiency checks pass. Queries with no evidence, conflicting document statuses, or missing structural locators return an evidence-only/unsupported response instead.
+
+## Discover official sources
+
+Discovery is read-only and does not download or ingest documents:
+
+```powershell
+python scripts/discover_sources.py --source mof
+python scripts/discover_sources.py --source government
+
+To persist a small batch of discovered official PDFs, use an explicit limit:
+
+```powershell
+python scripts/ingest_sources.py --source government --limit 1 --download
+python scripts/process_corpus.py
+```
+
+The command is read-only unless `--download` is provided. Downloaded PDFs are
+stored under local object storage and remain idempotent by content hash. The
+Ministry of Finance portal currently renders its catalog dynamically, so its
+connector is retained for safe official URL fetching while catalog discovery
+will need a portal-specific endpoint or export in a later iteration.
+```

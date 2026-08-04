@@ -9,6 +9,7 @@ from typing import Literal
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from taxlens.ingestion.connectors import SourceDocument
 from taxlens.legal_data.models import DocumentVersion, LegalDocument, ProcessingJob, SourceRecord
 from taxlens.storage.local import LocalObjectStorage
 
@@ -115,6 +116,33 @@ def ingest_seed_document(
     )
 
 
+def ingest_source_document(
+    session: Session,
+    storage: LocalObjectStorage,
+    document: SourceDocument,
+    content: bytes,
+) -> IngestionResult:
+    """Persist a downloaded official document using the existing idempotent path."""
+    return ingest_seed_document(
+        session,
+        storage,
+        SeedDocument(
+            source_name=document.source_name,
+            source_url=document.source_url,
+            source_document_id=document.source_document_id,
+            document_number=document.document_number,
+            title=document.title,
+            document_type="official_pdf",
+            issuing_agency=document.source_name,
+            issue_date=None,
+            effective_date=None,
+            legal_status="DISCOVERED",
+            content=content,
+            content_type=document.content_type,
+        ),
+    )
+
+
 def load_seed_manifest(manifest_path: Path) -> list[SeedDocument]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not isinstance(manifest, list):
@@ -148,8 +176,12 @@ def _artifact_key(document: SeedDocument, content_hash: str) -> str:
     issue_year = str(document.issue_date.year) if document.issue_date is not None else "unknown"
     return (
         f"raw-documents/source={document.source_name}/year={issue_year}/"
-        f"document={document_slug}/{content_hash}.txt"
+        f"document={document_slug}/{content_hash}{_artifact_suffix(document.content_type)}"
     )
+
+
+def _artifact_suffix(content_type: str) -> str:
+    return ".pdf" if content_type.casefold().split(";", 1)[0] == "application/pdf" else ".txt"
 
 
 def _required_string(item: dict[str, object], field: str) -> str:

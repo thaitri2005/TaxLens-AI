@@ -1,7 +1,9 @@
 import hashlib
 import re
 from dataclasses import dataclass
+from io import BytesIO
 
+from pypdf import PdfReader
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
@@ -32,7 +34,7 @@ def process_document_version(
         )
 
     raw_content = storage.get_bytes(version.raw_artifact_key)
-    normalized_text = normalize_text(raw_content.decode("utf-8"))
+    normalized_text = normalize_text(extract_text(raw_content, version.raw_artifact_key))
     normalized_content = normalized_text.encode("utf-8")
     normalized_hash = hashlib.sha256(normalized_content).hexdigest()
     normalized_key = f"normalized-text/{normalized_hash}.txt"
@@ -78,6 +80,13 @@ class ParsedChunk:
 def normalize_text(raw_text: str) -> str:
     normalized_lines = [re.sub(r"[ \t]+", " ", line).strip() for line in raw_text.splitlines()]
     return "\n".join(normalized_lines).strip() + "\n"
+
+
+def extract_text(raw_content: bytes, artifact_key: str) -> str:
+    if artifact_key.casefold().endswith(".pdf"):
+        reader = PdfReader(BytesIO(raw_content))
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
+    return raw_content.decode("utf-8")
 
 
 def build_article_chunks(text: str) -> list[ParsedChunk]:
