@@ -233,10 +233,10 @@ The diagram below is the target architecture. For the first vertical slice, run 
 
 The local backend currently implements the ingestion, processing, embedding,
 hybrid retrieval, citation, Q&A, comparison, and API layers described below.
-The `apps/` directory currently contains only the API container definition; the
-web client is intentionally the next major milestone. Build it against the
-existing API contracts before introducing authentication, Airflow, or Azure
-deployment.
+The `apps/` directory now contains separate API and Next.js/TypeScript web
+services. The web service consumes API contracts only; it does not access the
+database directly. Authentication, Airflow, and Azure deployment remain later
+milestones.
 
 ```text
 Official Sources / Seed Corpus

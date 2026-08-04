@@ -890,8 +890,11 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   local E5 embeddings, pgvector, keyword search, hybrid fusion, and citations.
 - **M4 backend:** substantially complete. Q&A, comparison, model adapters,
   evidence gates, and API routes exist and are tested.
-- **M4 frontend:** not started. There is currently no web application under
-  `apps/`; this is the next major product milestone.
+- **M4 frontend foundation:** complete. `apps/web` is now a dedicated
+  Next.js/TypeScript service with a production standalone build, API rewrite
+  boundary, and initial search, Q&A, documents, and comparison views.
+- **M4 frontend hardening:** in progress. Deep document navigation, richer
+  citation interactions, frontend tests, and accessibility checks remain.
 - **M5:** partially started. Metrics and telemetry exist, but there is no
   persisted labeled retrieval dataset or repeatable aggregate evaluation run.
 

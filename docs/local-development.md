@@ -93,7 +93,7 @@ URLs so retrieval quality and provenance can be inspected together.
 
 ## Web workspace
 
-The lightweight web client runs as a separate Nginx container and proxies
+The web client runs as a separate Next.js container and proxies
 browser requests to the API. Start it with:
 
 ```powershell

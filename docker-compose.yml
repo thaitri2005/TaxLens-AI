@@ -42,7 +42,7 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
     ports:
-      - "3000:80"
+      - "3000:3000"
     depends_on:
       - api
 
