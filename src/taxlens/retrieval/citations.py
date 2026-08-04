@@ -19,6 +19,7 @@ class Citation:
     page_start: int | None
     page_end: int | None
     source_artifact_key: str
+    source_url: str | None
 
 
 def build_citation(result: SearchResult) -> Citation:
@@ -35,4 +36,5 @@ def build_citation(result: SearchResult) -> Citation:
         page_start=result.chunk.page_start,
         page_end=result.chunk.page_end,
         source_artifact_key=result.version.raw_artifact_key,
+        source_url=result.source_url,
     )

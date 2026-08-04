@@ -32,6 +32,7 @@ class SearchCitation(BaseModel):
     page_start: int | None
     page_end: int | None
     source_artifact_key: str
+    source_url: str | None
 
 
 class SearchHit(BaseModel):
@@ -112,4 +113,5 @@ def _to_search_citation(citation: Citation) -> SearchCitation:
         page_start=citation.page_start,
         page_end=citation.page_end,
         source_artifact_key=citation.source_artifact_key,
+        source_url=citation.source_url,
     )

@@ -1006,3 +1006,11 @@ preserves page bounds on chunks, and records extraction failures in
 `processing_jobs`. Effective dates, legal status classification, OCR, and
 cross-page legal structure remain follow-up work rather than blockers for the
 first real-source retrieval slice.
+
+The retrieval validation slice is executable through
+`scripts/embed_corpus.py` and `scripts/evaluate_retrieval.py`. Search results
+carry both local artifact provenance and the stored official source URL. The
+evaluation command uses a small Vietnamese smoke set and reports fused scores,
+article numbers, and page bounds. This validates infrastructure rather than
+legal-answer accuracy; a labeled retrieval set is still needed for Recall@K
+and MRR measurements.

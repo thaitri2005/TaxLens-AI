@@ -80,4 +80,14 @@ Processing now extracts basic document type, issuing agency, and issue date
 when the official catalog exposes them. PDF chunks retain page start/end
 metadata, and extraction failures are recorded on the processing job so one
 bad document does not terminate the whole batch.
+
+After processing, generate embeddings and run retrieval smoke checks:
+
+```powershell
+python scripts/embed_corpus.py
+python scripts/evaluate_retrieval.py --query "thuế suất giá trị gia tăng"
+```
+
+The evaluation output includes fused ranking scores and stored official source
+URLs so retrieval quality and provenance can be inspected together.
 ```

@@ -132,4 +132,5 @@ def _citation_response(citation: Citation | None) -> SearchCitation | None:
         page_start=citation.page_start,
         page_end=citation.page_end,
         source_artifact_key=citation.source_artifact_key,
+        source_url=citation.source_url,
     )

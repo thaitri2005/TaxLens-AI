@@ -11,6 +11,7 @@ from taxlens.legal_data.models import (
     DocumentEmbedding,
     DocumentVersion,
     LegalDocument,
+    SourceRecord,
 )
 from taxlens.retrieval.embeddings import EmbeddingProvider
 from taxlens.retrieval.reranking import NoOpReranker, Reranker
@@ -34,6 +35,7 @@ class SearchResult:
     chunk: DocumentChunk
     version: DocumentVersion
     document: LegalDocument
+    source_url: str | None = None
     keyword_score: float | None = None
     vector_score: float | None = None
     fused_score: float = 0.0
@@ -97,10 +99,11 @@ def semantic_search_chunks(
             chunk=chunk,
             version=version,
             document=document,
+            source_url=source_url,
             vector_score=float(score_value),
             fused_score=float(score_value),
         )
-        for chunk, version, document, score_value in rows
+        for chunk, version, document, source_url, score_value in rows
     ]
 
 
@@ -152,6 +155,7 @@ def fuse_ranked_results(
                 chunk=existing.chunk,
                 version=existing.version,
                 document=existing.document,
+                source_url=existing.source_url,
                 keyword_score=existing.keyword_score,
                 vector_score=result.vector_score,
             )
@@ -163,6 +167,7 @@ def fuse_ranked_results(
                 chunk=result.chunk,
                 version=result.version,
                 document=result.document,
+                source_url=result.source_url,
                 keyword_score=result.keyword_score,
                 vector_score=result.vector_score,
                 fused_score=scores[key],
@@ -199,9 +204,10 @@ def _fallback_keyword_statement(query: str, filters: SearchFilters, limit: int) 
 
 def _base_statement(score: Any) -> Select[Any]:
     return (
-        select(DocumentChunk, DocumentVersion, LegalDocument, score)
+        select(DocumentChunk, DocumentVersion, LegalDocument, SourceRecord, score)
         .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
         .join(LegalDocument, DocumentVersion.document_id == LegalDocument.id)
+        .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
     )
 
 
@@ -231,8 +237,9 @@ def _to_keyword_results(rows: Sequence[Any]) -> list[SearchResult]:
             chunk=chunk,
             version=version,
             document=document,
+            source_url=source_url.source_url if source_url is not None else None,
             keyword_score=float(score),
             fused_score=float(score),
         )
-        for chunk, version, document, score in rows
+        for chunk, version, document, source_url, score in rows
     ]
