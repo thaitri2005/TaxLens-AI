@@ -1057,5 +1057,11 @@ complete.
 The curated tax manifest revealed that several official PDFs are image-only
 scans. Processing now removes stale embeddings before replacing chunks and
 records `OCR_REQUIRED` instead of persisting empty searchable content. OCR is
-the next processing milestone; it should be implemented behind the existing
-extraction boundary and kept optional to control cost.
+intentionally deferred from the MVP to avoid adding a heavyweight native
+runtime and an additional accuracy/cost surface. Those documents remain
+traceable and can be reprocessed later if OCR becomes necessary.
+
+The first labeled tax retrieval baseline contains four queries and currently
+reports `Hit@5=0.25`, `Recall@5=0.25`, and `MRR=0.25`. This confirms that the
+evaluation runner works and shows that corpus coverage—not prompt wording—must
+be addressed before ranking optimization.

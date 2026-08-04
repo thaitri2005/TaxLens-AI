@@ -125,10 +125,16 @@ After processing, generate embeddings and run retrieval smoke checks:
 ```powershell
 python scripts/embed_corpus.py
 python scripts/evaluate_retrieval.py --query "thuế suất giá trị gia tăng"
+python scripts/evaluate_tax_retrieval.py
 ```
 
 The evaluation output includes fused ranking scores and stored official source
 URLs so retrieval quality and provenance can be inspected together.
+
+The labeled tax baseline currently reports `Hit@5`, Recall@5, and MRR for four
+queries. Treat these numbers as a regression baseline, not a quality claim: the
+current corpus contains sparse text-extractable tax content and several
+official scanned PDFs marked `OCR_REQUIRED`.
 
 ## Web workspace
 

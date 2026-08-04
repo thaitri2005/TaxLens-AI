@@ -29,7 +29,9 @@ class ProcessResult:
 
 
 def process_document_version(
-    session: Session, storage: LocalObjectStorage, version: DocumentVersion
+    session: Session,
+    storage: LocalObjectStorage,
+    version: DocumentVersion,
 ) -> ProcessResult:
     existing_chunks = session.scalars(
         select(DocumentChunk).where(DocumentChunk.document_version_id == version.id)
@@ -47,7 +49,7 @@ def process_document_version(
     try:
         pages = extract_pages(raw_content, version.raw_artifact_key)
         if not any(page.strip() for page in pages):
-            raise ValueError("No extractable text found; OCR is required for this document")
+            raise ValueError("No extractable text found; OCR is required")
     except Exception as error:
         _delete_chunks_and_embeddings(session, version.id, existing_chunks)
         version.normalized_content_hash = None

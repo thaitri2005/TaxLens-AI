@@ -20,7 +20,10 @@ def main() -> None:
         if not arguments.all:
             query = query.where(DocumentVersion.normalized_content_hash.is_(None))
         versions = session.scalars(query).all()
-        results = [process_document_version(session, storage, version) for version in versions]
+        results = [
+            process_document_version(session, storage, version)
+            for version in versions
+        ]
 
     processed = sum(result.status == "PROCESSED" for result in results)
     unchanged = sum(result.status == "UNCHANGED" for result in results)

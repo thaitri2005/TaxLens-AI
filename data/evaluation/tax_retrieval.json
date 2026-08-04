@@ -1,0 +1,18 @@
+[
+  {
+    "query": "phí khai thác tài liệu địa chất",
+    "relevant_document_numbers": ["11/2024/TT-BTC"]
+  },
+  {
+    "query": "hóa đơn điện tử VAT",
+    "relevant_document_numbers": ["31/2025/TT-BTC", "02/2025/TT-BTC"]
+  },
+  {
+    "query": "thuế suất giá trị gia tăng",
+    "relevant_document_numbers": ["31/2025/TT-BTC", "02/2025/TT-BTC"]
+  },
+  {
+    "query": "điều kiện khấu trừ thuế giá trị gia tăng",
+    "relevant_document_numbers": ["31/2025/TT-BTC"]
+  }
+]
