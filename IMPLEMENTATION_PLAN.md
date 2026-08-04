@@ -897,8 +897,9 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   citation interactions, frontend tests, and accessibility checks remain.
 - **M5:** in progress. A four-case labeled retrieval dataset, repeatable
   aggregate evaluator, source-aware retrieval filters, and source provenance
-  in document summaries are implemented and tested. Corpus expansion,
-  processing-status reporting, and frontend filter controls remain.
+  in document summaries are implemented and tested. Document detail responses
+  now include processing status, error code, and indexed chunk count. Corpus
+  expansion and visible frontend filter/status controls remain.
 
 ### Next major milestone — M5 corpus and reliability hardening
 

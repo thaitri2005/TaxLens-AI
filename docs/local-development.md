@@ -156,4 +156,7 @@ be rebuilt independently of the slower API image.
 
 Selecting a document opens its indexed detail view, including stored versions,
 article headings, passage text, and page ranges when available.
+Each version also reports its latest processing status, error code when
+available, and indexed chunk count. `OCR_REQUIRED` indicates a scanned PDF was
+intentionally left unsearchable rather than converted with an OCR runtime.
 ```

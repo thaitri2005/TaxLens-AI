@@ -7,7 +7,12 @@ from sqlalchemy.pool import StaticPool
 
 from taxlens.api.main import create_app
 from taxlens.db import get_db_session
-from taxlens.legal_data.models import DocumentVersion, LegalDocument, SourceRecord
+from taxlens.legal_data.models import (
+    DocumentVersion,
+    LegalDocument,
+    ProcessingJob,
+    SourceRecord,
+)
 
 
 def test_document_endpoints_return_persisted_documents() -> None:
@@ -33,15 +38,23 @@ def test_document_endpoints_return_persisted_documents() -> None:
         )
         session.add(source_record)
         session.flush()
+        version = DocumentVersion(
+            document_id=document.id,
+            source_record_id=source_record.id,
+            issue_date=date(2025, 1, 1),
+            effective_date=date(2025, 2, 1),
+            legal_status="EFFECTIVE",
+            raw_content_hash="a" * 64,
+            raw_artifact_key="raw/doc.txt",
+        )
+        session.add(version)
+        session.flush()
         session.add(
-            DocumentVersion(
-                document_id=document.id,
-                source_record_id=source_record.id,
-                issue_date=date(2025, 1, 1),
-                effective_date=date(2025, 2, 1),
-                legal_status="EFFECTIVE",
-                raw_content_hash="a" * 64,
-                raw_artifact_key="raw/doc.txt",
+            ProcessingJob(
+                document_version_id=version.id,
+                status="COMPLETED",
+                stage="EMBEDDING",
+                attempt_count=1,
             )
         )
         session.commit()
@@ -65,3 +78,5 @@ def test_document_endpoints_return_persisted_documents() -> None:
     assert detail_response.status_code == 200
     assert detail_response.json()["versions"][0]["legal_status"] == "EFFECTIVE"
     assert detail_response.json()["source_name"] == "government-portal"
+    assert detail_response.json()["versions"][0]["processing_status"] == "COMPLETED"
+    assert detail_response.json()["versions"][0]["chunk_count"] == 0
