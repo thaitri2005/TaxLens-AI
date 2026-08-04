@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from taxlens.db import get_db_session
+from taxlens.retrieval.citations import Citation, build_citation
 from taxlens.retrieval.embeddings import get_embedding_provider
 from taxlens.retrieval.search import (
     SearchFilters,
@@ -23,7 +24,9 @@ class SearchCitation(BaseModel):
     version_id: uuid.UUID
     document_number: str
     title: str
+    version_label: str | None
     legal_status: str
+    effective_date: date | None
     article_number: str | None
     clause_number: str | None
     page_start: int | None
@@ -89,18 +92,24 @@ def search(
             vector_score=result.vector_score,
             fused_score=result.fused_score,
             content=result.chunk.content,
-            citation=SearchCitation(
-                document_id=result.document.id,
-                version_id=result.version.id,
-                document_number=result.document.document_number,
-                title=result.document.title,
-                legal_status=result.version.legal_status,
-                article_number=result.chunk.article_number,
-                clause_number=result.chunk.clause_number,
-                page_start=result.chunk.page_start,
-                page_end=result.chunk.page_end,
-                source_artifact_key=result.version.raw_artifact_key,
-            ),
+            citation=_to_search_citation(build_citation(result)),
         )
         for result in results
     ]
+
+
+def _to_search_citation(citation: Citation) -> SearchCitation:
+    return SearchCitation(
+        document_id=citation.document_id,
+        version_id=citation.version_id,
+        document_number=citation.document_number,
+        title=citation.title,
+        version_label=citation.version_label,
+        legal_status=citation.legal_status,
+        effective_date=citation.effective_date,
+        article_number=citation.article_number,
+        clause_number=citation.clause_number,
+        page_start=citation.page_start,
+        page_end=citation.page_end,
+        source_artifact_key=citation.source_artifact_key,
+    )

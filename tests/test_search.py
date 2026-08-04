@@ -8,6 +8,8 @@ from sqlalchemy.pool import StaticPool
 from taxlens.api.main import create_app
 from taxlens.db import get_db_session
 from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
+from taxlens.retrieval.citations import build_citation
+from taxlens.retrieval.reranking import NoOpReranker
 from taxlens.retrieval.search import SearchFilters, search_chunks
 
 
@@ -43,8 +45,28 @@ def test_search_api_returns_citation_ready_results() -> None:
     payload = response.json()
     assert len(payload) == 1
     assert payload[0]["citation"]["document_number"] == "31/2025/TT-BTC"
+    assert payload[0]["citation"]["version_label"] == "2025"
+    assert payload[0]["citation"]["effective_date"] == "2025-07-01"
     assert payload[0]["citation"]["article_number"] == "1"
     assert payload[0]["citation"]["source_artifact_key"] == "raw/31-2025.txt"
+
+
+def test_citation_builder_uses_stored_provenance_and_noop_reranker_preserves_order() -> None:
+    engine = _create_engine_with_search_data()
+    with Session(engine) as session:
+        results = search_chunks(session, "VAT")
+
+    citation = build_citation(results[0])
+    reranked = NoOpReranker().rerank("VAT", results, limit=1)
+
+    assert citation.document_number == "31/2025/TT-BTC"
+    assert citation.version_label == "2025"
+    assert citation.legal_status == "EFFECTIVE"
+    assert citation.article_number == "1"
+    assert citation.page_start == 1
+    assert citation.source_artifact_key == "raw/31-2025.txt"
+    assert reranked.provider_name == "none"
+    assert reranked.results == results[:1]
 
 
 def _create_engine_with_search_data():
@@ -71,6 +93,7 @@ def _create_engine_with_search_data():
         session.flush()
         effective_version = DocumentVersion(
             document_id=effective_document.id,
+            version_label="2025",
             issue_date=date(2025, 6, 1),
             effective_date=date(2025, 7, 1),
             legal_status="EFFECTIVE",

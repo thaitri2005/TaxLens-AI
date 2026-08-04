@@ -13,6 +13,7 @@ from taxlens.legal_data.models import (
     LegalDocument,
 )
 from taxlens.retrieval.embeddings import EmbeddingProvider
+from taxlens.retrieval.reranking import NoOpReranker, Reranker
 
 SearchMode = Literal["keyword", "semantic", "hybrid"]
 RRF_K = 60
@@ -110,10 +111,11 @@ def hybrid_search_chunks(
     filters: SearchFilters | None = None,
     limit: int = 20,
     candidate_limit: int = 50,
+    reranker: Reranker | None = None,
 ) -> list[SearchResult]:
     keyword_results = keyword_search_chunks(session, query, filters, candidate_limit)
     if provider is None or session.get_bind().dialect.name != "postgresql":
-        return keyword_results[:limit]
+        return (reranker or NoOpReranker()).rerank(query, keyword_results, limit).results
 
     query_embedding = provider.embed_query(query)
     semantic_results = semantic_search_chunks(
@@ -123,7 +125,8 @@ def hybrid_search_chunks(
         filters,
         candidate_limit,
     )
-    return fuse_ranked_results(keyword_results, semantic_results, limit)
+    fused_results = fuse_ranked_results(keyword_results, semantic_results, candidate_limit)
+    return (reranker or NoOpReranker()).rerank(query, fused_results, limit).results
 
 
 def fuse_ranked_results(

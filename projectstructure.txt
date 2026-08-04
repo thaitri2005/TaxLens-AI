@@ -12,7 +12,7 @@ The project’s central idea remains:
 
 > TaxLens continuously collects Vietnamese tax regulations, structures and versions them, detects relevant changes, and helps tax professionals understand what changed, why it matters, and where the conclusion came from.
 
-This preserves the original vision of a hybrid structured–unstructured system using Blob Storage, PostgreSQL, pgvector, Airflow, FastAPI, a self-hosted multilingual embedding model, optional Azure OpenAI for later generative workflows, authentication, monitoring, evaluation, and automated deployment. The practical path is to introduce these in phases rather than operate all of them in the first local environment.
+This preserves the original vision of a hybrid structured–unstructured system using Blob Storage, PostgreSQL, pgvector, Airflow, FastAPI, a self-hosted multilingual embedding model, Hugging Face routed inference for later generative workflows, authentication, monitoring, evaluation, and automated deployment. The practical path is to introduce these in phases rather than operate all of them in the first local environment.
 
 ---
 
@@ -399,9 +399,9 @@ Is the PDF text-readable?
 
 This avoids paying for OCR on digitally generated PDFs.
 
-## 5.5 Azure OpenAI
+## 5.5 Generative inference
 
-Use it for:
+Use Hugging Face Inference Providers for:
 
 * Summarization
 * Structured comparison
@@ -410,9 +410,9 @@ Use it for:
 * Impact-analysis drafting
 * Evaluation assistance
 
-Azure OpenAI is **not** the default embedding provider. It remains an optional, later integration for generative analysis after retrieval quality is established.
+Hugging Face routed inference is **not** the embedding provider. It is the default later integration for generative analysis after retrieval quality is established.
 
-The exact model should be configurable through environment variables rather than hard-coded.
+The development default is `Qwen/Qwen2.5-3B-Instruct:cheapest`. Qwen2.5-3B-Instruct supports Vietnamese, while `:cheapest` asks Hugging Face to select the lowest-priced available provider for that model. Keep the model ID, routing policy, timeout, output cap, and budget in environment settings rather than hard-coding them. A provider availability failure, budget exhaustion, or invalid structured output must produce an evidence-only/unsupported response, never an automatic upgrade to a costlier model.
 
 ## 5.5a Self-hosted embeddings
 
@@ -440,7 +440,7 @@ This removes per-vector API charges and external embedding network calls. Tradeo
 
 Store:
 
-* Azure OpenAI credentials, only when generative features are enabled
+* Hugging Face `HF_TOKEN`, only when generative features are enabled
 * Database password
 * JWT signing secret
 * Email provider credentials
@@ -519,7 +519,8 @@ Control spend and improve effectiveness by:
 * embedding high-priority or recently changed documents first;
 * pinning the Hugging Face model revision so an image rebuild cannot silently change vectors;
 * measuring embedding throughput, CPU time, image size, and cold-start latency;
-* recording model, token, latency, and estimated-cost data for every request;
+* recording requested model, routed provider when returned, token, latency, and estimated-cost data for every request;
+* configuring Hugging Face billing limits and a low maximum output-token cap before enabling generative endpoints;
 * setting a development budget and disabling nonessential resources outside demos;
 * measuring citation correctness and answer usefulness before increasing model size or adding infrastructure.
 
@@ -2454,7 +2455,7 @@ Designed and deployed an Azure-based regulatory intelligence platform that conti
 
 * Engineered an Airflow-based ingestion pipeline to detect, extract, classify, version, and index Vietnamese tax regulations across Azure Blob Storage and PostgreSQL.
 * Developed a hybrid legal retrieval system combining PostgreSQL full-text search, pgvector semantic search, metadata filtering, and reranking for article-level cited responses.
-* Built a LangGraph workflow for regulatory Q&A, document comparison, evidence validation, and user-specific impact analysis through FastAPI and Azure OpenAI.
+* Built a LangGraph workflow for regulatory Q&A, document comparison, evidence validation, and user-specific impact analysis through FastAPI and a provider-neutral Hugging Face inference adapter.
 * Implemented an LLMOps evaluation pipeline with MLflow, retrieval metrics, faithfulness testing, prompt versioning, latency monitoring, and regression checks.
 * Containerized the platform and automated infrastructure and deployment using Docker, Terraform, GitHub Actions, Azure Container Registry, Key Vault, and managed Azure services.
 
@@ -2475,7 +2476,7 @@ Only insert measured numbers once the benchmarks genuinely exist.
 | Keyword retrieval      | PostgreSQL full-text search                |
 | Object storage         | Azure Blob Storage                         |
 | OCR                    | Azure AI Document Intelligence             |
-| Generative LLM         | Azure OpenAI later, behind a provider adapter |
+| Generative LLM         | Hugging Face Inference Providers later, behind a provider adapter |
 | Embeddings             | Self-hosted `intfloat/multilingual-e5-small` in FastAPI image |
 | Cache/queue locally    | Redis                                      |
 | Cloud queue later      | Azure Storage Queue or Service Bus         |
