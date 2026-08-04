@@ -1,0 +1,47 @@
+[
+  {
+    "source": "government",
+    "document_number": "32/2025/TT-BTC",
+    "title": "Hướng dẫn thực hiện một số điều của Luật Quản lý thuế và hóa đơn, chứng từ",
+    "source_url": "https://vanban.chinhphu.vn/?docid=213855&pageid=27160",
+    "content_url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2025/6/32-btc.pdf",
+    "issue_date": "2025-05-31",
+    "topics": ["tax administration", "invoices"]
+  },
+  {
+    "source": "government",
+    "document_number": "359/2025/NĐ-CP",
+    "title": "Sửa đổi quy định chi tiết thi hành Luật Thuế giá trị gia tăng",
+    "source_url": "https://vanban.chinhphu.vn/?docid=216388&pageid=27160&typegroupid=4",
+    "content_url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/01/359-nd.signed.pdf",
+    "issue_date": "2025-12-31",
+    "topics": ["VAT"]
+  },
+  {
+    "source": "government",
+    "document_number": "51/2025/TT-BTC",
+    "title": "Quy định thủ tục giao dịch điện tử trong lĩnh vực thuế",
+    "source_url": "https://vanban.chinhphu.vn/?classid=1&docid=214342&pageid=27160&typegroupid=6",
+    "content_url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2025/7/51-btc.signed.pdf",
+    "issue_date": "2025-06-24",
+    "topics": ["tax administration", "customs"]
+  },
+  {
+    "source": "government",
+    "document_number": "18/VBHN-BTC",
+    "title": "Quy định về hóa đơn, chứng từ",
+    "source_url": "https://vanban.chinhphu.vn/?docid=214784&pageid=27160",
+    "content_url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2025/8/18-vbhn-btc.pdf",
+    "issue_date": "2025-07-30",
+    "topics": ["invoices"]
+  },
+  {
+    "source": "mof",
+    "document_number": "11/2024/TT-BTC",
+    "title": "Quy định mức thu, chế độ thu, nộp, quản lý và sử dụng phí khai thác tài liệu địa chất, khoáng sản",
+    "source_url": "https://vbpq.mof.gov.vn/",
+    "content_url": "https://vbpq.mof.gov.vn/DKC.FileManagement/FileStorage/File/247067",
+    "issue_date": "2024-02-05",
+    "topics": ["fees"]
+  }
+]

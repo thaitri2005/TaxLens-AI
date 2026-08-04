@@ -1053,3 +1053,9 @@ The ingestion CLI now accepts `--url`, `--document-number`, `--title`, and
 `--issue-date` for an explicitly selected official PDF. This supports safe MOF
 development imports without pretending that dynamic catalog discovery is
 complete.
+
+The curated tax manifest revealed that several official PDFs are image-only
+scans. Processing now removes stale embeddings before replacing chunks and
+records `OCR_REQUIRED` instead of persisting empty searchable content. OCR is
+the next processing milestone; it should be implemented behind the existing
+extraction boundary and kept optional to control cost.

@@ -87,6 +87,21 @@ docker compose exec -T api python scripts/embed_corpus.py
 
 This is intentionally a bounded demo corpus, not a production crawl.
 
+Some official PDFs are image-only scans. The processor does not create empty
+search chunks for these files; it records an `OCR_REQUIRED` processing failure
+until an OCR adapter is enabled.
+
+The curated tax manifest is the preferred development workflow:
+
+```powershell
+docker compose exec -T api python scripts/ingest_manifest.py --download
+docker compose exec -T api python scripts/process_corpus.py
+docker compose exec -T api python scripts/embed_corpus.py
+```
+
+Edit `data/corpus/tax_documents.json` to add or remove explicitly reviewed
+official tax documents. Keep the manifest small and topical during development.
+
 For a portal with dynamic catalog rendering, ingest an explicitly selected
 official PDF instead:
 

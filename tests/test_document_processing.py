@@ -13,7 +13,7 @@ from taxlens.document_processing.process import (
     process_document_version,
 )
 from taxlens.ingestion.seed import SeedDocument, ingest_seed_document
-from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
+from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument, ProcessingJob
 from taxlens.storage.local import LocalObjectStorage
 
 
@@ -77,3 +77,40 @@ def test_extract_text_accepts_pdf_artifacts() -> None:
     writer.write(buffer)
 
     assert extract_text(buffer.getvalue(), "raw/example.pdf") == ""
+
+
+def test_processing_marks_image_only_pdf_as_ocr_required(tmp_path: Path) -> None:
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    LegalDocument.metadata.create_all(engine)
+    storage = LocalObjectStorage(tmp_path / "storage")
+    writer = PdfWriter()
+    writer.add_blank_page(width=72, height=72)
+    pdf_buffer = BytesIO()
+    writer.write(pdf_buffer)
+    seed_document = SeedDocument(
+        source_name="official-source",
+        source_url="https://example.invalid/scanned",
+        source_document_id="scanned",
+        document_number="99/2025/TT-BTC",
+        title="Scanned document",
+        document_type="TT-BTC",
+        issuing_agency="Ministry of Finance",
+        issue_date=None,
+        effective_date=None,
+        legal_status="DISCOVERED",
+        content=pdf_buffer.getvalue(),
+        content_type="application/pdf",
+    )
+
+    with Session(engine) as session:
+        ingestion = ingest_seed_document(session, storage, seed_document)
+        version = session.get(DocumentVersion, UUID(ingestion.version_id))
+        assert version is not None
+
+        result = process_document_version(session, storage, version)
+        job = session.scalar(select(ProcessingJob))
+
+        assert result.status == "FAILED"
+        assert result.error_code == "OCR_REQUIRED"
+        assert job is not None
+        assert job.error_code == "OCR_REQUIRED"

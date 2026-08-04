@@ -1,6 +1,7 @@
 import hashlib
 import re
 from bisect import bisect_right
+from collections.abc import Sequence
 from dataclasses import dataclass
 from io import BytesIO
 
@@ -8,7 +9,12 @@ from pypdf import PdfReader
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from taxlens.legal_data.models import DocumentChunk, DocumentVersion, ProcessingJob
+from taxlens.legal_data.models import (
+    DocumentChunk,
+    DocumentEmbedding,
+    DocumentVersion,
+    ProcessingJob,
+)
 from taxlens.storage.local import LocalObjectStorage
 
 ARTICLE_PATTERN = re.compile(r"(?mi)^(?:article|điều)\s+(\d+)\.\s*(.*)$")
@@ -28,7 +34,9 @@ def process_document_version(
     existing_chunks = session.scalars(
         select(DocumentChunk).where(DocumentChunk.document_version_id == version.id)
     ).all()
-    if version.normalized_content_hash is not None and existing_chunks:
+    if version.normalized_content_hash is not None and any(
+        chunk.content.strip() for chunk in existing_chunks
+    ):
         return ProcessResult(
             status="UNCHANGED",
             version_id=str(version.id),
@@ -38,12 +46,22 @@ def process_document_version(
     raw_content = storage.get_bytes(version.raw_artifact_key)
     try:
         pages = extract_pages(raw_content, version.raw_artifact_key)
+        if not any(page.strip() for page in pages):
+            raise ValueError("No extractable text found; OCR is required for this document")
     except Exception as error:
+        _delete_chunks_and_embeddings(session, version.id, existing_chunks)
+        version.normalized_content_hash = None
+        version.normalized_artifact_key = None
         job = _latest_job(session, version)
         if job is not None:
             job.status = "FAILED"
             job.stage = "EXTRACTION"
-            job.error_code = "DOCUMENT_EXTRACTION_FAILED"
+            job.error_code = (
+                "OCR_REQUIRED"
+                if version.raw_artifact_key.casefold().endswith(".pdf")
+                and raw_content.startswith(b"%PDF")
+                else "DOCUMENT_EXTRACTION_FAILED"
+            )
             job.error_detail = str(error)[:2000]
             job.attempt_count += 1
             session.commit()
@@ -51,7 +69,7 @@ def process_document_version(
             status="FAILED",
             version_id=str(version.id),
             chunk_count=0,
-            error_code="DOCUMENT_EXTRACTION_FAILED",
+            error_code=job.error_code if job is not None else "DOCUMENT_EXTRACTION_FAILED",
         )
 
     normalized_pages = [normalize_text(page).strip() for page in pages]
@@ -62,7 +80,7 @@ def process_document_version(
     if not storage.exists(normalized_key):
         storage.put_bytes(normalized_key, normalized_content, "text/plain; charset=utf-8")
 
-    session.execute(delete(DocumentChunk).where(DocumentChunk.document_version_id == version.id))
+    _delete_chunks_and_embeddings(session, version.id, existing_chunks)
     page_boundaries = _page_boundaries(normalized_pages)
     chunks = build_article_chunks(normalized_text, page_boundaries)
     for chunk in chunks:
@@ -163,3 +181,14 @@ def _latest_job(session: Session, version: DocumentVersion) -> ProcessingJob | N
         .where(ProcessingJob.document_version_id == version.id)
         .order_by(ProcessingJob.created_at.desc())
     )
+
+
+def _delete_chunks_and_embeddings(
+    session: Session, version_id: object, chunks: Sequence[DocumentChunk]
+) -> None:
+    chunk_ids = [chunk.id for chunk in chunks]
+    if chunk_ids:
+        session.execute(
+            delete(DocumentEmbedding).where(DocumentEmbedding.document_chunk_id.in_(chunk_ids))
+        )
+    session.execute(delete(DocumentChunk).where(DocumentChunk.document_version_id == version_id))
