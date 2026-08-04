@@ -54,7 +54,7 @@ def test_search_api_returns_citation_ready_results() -> None:
 def test_citation_builder_uses_stored_provenance_and_noop_reranker_preserves_order() -> None:
     engine = _create_engine_with_search_data()
     with Session(engine) as session:
-        results = search_chunks(session, "VAT")
+        results = search_chunks(session, "VAT", SearchFilters(legal_status="EFFECTIVE"))
 
     citation = build_citation(results[0])
     reranked = NoOpReranker().rerank("VAT", results, limit=1)

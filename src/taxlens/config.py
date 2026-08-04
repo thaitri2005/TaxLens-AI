@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     embedding_dimensions: int = 384
     embedding_max_tokens: int = 512
     embedding_batch_size: int = 32
+    hf_token: str | None = None
+    hf_chat_base_url: str = "https://router.huggingface.co/v1"
+    hf_chat_model: str = "Qwen/Qwen3-4B-Instruct-2507"
+    hf_chat_routing_policy: str = "cheapest"
+    hf_chat_timeout_seconds: float = 30.0
+    hf_chat_max_output_tokens: int = 600
+    hf_chat_temperature: float = 0.1
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

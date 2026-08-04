@@ -38,3 +38,7 @@ Invoke-RestMethod 'http://localhost:8000/search?q=invoice&legal_status=EFFECTIVE
 
 The search endpoint supports `document_number`, `document_type`, `legal_status`,
 `issuing_agency`, `effective_from`, `effective_to`, and `limit` filters.
+
+# Hugging Face inference
+
+For the intelligence-workflow milestone, set `HF_TOKEN=hf_...` in your local `.env` file. Do not commit it or place it in `.env.example`. `HF_CHAT_MODEL` and `HF_CHAT_ROUTING_POLICY` select the model and routed provider policy independently, so changing either never requires a code change.

@@ -412,7 +412,7 @@ Use Hugging Face Inference Providers for:
 
 Hugging Face routed inference is **not** the embedding provider. It is the default later integration for generative analysis after retrieval quality is established.
 
-The development default is `Qwen/Qwen2.5-3B-Instruct:cheapest`. Qwen2.5-3B-Instruct supports Vietnamese, while `:cheapest` asks Hugging Face to select the lowest-priced available provider for that model. Keep the model ID, routing policy, timeout, output cap, and budget in environment settings rather than hard-coding them. A provider availability failure, budget exhaustion, or invalid structured output must produce an evidence-only/unsupported response, never an automatic upgrade to a costlier model.
+The development default is `Qwen/Qwen3-4B-Instruct-2507:cheapest`. This small multilingual instruct model is currently routable through Hugging Face, while `:cheapest` asks Hugging Face to select the lowest-priced available provider for that model. Keep the model ID, routing policy, timeout, output cap, and budget in environment settings rather than hard-coding them. A provider availability failure, budget exhaustion, or invalid structured output must produce an evidence-only/unsupported response, never an automatic upgrade to a costlier model.
 
 ## 5.5a Self-hosted embeddings
 

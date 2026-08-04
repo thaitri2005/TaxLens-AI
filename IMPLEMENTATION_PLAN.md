@@ -462,7 +462,7 @@ Construct citations from stored metadata, never from model-generated text. A cit
 
 Define a provider-neutral interface for chat and structured output. The first production adapter uses Hugging Face Inference Providers through its routed chat-completions API, authenticated by an `HF_TOKEN` with only `Make calls to Inference Providers` permission.
 
-Use `Qwen/Qwen2.5-3B-Instruct:cheapest` as the configurable development default. The Qwen model family explicitly supports Vietnamese; the `:cheapest` suffix selects the lowest-priced available provider for that model. Keep the model ID and routing policy in settings rather than hard-coding them. Availability and price can change, so never assume a specific underlying provider.
+Use `Qwen/Qwen3-4B-Instruct-2507:cheapest` as the configurable development default. This small multilingual Qwen instruct model is currently routable through Hugging Face; the `:cheapest` suffix selects the lowest-priced available provider for that model. Keep the model ID and routing policy in settings rather than hard-coding them. Availability and price can change, so never assume a specific underlying provider.
 
 The adapter must record the requested model, routing policy, resolved provider when returned, prompt version, input/output token counts, latency, request outcome, and estimated cost. It must enforce a low output-token cap, bounded evidence context, timeout, retry policy, and per-environment spend limit. On provider unavailability, budget exhaustion, or invalid structured output, return an evidence-only/unsupported response; do not silently fall back to a larger or more expensive model. This interface is separate from the local embedding adapter.
 
@@ -834,7 +834,7 @@ The default local profile should contain only PostgreSQL/pgvector, API, frontend
 - package the pinned embedding model into the image and monitor image size, memory, CPU, and cold starts;
 - cache safe metadata and summary results;
 - cap document context and output tokens;
-- use Hugging Face routed inference with `Qwen/Qwen2.5-3B-Instruct:cheapest` for the first chat adapter; keep a small maximum output (initially 600 tokens) and a bounded context window;
+- use Hugging Face routed inference with `Qwen/Qwen3-4B-Instruct-2507:cheapest` for the first chat adapter; keep a small maximum output (initially 600 tokens) and a bounded context window;
 - configure a monthly Hugging Face spending limit and track routed-provider usage in Hugging Face billing; do not use a custom provider key in the MVP;
 - use a small model for classification and a stronger model only where evaluation shows value;
 - log estimated cost per job and query.
@@ -922,7 +922,7 @@ Cost impact: Higher image size, CPU/memory use, and cold-start cost; no per-vect
 ### 2026-08-04 — Hugging Face routed inference default
 
 ```text
-Change: Use Hugging Face Inference Providers for generative chat, with Qwen/Qwen2.5-3B-Instruct:cheapest as the configurable development default.
+Change: Use Hugging Face Inference Providers for generative chat, with Qwen/Qwen3-4B-Instruct-2507:cheapest as the configurable development default.
 Reason: Obtain Vietnamese-capable instruction following without hosting a chat model or committing to a single cloud-model vendor.
 Affected phase/module: Phase 6 model adapter, cited Q&A, comparison summaries, settings, secret management, and cost telemetry.
 Migration or compatibility impact: Add a provider-neutral chat interface. Keep the model ID, routing policy, output cap, and timeout configurable; no automatic fallback to a more expensive model.
@@ -936,7 +936,7 @@ Cost impact: Pay-as-you-go routed inference. Hugging Face credits may cover expe
 - PostgreSQL remains sufficient for the initial corpus size;
 - article parsing quality is adequate for the selected document types;
 - the pinned `multilingual-e5-small` model revision remains available under its MIT license and meets Vietnamese/English retrieval quality targets;
-- `Qwen/Qwen2.5-3B-Instruct:cheapest` remains routable and meets the Vietnamese legal-answer quality threshold; compare it with a larger model only using the evaluation set and an explicit cost decision;
+- `Qwen/Qwen3-4B-Instruct-2507:cheapest` remains routable and meets the Vietnamese legal-answer quality threshold; compare it with a larger model only using the evaluation set and an explicit cost decision;
 - local Docker Compose remains the fastest contributor workflow.
 
 ---
