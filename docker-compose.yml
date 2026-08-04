@@ -37,5 +37,14 @@ services:
         condition: service_healthy
     command: uvicorn taxlens.api.main:app --host 0.0.0.0 --port 8000 --reload
 
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
 volumes:
   postgres_data:

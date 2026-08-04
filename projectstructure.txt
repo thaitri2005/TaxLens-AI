@@ -229,6 +229,15 @@ Possible notification channels:
 
 The diagram below is the target architecture. For the first vertical slice, run ingestion and processing as repeatable CLI/worker commands and keep the same module boundaries. Add Airflow after there are multiple scheduled workflows that need retries, backfills, and operational visibility.
 
+### Current implementation checkpoint
+
+The local backend currently implements the ingestion, processing, embedding,
+hybrid retrieval, citation, Q&A, comparison, and API layers described below.
+The `apps/` directory currently contains only the API container definition; the
+web client is intentionally the next major milestone. Build it against the
+existing API contracts before introducing authentication, Airflow, or Azure
+deployment.
+
 ```text
 Official Sources / Seed Corpus
               │

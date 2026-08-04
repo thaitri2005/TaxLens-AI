@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Evidence-grounded Vietnamese tax regulation intelligence">
+  <title>TaxLens AI</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#search" aria-label="TaxLens AI home">
+      <span class="brand-mark">TL</span>
+      <span><strong>TaxLens</strong><small>Regulatory intelligence</small></span>
+    </a>
+    <div class="status"><span class="status-dot"></span>Local workspace</div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">Vietnamese tax intelligence</p>
+      <h1>Find the rule.<br><em>See the evidence.</em></h1>
+      <p class="hero-copy">Search official regulations, ask grounded questions, and compare document versions from one focused workspace.</p>
+    </section>
+
+    <nav class="tabs" aria-label="Workspace views">
+      <button class="tab active" data-view="search">Search</button>
+      <button class="tab" data-view="ask">Ask TaxLens</button>
+      <button class="tab" data-view="compare">Compare versions</button>
+      <button class="tab" data-view="documents">Documents</button>
+    </nav>
+
+    <section id="view-search" class="view active">
+      <div class="section-heading"><div><p class="eyebrow">Retrieval workspace</p><h2>Search regulations</h2></div><span class="chip">Hybrid search</span></div>
+      <form id="search-form" class="search-form">
+        <label class="search-box"><span>⌕</span><input id="search-input" required maxlength="500" placeholder="Try: thời điểm lập hóa đơn" autocomplete="off"><button type="submit">Search</button></label>
+        <div class="form-row"><label>Mode<select id="search-mode"><option value="hybrid">Hybrid</option><option value="keyword">Keyword</option><option value="semantic">Semantic</option></select></label><label>Results<select id="search-limit"><option>5</option><option>10</option><option>20</option></select></label></div>
+      </form>
+      <div id="search-state" class="empty-state"><span class="empty-icon">⌁</span><h3>Search the corpus</h3><p>Results will show the matched passage and its source document, article, page, and official URL.</p></div>
+      <div id="search-results" class="result-list" hidden></div>
+    </section>
+
+    <section id="view-ask" class="view" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Evidence-grounded answers</p><h2>Ask TaxLens</h2></div><span class="chip chip-warm">Cited response</span></div>
+      <form id="ask-form" class="question-form"><textarea id="question-input" required maxlength="1000" placeholder="Ask a question about Vietnamese tax regulations..."></textarea><div class="form-actions"><span>Answers are generated from retrieved legal passages.</span><button type="submit">Ask question <span>→</span></button></div></form>
+      <div id="ask-state" class="empty-state"><span class="empty-icon">✦</span><h3>Ask a focused question</h3><p>TaxLens will show its evidence status, answer, uncertainties, and citations.</p></div>
+      <div id="ask-result" class="answer-card" hidden></div>
+    </section>
+
+    <section id="view-compare" class="view" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Version intelligence</p><h2>Compare regulations</h2></div><span class="chip chip-blue">Article diff</span></div>
+      <form id="compare-form" class="compare-form"><label>Before document<input id="before-input" list="document-options" required placeholder="e.g. 02/2024/TT-BTC"></label><span class="swap">→</span><label>After document<input id="after-input" list="document-options" required placeholder="e.g. 31/2025/TT-BTC"></label><button type="submit">Compare versions <span>→</span></button><datalist id="document-options"></datalist></form>
+      <div id="compare-state" class="empty-state"><span class="empty-icon">⇄</span><h3>Choose two document versions</h3><p>Use document numbers from the Documents tab to see added, removed, and modified articles.</p></div>
+      <div id="compare-result" class="comparison-list" hidden></div>
+    </section>
+
+    <section id="view-documents" class="view" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Source library</p><h2>Documents</h2></div><button id="refresh-documents" class="quiet-button">Refresh</button></div>
+      <div id="documents-state" class="empty-state"><span class="empty-icon">▤</span><h3>Loading source library</h3><p>Reading the indexed legal documents.</p></div>
+      <div id="documents-list" class="document-list" hidden></div>
+    </section>
+  </main>
+
+  <footer><span>TaxLens AI</span><span>Evidence first · Local development</span></footer>
+  <script src="/app.js"></script>
+</body>
+</html>

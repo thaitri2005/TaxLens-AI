@@ -90,4 +90,17 @@ python scripts/evaluate_retrieval.py --query "thuế suất giá trị gia tăng
 
 The evaluation output includes fused ranking scores and stored official source
 URLs so retrieval quality and provenance can be inspected together.
+
+## Web workspace
+
+The lightweight web client runs as a separate Nginx container and proxies
+browser requests to the API. Start it with:
+
+```powershell
+docker compose up --build -d web
+```
+
+Open `http://localhost:3000`. The workspace includes search, cited Q&A,
+document browsing, and article-level version comparison. The web container can
+be rebuilt independently of the slower API image.
 ```

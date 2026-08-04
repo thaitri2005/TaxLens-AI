@@ -882,6 +882,30 @@ These estimates assume one developer working part-time to full-time and a prepar
 
 Do not treat dates as promises. Treat the acceptance criteria as the schedule authority.
 
+### Current milestone status — 2026-08-04
+
+- **M0–M2:** complete for the local vertical slice, including schema, seed
+  ingestion, two official-source connectors, PDF processing, and idempotency.
+- **M3:** complete for the implemented retrieval infrastructure, including
+  local E5 embeddings, pgvector, keyword search, hybrid fusion, and citations.
+- **M4 backend:** substantially complete. Q&A, comparison, model adapters,
+  evidence gates, and API routes exist and are tested.
+- **M4 frontend:** not started. There is currently no web application under
+  `apps/`; this is the next major product milestone.
+- **M5:** partially started. Metrics and telemetry exist, but there is no
+  persisted labeled retrieval dataset or repeatable aggregate evaluation run.
+
+### Next major milestone — M4 product vertical slice
+
+Build the smallest usable web client against the existing API. It should
+support document browsing, keyword/hybrid search, cited Q&A, and version
+comparison. Keep authentication, notifications, Airflow, Azure deployment,
+and visual polish out of this milestone. The acceptance test is that a user
+can complete the core demo without PowerShell or direct API calls.
+
+After the UI vertical slice, complete M5 with a small labeled retrieval set and
+automated regression checks before beginning Azure deployment.
+
 ---
 
 ## 19. Technical Change Management
