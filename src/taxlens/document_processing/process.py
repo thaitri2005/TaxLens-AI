@@ -9,6 +9,8 @@ from pypdf import PdfReader
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
+from taxlens.config import get_settings
+from taxlens.document_processing.ocr import ocr_pages
 from taxlens.legal_data.models import (
     DocumentChunk,
     DocumentEmbedding,
@@ -26,6 +28,7 @@ class ProcessResult:
     version_id: str
     chunk_count: int
     error_code: str | None = None
+    extraction_method: str | None = None
 
 
 def process_document_version(
@@ -43,13 +46,20 @@ def process_document_version(
             status="UNCHANGED",
             version_id=str(version.id),
             chunk_count=len(existing_chunks),
+            extraction_method="unchanged",
         )
 
     raw_content = storage.get_bytes(version.raw_artifact_key)
+    used_ocr = False
     try:
         pages = extract_pages(raw_content, version.raw_artifact_key)
-        if not any(page.strip() for page in pages):
-            raise ValueError("No extractable text found; OCR is required")
+        if not _has_usable_text(pages):
+            if not raw_content.startswith(b"%PDF"):
+                raise ValueError("No usable extractable text found")
+            pages = ocr_pages(raw_content, get_settings())
+            used_ocr = True
+            if not _has_usable_text(pages):
+                raise ValueError("No usable text found after Tesseract OCR")
     except Exception as error:
         _delete_chunks_and_embeddings(session, version.id, existing_chunks)
         version.normalized_content_hash = None
@@ -72,6 +82,7 @@ def process_document_version(
             version_id=str(version.id),
             chunk_count=0,
             error_code=job.error_code if job is not None else "DOCUMENT_EXTRACTION_FAILED",
+            extraction_method="ocr_failed" if raw_content.startswith(b"%PDF") else "native_failed",
         )
 
     normalized_pages = [normalize_text(page).strip() for page in pages]
@@ -103,9 +114,14 @@ def process_document_version(
     job = _latest_job(session, version)
     if job is not None:
         job.status = "COMPLETED"
-        job.stage = "CHUNKED"
+        job.stage = "OCR_CHUNKED" if used_ocr else "CHUNKED"
     session.commit()
-    return ProcessResult(status="PROCESSED", version_id=str(version.id), chunk_count=len(chunks))
+    return ProcessResult(
+        status="PROCESSED",
+        version_id=str(version.id),
+        chunk_count=len(chunks),
+        extraction_method="ocr" if used_ocr else "native",
+    )
 
 
 @dataclass(frozen=True)
@@ -120,6 +136,15 @@ class ParsedChunk:
 def normalize_text(raw_text: str) -> str:
     normalized_lines = [re.sub(r"[ \t]+", " ", line).strip() for line in raw_text.splitlines()]
     return "\n".join(normalized_lines).strip() + "\n"
+
+
+def _has_usable_text(pages: list[str]) -> bool:
+    text = " ".join(page.strip() for page in pages)
+    compact = re.sub(r"\s+", "", text)
+    if len(compact) < 40:
+        return False
+    alphabetic = sum(character.isalpha() for character in compact)
+    return alphabetic / len(compact) >= 0.2
 
 
 def extract_pages(raw_content: bytes, artifact_key: str) -> list[str]:

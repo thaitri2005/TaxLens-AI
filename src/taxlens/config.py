@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     embedding_dimensions: int = 384
     embedding_max_tokens: int = 512
     embedding_batch_size: int = 32
+    ocr_enabled: bool = True
+    ocr_language: str = "vie+eng"
+    ocr_render_scale: float = 2.0
+    ocr_timeout_seconds: float = 30.0
     hf_token: str | None = None
     hf_chat_base_url: str = "https://router.huggingface.co/v1"
     hf_chat_model: str = "Qwen/Qwen3-4B-Instruct-2507"

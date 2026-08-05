@@ -1,11 +1,12 @@
 import argparse
+import time
 
 from sqlalchemy import select
 
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal
 from taxlens.document_processing.process import process_document_version
-from taxlens.legal_data.models import DocumentVersion
+from taxlens.legal_data.models import DocumentVersion, LegalDocument
 from taxlens.storage.local import LocalObjectStorage
 
 
@@ -16,14 +17,32 @@ def main() -> None:
 
     storage = LocalObjectStorage(get_settings().local_storage_path)
     with SessionLocal() as session:
-        query = select(DocumentVersion).order_by(DocumentVersion.created_at)
+        query = select(DocumentVersion).join(LegalDocument).order_by(DocumentVersion.created_at)
         if not arguments.all:
             query = query.where(DocumentVersion.normalized_content_hash.is_(None))
         versions = session.scalars(query).all()
-        results = [
-            process_document_version(session, storage, version)
-            for version in versions
-        ]
+        total = len(versions)
+        print(f"Processing {total} document version(s)...", flush=True)
+        results = []
+        for index, version in enumerate(versions, start=1):
+            document = session.get(LegalDocument, version.document_id)
+            document_number = document.document_number if document is not None else str(version.id)
+            title = document.title if document is not None else "Unknown document"
+            print(
+                f"[{index}/{total}] START {document_number} | {title} | "
+                f"{version.raw_artifact_key}",
+                flush=True,
+            )
+            started_at = time.perf_counter()
+            result = process_document_version(session, storage, version)
+            results.append(result)
+            elapsed = time.perf_counter() - started_at
+            detail = result.error_code or result.extraction_method or "complete"
+            print(
+                f"[{index}/{total}] DONE {document_number} | {result.status} | "
+                f"{result.chunk_count} chunks | {detail} | {elapsed:.1f}s",
+                flush=True,
+            )
 
     processed = sum(result.status == "PROCESSED" for result in results)
     unchanged = sum(result.status == "UNCHANGED" for result in results)

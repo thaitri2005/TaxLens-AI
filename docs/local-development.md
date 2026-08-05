@@ -88,8 +88,10 @@ docker compose exec -T api python scripts/embed_corpus.py
 This is intentionally a bounded demo corpus, not a production crawl.
 
 Some official PDFs are image-only scans. The processor does not create empty
-search chunks for these files; it records an `OCR_REQUIRED` processing failure
-until an OCR adapter is enabled.
+search chunks for these files. The API first tries native PDF extraction and
+then uses local Tesseract with Vietnamese and English language data when the
+native text is empty or unusable. If Tesseract is unavailable or still finds
+no usable text, it records an `OCR_REQUIRED` processing failure.
 
 The curated tax manifest is the preferred development workflow:
 
@@ -167,6 +169,6 @@ be rebuilt independently of the slower API image.
 Selecting a document opens its indexed detail view, including stored versions,
 article headings, passage text, and page ranges when available.
 Each version also reports its latest processing status, error code when
-available, and indexed chunk count. `OCR_REQUIRED` indicates a scanned PDF was
-intentionally left unsearchable rather than converted with an OCR runtime.
+available, and indexed chunk count. `OCR_REQUIRED` indicates that native
+extraction and the local Tesseract fallback both failed or that OCR is disabled.
 ```

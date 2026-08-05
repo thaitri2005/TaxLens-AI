@@ -1058,11 +1058,11 @@ development imports without pretending that dynamic catalog discovery is
 complete.
 
 The curated tax manifest revealed that several official PDFs are image-only
-scans. Processing now removes stale embeddings before replacing chunks and
-records `OCR_REQUIRED` instead of persisting empty searchable content. OCR is
-intentionally deferred from the MVP to avoid adding a heavyweight native
-runtime and an additional accuracy/cost surface. Those documents remain
-traceable and can be reprocessed later if OCR becomes necessary.
+scans. Processing now removes stale embeddings before replacing chunks, tries
+native extraction first, and falls back to local Tesseract with `vie+eng`
+language data when the native text is empty or unusable. It records
+`OCR_REQUIRED` only when both paths fail or OCR is disabled. OCR remains
+optional/configurable to control processing time and image size.
 
 The first labeled tax retrieval baseline contains four queries and currently
 reports `Hit@5=0.25`, `Recall@5=0.25`, and `MRR=0.25`. This confirms that the

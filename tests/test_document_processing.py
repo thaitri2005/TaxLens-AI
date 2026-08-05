@@ -79,7 +79,9 @@ def test_extract_text_accepts_pdf_artifacts() -> None:
     assert extract_text(buffer.getvalue(), "raw/example.pdf") == ""
 
 
-def test_processing_marks_image_only_pdf_as_ocr_required(tmp_path: Path) -> None:
+def test_processing_marks_image_only_pdf_as_ocr_required(
+    tmp_path: Path, monkeypatch
+) -> None:
     engine = create_engine("sqlite+pysqlite:///:memory:")
     LegalDocument.metadata.create_all(engine)
     storage = LocalObjectStorage(tmp_path / "storage")
@@ -103,6 +105,10 @@ def test_processing_marks_image_only_pdf_as_ocr_required(tmp_path: Path) -> None
     )
 
     with Session(engine) as session:
+        monkeypatch.setattr(
+            "taxlens.document_processing.process.ocr_pages",
+            lambda raw_content, settings: [""],
+        )
         ingestion = ingest_seed_document(session, storage, seed_document)
         version = session.get(DocumentVersion, UUID(ingestion.version_id))
         assert version is not None
@@ -114,3 +120,48 @@ def test_processing_marks_image_only_pdf_as_ocr_required(tmp_path: Path) -> None
         assert result.error_code == "OCR_REQUIRED"
         assert job is not None
         assert job.error_code == "OCR_REQUIRED"
+
+
+def test_processing_uses_ocr_when_native_pdf_text_is_unusable(
+    tmp_path: Path, monkeypatch
+) -> None:
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    LegalDocument.metadata.create_all(engine)
+    storage = LocalObjectStorage(tmp_path / "storage")
+    writer = PdfWriter()
+    writer.add_blank_page(width=72, height=72)
+    pdf_buffer = BytesIO()
+    writer.write(pdf_buffer)
+    seed_document = SeedDocument(
+        source_name="official-source",
+        source_url="https://example.invalid/ocr",
+        source_document_id="ocr",
+        document_number="98/2025/TT-BTC",
+        title="OCR document",
+        document_type="TT-BTC",
+        issuing_agency="Ministry of Finance",
+        issue_date=None,
+        effective_date=None,
+        legal_status="DISCOVERED",
+        content=pdf_buffer.getvalue(),
+        content_type="application/pdf",
+    )
+
+    monkeypatch.setattr(
+        "taxlens.document_processing.process.ocr_pages",
+            lambda raw_content, settings: [
+                "Article 1. OCR scope\nVietnamese tax content for the fallback test."
+            ],
+    )
+    with Session(engine) as session:
+        ingestion = ingest_seed_document(session, storage, seed_document)
+        version = session.get(DocumentVersion, UUID(ingestion.version_id))
+        assert version is not None
+
+        result = process_document_version(session, storage, version)
+        job = session.scalar(select(ProcessingJob))
+
+        assert result.status == "PROCESSED"
+        assert result.chunk_count == 1
+        assert job is not None
+        assert job.stage == "OCR_CHUNKED"

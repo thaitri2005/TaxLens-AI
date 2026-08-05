@@ -7,6 +7,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/workspace/src \
     HF_HUB_DISABLE_TELEMETRY=1
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-vie tesseract-ocr-eng \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY pyproject.toml ./
 COPY docs/local-development.md ./docs/local-development.md
 COPY src ./src
