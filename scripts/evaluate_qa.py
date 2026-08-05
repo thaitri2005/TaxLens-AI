@@ -63,6 +63,10 @@ def main() -> None:
                     {
                         "question": case["question"],
                         "status": result.status.value,
+                        "evidence_status": (
+                            result.evidence.status.value if result.evidence else None
+                        ),
+                        "retrieval_mode": "semantic_hybrid" if embedding_provider else "keyword",
                         "faithfulness": metrics.faithfulness,
                         "answer_relevancy": metrics.answer_relevancy,
                         "context_precision": metrics.context_precision,

@@ -15,3 +15,10 @@ def test_rag_metrics_are_deterministic_and_citation_aware() -> None:
     assert metrics.citation_completeness == 1.0
     assert metrics.answer_relevancy > 0
     assert metrics.context_precision == 1.0
+
+
+def test_rag_metrics_do_not_reward_missing_answers() -> None:
+    metrics = evaluate_rag_answer("thuế", None, [], [], citation_count=0)
+
+    assert metrics.faithfulness == 0.0
+    assert metrics.citation_completeness == 0.0

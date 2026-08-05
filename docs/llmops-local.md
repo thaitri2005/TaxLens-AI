@@ -36,7 +36,9 @@ The API image contains the embedding model at
 `/opt/taxlens-models/multilingual-e5-small`; a host Python environment usually
 does not. If the model is not present locally, the script reports that fact and
 falls back to keyword retrieval. Use `--keyword-only` explicitly for a fast
-host-side smoke run.
+host-side smoke run. Keyword-only results are not comparable to the normal
+semantic-hybrid production path and may return insufficient evidence for
+Vietnamese queries with spelling or diacritic variation.
 
 The report includes faithfulness, answer relevancy, context precision, and
 citation completeness. These are deliberately cheap RAGAS-style metrics; a

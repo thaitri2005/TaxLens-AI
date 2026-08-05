@@ -22,6 +22,13 @@ def evaluate_rag_answer(
 ) -> RagEvaluationMetrics:
     """Calculate cheap, deterministic RAGAS-style metrics without a judge model."""
 
+    if not answer or not contexts:
+        return RagEvaluationMetrics(
+            faithfulness=0.0,
+            answer_relevancy=0.0,
+            context_precision=0.0,
+            citation_completeness=0.0,
+        )
     faithfulness = citation_completeness(claims, citation_count)
     answer_tokens = _tokens(answer or "")
     question_tokens = _tokens(question)
