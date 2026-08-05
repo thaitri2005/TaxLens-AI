@@ -960,22 +960,21 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   quality remains a measured backlog: the current baseline is `Hit@5=0.25`,
   `Recall@5=0.25`, and `MRR=0.25` because coverage is still sparse.
 
-- **M5.5:** in progress before cloud deployment. The required Airflow local
-  profile and daily discovery/process/embed/evaluation DAG are implemented.
-  The Q&A path now runs through a LangGraph state graph and the configured
-  provider is wrapped by a LangChain runnable adapter. The remaining work is
-  connecting optional MLflow experiment runs and expanding the reviewed QA
-  dataset; deterministic RAGAS-style metrics and the evaluation script are
-  implemented.
+- **M5.5:** complete for the planned local LLMOps scope. The required Airflow
+  daily discovery/process/embed/evaluation DAG is implemented; Q&A runs
+  through LangGraph with a LangChain provider adapter; deterministic
+  RAGAS-style metrics are available; the five-case semantic-hybrid QA set has
+  been evaluated using the baked embedding model; and the finished run is
+  recorded in local MLflow. A judge-model RAGAS run remains an optional future
+  quality experiment, not a release blocker.
 
 ### Next milestone — M5.5 LLMOps integration
 
 Add the LLMOps ecosystem signal without replacing the working retrieval core.
-The graph, adapter, deterministic metrics, evaluation script, and scheduled
-retrieval evaluation are implemented. The remaining acceptance work is to
-install the optional `llmops` extra, start the MLflow profile, run an end-to-end
-experiment, and expand the reviewed QA dataset. Keep MLflow and RAGAS
-evaluation services optional outside evaluation runs, but Airflow is a
+This milestone is complete: the graph, adapter, deterministic metrics,
+evaluation script, scheduled retrieval evaluation, five-case semantic-hybrid
+run, and finished MLflow experiment are all working. Keep MLflow and RAGAS
+evaluation services optional outside evaluation runs, but Airflow remains a
 required product component.
 
 ### Following milestone — M6 deployment hardening

@@ -42,11 +42,14 @@ Vietnamese queries with spelling or diacritic variation.
 
 The report includes faithfulness, answer relevancy, context precision, and
 citation completeness. These are deliberately cheap RAGAS-style metrics; a
-future judged evaluation can be added without changing the Q&A contract.
+future judged evaluation can be added without changing the Q&A contract. The
+current five-case semantic-hybrid smoke set is stored in MLflow after running
+the evaluation inside the API container.
 
 Set `MLFLOW_ENABLED=true` and configure `MLFLOW_TRACKING_URI` to log the same
-run parameters and aggregate metrics to MLflow. MLflow remains disabled during
-normal user traffic.
+run parameters and aggregate metrics to MLflow. The API image uses a small
+REST fallback when the optional MLflow Python package is not installed. MLflow
+remains disabled during normal user traffic.
 
 ## Scheduled evaluation
 
