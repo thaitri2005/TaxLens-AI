@@ -233,10 +233,12 @@ The diagram below is the target architecture. For the first vertical slice, run 
 
 The local backend currently implements the ingestion, processing, embedding,
 hybrid retrieval, citation, Q&A, comparison, and API layers described below.
-The `apps/` directory now contains separate API and Next.js/TypeScript web
+The `apps/` directory contains separate API and Next.js/TypeScript web
 services. The web service consumes API contracts only; it does not access the
-database directly. Authentication, Airflow, and Azure deployment remain later
-milestones.
+database directly. The local profile uses Docker Compose, PostgreSQL/pgvector,
+workspace-backed raw storage, native PDF extraction, local Tesseract OCR, and
+the provider-neutral Hugging Face chat adapter. Authentication, Airflow, and
+Azure deployment remain later milestones.
 
 ```text
 Official Sources / Seed Corpus
@@ -252,11 +254,14 @@ Official Sources / Seed Corpus
 Change Detection    Crawl Metadata
      │                  │
      ▼                  ▼
-Azure Blob Storage   PostgreSQL
+Local Raw Storage    PostgreSQL
 Original Documents   Crawl Jobs
      │
      ▼
-Text Extraction / OCR
+Native Text Extraction
+     │
+     ▼
+Tesseract OCR Fallback
      │
      ▼
 Document Normalization
@@ -289,7 +294,7 @@ Chunking and Indexing
                               └───────────┴───────────┘
                                           │
                                           ▼
-                                       OpenAI
+                         Hugging Face Chat Adapter
                                           │
                                           ▼
                                 Answer + Citations
@@ -392,9 +397,10 @@ PostgreSQL can provide both:
 
 This avoids adding a separate vector database before the scale requires it.
 
-## 5.4 Azure AI Document Intelligence
+## 5.4 Document OCR
 
-Use only when necessary.
+Use only when native extraction is unusable. The local MVP does not use Azure
+Document Intelligence or a hosted OCR API.
 
 Processing logic:
 
@@ -403,7 +409,7 @@ Is the PDF text-readable?
     │
     ├── Yes → native PDF extraction
     │
-    └── No  → Azure AI Document Intelligence OCR
+    └── No  → local Tesseract OCR (`vie+eng`)
 ```
 
 This avoids paying for OCR on digitally generated PDFs.
@@ -419,7 +425,8 @@ Use Hugging Face Inference Providers for:
 * Impact-analysis drafting
 * Evaluation assistance
 
-Hugging Face routed inference is **not** the embedding provider. It is the default later integration for generative analysis after retrieval quality is established.
+Hugging Face routed inference is **not** the embedding provider. It is the
+current configurable chat provider for cited Q&A and comparison summaries.
 
 The development default is `Qwen/Qwen3-4B-Instruct-2507:cheapest`. This small multilingual instruct model is currently routable through Hugging Face, while `:cheapest` asks Hugging Face to select the lowest-priced available provider for that model. Keep the model ID, routing policy, timeout, output cap, and budget in environment settings rather than hard-coding them. A provider availability failure, budget exhaustion, or invalid structured output must produce an evidence-only/unsupported response, never an automatic upgrade to a costlier model.
 
@@ -518,12 +525,12 @@ The Azure mapping is a target deployment blueprint, not a requirement to keep ev
 
 1. local Docker Compose with PostgreSQL/pgvector and a seed corpus;
 2. one low-cost Azure development environment with API, Blob Storage, PostgreSQL, and secrets;
-3. add workers, scheduling, OCR, monitoring, and managed identity as the corresponding workflow becomes real;
+3. add workers, scheduling, monitoring, and managed identity as the corresponding workflow becomes real; keep OCR inside the application image;
 4. keep AKS, high availability, and production resource groups as infrastructure-code demonstrations unless sustained usage justifies them.
 
 Control spend and improve effectiveness by:
 
-* extracting native PDF text before using paid OCR;
+* extracting native PDF text before using the local Tesseract fallback;
 * caching normalized text, metadata, embeddings, and evaluation results;
 * embedding high-priority or recently changed documents first;
 * pinning the Hugging Face model revision so an image rebuild cannot silently change vectors;
@@ -1562,6 +1569,37 @@ alert_on_regression
 
 # 11. Repository Structure
 
+## 11.1 Current implemented layout
+
+```text
+taxlens-ai/
+├── apps/
+│   ├── api/Dockerfile
+│   └── web/
+│       ├── app/
+│       ├── Dockerfile
+│       └── package.json
+├── src/taxlens/
+│   ├── api/routes/              # FastAPI HTTP contracts
+│   ├── document_processing/     # native extraction + Tesseract fallback
+│   ├── evaluation/              # retrieval metrics
+│   ├── ingestion/               # seed and official-source connectors
+│   ├── intelligence/            # planning, evidence, HF chat, Q&A, compare
+│   ├── legal_data/              # SQLAlchemy models
+│   ├── retrieval/               # FTS, pgvector, fusion, citations
+│   ├── storage/                 # local raw-artifact storage
+│   └── config.py
+├── migrations/
+├── scripts/                     # bounded ingestion, processing, embedding, evaluation
+├── tests/
+├── docker-compose.yml
+└── pyproject.toml
+```
+
+The following target structure remains the planned expansion path; it must be
+introduced behind the current Python module contracts rather than replacing
+the working local vertical slice prematurely.
+
 ```text
 taxlens-ai/
 │
@@ -1699,7 +1737,9 @@ taxlens-ai/
         └── nightly-evaluation.yml
 ```
 
-This is the complete target repository structure. The first implementation may use the same modules inside one Python package and omit optional runtime folders until their phase begins. In particular, `apps/worker`, `airflow`, `monitoring`, `infra/kubernetes`, and `packages/agents` should not block the core MVP.
+The target structure is intentionally broader than the current MVP. `apps/worker`,
+Airflow, monitoring, infrastructure, and LangGraph modules remain optional
+downstream additions and should not block the core MVP.
 
 ---
 
@@ -2484,8 +2524,8 @@ Only insert measured numbers once the benchmarks genuinely exist.
 | Vector retrieval       | pgvector                                   |
 | Keyword retrieval      | PostgreSQL full-text search                |
 | Object storage         | Azure Blob Storage                         |
-| OCR                    | Azure AI Document Intelligence             |
-| Generative LLM         | Hugging Face Inference Providers later, behind a provider adapter |
+| OCR                    | Native extraction, then local Tesseract (`vie+eng`) in API/worker images |
+| Generative LLM         | Hugging Face Inference Providers behind a provider adapter |
 | Embeddings             | Self-hosted `intfloat/multilingual-e5-small` in FastAPI image |
 | Cache/queue locally    | Redis                                      |
 | Cloud queue later      | Azure Storage Queue or Service Bus         |
@@ -2503,7 +2543,14 @@ Only insert measured numbers once the benchmarks genuinely exist.
 | Code quality           | Ruff, MyPy, ESLint                         |
 | Security scan          | Trivy                                      |
 
-The stack above is the long-term target. For the core MVP, the minimum active stack is FastAPI, Next.js, PostgreSQL with pgvector, local object storage, native document extraction, one model adapter, Docker Compose, pytest, and Alembic. Airflow, LangGraph, MLflow, Redis, and managed Azure services are introduced at the phases defined in section 20.
+The stack above is the long-term target. OCR is not planned as an Azure service:
+Azure hosts the container image, while Tesseract and its language data run
+inside the API/worker container. For the core MVP, the active stack is
+FastAPI, Next.js, PostgreSQL with pgvector, workspace-backed raw storage,
+native extraction plus local Tesseract OCR, baked-in E5 embeddings, the
+configurable Hugging Face chat adapter, Docker Compose, pytest, and Alembic.
+Airflow, LangGraph, MLflow, Redis, and managed Azure services are introduced
+only at the phases defined in section 20.
 
 ---
 

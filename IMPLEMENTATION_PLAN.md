@@ -30,7 +30,7 @@ Deliver a working regulatory-intelligence vertical slice that can:
 - Make every processing step deterministic and rerunnable.
 - Keep raw documents and provenance immutable.
 - Use PostgreSQL and pgvector before adding another database.
-- Use native extraction before paid OCR.
+- Use native extraction before local Tesseract OCR; do not add a managed OCR dependency.
 - Use an LLM for interpretation and drafting, not as the source of truth.
 - Make citations first-class objects and validate them before responding.
 - Test each layer with fixtures before connecting the next layer.
@@ -370,9 +370,9 @@ Support text-readable PDF and HTML first. Preserve:
 
 ### Work package 4.2 — Quality scoring and OCR fallback
 
-Calculate extraction quality using character count, alphabetic ratio, broken-character ratio, empty-page ratio, and expected page count. Invoke Azure Document Intelligence only when the score is below a documented threshold.
+Calculate extraction quality using character count, alphabetic ratio, broken-character ratio, empty-page ratio, and expected page count. Try native PDF extraction first, then use local Tesseract OCR with Vietnamese and English language data only when extracted text is unusable. Keep OCR configurable for environments that cannot carry the language packages.
 
-**Acceptance criteria:** tests prove that good PDFs do not call the OCR adapter and scanned fixtures do.
+**Acceptance criteria:** tests prove that good PDFs do not call the OCR adapter, scanned fixtures use the local OCR adapter, OCR failures are retryable, and processing logs identify each document and extraction method.
 
 ### Work package 4.3 — Normalization
 
@@ -464,7 +464,7 @@ Define a provider-neutral interface for chat and structured output. The first pr
 
 Use `Qwen/Qwen3-4B-Instruct-2507:cheapest` as the configurable development default. This small multilingual Qwen instruct model is currently routable through Hugging Face; the `:cheapest` suffix selects the lowest-priced available provider for that model. Keep the model ID and routing policy in settings rather than hard-coding them. Availability and price can change, so never assume a specific underlying provider.
 
-The adapter must record the requested model, routing policy, resolved provider when returned, prompt version, input/output token counts, latency, request outcome, and estimated cost. It must enforce a low output-token cap, bounded evidence context, timeout, retry policy, and per-environment spend limit. On provider unavailability, budget exhaustion, or invalid structured output, return an evidence-only/unsupported response; do not silently fall back to a larger or more expensive model. This interface is separate from the local embedding adapter.
+The adapter must record the requested model, routing policy, resolved provider when returned, prompt version, input/output token counts, latency, request outcome, and estimated cost. It must enforce bounded evidence context, concise structured output, timeout, retry policy, and per-environment spend limit. Q&A currently sends the top three evidence passages and recovers a complete answer when a provider truncates its JSON; it preserves uncertainty and citations rather than inventing missing facts. On provider unavailability or unusable output, return an evidence-only response; do not silently fall back to a larger or more expensive model. This interface is separate from the local embedding adapter.
 
 ### Work package 6.2 — Intent and query planning
 
@@ -660,7 +660,7 @@ Every resource must have tags, outputs, and a destroy/cleanup procedure.
 
 ### Work package 10.2 — Container images
 
-Build reproducible API, worker, and frontend images only when the corresponding runtime exists. Use immutable Git SHA tags and a minimal base image.
+Build reproducible API, worker, and frontend images only when the corresponding runtime exists. The API/worker image must include Tesseract and the `vie`/`eng` language packages, while the embedding model remains baked into the API image. Use immutable Git SHA tags and a minimal base image. Cloud OCR is not required for operation.
 
 ### Work package 10.3 — Secrets and identity
 
@@ -833,8 +833,9 @@ The default local profile should contain only PostgreSQL/pgvector, API, frontend
 - cache embeddings by normalized-text hash and model name;
 - package the pinned embedding model into the image and monitor image size, memory, CPU, and cold starts;
 - cache safe metadata and summary results;
-- cap document context and output tokens;
-- use Hugging Face routed inference with `Qwen/Qwen3-4B-Instruct-2507:cheapest` for the first chat adapter; keep a small maximum output (initially 600 tokens) and a bounded context window;
+- cap document context and output tokens; Ask currently sends the top three
+  evidence passages and uses a configurable 1400-token ceiling;
+- use Hugging Face routed inference with `Qwen/Qwen3-4B-Instruct-2507:cheapest` for the first chat adapter; keep a bounded context window, concise prompt, and configurable output ceiling (currently 1400 tokens);
 - configure a monthly Hugging Face spending limit and track routed-provider usage in Hugging Face billing; do not use a custom provider key in the MVP;
 - use a small model for classification and a stronger model only where evaluation shows value;
 - log estimated cost per job and query.
@@ -893,13 +894,17 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
 - **M4 frontend foundation:** complete. `apps/web` is now a dedicated
   Next.js/TypeScript service with a production standalone build, API rewrite
   boundary, and initial search, Q&A, documents, and comparison views.
-- **M4 frontend hardening:** in progress. Deep document navigation, richer
-  citation interactions, frontend tests, and accessibility checks remain.
+- **M4 frontend hardening:** complete for the current local MVP scope. The
+  separated web service now includes bilingual EN/VI navigation, chat-style
+  Ask input, grouped search results, top-ten pagination, document detail
+  views, source/type filters, and clickable official citations. Automated
+  browser tests and formal accessibility checks remain later hardening work.
 - **M5:** complete for the current local MVP scope. The labeled retrieval
   dataset and evaluator now report unique document rankings; source-aware
   filters, source provenance, processing status, error codes, chunk counts,
-  and frontend source/type filters are implemented and tested. Corpus quality
-  remains a measured backlog: the current baseline is `Hit@5=0.25`,
+  and frontend source/type filters are implemented and tested. OCR fallback,
+  document processing logs, and resilient cited Q&A are also complete. Corpus
+  quality remains a measured backlog: the current baseline is `Hit@5=0.25`,
   `Recall@5=0.25`, and `MRR=0.25` because coverage is still sparse.
 
 ### Next major milestone — M6 deployment hardening
@@ -907,10 +912,16 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
 Prepare the separated API and web services for a low-cost hosted environment:
 secret configuration, authentication boundary, rate limits, health checks,
 managed PostgreSQL/pgvector, and reproducible Azure Container Apps deployment.
-Keep OCR and ranking optimization out of M6. Expand the official corpus as an
-independent data-quality backlog and re-run the evaluator after each import.
+M6 must verify that the deployed API image can run native extraction and
+Tesseract OCR without external OCR calls. Keep ranking optimization out of M6.
+Expand the official corpus as an independent data-quality backlog and re-run
+the evaluator after each import.
 
-After M5, begin deployment hardening and Azure planning.
+After M5, begin deployment hardening and Azure planning. Do not introduce
+managed OCR or managed embeddings: Tesseract is the permanent OCR fallback,
+and `multilingual-e5-small` remains packaged in the API image. The hosted
+design should preserve the same API/web separation and use managed
+PostgreSQL with pgvector plus object storage only when persistence requires it.
 
 ---
 
@@ -957,6 +968,16 @@ Reason: Obtain Vietnamese-capable instruction following without hosting a chat m
 Affected phase/module: Phase 6 model adapter, cited Q&A, comparison summaries, settings, secret management, and cost telemetry.
 Migration or compatibility impact: Add a provider-neutral chat interface. Keep the model ID, routing policy, output cap, and timeout configurable; no automatic fallback to a more expensive model.
 Cost impact: Pay-as-you-go routed inference. Hugging Face credits may cover experimentation, but budget limits and per-request telemetry are required before public use.
+```
+
+### 2026-08-05 — Local OCR and resilient Ask workflow
+
+```text
+Change: Use native extraction followed by local Tesseract OCR, and constrain Ask TaxLens to the top three evidence passages with truncated-answer recovery.
+Reason: Avoid recurring OCR charges, keep Vietnamese scanned-PDF processing self-contained, and prevent provider formatting limits from turning useful cited answers into unusable errors.
+Affected phase/module: Phase 4 document processing, Phase 6 cited Q&A, API container, and local development workflow.
+Migration or compatibility impact: OCR language packages are part of the API image; changing the chat model must preserve the provider-neutral adapter and answer contract.
+Cost impact: Larger API image and CPU time for OCR; lower OCR cost and bounded Hugging Face output/context usage.
 ```
 
 ### Current assumptions to revisit
@@ -1045,10 +1066,11 @@ article numbers, and page bounds. This validates infrastructure rather than
 legal-answer accuracy; a labeled retrieval set is still needed for Recall@K
 and MRR measurements.
 
-The first real corpus validation is complete with four Government Portal
-documents: 22 new chunks were processed and embedded, and browser-facing
-search returned official source URLs with article/page citations. The next
-corpus task is to add one or two explicitly selected Ministry of Finance PDFs;
+The first real corpus validation is complete with seven selected official
+documents: 85 chunks were processed and embedded, including scanned PDFs
+processed with local Tesseract OCR, and browser-facing search returned official
+source URLs with article/page citations. The next corpus task is to add one or
+two explicitly selected Ministry of Finance PDFs;
 automated MOF catalog discovery remains deferred because that portal renders
 its catalog dynamically.
 
