@@ -968,7 +968,7 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   recorded in local MLflow. A judge-model RAGAS run remains an optional future
   quality experiment, not a release blocker.
 
-### Next milestone — M5.5 LLMOps integration
+### Completed milestone — M5.5 LLMOps integration
 
 Add the LLMOps ecosystem signal without replacing the working retrieval core.
 This milestone is complete: the graph, adapter, deterministic metrics,
@@ -993,7 +993,7 @@ design should preserve the same API/web separation and use managed
 PostgreSQL with pgvector plus object storage only when persistence requires it.
 
 The Airflow implementation deliberately avoids mounting the Docker socket.
-The scheduler calls three authenticated, allowlisted API job endpoints, which
+The scheduler calls four authenticated, allowlisted API job endpoints, which
 keeps orchestration separate from the API while allowing the same workflow to
 move to Azure Container Apps Jobs or a managed scheduler during M6.
 

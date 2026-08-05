@@ -241,8 +241,8 @@ The `apps/` directory contains separate API and Next.js/TypeScript web
 services. The web service consumes API contracts only; it does not access the
 database directly. The local profile uses Docker Compose, PostgreSQL/pgvector,
 workspace-backed raw storage, native PDF extraction, local Tesseract OCR, and
-the provider-neutral Hugging Face chat adapter. Authentication, Airflow, and
-Azure deployment remain later milestones.
+the provider-neutral Hugging Face chat adapter. Airflow is now active through
+the local scheduled-ingestion profile; Azure deployment remains the next milestone.
 
 ```text
 Official Sources / Seed Corpus
@@ -1760,9 +1760,9 @@ monitoring, and infrastructure remain optional downstream additions. Airflow is
 a required M5.5 product component and is now implemented locally under the
 `airflow/` directory with a dedicated Compose profile. Its DAG calls the API's
 authenticated allowlisted internal job boundary rather than mounting the Docker
-socket. LangGraph, LangChain, MLflow, and RAGAS are the remaining LLMOps
-upgrade; MLflow and RAGAS remain optional at runtime outside scheduled
-evaluation jobs.
+socket. LangGraph, LangChain, deterministic RAGAS-style evaluation, and MLflow
+tracking are implemented locally; MLflow and judge-model RAGAS remain optional
+at runtime outside scheduled evaluation jobs.
 
 ---
 
@@ -2592,9 +2592,9 @@ Azure hosts the container image, while Tesseract and its language data run
 inside the API/worker container. For the core MVP, the active stack is
 FastAPI, Next.js, PostgreSQL with pgvector, workspace-backed raw storage,
 native extraction plus local Tesseract OCR, baked-in E5 embeddings, the
-configurable Hugging Face chat adapter, Docker Compose, pytest, and Alembic.
-Airflow, LangGraph, MLflow, Redis, and managed Azure services are introduced
-only at the phases defined in section 20.
+configurable Hugging Face chat adapter, LangGraph, LangChain, Airflow, MLflow
+evaluation hooks, Docker Compose, pytest, and Alembic. Redis, monitoring, and
+managed Azure services remain downstream M6/operations work.
 
 ---
 

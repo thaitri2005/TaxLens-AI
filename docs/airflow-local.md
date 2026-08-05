@@ -4,7 +4,7 @@ Airflow is the scheduled-ingestion component for TaxLens. The daily DAG calls
 the existing idempotent commands in order:
 
 ```text
-discover and ingest → process and OCR → embed pending chunks
+discover and ingest → process and OCR → embed pending chunks → evaluate retrieval
 ```
 
 The normal PostgreSQL/API/web profile remains unchanged. Start the scheduler
@@ -19,7 +19,7 @@ Compose defaults. Trigger `tax_regulation_discovery_daily` manually for a
 smoke test, then inspect task logs and retry behavior.
 
 Airflow has its own Python environment because Airflow and the API use
-different SQLAlchemy compatibility ranges. The DAG calls three allowlisted
+different SQLAlchemy compatibility ranges. The DAG calls four allowlisted
 internal API job endpoints over the Compose network using
 `X-TaxLens-Internal-Token`; the API executes the existing scripts in its own
 runtime, preserving Tesseract and the baked-in embedding model. No Docker
