@@ -21,6 +21,8 @@ dependencies = [
   "pytesseract>=0.3.13,<1.0",
   "sentence-transformers>=3.3,<4.0",
   "uvicorn[standard]>=0.32,<1.0",
+  "langchain-core>=1.0,<2.0",
+  "langgraph>=1.0,<2.0",
 ]
 
 [project.optional-dependencies]
@@ -29,6 +31,10 @@ dev = [
   "pytest>=8.3,<9.0",
   "pytest-cov>=6.0,<7.0",
   "ruff>=0.8,<1.0",
+]
+llmops = [
+  "mlflow>=3.0,<4.0",
+  "ragas>=0.2,<1.0",
 ]
 
 [tool.hatch.build.targets.wheel]

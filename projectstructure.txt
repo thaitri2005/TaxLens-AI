@@ -12,7 +12,7 @@ The project’s central idea remains:
 
 > TaxLens continuously collects Vietnamese tax regulations, structures and versions them, detects relevant changes, and helps tax professionals understand what changed, why it matters, and where the conclusion came from.
 
-This preserves the original vision of a hybrid structured–unstructured system using Blob Storage, PostgreSQL, pgvector, Airflow, FastAPI, a self-hosted multilingual embedding model, Hugging Face routed inference for later generative workflows, authentication, monitoring, evaluation, and automated deployment. The practical path is to introduce these in phases rather than operate all of them in the first local environment.
+This preserves the original vision of a hybrid structured–unstructured system using Blob Storage, PostgreSQL, pgvector, Airflow, FastAPI, a self-hosted multilingual embedding model, Hugging Face routed inference, LangGraph, LangChain adapters, MLflow, RAGAS-style evaluation, authentication, monitoring, and automated deployment. The practical path is to introduce these in phases rather than operate all of them in the first local environment.
 
 ---
 
@@ -227,7 +227,11 @@ Possible notification channels:
 
 # 4. High-Level System Architecture
 
-The diagram below is the target architecture. For the first vertical slice, run ingestion and processing as repeatable CLI/worker commands and keep the same module boundaries. Add Airflow after there are multiple scheduled workflows that need retries, backfills, and operational visibility.
+The diagram below is the target architecture. For the first vertical slice,
+run ingestion and processing as repeatable CLI/worker commands and keep the
+same module boundaries. Airflow becomes a required scheduler before cloud
+deployment because daily source checks, retries, and backfills are core product
+behavior.
 
 ### Current implementation checkpoint
 
@@ -861,9 +865,11 @@ The system should infer:
 
 Then it searches only the relevant legal subset.
 
-## 6.10 LangGraph Agent
+## 6.10 LangGraph Workflow
 
-Do not create an unrestricted “autonomous legal agent.”
+Do not create an unrestricted “autonomous legal agent.” The pre-M6 upgrade
+uses LangGraph as a controlled orchestration layer around the existing domain
+functions.
 
 Use a controlled workflow graph.
 
@@ -924,6 +930,11 @@ The graph provides CV value because it demonstrates:
 * Deterministic control
 * Error handling
 * Observability
+
+LangChain is used only at the model and prompt integration boundary for
+provider adapters, structured output, and callbacks. It does not own the
+PostgreSQL/pgvector retrieval implementation. LlamaIndex is intentionally not
+added because it overlaps with the existing retrieval and citation modules.
 
 ## 6.11 Notification Service
 
@@ -1441,7 +1452,12 @@ The interface should allow:
 
 # 10. Airflow DAG Structure
 
-Airflow is the target scheduler for continuous ingestion, weekly digests, and evaluation. It is not required to make the first search/Q&A demo work. Start with the same task functions behind CLI commands; then place those functions in DAGs once the processing path is stable and idempotent.
+Airflow is the required scheduler for daily discovery, continuous ingestion,
+weekly digests, and evaluation. It is not required to make the first
+search/Q&A demo work, but it is required before the product is considered
+cloud-ready. Start with the same task functions behind CLI commands, then
+place those functions in DAGs once the processing path is stable and
+idempotent.
 
 ## 10.1 Daily discovery DAG
 
@@ -1494,7 +1510,7 @@ assess_text_quality
   ↓
 branch_ocr_required
   ├── no → normalize_text
-  └── yes → document_intelligence_ocr → normalize_text
+  └── yes → tesseract_ocr → normalize_text
   ↓
 extract_metadata
   ↓
@@ -1582,15 +1598,17 @@ taxlens-ai/
 ├── src/taxlens/
 │   ├── api/routes/              # FastAPI HTTP contracts
 │   ├── document_processing/     # native extraction + Tesseract fallback
-│   ├── evaluation/              # retrieval metrics
+│   ├── evaluation/              # retrieval + RAGAS-style metrics + MLflow hook
 │   ├── ingestion/               # seed and official-source connectors
-│   ├── intelligence/            # planning, evidence, HF chat, Q&A, compare
+│   ├── intelligence/            # LangGraph Q&A, LangChain adapter, evidence, compare
 │   ├── legal_data/              # SQLAlchemy models
 │   ├── retrieval/               # FTS, pgvector, fusion, citations
 │   ├── storage/                 # local raw-artifact storage
 │   └── config.py
 ├── migrations/
 ├── scripts/                     # bounded ingestion, processing, embedding, evaluation
+├── airflow/                     # required daily discovery/process/embed/evaluate DAG
+├── docs/llmops-local.md         # LangGraph, MLflow, and evaluation workflow
 ├── tests/
 ├── docker-compose.yml
 └── pyproject.toml
@@ -1738,8 +1756,13 @@ taxlens-ai/
 ```
 
 The target structure is intentionally broader than the current MVP. `apps/worker`,
-Airflow, monitoring, infrastructure, and LangGraph modules remain optional
-downstream additions and should not block the core MVP.
+monitoring, and infrastructure remain optional downstream additions. Airflow is
+a required M5.5 product component and is now implemented locally under the
+`airflow/` directory with a dedicated Compose profile. Its DAG calls the API's
+authenticated allowlisted internal job boundary rather than mounting the Docker
+socket. LangGraph, LangChain, MLflow, and RAGAS are the remaining LLMOps
+upgrade; MLflow and RAGAS remain optional at runtime outside scheduled
+evaluation jobs.
 
 ---
 
@@ -1757,16 +1780,22 @@ api
 frontend
 ```
 
-### Optional `platform` profile
+### Scheduled ingestion profile
 
-Add these only when their related phase is being developed:
+Start these when running the daily ingestion workflow locally:
+
+```text
+airflow-postgres      # Airflow metadata database
+airflow-init
+airflow-webserver
+airflow-scheduler
+```
+
+Other platform services remain downstream additions:
 
 ```text
 redis                 # queue/cache phase
 worker                # asynchronous processing phase
-airflow-webserver     # scheduled-ingestion phase
-airflow-scheduler
-airflow-triggerer
 prometheus            # operations phase
 grafana
 mlflow                # evaluation-experiment phase
@@ -1793,7 +1822,10 @@ MLflow:       http://localhost:5000
 MailHog:      http://localhost:8025
 ```
 
-This keeps the core demo runnable with one command while retaining a full local platform profile for the later CV demonstration.
+This keeps the core demo runnable with one command. The scheduled ingestion
+profile is a deliberate second command because it starts an additional
+database and scheduler, but it is part of the product workflow rather than a
+future placeholder. See `docs/airflow-local.md` for the exact commands.
 
 ---
 
@@ -1942,7 +1974,8 @@ Daily token cost exceeds budget
 
 # 15. MLflow and LLMOps
 
-MLflow should not be added merely as decoration.
+MLflow is included as a self-hosted, optional experiment-tracking service
+before cloud deployment. It must not become a runtime dependency of the API.
 
 Use it to compare retrieval and generation configurations.
 
@@ -2294,6 +2327,11 @@ Build:
 * Reranking
 * Citation construction
 
+RAGAS-style evaluation adds context precision, context recall, answer
+relevancy, and faithfulness to the existing retrieval metrics. Judge-model
+calls run only from an explicit evaluation command, never from normal user
+requests.
+
 Deliverable:
 
 A search endpoint returning correctly ranked source passages.
@@ -2302,7 +2340,7 @@ A search endpoint returning correctly ranked source passages.
 
 Build:
 
-* A tested workflow state; introduce LangGraph when branching workflows justify it
+* A tested LangGraph workflow state
 * Intent router
 * Retrieval node
 * Sufficiency check
@@ -2352,7 +2390,10 @@ Build:
 * Evaluation dataset
 * Baseline retrieval experiment
 * RAG evaluation runner
-* Metric/report artifacts first; add MLflow logging when experiments need central tracking
+* Metric/report artifacts with MLflow experiment tracking
+* LangChain adapter integration for prompts, structured output, and callbacks
+* RAGAS-style context precision, context recall, answer relevancy, and faithfulness
+* Required Airflow DAGs around the existing idempotent ingestion and evaluation commands
 * Nightly evaluation
 * Regression alert
 
@@ -2520,6 +2561,7 @@ Only insert measured numbers once the benchmarks genuinely exist.
 | Backend                | FastAPI, Python, Pydantic                  |
 | Workflow orchestration | Apache Airflow                             |
 | LLM workflow           | LangGraph                                  |
+| LLM integration        | LangChain adapter at the provider boundary |
 | Relational database    | Azure Database for PostgreSQL              |
 | Vector retrieval       | pgvector                                   |
 | Keyword retrieval      | PostgreSQL full-text search                |
@@ -2527,6 +2569,8 @@ Only insert measured numbers once the benchmarks genuinely exist.
 | OCR                    | Native extraction, then local Tesseract (`vie+eng`) in API/worker images |
 | Generative LLM         | Hugging Face Inference Providers behind a provider adapter |
 | Embeddings             | Self-hosted `intfloat/multilingual-e5-small` in FastAPI image |
+| Experiment tracking    | MLflow (optional self-hosted service)     |
+| RAG evaluation         | RAGAS-style evaluation runner              |
 | Cache/queue locally    | Redis                                      |
 | Cloud queue later      | Azure Storage Queue or Service Bus         |
 | Secrets                | Azure Key Vault                            |

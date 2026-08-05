@@ -23,7 +23,25 @@ ruff check .
 mypy src
 ```
 
-The initial Compose profile runs PostgreSQL/pgvector and the API only. Workers, Airflow, MLflow, and monitoring are added in later phases.
+The default Compose profile runs PostgreSQL/pgvector, the API, and the web
+service. Airflow is a required scheduled-ingestion component and runs through
+the separate `airflow` profile. MLflow and RAGAS remain evaluation-only
+services, while monitoring and additional workers are later operational
+additions. Airflow calls authenticated allowlisted API jobs and does not need
+access to the Docker socket.
+
+The optional `llmops` profile starts MLflow on `http://localhost:5000`; it is
+only needed when recording evaluation experiments.
+
+## Run scheduled ingestion locally
+
+```powershell
+docker compose --profile airflow up -d airflow-postgres airflow-init airflow-scheduler airflow-webserver
+```
+
+Open `http://localhost:8080` and sign in with the Airflow credentials from
+`.env`. The DAG is `tax_regulation_discovery_daily`; it discovers sources,
+processes pending documents, and embeds pending chunks in that order.
 
 ## Seed, process, and search the sample corpus
 

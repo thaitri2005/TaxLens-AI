@@ -347,9 +347,12 @@ python scripts/process_corpus.py --pending
 
 Persist status transitions and errors. A failed document must be retryable without restarting the entire corpus.
 
-### Work package 3.5 — Airflow adapter, later in this phase
+### Work package 3.5 — Airflow adapter
 
-Only after the command path is stable, wrap discovery and processing functions in the DAGs described in `projectstructure.txt`. DAG tasks should call package functions rather than contain business logic.
+After the command path is stable, wrap discovery and processing functions in
+the DAGs described in `projectstructure.txt`. DAG tasks should call package
+functions rather than contain business logic. This is required for the daily
+regulatory-update product workflow and is delivered in M5.5.
 
 ---
 
@@ -513,9 +516,11 @@ Validate that each factual claim is linked to retrieved evidence before returnin
 
 Implement deterministic structural diff first. Classify added, removed, modified, and unchanged articles. Use the LLM only to summarize the diff and explain practical impact, with citations to both versions.
 
-### Work package 6.6 — Optional LangGraph integration
+### Work package 6.6 — LangGraph compatibility boundary
 
-Introduce LangGraph only after the ordinary service workflow passes tests. Nodes should wrap existing functions; no node should bypass evidence or citation validation.
+The existing service workflow remains callable without LangGraph. M5.5 adds
+the LangGraph workflow in the LLMOps phase; nodes must wrap existing functions
+and no node may bypass evidence or citation validation.
 
 ---
 
@@ -600,9 +605,53 @@ Compare:
 
 Store configuration snapshots and fail CI or scheduled evaluation when a protected metric regresses beyond a documented tolerance.
 
-### Work package 8.5 — MLflow, later
+### Work package 8.5 — MLflow experiment tracking
 
-Log experiments to MLflow when multiple retrieval or prompt experiments need central comparison. Do not make MLflow a dependency of the core application.
+Add MLflow as an optional local LLMOps service before M6. Log model and
+retrieval configuration, prompt version, dataset version, latency, token
+usage, cost estimate, Recall@K, MRR, citation coverage, faithfulness, and
+answer relevance. The application must remain usable when MLflow is stopped;
+experiment logging is best-effort and must not block user requests.
+
+### Work package 8.6 — LangGraph workflow
+
+Wrap the existing deterministic Q&A functions in a small controlled
+LangGraph workflow:
+
+```text
+question → intent/query plan → hybrid retrieval → evidence gate
+         → answer generation → citation validation → response
+```
+
+Keep retrieval, evidence assessment, and citation construction in the existing
+domain modules. LangGraph owns orchestration and state transitions only. Add a
+traceable state schema, node-level tests, unsupported-question routing, and a
+provider-error path.
+
+### Work package 8.7 — LangChain provider adapter
+
+Add LangChain only at the integration boundary. Use its prompt/template,
+chat-model, structured-output, and callback interfaces where they reduce
+provider-specific code. Keep the existing provider-neutral `ChatProvider`
+contract and Hugging Face configuration as the application boundary; do not
+rewrite retrieval or legal-domain logic around LangChain abstractions.
+
+### Work package 8.8 — RAGAS evaluation
+
+Add an offline evaluation command that runs the reviewed question set through
+the Q&A workflow and records RAGAS-style context precision, context recall,
+answer relevancy, and faithfulness alongside the existing deterministic
+retrieval metrics. Use human review as the source of truth for legal
+correctness. Keep judge-model calls bounded, configurable, and excluded from
+normal API traffic.
+
+### Work package 8.9 — Airflow orchestration
+
+Add the required Airflow profile and DAGs that call the existing idempotent
+scripts for daily discovery, processing, embedding, and evaluation. Airflow
+must not duplicate domain logic. Acceptance requires one successful local DAG
+run, retry visibility, backfill behavior, and a documented path to schedule
+the same DAGs in Azure later.
 
 ---
 
@@ -825,7 +874,10 @@ Every release must pass formatting, type checks, unit tests, integration tests, 
 
 ### Local development
 
-The default local profile should contain only PostgreSQL/pgvector, API, frontend, and required local storage. Redis, Airflow, MLflow, monitoring, and mail services belong to optional profiles.
+The base local profile should contain PostgreSQL/pgvector, API, frontend, and
+required local storage. Once M5.5 is implemented, the standard product profile
+must also start Airflow for daily ingestion. MLflow and RAGAS remain evaluation
+profiles; Redis, mail, and monitoring remain optional operational additions.
 
 ### Model usage
 
@@ -878,12 +930,13 @@ These estimates assume one developer working part-time to full-time and a prepar
 | M3 | self-hosted embeddings, hybrid retrieval, and citations | end of week 4 |
 | M4 | Q&A, comparison, API, UI | end of week 6 |
 | M5 | evaluation and hardening | end of week 7 |
-| M6 | low-cost Azure deployment | end of week 8 |
+| M5.5 | LLMOps ecosystem integration and workflow orchestration | before cloud deployment |
+| M6 | low-cost Azure deployment | after M5.5 |
 | M7 | one post-MVP differentiator | after core release |
 
 Do not treat dates as promises. Treat the acceptance criteria as the schedule authority.
 
-### Current milestone status — 2026-08-04
+### Current milestone status — 2026-08-05
 
 - **M0–M2:** complete for the local vertical slice, including schema, seed
   ingestion, two official-source connectors, PDF processing, and idempotency.
@@ -907,21 +960,43 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   quality remains a measured backlog: the current baseline is `Hit@5=0.25`,
   `Recall@5=0.25`, and `MRR=0.25` because coverage is still sparse.
 
-### Next major milestone — M6 deployment hardening
+- **M5.5:** in progress before cloud deployment. The required Airflow local
+  profile and daily discovery/process/embed/evaluation DAG are implemented.
+  The Q&A path now runs through a LangGraph state graph and the configured
+  provider is wrapped by a LangChain runnable adapter. The remaining work is
+  connecting optional MLflow experiment runs and expanding the reviewed QA
+  dataset; deterministic RAGAS-style metrics and the evaluation script are
+  implemented.
 
-Prepare the separated API and web services for a low-cost hosted environment:
-secret configuration, authentication boundary, rate limits, health checks,
-managed PostgreSQL/pgvector, and reproducible Azure Container Apps deployment.
-M6 must verify that the deployed API image can run native extraction and
-Tesseract OCR without external OCR calls. Keep ranking optimization out of M6.
-Expand the official corpus as an independent data-quality backlog and re-run
-the evaluator after each import.
+### Next milestone — M5.5 LLMOps integration
+
+Add the LLMOps ecosystem signal without replacing the working retrieval core.
+The graph, adapter, deterministic metrics, evaluation script, and scheduled
+retrieval evaluation are implemented. The remaining acceptance work is to
+install the optional `llmops` extra, start the MLflow profile, run an end-to-end
+experiment, and expand the reviewed QA dataset. Keep MLflow and RAGAS
+evaluation services optional outside evaluation runs, but Airflow is a
+required product component.
+
+### Following milestone — M6 deployment hardening
+
+After M5.5, prepare the separated API, web, and Airflow services for a
+low-cost hosted environment: secret configuration, authentication boundary,
+rate limits, health checks, managed PostgreSQL/pgvector, and reproducible
+Azure Container Apps deployment. M6 must verify that the deployed API image
+can run native extraction and Tesseract OCR without external OCR calls, and
+that the Airflow scheduler executes the daily ingestion DAG.
 
 After M5, begin deployment hardening and Azure planning. Do not introduce
 managed OCR or managed embeddings: Tesseract is the permanent OCR fallback,
 and `multilingual-e5-small` remains packaged in the API image. The hosted
 design should preserve the same API/web separation and use managed
 PostgreSQL with pgvector plus object storage only when persistence requires it.
+
+The Airflow implementation deliberately avoids mounting the Docker socket.
+The scheduler calls three authenticated, allowlisted API job endpoints, which
+keeps orchestration separate from the API while allowing the same workflow to
+move to Azure Container Apps Jobs or a managed scheduler during M6.
 
 ---
 
@@ -978,6 +1053,26 @@ Reason: Avoid recurring OCR charges, keep Vietnamese scanned-PDF processing self
 Affected phase/module: Phase 4 document processing, Phase 6 cited Q&A, API container, and local development workflow.
 Migration or compatibility impact: OCR language packages are part of the API image; changing the chat model must preserve the provider-neutral adapter and answer contract.
 Cost impact: Larger API image and CPU time for OCR; lower OCR cost and bounded Hugging Face output/context usage.
+```
+
+### 2026-08-05 — LLMOps ecosystem upgrade before cloud deployment
+
+```text
+Change: Add a pre-M6 M5.5 milestone for LangGraph orchestration, LangChain provider-boundary adapters, MLflow tracking, RAGAS-style evaluation, and required Airflow ingestion DAGs.
+Reason: Demonstrate practical LLMOps and workflow-orchestration experience while retaining the existing custom PostgreSQL/pgvector retrieval core and low operating cost.
+Affected phase/module: Phase 6 intelligence workflows, Phase 8 evaluation/LLMOps, optional scheduler profile, and downstream cloud deployment.
+Migration or compatibility impact: Existing retrieval, evidence, citations, and provider-neutral interfaces remain the domain boundary; new tools wrap them rather than replacing them.
+Cost impact: Open-source dependencies and self-hosted services add development and container complexity but no mandatory per-request platform fees; judge-model and MLflow services are disabled in normal user traffic. Airflow is required because daily source checks are core product behavior.
+```
+
+### 2026-08-05 — M5.5 implementation slice
+
+```text
+Change: Route Q&A through LangGraph, wrap chat inference with a LangChain runnable adapter, add deterministic RAGAS-style metrics, add an optional MLflow profile, and extend the daily Airflow DAG with retrieval evaluation.
+Reason: Make the LLMOps workflow observable and repeatable without replacing the custom retrieval and evidence contracts.
+Affected phase/module: Phase 6 Q&A, Phase 8 evaluation, Airflow scheduled ingestion, and local Compose profiles.
+Migration or compatibility impact: Existing API response contracts and provider configuration remain unchanged; MLflow/RAGAS dependencies are evaluation-only.
+Cost impact: No additional normal request cost; evaluation uses local deterministic metrics unless the optional MLflow profile is explicitly started.
 ```
 
 ### Current assumptions to revisit

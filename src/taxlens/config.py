@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     hf_chat_timeout_seconds: float = 30.0
     hf_chat_max_output_tokens: int = 1400
     hf_chat_temperature: float = 0.1
+    mlflow_enabled: bool = False
+    mlflow_tracking_uri: str = "http://mlflow:5000"
+    mlflow_experiment_name: str = "taxlens-qa"
+    airflow_internal_token: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

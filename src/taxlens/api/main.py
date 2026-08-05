@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Request, Response, status
 
 from taxlens.api.routes.comparisons import router as comparisons_router
 from taxlens.api.routes.documents import router as documents_router
+from taxlens.api.routes.internal_jobs import router as internal_jobs_router
 from taxlens.api.routes.questions import router as questions_router
 from taxlens.api.routes.search import router as search_router
 from taxlens.config import get_settings
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
     app.include_router(comparisons_router)
     app.include_router(questions_router)
     app.include_router(search_router)
+    app.include_router(internal_jobs_router)
 
     @app.middleware("http")
     async def request_id_middleware(

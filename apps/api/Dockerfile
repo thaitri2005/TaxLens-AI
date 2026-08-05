@@ -14,6 +14,7 @@ RUN apt-get update \
 COPY pyproject.toml ./
 COPY docs/local-development.md ./docs/local-development.md
 COPY src ./src
+COPY scripts ./scripts
 RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.5.1+cpu
 RUN pip install --no-cache-dir ".[dev]"
 

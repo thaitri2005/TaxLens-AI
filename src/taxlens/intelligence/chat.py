@@ -42,6 +42,21 @@ class ChatProvider(Protocol):
     def complete(self, request: ChatRequest) -> ChatResponse: ...
 
 
+class LangChainChatAdapter:
+    """Expose the provider-neutral chat contract through LangChain runnables."""
+
+    def __init__(self, provider: ChatProvider) -> None:
+        from langchain_core.runnables import RunnableLambda
+
+        self._chain = RunnableLambda(lambda request: provider.complete(request))
+
+    def complete(self, request: ChatRequest) -> ChatResponse:
+        response = self._chain.invoke(request)
+        if not isinstance(response, ChatResponse):
+            raise ChatProviderError("LangChain returned an invalid chat response")
+        return response
+
+
 class HuggingFaceChatProvider:
     def __init__(self, settings: Settings, client: httpx.Client | None = None) -> None:
         self._token = settings.hf_token
@@ -130,7 +145,7 @@ class HuggingFaceChatProvider:
 
 
 def get_chat_provider() -> ChatProvider:
-    return HuggingFaceChatProvider(get_settings())
+    return LangChainChatAdapter(HuggingFaceChatProvider(get_settings()))
 
 
 def _routed_model(model: str, routing_policy: str) -> str:

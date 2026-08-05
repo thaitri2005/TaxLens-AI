@@ -4,7 +4,12 @@ import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
+from functools import lru_cache
+from typing import Any, TypedDict
 
+from langchain_core.prompts import PromptTemplate
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 from sqlalchemy.orm import Session
 
 from taxlens.intelligence.chat import ChatMessage, ChatProvider, ChatProviderError, ChatRequest
@@ -61,79 +66,163 @@ def answer_question(
     embedding_provider: EmbeddingProvider | None = None,
     retrieval_limit: int = 5,
 ) -> QuestionAnswer:
-    query_plan = plan_query(question)
+    graph = _build_question_graph()
+    state = graph.invoke(
+        {
+            "session": session,
+            "question": question,
+            "chat_provider": chat_provider,
+            "embedding_provider": embedding_provider,
+            "retrieval_limit": retrieval_limit,
+        }
+    )
+    result = state.get("result")
+    if not isinstance(result, QuestionAnswer):
+        raise RuntimeError("Question graph did not produce a QuestionAnswer")
+    return result
+
+
+class QuestionGraphState(TypedDict, total=False):
+    session: Session
+    question: str
+    chat_provider: ChatProvider
+    embedding_provider: EmbeddingProvider | None
+    retrieval_limit: int
+    query_plan: QueryPlan
+    results: list[SearchResult]
+    evidence: EvidenceAssessment
+    citations: list[Citation]
+    result: QuestionAnswer
+
+
+@lru_cache(maxsize=1)
+def _build_question_graph() -> CompiledStateGraph[Any, Any, Any, Any]:
+    graph = StateGraph(QuestionGraphState)
+    graph.add_node("plan_query", _plan_query_node)
+    graph.add_node("retrieve_evidence", _retrieve_evidence_node)
+    graph.add_node("assess_evidence", _assess_evidence_node)
+    graph.add_node("generate_answer", _generate_answer_node)
+    graph.add_node("finalize_insufficient", _finalize_insufficient_node)
+    graph.add_edge(START, "plan_query")
+    graph.add_edge("plan_query", "retrieve_evidence")
+    graph.add_conditional_edges(
+        "retrieve_evidence",
+        _route_supported_query,
+        {"assess": "assess_evidence", "unsupported": "finalize_insufficient"},
+    )
+    graph.add_conditional_edges(
+        "assess_evidence",
+        _route_evidence,
+        {"generate": "generate_answer", "insufficient": "finalize_insufficient"},
+    )
+    graph.add_edge("generate_answer", END)
+    graph.add_edge("finalize_insufficient", END)
+    return graph.compile()
+
+
+def _plan_query_node(state: QuestionGraphState) -> dict[str, object]:
+    return {"query_plan": plan_query(state["question"])}
+
+
+def _retrieve_evidence_node(state: QuestionGraphState) -> dict[str, object]:
+    query_plan = state["query_plan"]
     if query_plan.intent is QueryIntent.UNSUPPORTED:
-        return _safe_answer(
+        return {"results": []}
+    results = hybrid_search_chunks(
+        state["session"],
+        query_plan.original_query,
+        state.get("embedding_provider"),
+        query_plan.filters,
+        limit=state.get("retrieval_limit", 5),
+    )
+    return {"results": results}
+
+
+def _assess_evidence_node(state: QuestionGraphState) -> dict[str, object]:
+    results = state.get("results", [])
+    return {
+        "evidence": assess_evidence(results),
+        "citations": [build_citation(result) for result in results],
+    }
+
+
+def _route_supported_query(state: QuestionGraphState) -> str:
+    return "unsupported" if state["query_plan"].intent is QueryIntent.UNSUPPORTED else "assess"
+
+
+def _route_evidence(state: QuestionGraphState) -> str:
+    return "generate" if state["evidence"].is_sufficient else "insufficient"
+
+
+def _finalize_insufficient_node(state: QuestionGraphState) -> dict[str, object]:
+    query_plan = state["query_plan"]
+    evidence = state.get("evidence")
+    citations = state.get("citations", [])
+    if query_plan.intent is QueryIntent.UNSUPPORTED:
+        result = _safe_answer(
             AnswerStatus.UNSUPPORTED,
             query_plan,
             None,
             "The request is outside the supported regulatory-question scope.",
-            [],
+            citations,
         )
-
-    results = hybrid_search_chunks(
-        session,
-        query_plan.original_query,
-        embedding_provider,
-        query_plan.filters,
-        limit=retrieval_limit,
-    )
-    evidence = assess_evidence(results)
-    citations = [build_citation(result) for result in results]
-    if not evidence.is_sufficient:
-        return _safe_answer(
+    else:
+        result = _safe_answer(
             AnswerStatus.INSUFFICIENT_EVIDENCE,
             query_plan,
             evidence,
-            evidence.reason,
+            evidence.reason if evidence else "No relevant evidence was retrieved.",
             citations,
         )
+    return {"result": result}
 
+
+def _generate_answer_node(state: QuestionGraphState) -> dict[str, object]:
+    query_plan = state["query_plan"]
+    evidence = state["evidence"]
+    results = state.get("results", [])
+    citations = state.get("citations", [])
     try:
-        completion = chat_provider.complete(
+        completion = state["chat_provider"].complete(
             ChatRequest(messages=_build_messages(query_plan, results, citations))
         )
     except ChatProviderError:
-        return _safe_answer(
+        result = _safe_answer(
             AnswerStatus.PROVIDER_UNAVAILABLE,
             query_plan,
             evidence,
             "The configured language model is unavailable; review the cited evidence directly.",
             citations,
         )
+        return {"result": result}
 
     try:
         generated = parse_generated_answer(completion.content, len(citations))
     except ValueError as error:
         recovered_answer = _recover_answer_text(completion.content)
         if recovered_answer:
-            return _recovered_answer(
-                query_plan,
-                evidence,
-                results,
-                citations,
-                recovered_answer,
+            result = _recovered_answer(
+                query_plan, evidence, results, citations, recovered_answer
             )
-        logger.warning("Unable to parse model answer: %s", error)
-        return _evidence_fallback_answer(
-            query_plan,
-            evidence,
-            results,
-            citations,
-        )
+        else:
+            logger.warning("Unable to parse model answer: %s", error)
+            result = _evidence_fallback_answer(query_plan, evidence, results, citations)
+        return {"result": result}
 
-    return QuestionAnswer(
-        status=AnswerStatus.ANSWERED,
-        query_plan=query_plan,
-        evidence=evidence,
-        answer=generated.answer,
-        confirmed_facts=generated.confirmed_facts,
-        interpretation=generated.interpretation,
-        uncertainties=generated.uncertainties,
-        citations=citations,
-        review_actions=generated.review_actions,
-        disclaimer=_disclaimer(),
-    )
+    return {
+        "result": QuestionAnswer(
+            status=AnswerStatus.ANSWERED,
+            query_plan=query_plan,
+            evidence=evidence,
+            answer=generated.answer,
+            confirmed_facts=generated.confirmed_facts,
+            interpretation=generated.interpretation,
+            uncertainties=generated.uncertainties,
+            citations=citations,
+            review_actions=generated.review_actions,
+            disclaimer=_disclaimer(),
+        )
+    }
 
 
 def parse_generated_answer(content: str, citation_count: int) -> GeneratedAnswer:
@@ -184,9 +273,12 @@ def _build_messages(
         "of strings), and review_actions (array of strings). Every confirmed fact needs one or "
         "more valid citation numbers."
     )
-    user_prompt = (
-        f"Intent: {query_plan.intent}\nQuestion: {query_plan.original_query}\n\n"
-        f"Evidence:\n{evidence_blocks}"
+    user_prompt = PromptTemplate.from_template(
+        "Intent: {intent}\nQuestion: {question}\n\nEvidence:\n{evidence}"
+    ).format(
+        intent=query_plan.intent,
+        question=query_plan.original_query,
+        evidence=evidence_blocks,
     )
     return [
         ChatMessage(role="system", content=system_prompt),
