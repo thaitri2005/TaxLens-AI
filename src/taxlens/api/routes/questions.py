@@ -54,6 +54,7 @@ def ask_question(
         request.question,
         get_chat_provider(),
         embedding_provider,
+        retrieval_limit=3,
     )
     return _to_response(result)
 

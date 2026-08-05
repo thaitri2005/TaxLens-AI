@@ -1,4 +1,6 @@
 import json
+import logging
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
@@ -11,6 +13,8 @@ from taxlens.intelligence.planning import QueryIntent, QueryPlan, plan_query
 from taxlens.retrieval.citations import Citation, build_citation
 from taxlens.retrieval.embeddings import EmbeddingProvider
 from taxlens.retrieval.search import SearchResult, hybrid_search_chunks
+
+logger = logging.getLogger(__name__)
 
 
 class AnswerStatus(StrEnum):
@@ -100,12 +104,21 @@ def answer_question(
 
     try:
         generated = parse_generated_answer(completion.content, len(citations))
-    except ValueError:
-        return _safe_answer(
-            AnswerStatus.INVALID_MODEL_OUTPUT,
+    except ValueError as error:
+        recovered_answer = _recover_answer_text(completion.content)
+        if recovered_answer:
+            return _recovered_answer(
+                query_plan,
+                evidence,
+                results,
+                citations,
+                recovered_answer,
+            )
+        logger.warning("Unable to parse model answer: %s", error)
+        return _evidence_fallback_answer(
             query_plan,
             evidence,
-            "The model response did not meet the required evidence-linked format.",
+            results,
             citations,
         )
 
@@ -124,7 +137,7 @@ def answer_question(
 
 
 def parse_generated_answer(content: str, citation_count: int) -> GeneratedAnswer:
-    content = _unwrap_json_content(content)
+    content = _extract_json_content(content)
     try:
         payload = json.loads(content)
     except json.JSONDecodeError as error:
@@ -164,7 +177,9 @@ def _build_messages(
     system_prompt = (
         "You are a Vietnamese tax-regulation research assistant. Use only the provided evidence. "
         "Do not invent legal facts, give definitive professional advice, or cite sources outside "
-        "the list. Return valid JSON only with: answer (string), confirmed_facts (array of objects "
+        "the list. Keep answer under 80 words. Return exactly 3 confirmed facts when evidence "
+        "supports them; keep each fact under 25 words. Do not repeat the answer in the facts. "
+        "Return valid JSON only with: answer (string), confirmed_facts (array of objects "
         "with text and citation_numbers), interpretation (string or null), uncertainties (array "
         "of strings), and review_actions (array of strings). Every confirmed fact needs one or "
         "more valid citation numbers."
@@ -198,6 +213,86 @@ def _safe_answer(
         review_actions=["Review the cited source material or refine the question and filters."],
         disclaimer=_disclaimer(),
     )
+
+
+def _evidence_fallback_answer(
+    query_plan: QueryPlan,
+    evidence: EvidenceAssessment,
+    results: Sequence[SearchResult],
+    citations: list[Citation],
+) -> QuestionAnswer:
+    claims = [
+        CitedClaim(
+            text=(result.chunk.heading or result.chunk.content).strip(),
+            citation_numbers=(index,),
+        )
+        for index, result in enumerate(results, start=1)
+        if (result.chunk.heading or result.chunk.content).strip()
+    ]
+    return QuestionAnswer(
+        status=AnswerStatus.ANSWERED,
+        query_plan=query_plan,
+        evidence=evidence,
+        answer=(
+            "The retrieved evidence contains relevant provisions for this question. "
+            "Review the cited articles below; the language model response could not be "
+            "formatted reliably."
+        ),
+        confirmed_facts=claims,
+        interpretation=None,
+        uncertainties=[
+            "The response is an evidence summary because the language model output was not usable."
+        ],
+        citations=citations,
+        review_actions=["Review the cited source material for the complete rule and context."],
+        disclaimer=_disclaimer(),
+    )
+
+
+def _recovered_answer(
+    query_plan: QueryPlan,
+    evidence: EvidenceAssessment,
+    results: Sequence[SearchResult],
+    citations: list[Citation],
+    answer: str,
+) -> QuestionAnswer:
+    claims = _evidence_claims(results)
+    return QuestionAnswer(
+        status=AnswerStatus.ANSWERED,
+        query_plan=query_plan,
+        evidence=evidence,
+        answer=answer,
+        confirmed_facts=claims,
+        interpretation=None,
+        uncertainties=[
+            "The model response was truncated before all structured citations could be validated."
+        ],
+        citations=citations,
+        review_actions=["Review the cited source material for the complete rule and context."],
+        disclaimer=_disclaimer(),
+    )
+
+
+def _evidence_claims(results: Sequence[SearchResult]) -> list[CitedClaim]:
+    return [
+        CitedClaim(
+            text=(result.chunk.heading or result.chunk.content).strip(),
+            citation_numbers=(index,),
+        )
+        for index, result in enumerate(results, start=1)
+        if (result.chunk.heading or result.chunk.content).strip()
+    ]
+
+
+def _recover_answer_text(content: str) -> str | None:
+    match = re.search(r'"answer"\s*:\s*"((?:\\.|[^"\\])*)', content)
+    if not match:
+        return None
+    try:
+        value = json.loads(f'"{match.group(1)}"')
+    except json.JSONDecodeError:
+        return None
+    return value.strip() if isinstance(value, str) and value.strip() else None
 
 
 def _required_text(payload: dict[object, object], name: str) -> str:
@@ -263,11 +358,42 @@ def _normalize_citation_numbers(value: object, citation_count: int) -> list[int]
     return normalized
 
 
-def _unwrap_json_content(content: str) -> str:
+def _extract_json_content(content: str) -> str:
     normalized = content.strip()
-    if normalized.startswith("```") and normalized.endswith("```"):
+    if not normalized:
+        return normalized
+
+    without_reasoning = normalized
+    while "<think>" in without_reasoning.lower():
+        start = without_reasoning.lower().find("<think>")
+        end = without_reasoning.lower().find("</think>", start + len("<think>"))
+        if end < 0:
+            without_reasoning = without_reasoning[:start]
+            break
+        without_reasoning = without_reasoning[:start] + without_reasoning[end + len("</think>") :]
+    normalized = without_reasoning.strip()
+
+    if normalized.startswith("```"):
         lines = normalized.splitlines()
-        return "\n".join(lines[1:-1]).strip()
+        if len(lines) >= 3 and lines[-1].strip().startswith("```"):
+            normalized = "\n".join(lines[1:-1]).strip()
+
+    try:
+        json.loads(normalized)
+        return normalized
+    except json.JSONDecodeError:
+        pass
+
+    decoder = json.JSONDecoder()
+    for index, character in enumerate(normalized):
+        if character != "{":
+            continue
+        try:
+            payload, end = decoder.raw_decode(normalized[index:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, dict):
+            return normalized[index : index + end]
     return normalized
 
 
