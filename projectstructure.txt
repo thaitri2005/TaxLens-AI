@@ -454,7 +454,12 @@ The implementation must:
 * load the model once per container process, not once per request;
 * download model files during Docker image build, not at Container Apps startup.
 
-This removes per-vector API charges and external embedding network calls. Tradeoffs are a larger container image, CPU/memory use, and slower scale-from-zero cold starts. Start with one warm Container Apps replica for demos or accept the cold-start delay; split the embedding workload into a worker only if measured API latency requires it.
+This removes per-vector API charges and external embedding network calls. The
+API image keeps dependencies and the baked model in cache-stable layers so
+source edits do not reinstall the expensive stack. Start with the model in the
+API image for the first cloud slice; split it into a dedicated embedding worker
+only if measured API cold starts, memory use, or ingestion throughput justify
+the additional service.
 
 ## 5.6 Azure Key Vault
 
@@ -1606,7 +1611,10 @@ taxlens-ai/
 │   ├── storage/                 # local or Azure Blob artifact storage
 │   └── config.py
 ├── migrations/
+├── requirements/
+│   └── api-runtime.txt          # cache-stable production dependency layer
 ├── scripts/                     # bounded ingestion, processing, embedding, evaluation
+│   └── repair_document_metadata.py
 ├── airflow/                     # required daily discovery/process/embed/evaluate DAG
 ├── docs/llmops-local.md         # LangGraph, MLflow, and evaluation workflow
 ├── docs/deployment.md           # M6 Azure topology and deployment contract

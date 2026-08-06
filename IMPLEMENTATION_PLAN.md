@@ -967,13 +967,14 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   been evaluated using the baked embedding model; and the finished run is
   recorded in local MLflow. A judge-model RAGAS run remains an optional future
   quality experiment, not a release blocker.
-- **M6:** in progress. Azure foundation, PostgreSQL Flexible Server with
-  pgvector, Key Vault, managed identity, scoped RBAC, and secret resources are
-  provisioned and verified. The provider-neutral object-storage boundary maps
-  raw and normalized artifacts to the Terraform-created Blob containers, and
-  production dependency selection is explicit. Container Apps deployment,
-  Key Vault secret injection, API/web cloud smoke tests, and the later Airflow
-  deployment decision remain outstanding.
+- **M6:** cloud application slice complete. Azure foundation, PostgreSQL
+  Flexible Server with pgvector, Key Vault, managed identity, scoped RBAC,
+  cached production dependencies, private API/public web Container Apps, cloud
+  migrations, Blob-backed official documents, Tesseract processing, pgvector
+  embeddings, hybrid search, and grounded Q&A have been verified. The API
+  remains scale-to-zero in development. Remaining work is metadata/source
+  quality hardening, monitoring, network tightening, and scheduled Airflow
+  deployment.
 
 ### Completed milestone — M5.5 LLMOps integration
 
@@ -1006,6 +1007,13 @@ managed OCR or managed embeddings: Tesseract is the permanent OCR fallback,
 and `multilingual-e5-small` remains packaged in the API image. The hosted
 design should preserve the same API/web separation and use managed
 PostgreSQL with pgvector plus object storage only when persistence requires it.
+
+The API image now separates the cached runtime dependency layer from source
+code, migrations, and scripts so normal code changes do not reinstall PyTorch
+or redownload the embedding model. The initial cloud slice still keeps the
+small E5 model in the API image to minimize moving parts. After cloud bootstrap
+is validated, evaluate a separate embedding worker/service if API cold starts,
+memory pressure, or ingestion throughput justify the extra Container App.
 
 The Airflow implementation deliberately avoids mounting the Docker socket.
 The scheduler calls four authenticated, allowlisted API job endpoints, which

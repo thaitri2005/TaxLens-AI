@@ -49,10 +49,13 @@ The API image always contains Tesseract with `eng` and `vie` language data, the
 pinned `multilingual-e5-small` model, and the FastAPI application with bounded
 job scripts.
 
-Build a production dependency set without development tools:
+The API Dockerfile installs the cached runtime dependency manifest from
+`requirements/api-runtime.txt` before copying application source. This keeps
+source edits from reinstalling PyTorch, Azure SDKs, or the embedding stack.
+Build the production image with:
 
 ```powershell
-docker build -f apps/api/Dockerfile --build-arg PIP_EXTRAS=cloud -t taxlens-api:cloud .
+docker build -f apps/api/Dockerfile -t taxlens-api:cloud .
 ```
 
 The local Compose build keeps `PIP_EXTRAS=dev` by default.
@@ -64,7 +67,7 @@ both images before applying the Phase 4 Terraform plan:
 
 ```powershell
 az acr login --name taxlensdevacr
-docker build -f apps/api/Dockerfile --build-arg PIP_EXTRAS=cloud -t taxlensdevacr.azurecr.io/taxlens-api:phase4 .
+docker build -f apps/api/Dockerfile -t taxlensdevacr.azurecr.io/taxlens-api:phase4 .
 docker push taxlensdevacr.azurecr.io/taxlens-api:phase4
 docker build -f apps/web/Dockerfile --build-arg API_ORIGIN=http://taxlens-dev-api -t taxlensdevacr.azurecr.io/taxlens-web:phase4 .
 docker push taxlensdevacr.azurecr.io/taxlens-web:phase4
@@ -85,6 +88,17 @@ Run these as explicit release steps, not in the API web process:
 3. Run `/health` and `/ready` smoke checks.
 4. Verify Blob round-trip, search, and Q&A citations.
 5. Add and verify the scheduled ingestion deployment in the later Airflow phase.
+
+## Cloud corpus bootstrap
+
+Use the API image as a one-off worker for migrations, ingestion, processing, and
+embedding. For long OCR jobs, run the worker locally with Azure PostgreSQL and
+Blob credentials rather than holding an ACA exec websocket open. The workflow
+is idempotent and stores all durable output in Azure.
+
+After the first official import, run `scripts/repair_document_metadata.py`
+against the curated manifest so document titles, issuing agencies, issue dates,
+and official portal links are not lost when a source requires a direct PDF URL.
 
 ## Required production settings
 

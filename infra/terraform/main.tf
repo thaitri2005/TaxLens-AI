@@ -206,8 +206,9 @@ resource "azurerm_container_app" "api" {
   }
 
   template {
-    min_replicas = 0
-    max_replicas = 1
+    revision_suffix = "phase4apifix4"
+    min_replicas    = 0
+    max_replicas    = 1
 
     container {
       name   = "api"
@@ -262,6 +263,10 @@ resource "azurerm_container_app" "api" {
       env {
         name        = "DATABASE_PASSWORD"
         secret_name = "postgres-admin-password"
+      }
+      env {
+        name  = "AZURE_CLIENT_ID"
+        value = azurerm_user_assigned_identity.app.client_id
       }
 
       liveness_probe {
