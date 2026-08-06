@@ -38,6 +38,11 @@ identity. The raw and normalized prefixes map to the Terraform-created
 `raw-documents` and `normalized-text` containers. Raw PDFs and normalized text
 must not remain on the API container filesystem.
 
+The development PostgreSQL server uses Azure's `0.0.0.0` firewall sentinel so
+Azure-hosted Container Apps can reach it without creating one firewall rule per
+rotating ACA egress IP. This is a development compromise; production should
+use private networking or a controlled network boundary.
+
 ## Image contract
 
 The API image always contains Tesseract with `eng` and `vie` language data, the
@@ -51,6 +56,25 @@ docker build -f apps/api/Dockerfile --build-arg PIP_EXTRAS=cloud -t taxlens-api:
 ```
 
 The local Compose build keeps `PIP_EXTRAS=dev` by default.
+
+## Phase 4 image preparation
+
+Container Apps pulls immutable image tags from the Basic ACR. Build and push
+both images before applying the Phase 4 Terraform plan:
+
+```powershell
+az acr login --name taxlensdevacr
+docker build -f apps/api/Dockerfile --build-arg PIP_EXTRAS=cloud -t taxlensdevacr.azurecr.io/taxlens-api:phase4 .
+docker push taxlensdevacr.azurecr.io/taxlens-api:phase4
+docker build -f apps/web/Dockerfile --build-arg API_ORIGIN=http://taxlens-dev-api -t taxlensdevacr.azurecr.io/taxlens-web:phase4 .
+docker push taxlensdevacr.azurecr.io/taxlens-web:phase4
+```
+
+The web image keeps `http://api:8000` as its local default and uses the
+Container Apps internal API name on ingress port 80 in the cloud image. The
+API app is internal-only, so insecure HTTP is limited to the private
+Container Apps environment; public traffic still reaches the web app over
+HTTPS.
 
 ## Required deployment jobs
 

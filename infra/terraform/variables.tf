@@ -48,3 +48,15 @@ variable "key_vault_name" {
   description = "Globally unique Azure Key Vault name."
   default     = "taxlensdevkv"
 }
+
+variable "api_image" {
+  type        = string
+  description = "API image in Azure Container Registry. Build and push it before applying Phase 4."
+  default     = "taxlensdevacr.azurecr.io/taxlens-api:phase4"
+}
+
+variable "web_image" {
+  type        = string
+  description = "Web image in Azure Container Registry. Build and push it before applying Phase 4."
+  default     = "taxlensdevacr.azurecr.io/taxlens-web:phase4"
+}

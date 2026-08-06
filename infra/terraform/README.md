@@ -40,6 +40,21 @@ through the ignored `terraform.tfvars` file and becomes a Key Vault secret.
 Terraform state contains sensitive secret resource values and must be stored
 privately when remote state is introduced.
 
+Before applying Phase 4, push the image tags configured by `api_image` and
+`web_image` to the Basic ACR. The web image must be built with the API's
+private Container Apps FQDN, not the container app name. Retrieve it with:
+
+```powershell
+$apiOrigin = "http://taxlens-dev-api"
+Set-Location ../..
+docker build -f apps/web/Dockerfile --build-arg API_ORIGIN=$apiOrigin -t taxlensdevacr.azurecr.io/taxlens-web:phase4 .
+docker push taxlensdevacr.azurecr.io/taxlens-web:phase4
+```
+
+The URL uses HTTP over the private Container Apps service network. Container
+Apps forwards that request to the API container's port 8000, and the API
+remains unreachable from the public internet.
+
 ## Phase 2 database inputs
 
 Phase 2 adds a small PostgreSQL Flexible Server (`B_Standard_B1ms`) with the

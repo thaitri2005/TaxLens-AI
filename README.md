@@ -1,4 +1,4 @@
-﻿# TaxLens AI
+# TaxLens AI
 
 TaxLens is a Vietnamese tax-regulatory intelligence workspace. It discovers official documents, extracts and indexes their contents, supports hybrid keyword/semantic retrieval, and returns evidence-grounded answers with links to the official source.
 
@@ -81,6 +81,13 @@ Host-side `--keyword-only` mode is only a smoke test and is not comparable to pr
 
 - M0–M5: local ingestion, OCR, hybrid retrieval, citations, API, frontend, evaluation, and hardening complete.
 - M5.5: LangGraph, LangChain adapter, Airflow scheduling, MLflow tracking, and semantic QA evaluation complete.
-- M6: Azure deployment hardening is next: managed PostgreSQL/pgvector, container deployment, secrets, authentication, rate limits, storage, and production smoke tests.
+- M6: Azure foundation, PostgreSQL/pgvector, Key Vault, managed identity, and RBAC are complete. Container Apps deployment, cloud secret injection, authentication, rate limits, and production smoke tests remain.
+
+## Azure deployment
+
+Phase 4 deploys the separated API and web services to Azure Container Apps.
+Build and push the images to the Terraform-managed ACR before applying the
+Phase 4 plan. See `docs/deployment.md` for the exact commands and cloud
+configuration contract.
 
 See `IMPLEMENTATION_PLAN.md`, `projectstructure.txt`, and `docs/` for the authoritative implementation blueprint and local operating instructions.
