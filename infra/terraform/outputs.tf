@@ -10,10 +10,22 @@ output "storage_account_name" {
   value = azurerm_storage_account.artifacts.name
 }
 
-output "storage_container_name" {
+output "raw_storage_container_name" {
   value = azurerm_storage_container.artifacts.name
+}
+
+output "normalized_storage_container_name" {
+  value = azurerm_storage_container.normalized.name
 }
 
 output "container_registry_login_server" {
   value = azurerm_container_registry.this.login_server
+}
+
+output "postgres_server_fqdn" {
+  value = azurerm_postgresql_flexible_server.this.fqdn
+}
+
+output "postgres_database_name" {
+  value = azurerm_postgresql_flexible_server_database.taxlens.name
 }

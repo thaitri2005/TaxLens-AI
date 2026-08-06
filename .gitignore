@@ -14,3 +14,9 @@ data/models/
 artifacts/
 .docker-build*.log
 .embedding*.log
+*.tfvars
+infra/terraform/*.tfvars
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform/

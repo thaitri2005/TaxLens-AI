@@ -5,7 +5,7 @@ development environment. It creates only shared platform resources:
 
 - resource group;
 - Log Analytics workspace;
-- private Blob Storage container for raw and normalized artifacts;
+- private Blob Storage containers for raw and normalized artifacts;
 - Basic Azure Container Registry.
 
 PostgreSQL Flexible Server, Container Apps, Key Vault, managed identities, and
@@ -32,3 +32,18 @@ terraform plan -var="subscription_id=<subscription-id>"
 
 Do not run `terraform apply` until the region, naming prefix, budget, and
 PostgreSQL/Airflow deployment design have been explicitly confirmed.
+
+## Phase 2 database inputs
+
+Phase 2 adds a small PostgreSQL Flexible Server (`B_Standard_B1ms`) with the
+`vector` extension enabled. Supply the administrator password and, optionally,
+your current public IPv4 address without committing them:
+
+```powershell
+$env:TF_VAR_postgres_admin_password = "<local-only-password>"
+$env:TF_VAR_postgres_allowed_ip = "<your-public-ip>"
+```
+
+Leaving `TF_VAR_postgres_allowed_ip` empty creates no firewall rule. The
+development server is intentionally public-network enabled for this first
+increment; production networking and secret management are later phases.

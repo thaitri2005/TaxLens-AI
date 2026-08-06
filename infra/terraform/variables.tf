@@ -6,7 +6,7 @@ variable "subscription_id" {
 variable "location" {
   type        = string
   description = "Azure region for the development environment."
-  default     = "southeastasia"
+  default     = "eastasia"
 }
 
 variable "name_prefix" {
@@ -23,4 +23,16 @@ variable "tags" {
     environment = "dev"
     managed_by  = "terraform"
   }
+}
+
+variable "postgres_admin_password" {
+  type        = string
+  description = "Administrator password for PostgreSQL Flexible Server. Supply via TF_VAR_postgres_admin_password; never commit it."
+  sensitive   = true
+}
+
+variable "postgres_allowed_ip" {
+  type        = string
+  description = "Optional public IPv4 address allowed to connect to PostgreSQL. Leave empty to create no firewall rule."
+  default     = ""
 }
