@@ -967,12 +967,13 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   been evaluated using the baked embedding model; and the finished run is
   recorded in local MLflow. A judge-model RAGAS run remains an optional future
   quality experiment, not a release blocker.
-- **M6:** in progress. The provider-neutral object-storage boundary now
-  supports local files and Azure Blob configuration, production dependency
-  selection is explicit, and a non-applied Terraform foundation exists for
-  resource group, Log Analytics, Blob Storage, and ACR. PostgreSQL Flexible
-  Server, Container Apps, Key Vault, managed identity, and cloud smoke tests
-  remain outstanding.
+- **M6:** in progress. Azure foundation, PostgreSQL Flexible Server with
+  pgvector, Key Vault, managed identity, scoped RBAC, and secret resources are
+  provisioned and verified. The provider-neutral object-storage boundary maps
+  raw and normalized artifacts to the Terraform-created Blob containers, and
+  production dependency selection is explicit. Container Apps deployment,
+  Key Vault secret injection, API/web cloud smoke tests, and the later Airflow
+  deployment decision remain outstanding.
 
 ### Completed milestone — M5.5 LLMOps integration
 
@@ -992,11 +993,13 @@ Azure Container Apps deployment. M6 must verify that the deployed API image
 can run native extraction and Tesseract OCR without external OCR calls, and
 that the Airflow scheduler executes the daily ingestion DAG.
 
-M6 begins with the storage and deployment contract: `ObjectStorage` now selects
+M6 began with the storage and deployment contract: `ObjectStorage` selects
 local files or Azure Blob through configuration, while production images use a
-separate cloud dependency set. The remaining M6 implementation is Terraform,
-durable service configuration, authentication/rate limiting, migration jobs,
-and cloud smoke tests.
+separate cloud dependency set. Phase 1 foundation, Phase 2 database, and
+Phase 3 identity/secrets are complete. The remaining implementation is
+Container Apps, durable service configuration, authentication/rate limiting,
+migration jobs, and cloud smoke tests; Airflow remains a later deployment
+phase after the core services are operational.
 
 After M5, begin deployment hardening and Azure planning. Do not introduce
 managed OCR or managed embeddings: Tesseract is the permanent OCR fallback,

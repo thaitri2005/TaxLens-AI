@@ -1610,7 +1610,7 @@ taxlens-ai/
 ├── airflow/                     # required daily discovery/process/embed/evaluate DAG
 ├── docs/llmops-local.md         # LangGraph, MLflow, and evaluation workflow
 ├── docs/deployment.md           # M6 Azure topology and deployment contract
-├── infra/terraform/              # non-applied M6 Azure foundation
+├── infra/terraform/              # applied M6 Azure foundation and state config
 ├── tests/
 ├── docker-compose.yml
 └── pyproject.toml

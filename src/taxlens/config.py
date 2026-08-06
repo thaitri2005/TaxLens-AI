@@ -18,7 +18,9 @@ class Settings(BaseSettings):
     object_storage_backend: str = "local"
     azure_storage_connection_string: str | None = None
     azure_storage_account_url: str | None = None
-    azure_storage_container: str = "taxlens-artifacts"
+    azure_storage_container: str = "raw-documents"
+    azure_storage_normalized_container: str = "normalized-text"
+    database_ssl_mode: str | None = None
     embedding_model_id: str = "intfloat/multilingual-e5-small"
     embedding_model_revision: str = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
     embedding_model_path: str = "./data/models/multilingual-e5-small"
@@ -45,11 +47,14 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        return (
+        url = (
             "postgresql+psycopg://"
             f"{self.database_user}:{self.database_password}@"
             f"{self.database_host}:{self.database_port}/{self.database_name}"
         )
+        if self.database_ssl_mode:
+            url += f"?sslmode={self.database_ssl_mode}"
+        return url
 
 
 @lru_cache

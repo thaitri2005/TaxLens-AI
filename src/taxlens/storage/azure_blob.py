@@ -30,12 +30,15 @@ class AzureBlobStorage:
             raise RuntimeError(
                 "AZURE_STORAGE_CONNECTION_STRING or AZURE_STORAGE_ACCOUNT_URL is required"
             )
-        self._container = self._client.get_container_client(settings.azure_storage_container)
+        self._raw_container = self._client.get_container_client(settings.azure_storage_container)
+        self._normalized_container = self._client.get_container_client(
+            settings.azure_storage_normalized_container
+        )
 
     def put_bytes(
         self, key: str, content: bytes, content_type: str | None = None
     ) -> ObjectMetadata:
-        blob = self._container.get_blob_client(key)
+        blob = self._container_for_key(key).get_blob_client(self._blob_name(key))
         headers: dict[str, str] = {}
         if content_type:
             headers["content_type"] = content_type
@@ -43,11 +46,14 @@ class AzureBlobStorage:
         return ObjectMetadata(key=key, content_type=content_type, size=len(content))
 
     def get_bytes(self, key: str) -> bytes:
-        return cast(bytes, self._container.get_blob_client(key).download_blob().readall())
+        return cast(
+            bytes,
+            self._container_for_key(key).get_blob_client(self._blob_name(key)).download_blob().readall(),
+        )
 
     def exists(self, key: str) -> bool:
         try:
-            self._container.get_blob_client(key).get_blob_properties()
+            self._container_for_key(key).get_blob_client(self._blob_name(key)).get_blob_properties()
         except Exception as error:
             if _is_not_found(error):
                 return False
@@ -55,15 +61,30 @@ class AzureBlobStorage:
         return True
 
     def delete(self, key: str) -> None:
-        self._container.get_blob_client(key).delete_blob(delete_snapshots="include")
+        self._container_for_key(key).get_blob_client(self._blob_name(key)).delete_blob(
+            delete_snapshots="include"
+        )
 
     def get_metadata(self, key: str) -> ObjectMetadata:
-        properties = self._container.get_blob_client(key).get_blob_properties()
+        properties = self._container_for_key(key).get_blob_client(
+            self._blob_name(key)
+        ).get_blob_properties()
         return ObjectMetadata(
             key=key,
             content_type=properties.content_settings.content_type,
             size=properties.size,
         )
+
+    def _container_for_key(self, key: str) -> Any:
+        if key.startswith("normalized-text/"):
+            return self._normalized_container
+        return self._raw_container
+
+    @staticmethod
+    def _blob_name(key: str) -> str:
+        if key.startswith("normalized-text/"):
+            return key.removeprefix("normalized-text/")
+        return key.removeprefix("raw-documents/")
 
 
 def _content_settings(headers: dict[str, str]) -> Any:
