@@ -54,6 +54,7 @@ resource "azurerm_postgresql_flexible_server" "this" {
   administrator_login           = "taxlensadmin"
   administrator_password        = var.postgres_admin_password
   sku_name                      = "B_Standard_B1ms"
+  zone                          = "1"
   storage_mb                    = 32768
   backup_retention_days         = 7
   geo_redundant_backup_enabled  = false
@@ -80,4 +81,64 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "developer" {
   server_id        = azurerm_postgresql_flexible_server.this.id
   start_ip_address = var.postgres_allowed_ip
   end_ip_address   = var.postgres_allowed_ip
+}
+
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_user_assigned_identity" "app" {
+  name                = "${var.name_prefix}-app-identity"
+  resource_group_name = azurerm_resource_group.this.name
+  location            = azurerm_resource_group.this.location
+  tags                = var.tags
+}
+
+resource "azurerm_key_vault" "this" {
+  name                          = var.key_vault_name
+  location                      = azurerm_resource_group.this.location
+  resource_group_name           = azurerm_resource_group.this.name
+  tenant_id                     = data.azurerm_client_config.current.tenant_id
+  sku_name                      = "standard"
+  soft_delete_retention_days    = 7
+  purge_protection_enabled      = false
+  rbac_authorization_enabled    = true
+  public_network_access_enabled = true
+  tags                          = var.tags
+}
+
+resource "azurerm_role_assignment" "app_key_vault_secrets" {
+  scope                = azurerm_key_vault.this.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.app.principal_id
+}
+
+resource "azurerm_role_assignment" "terraform_key_vault_secrets" {
+  scope                = azurerm_key_vault.this.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+resource "azurerm_role_assignment" "app_blob_contributor" {
+  scope                = azurerm_storage_account.artifacts.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.app.principal_id
+}
+
+resource "azurerm_role_assignment" "app_acr_pull" {
+  scope                = azurerm_container_registry.this.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.app.principal_id
+}
+
+resource "azurerm_key_vault_secret" "postgres_admin_password" {
+  name         = "postgres-admin-password"
+  value        = var.postgres_admin_password
+  key_vault_id = azurerm_key_vault.this.id
+  depends_on   = [azurerm_role_assignment.terraform_key_vault_secrets]
+}
+
+resource "azurerm_key_vault_secret" "hf_token" {
+  name         = "hf-token"
+  value        = var.hf_token
+  key_vault_id = azurerm_key_vault.this.id
+  depends_on   = [azurerm_role_assignment.terraform_key_vault_secrets]
 }

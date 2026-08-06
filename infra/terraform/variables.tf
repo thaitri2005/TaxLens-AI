@@ -36,3 +36,15 @@ variable "postgres_allowed_ip" {
   description = "Optional public IPv4 address allowed to connect to PostgreSQL. Leave empty to create no firewall rule."
   default     = ""
 }
+
+variable "hf_token" {
+  type        = string
+  description = "Hugging Face API token for production inference. Supply locally and never commit it."
+  sensitive   = true
+}
+
+variable "key_vault_name" {
+  type        = string
+  description = "Globally unique Azure Key Vault name."
+  default     = "taxlensdevkv"
+}

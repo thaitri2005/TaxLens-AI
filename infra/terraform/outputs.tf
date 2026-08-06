@@ -29,3 +29,11 @@ output "postgres_server_fqdn" {
 output "postgres_database_name" {
   value = azurerm_postgresql_flexible_server_database.taxlens.name
 }
+
+output "key_vault_name" {
+  value = azurerm_key_vault.this.name
+}
+
+output "app_identity_client_id" {
+  value = azurerm_user_assigned_identity.app.client_id
+}

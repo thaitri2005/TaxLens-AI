@@ -8,10 +8,9 @@ development environment. It creates only shared platform resources:
 - private Blob Storage containers for raw and normalized artifacts;
 - Basic Azure Container Registry.
 
-PostgreSQL Flexible Server, Container Apps, Key Vault, managed identities, and
-Airflow service resources are intentionally separate follow-up modules. They
-require the final networking, secret, image, and cost decisions rather than
-being provisioned accidentally by the first plan.
+Container Apps and Airflow service resources remain separate follow-up phases.
+They require the final networking, image, and cost decisions rather than being
+provisioned accidentally by an earlier plan.
 
 ## Prerequisites
 
@@ -32,6 +31,10 @@ terraform plan -var="subscription_id=<subscription-id>"
 
 Do not run `terraform apply` until the region, naming prefix, budget, and
 PostgreSQL/Airflow deployment design have been explicitly confirmed.
+
+Phase 3 adds Key Vault, a user-assigned application identity, and RBAC for
+secrets, Blob Storage, and ACR pull access. The Hugging Face token is supplied
+through the ignored `terraform.tfvars` file and becomes a Key Vault secret.
 
 ## Phase 2 database inputs
 
