@@ -17,7 +17,7 @@ from taxlens.legal_data.models import (
     DocumentVersion,
     ProcessingJob,
 )
-from taxlens.storage.local import LocalObjectStorage
+from taxlens.storage.base import ObjectStorage
 
 ARTICLE_PATTERN = re.compile(r"(?mi)^(?:article|điều)\s+(\d+)\.\s*(.*)$")
 
@@ -33,7 +33,7 @@ class ProcessResult:
 
 def process_document_version(
     session: Session,
-    storage: LocalObjectStorage,
+    storage: ObjectStorage,
     version: DocumentVersion,
 ) -> ProcessResult:
     existing_chunks = session.scalars(

@@ -2,7 +2,6 @@ import argparse
 import hashlib
 from datetime import date
 
-from taxlens.config import get_settings
 from taxlens.db import SessionLocal
 from taxlens.ingestion.connectors import (
     ConnectorError,
@@ -10,7 +9,7 @@ from taxlens.ingestion.connectors import (
     create_official_connector,
 )
 from taxlens.ingestion.seed import ingest_source_document
-from taxlens.storage.local import LocalObjectStorage
+from taxlens.storage.factory import get_object_storage
 
 
 def main() -> None:
@@ -67,7 +66,7 @@ def main() -> None:
         print(f"Discovered {len(documents)} document(s); nothing downloaded")
         return
 
-    storage = LocalObjectStorage(get_settings().local_storage_path)
+    storage = get_object_storage()
     results = []
     with SessionLocal() as session:
         for document in documents:

@@ -16,7 +16,8 @@ COPY docs/local-development.md ./docs/local-development.md
 COPY src ./src
 COPY scripts ./scripts
 RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.5.1+cpu
-RUN pip install --no-cache-dir ".[dev]"
+ARG PIP_EXTRAS=dev
+RUN pip install --no-cache-dir ".[$PIP_EXTRAS]"
 
 ARG EMBEDDING_MODEL_ID=intfloat/multilingual-e5-small
 ARG EMBEDDING_MODEL_REVISION=614241f622f53c4eeff9890bdc4f31cfecc418b3

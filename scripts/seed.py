@@ -1,10 +1,9 @@
 import argparse
 from pathlib import Path
 
-from taxlens.config import get_settings
 from taxlens.db import SessionLocal
 from taxlens.ingestion.seed import ingest_seed_document, load_seed_manifest
-from taxlens.storage.local import LocalObjectStorage
+from taxlens.storage.factory import get_object_storage
 
 
 def main() -> None:
@@ -18,7 +17,7 @@ def main() -> None:
     arguments = parser.parse_args()
 
     documents = load_seed_manifest(arguments.manifest)
-    storage = LocalObjectStorage(get_settings().local_storage_path)
+    storage = get_object_storage()
     results = []
     with SessionLocal() as session:
         for document in documents:

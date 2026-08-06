@@ -967,6 +967,12 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
   been evaluated using the baked embedding model; and the finished run is
   recorded in local MLflow. A judge-model RAGAS run remains an optional future
   quality experiment, not a release blocker.
+- **M6:** in progress. The provider-neutral object-storage boundary now
+  supports local files and Azure Blob configuration, production dependency
+  selection is explicit, and a non-applied Terraform foundation exists for
+  resource group, Log Analytics, Blob Storage, and ACR. PostgreSQL Flexible
+  Server, Container Apps, Key Vault, managed identity, and cloud smoke tests
+  remain outstanding.
 
 ### Completed milestone — M5.5 LLMOps integration
 
@@ -985,6 +991,12 @@ rate limits, health checks, managed PostgreSQL/pgvector, and reproducible
 Azure Container Apps deployment. M6 must verify that the deployed API image
 can run native extraction and Tesseract OCR without external OCR calls, and
 that the Airflow scheduler executes the daily ingestion DAG.
+
+M6 begins with the storage and deployment contract: `ObjectStorage` now selects
+local files or Azure Blob through configuration, while production images use a
+separate cloud dependency set. The remaining M6 implementation is Terraform,
+durable service configuration, authentication/rate limiting, migration jobs,
+and cloud smoke tests.
 
 After M5, begin deployment hardening and Azure planning. Do not introduce
 managed OCR or managed embeddings: Tesseract is the permanent OCR fallback,
@@ -1072,6 +1084,16 @@ Reason: Make the LLMOps workflow observable and repeatable without replacing the
 Affected phase/module: Phase 6 Q&A, Phase 8 evaluation, Airflow scheduled ingestion, and local Compose profiles.
 Migration or compatibility impact: Existing API response contracts and provider configuration remain unchanged; MLflow/RAGAS dependencies are evaluation-only.
 Cost impact: No additional normal request cost; evaluation uses local deterministic metrics unless the optional MLflow profile is explicitly started.
+```
+
+### 2026-08-06 — M6 deployment foundation
+
+```text
+Change: Add a provider-neutral object-storage contract with local and Azure Blob implementations, a cloud dependency extra, production image dependency selection, deployment documentation, and a non-applied Terraform foundation.
+Reason: Remove the local filesystem assumption before moving the API and ingestion services to Azure.
+Affected phase/module: Phase 10 Azure deployment, artifact storage, API/ingestion scripts, and infrastructure documentation.
+Migration or compatibility impact: Local Compose remains the default; production selects OBJECT_STORAGE_BACKEND=azure_blob and supplies Azure storage credentials through managed identity or Key Vault.
+Cost impact: No cloud resources are created by this change. The Terraform foundation defaults to low-cost LRS storage, Basic ACR, and 30-day Log Analytics retention.
 ```
 
 ### Current assumptions to revisit

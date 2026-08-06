@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from taxlens.ingestion.connectors import SourceDocument
 from taxlens.legal_data.models import DocumentVersion, LegalDocument, ProcessingJob, SourceRecord
-from taxlens.storage.local import LocalObjectStorage
+from taxlens.storage.base import ObjectStorage
 
 IngestionStatus = Literal["NEW_DOCUMENT", "UNCHANGED"]
 
@@ -41,7 +41,7 @@ class IngestionResult:
 
 
 def ingest_seed_document(
-    session: Session, storage: LocalObjectStorage, document: SeedDocument
+    session: Session, storage: ObjectStorage, document: SeedDocument
 ) -> IngestionResult:
     raw_content_hash = hashlib.sha256(document.content).hexdigest()
     existing_version = session.scalar(
@@ -118,7 +118,7 @@ def ingest_seed_document(
 
 def ingest_source_document(
     session: Session,
-    storage: LocalObjectStorage,
+    storage: ObjectStorage,
     document: SourceDocument,
     content: bytes,
 ) -> IngestionResult:

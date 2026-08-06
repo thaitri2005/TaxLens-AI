@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     database_user: str = "taxlens"
     database_password: str = "taxlens"
     local_storage_path: str = "./data/local"
+    object_storage_backend: str = "local"
+    azure_storage_connection_string: str | None = None
+    azure_storage_account_url: str | None = None
+    azure_storage_container: str = "taxlens-artifacts"
     embedding_model_id: str = "intfloat/multilingual-e5-small"
     embedding_model_revision: str = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
     embedding_model_path: str = "./data/models/multilingual-e5-small"

@@ -28,6 +28,10 @@ services:
       DATABASE_USER: taxlens
       DATABASE_PASSWORD: taxlens
       LOCAL_STORAGE_PATH: /workspace/data/local
+      OBJECT_STORAGE_BACKEND: ${OBJECT_STORAGE_BACKEND:-local}
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING:-}
+      AZURE_STORAGE_ACCOUNT_URL: ${AZURE_STORAGE_ACCOUNT_URL:-}
+      AZURE_STORAGE_CONTAINER: ${AZURE_STORAGE_CONTAINER:-taxlens-artifacts}
       EMBEDDING_MODEL_PATH: /opt/taxlens-models/multilingual-e5-small
       AIRFLOW_INTERNAL_TOKEN: ${AIRFLOW_INTERNAL_TOKEN:-taxlens-local-internal-token}
     ports:

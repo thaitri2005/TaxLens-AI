@@ -3,11 +3,10 @@ import time
 
 from sqlalchemy import select
 
-from taxlens.config import get_settings
 from taxlens.db import SessionLocal
 from taxlens.document_processing.process import process_document_version
 from taxlens.legal_data.models import DocumentVersion, LegalDocument
-from taxlens.storage.local import LocalObjectStorage
+from taxlens.storage.factory import get_object_storage
 
 
 def main() -> None:
@@ -15,7 +14,7 @@ def main() -> None:
     parser.add_argument("--all", action="store_true", help="Reprocess every document version")
     arguments = parser.parse_args()
 
-    storage = LocalObjectStorage(get_settings().local_storage_path)
+    storage = get_object_storage()
     with SessionLocal() as session:
         query = select(DocumentVersion).join(LegalDocument).order_by(DocumentVersion.created_at)
         if not arguments.all:

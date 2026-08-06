@@ -36,6 +36,10 @@ llmops = [
   "mlflow>=3.0,<4.0",
   "ragas>=0.2,<1.0",
 ]
+cloud = [
+  "azure-identity>=1.19,<2.0",
+  "azure-storage-blob>=12.24,<13.0",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/taxlens"]

@@ -1,12 +1,6 @@
-from dataclasses import dataclass
 from pathlib import Path
 
-
-@dataclass(frozen=True)
-class ObjectMetadata:
-    key: str
-    content_type: str | None
-    size: int
+from taxlens.storage.base import ObjectMetadata
 
 
 class LocalObjectStorage:

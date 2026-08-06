@@ -8,8 +8,8 @@ def ocr_pages(raw_content: bytes, settings: Settings) -> list[str]:
         raise RuntimeError("Tesseract OCR is disabled")
 
     try:
-        import pypdfium2  # type: ignore[import-not-found]
-        import pytesseract  # type: ignore[import-not-found]
+        import pypdfium2  # type: ignore[import-untyped]
+        import pytesseract  # type: ignore[import-untyped]
     except ImportError as error:
         raise RuntimeError("Tesseract OCR dependencies are unavailable") from error
 
