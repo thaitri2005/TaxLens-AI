@@ -1021,6 +1021,25 @@ daily discovery, processing, embedding, and evaluation.
 - Use immutable image tags for production and preserve scale-to-zero defaults
   for the low-cost development environment.
 
+### M7 — Azure Airflow deployment
+
+- Build an Airflow image that contains the DAG files and no Docker socket access.
+- Provision a separate Airflow metadata database on the existing PostgreSQL
+  server and store its connection string and credentials in Key Vault.
+- Run one scheduler Container App replica for daily orchestration and a
+  scale-to-zero webserver that is enabled only when the UI is needed.
+- Authenticate DAG calls with a dedicated internal token and the API's
+  allowlisted job boundary; never expose HF credentials to Airflow.
+- Keep `airflow_enabled=false` by default and require a reviewed Terraform plan
+  before enabling the paid/always-on scheduler.
+
+M7 is deployed in the development subscription. The scheduler is healthy, the
+webserver is reachable over HTTPS, the dedicated metadata database migrated
+successfully, and `tax_regulation_discovery_daily` is discovered but paused.
+The next operational check is a deliberate manual DAG run followed by review
+of each task log; the schedule must remain paused until that smoke run is
+approved.
+
 M6 began with the storage and deployment contract: `ObjectStorage` selects
 local files or Azure Blob through configuration, while production images use a
 separate cloud dependency set. Phase 1 foundation, Phase 2 database, and

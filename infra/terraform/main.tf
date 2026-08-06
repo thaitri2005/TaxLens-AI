@@ -225,6 +225,15 @@ resource "azurerm_container_app" "api" {
     identity            = azurerm_user_assigned_identity.app.id
   }
 
+  dynamic "secret" {
+    for_each = var.airflow_enabled ? [1] : []
+    content {
+      name                = "airflow-token"
+      key_vault_secret_id = azurerm_key_vault_secret.airflow_internal_token[0].versionless_id
+      identity            = azurerm_user_assigned_identity.app.id
+    }
+  }
+
   template {
     revision_suffix = "m64ops1"
     min_replicas    = 0
@@ -283,6 +292,13 @@ resource "azurerm_container_app" "api" {
       env {
         name        = "AUTH_INTERNAL_TOKEN"
         secret_name = "auth-internal-token"
+      }
+      dynamic "env" {
+        for_each = var.airflow_enabled ? [1] : []
+        content {
+          name        = "AIRFLOW_INTERNAL_TOKEN"
+          secret_name = "airflow-token"
+        }
       }
       env {
         name        = "DATABASE_PASSWORD"

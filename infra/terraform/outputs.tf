@@ -45,3 +45,7 @@ output "web_container_app_url" {
 output "api_container_app_name" {
   value = azurerm_container_app.api.name
 }
+
+output "airflow_web_url" {
+  value = var.airflow_enabled && var.airflow_web_external_enabled ? "https://${azurerm_container_app.airflow_webserver[0].ingress[0].fqdn}" : ""
+}

@@ -72,3 +72,41 @@ variable "web_image" {
   description = "Web image in Azure Container Registry. Build and push it before applying Phase 4."
   default     = "taxlensdevacr.azurecr.io/taxlens-web:phase4"
 }
+
+variable "airflow_enabled" {
+  type        = bool
+  description = "Enable the optional Azure Airflow scheduler and webserver. Keep false until M7 deployment approval."
+  default     = false
+}
+
+variable "airflow_web_external_enabled" {
+  type        = bool
+  description = "Expose the Airflow webserver through public Container Apps ingress when Airflow is enabled."
+  default     = false
+}
+
+variable "airflow_image" {
+  type        = string
+  description = "Airflow image in Azure Container Registry. Build and push it before enabling M7."
+  default     = "taxlensdevacr.azurecr.io/taxlens-airflow:m7"
+}
+
+variable "airflow_admin_username" {
+  type        = string
+  description = "Initial Airflow UI administrator username."
+  default     = "admin"
+}
+
+variable "airflow_admin_password" {
+  type        = string
+  description = "Initial Airflow UI administrator password. Required when Airflow is enabled."
+  sensitive   = true
+  default     = ""
+}
+
+variable "airflow_internal_token" {
+  type        = string
+  description = "Secret used by Airflow DAGs to authenticate to the internal API job endpoints. Required when Airflow is enabled."
+  sensitive   = true
+  default     = ""
+}

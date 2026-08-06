@@ -13,7 +13,7 @@ Azure Container Registry
         │
         ├── TaxLens web Container App
         ├── TaxLens API Container App
-        └── Airflow scheduler/webserver deployment (later phase)
+        └── Airflow scheduler/webserver Container Apps (M7)
 
 Azure Database for PostgreSQL Flexible Server + pgvector
 Azure Blob Storage (raw and normalized artifacts)
@@ -89,7 +89,7 @@ Run these as explicit release steps, not in the API web process:
 2. Deploy or update API and web revisions.
 3. Run `/health` and `/ready` smoke checks.
 4. Verify Blob round-trip, search, and Q&A citations.
-5. Add and verify the scheduled ingestion deployment in the later Airflow phase.
+5. Verify the separately deployed Airflow scheduler and webserver.
 
 ## M6.4 operational hardening
 
@@ -123,6 +123,34 @@ rule and the Azure-services sentinel is a required production checklist item.
 Use immutable image tags (for example, a Git SHA) for production releases.
 The current `m63-auth` image tags are development release identifiers and must
 not be reused for unrelated builds.
+
+## M7 Airflow deployment
+
+Airflow is an optional, separately scaled deployment. It uses a dedicated
+`airflow` database on the existing PostgreSQL Flexible Server, a scheduler
+Container App with one replica, and a webserver Container App that can scale to
+zero. The scheduler is the component that must remain running for daily runs;
+the webserver can be started only when the UI is needed. The DAG image contains
+the DAG files, so cloud deployment does not depend on a local volume mount.
+
+Before enabling it, add these ignored Terraform variables to
+`infra/terraform/terraform.tfvars`:
+
+```hcl
+airflow_enabled              = true
+airflow_web_external_enabled = true
+airflow_admin_password       = "<strong-local-only-password>"
+airflow_internal_token       = "<strong-random-local-only-token>"
+airflow_image                = "taxlensdevacr.azurecr.io/taxlens-airflow:<immutable-tag>"
+```
+
+The API receives the same internal token through Key Vault, while the DAG
+receives it through a separate secret reference. Airflow never receives the HF
+token and does not access PostgreSQL application tables directly; it calls the
+allowlisted internal API job endpoints in sequence. `airflow_enabled` remains
+false by default in the Terraform module, but it is explicitly enabled in the
+current development environment. The deployed DAG is paused by default; run
+it manually from the Airflow UI only after reviewing the smoke-run plan.
 
 ## Cloud corpus bootstrap
 

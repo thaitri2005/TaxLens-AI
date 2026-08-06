@@ -245,8 +245,9 @@ the provider-neutral Hugging Face chat adapter. Airflow is active through the
 local scheduled-ingestion profile. The M6 cloud slice is deployed as a private
 API and public web Container Apps pair with Azure Blob, PostgreSQL/pgvector,
 Key Vault, managed identity, and Log Analytics. M6.4 adds request and job
-duration logging plus release smoke checks; Azure Airflow remains the separate
-M7 deployment.
+duration logging plus release smoke checks; Azure Airflow is now provisioned
+separately in M7 with a dedicated metadata database, Key Vault-backed
+credentials, and a paused daily DAG.
 
 ```text
 Official Sources / Seed Corpus

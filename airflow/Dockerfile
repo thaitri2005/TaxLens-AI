@@ -6,3 +6,4 @@ RUN pip install --no-cache-dir "psycopg2-binary==2.9.9"
 ENV AIRFLOW_HOME=/opt/airflow
 
 COPY airflow/airflow.cfg /opt/airflow/airflow.cfg
+COPY airflow/dags /opt/airflow/dags

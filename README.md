@@ -93,7 +93,8 @@ Host-side `--keyword-only` mode is only a smoke test and is not comparable to pr
 - M0–M5: local ingestion, OCR, hybrid retrieval, citations, API, frontend, evaluation, and hardening complete.
 - M5.5: LangGraph, LangChain adapter, Airflow scheduling, MLflow tracking, and semantic QA evaluation complete.
 - M6: Azure foundation, PostgreSQL/pgvector, Key Vault, managed identity, RBAC, private API/public web Container Apps, cloud migrations, official-document OCR, embeddings, hybrid search, and grounded Q&A are complete.
-- M6.4: Cloud operational hardening, request/job observability, stable deployment smoke checks, and cost/networking guardrails are complete; Azure Airflow remains M7.
+- M6.4: Cloud operational hardening, request/job observability, stable deployment smoke checks, and cost/networking guardrails are complete.
+- M7: Airflow is deployed as a separate Azure scheduler/webserver pair with a dedicated metadata database and Key Vault-backed credentials.
 
 ## Azure deployment
 
@@ -107,9 +108,18 @@ It contains two official documents, OCR-processed chunks, pgvector
 embeddings, hybrid search, and cited Q&A. See `docs/deployment.md` for the
 deployment contract and cloud bootstrap workflow.
 
+The Airflow UI is available at:
+
+```text
+https://taxlens-dev-airflow-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io
+```
+
+The daily DAG is deployed paused. Unpause and trigger it from Airflow only when
+you want to run discovery, processing/OCR, embedding, and retrieval evaluation.
+
 Known development limitations: PostgreSQL currently uses the Azure-services
-firewall sentinel, the government catalog can require a curated manifest, and
-Airflow is not deployed to Azure yet. See `docs/deployment.md` for the
-production checklist covering private networking and immutable image tags.
+firewall sentinel and the government catalog can require a curated manifest.
+See `docs/deployment.md` for the production checklist covering private
+networking, immutable image tags, and Airflow cost controls.
 
 See `IMPLEMENTATION_PLAN.md`, `projectstructure.txt`, and `docs/` for the authoritative implementation blueprint and local operating instructions.
