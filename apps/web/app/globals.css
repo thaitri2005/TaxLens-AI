@@ -38,3 +38,18 @@ footer { display:flex; justify-content:space-between; width:min(100% - 48px,1080
 .auth-form button { padding: .8rem 1rem; border: 0; border-radius: .65rem; background: #397f7b; color: white; font: inherit; font-weight: 700; cursor: pointer; }
 .auth-form button:disabled { opacity: .6; cursor: wait; }
 .auth-error { color: #a33b36; margin: 0; }
+.topbar-link { color: var(--teal-dark); font-size: 12px; font-weight: 800; text-decoration: none; }
+.topbar-link:hover { color: var(--teal); text-decoration: underline; }
+.sign-out-button { padding: 8px 12px; border: 1px solid #c9d8d5; color: var(--teal-dark); background: #fff; border-radius: 8px; font-size: 12px; font-weight: 800; }
+.sign-out-button:hover { border-color: var(--teal); color: #fff; background: var(--teal); }
+.admin-view h1 { margin: 0; font: 600 42px/1.1 Georgia,serif; letter-spacing: -.04em; }
+.admin-intro { margin: 10px 0 28px; color: var(--muted); }
+.admin-create-form { max-width: 620px; grid-template-columns: 1fr 1fr auto; align-items:end; padding: 22px; border: 1px solid var(--line); background: #fff; border-radius: 12px; }
+.admin-create-form button { height: 43px; padding: 0 17px; border: 0; border-radius: 8px; color: #fff; background: var(--teal); font-weight: 800; }
+.user-card { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.user-card-info { display:grid; gap:4px; }.user-card-info span { color:var(--muted); font-size:12px; }
+.user-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+.user-actions button { padding:8px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; font-size:12px; font-weight:800; }
+.button-secondary { color:var(--teal-dark); }.button-warning { color:#86652d; border-color:#ead9ae !important; background:#fffaf0 !important; }.button-danger { color:#a14941; border-color:#ebc5bf !important; background:#fff8f6 !important; }
+.user-actions button:hover { transform: translateY(-1px); box-shadow:0 4px 12px rgba(27,48,46,.08); }
+@media (max-width:700px) { .admin-create-form { grid-template-columns:1fr; }.user-card { align-items:flex-start; flex-direction:column; }.user-actions { justify-content:flex-start; }.topbar-actions { gap:8px; }.topbar-link { font-size:11px; } }
