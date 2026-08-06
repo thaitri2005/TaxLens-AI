@@ -123,3 +123,7 @@ See `docs/deployment.md` for the production checklist covering private
 networking, immutable image tags, and Airflow cost controls.
 
 See `IMPLEMENTATION_PLAN.md`, `projectstructure.txt`, and `docs/` for the authoritative implementation blueprint and local operating instructions.
+
+CI/CD is documented in `docs/ci-cd.md`. Pull requests run backend, frontend,
+and Terraform validation; Azure image publishing is a manually triggered,
+protected workflow.

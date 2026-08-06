@@ -1040,6 +1040,17 @@ The next operational check is a deliberate manual DAG run followed by review
 of each task log; the schedule must remain paused until that smoke run is
 approved.
 
+### M8 — CI/CD foundation
+
+- Run Ruff, MyPy, Pytest, Next.js production builds, and Terraform validation
+  automatically on pull requests and pushes to `main`.
+- Publish API, web, and Airflow images manually through a protected GitHub
+  Actions environment using Azure OIDC and immutable commit-SHA tags.
+- Keep Terraform apply manual until the existing local state is migrated to a
+  remote Azure Blob backend; never let GitHub Actions compete with local state.
+- Document required GitHub secrets, environment protection, release tags, and
+  the future remote-state migration.
+
 M6 began with the storage and deployment contract: `ObjectStorage` selects
 local files or Azure Blob through configuration, while production images use a
 separate cloud dependency set. Phase 1 foundation, Phase 2 database, and

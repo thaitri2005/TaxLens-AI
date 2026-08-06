@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install backend dependencies
+        run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+      - name: Ruff
+        run: ruff check src tests scripts
+      - name: MyPy
+        run: mypy src
+      - name: Pytest
+        run: pytest
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package.json
+      - name: Install frontend dependencies
+        run: npm install
+      - name: Build frontend
+        env:
+          API_ORIGIN: http://api:8000
+          AUTH_INTERNAL_TOKEN: ci-only-token
+          NEXTAUTH_SECRET: ci-only-secret
+        run: npm run build
+
+  terraform:
+    name: Terraform validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Initialize providers without a backend
+        run: terraform init -backend=false
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+      - name: Validate configuration
+        run: terraform validate
