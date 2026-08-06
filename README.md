@@ -96,10 +96,10 @@ Host-side `--keyword-only` mode is only a smoke test and is not comparable to pr
 
 ## Azure deployment
 
-The current cloud slice is available at:
+Visit the live cloud deployment at:
 
 ```text
-https://taxlens-dev-web--phase4webfix6.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io
+https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io
 ```
 
 It contains two official documents, OCR-processed chunks, pgvector

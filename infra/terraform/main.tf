@@ -352,7 +352,7 @@ resource "azurerm_container_app" "web" {
   }
 
   template {
-    revision_suffix = "phase4webfix6"
+    revision_suffix = "m63auth1"
     min_replicas    = 0
     max_replicas    = 1
 

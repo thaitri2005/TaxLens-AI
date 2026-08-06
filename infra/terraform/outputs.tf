@@ -39,7 +39,7 @@ output "app_identity_client_id" {
 }
 
 output "web_container_app_url" {
-  value = "https://${azurerm_container_app.web.latest_revision_fqdn}"
+  value = "https://${azurerm_container_app.web.ingress[0].fqdn}"
 }
 
 output "api_container_app_name" {
