@@ -10,9 +10,9 @@ development environment. It currently manages:
 - PostgreSQL Flexible Server with the `vector` extension;
 - Key Vault, managed identity, and scoped RBAC assignments.
 
-Container Apps and Airflow service resources remain separate follow-up phases.
-They require the final networking, image, and cost decisions rather than being
-provisioned accidentally by an earlier plan.
+The API and web Container Apps are applied in this development environment.
+Airflow remains a separate follow-up deployment because its scheduler,
+webserver, metadata database, and persistence need independent cost decisions.
 
 ## Prerequisites
 

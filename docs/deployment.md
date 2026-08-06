@@ -62,8 +62,10 @@ The local Compose build keeps `PIP_EXTRAS=dev` by default.
 
 ## Phase 4 image preparation
 
-Container Apps pulls immutable image tags from the Basic ACR. Build and push
-both images before applying the Phase 4 Terraform plan:
+Container Apps pulls image tags from the Basic ACR. The current development
+rollout uses the `phase4` tag plus Terraform revision suffixes; production
+should switch to immutable Git SHA tags. Build and push both images before
+applying the Terraform plan:
 
 ```powershell
 az acr login --name taxlensdevacr

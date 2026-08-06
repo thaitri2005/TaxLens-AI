@@ -26,7 +26,14 @@ Prerequisites: Python 3.12 and Docker Desktop with Compose.
 
 ```powershell
 Copy-Item .env.example .env
+docker compose up -d
+```
+
+Airflow and MLflow are optional local profiles. Start them only when needed:
+
+```powershell
 docker compose --profile airflow --profile llmops up -d
+docker compose --profile airflow --profile llmops down
 ```
 
 Open:
@@ -81,13 +88,22 @@ Host-side `--keyword-only` mode is only a smoke test and is not comparable to pr
 
 - M0–M5: local ingestion, OCR, hybrid retrieval, citations, API, frontend, evaluation, and hardening complete.
 - M5.5: LangGraph, LangChain adapter, Airflow scheduling, MLflow tracking, and semantic QA evaluation complete.
-- M6: Azure foundation, PostgreSQL/pgvector, Key Vault, managed identity, and RBAC are complete. Container Apps deployment, cloud secret injection, authentication, rate limits, and production smoke tests remain.
+- M6: Azure foundation, PostgreSQL/pgvector, Key Vault, managed identity, RBAC, private API/public web Container Apps, cloud migrations, official-document OCR, embeddings, hybrid search, and grounded Q&A are complete.
 
 ## Azure deployment
 
-Phase 4 deploys the separated API and web services to Azure Container Apps.
-Build and push the images to the Terraform-managed ACR before applying the
-Phase 4 plan. See `docs/deployment.md` for the exact commands and cloud
-configuration contract.
+The current cloud slice is available at:
+
+```text
+https://taxlens-dev-web--phase4webfix6.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io
+```
+
+It contains two official documents, OCR-processed chunks, pgvector
+embeddings, hybrid search, and cited Q&A. See `docs/deployment.md` for the
+deployment contract and cloud bootstrap workflow.
+
+Known development limitations: PostgreSQL currently uses the Azure-services
+firewall sentinel, the government catalog can require a curated manifest, and
+Airflow is not deployed to Azure yet.
 
 See `IMPLEMENTATION_PLAN.md`, `projectstructure.txt`, and `docs/` for the authoritative implementation blueprint and local operating instructions.

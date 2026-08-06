@@ -985,22 +985,20 @@ run, and finished MLflow experiment are all working. Keep MLflow and RAGAS
 evaluation services optional outside evaluation runs, but Airflow remains a
 required product component.
 
-### Following milestone — M6 deployment hardening
+### Following work — M6 operational hardening and M7 Airflow deployment
 
-After M5.5, prepare the separated API, web, and Airflow services for a
-low-cost hosted environment: secret configuration, authentication boundary,
-rate limits, health checks, managed PostgreSQL/pgvector, and reproducible
-Azure Container Apps deployment. M6 must verify that the deployed API image
-can run native extraction and Tesseract OCR without external OCR calls, and
-that the Airflow scheduler executes the daily ingestion DAG.
+The cloud application slice is complete. Remaining M6 hardening includes
+source-catalog reliability, immutable image tags, authentication/rate limits,
+monitoring, private database networking, and cost checks. M7 then deploys
+Airflow separately for daily discovery, processing, embedding, and evaluation.
 
 M6 began with the storage and deployment contract: `ObjectStorage` selects
 local files or Azure Blob through configuration, while production images use a
 separate cloud dependency set. Phase 1 foundation, Phase 2 database, and
-Phase 3 identity/secrets are complete. The remaining implementation is
-Container Apps, durable service configuration, authentication/rate limiting,
-migration jobs, and cloud smoke tests; Airflow remains a later deployment
-phase after the core services are operational.
+Phase 3 identity/secrets and the core Container Apps deployment are complete.
+Cloud bootstrap has been verified with official documents, OCR, embeddings,
+hybrid search, and Q&A. Airflow remains separate until the core services are
+stable and its hosting cost is understood.
 
 After M5, begin deployment hardening and Azure planning. Do not introduce
 managed OCR or managed embeddings: Tesseract is the permanent OCR fallback,
