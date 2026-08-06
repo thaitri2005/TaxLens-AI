@@ -241,8 +241,12 @@ The `apps/` directory contains separate API and Next.js/TypeScript web
 services. The web service consumes API contracts only; it does not access the
 database directly. The local profile uses Docker Compose, PostgreSQL/pgvector,
 workspace-backed raw storage, native PDF extraction, local Tesseract OCR, and
-the provider-neutral Hugging Face chat adapter. Airflow is now active through
-the local scheduled-ingestion profile; Azure deployment remains the next milestone.
+the provider-neutral Hugging Face chat adapter. Airflow is active through the
+local scheduled-ingestion profile. The M6 cloud slice is deployed as a private
+API and public web Container Apps pair with Azure Blob, PostgreSQL/pgvector,
+Key Vault, managed identity, and Log Analytics. M6.4 adds request and job
+duration logging plus release smoke checks; Azure Airflow remains the separate
+M7 deployment.
 
 ```text
 Official Sources / Seed Corpus

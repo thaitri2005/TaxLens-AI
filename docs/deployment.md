@@ -91,6 +91,39 @@ Run these as explicit release steps, not in the API web process:
 4. Verify Blob round-trip, search, and Q&A citations.
 5. Add and verify the scheduled ingestion deployment in the later Airflow phase.
 
+## M6.4 operational hardening
+
+The core cloud slice remains intentionally low-cost: both Container Apps use
+scale-to-zero with a maximum of one replica, while PostgreSQL and Blob Storage
+hold durable state. Container Apps send application logs to the shared Log
+Analytics workspace. API request and Airflow job logs include request/job IDs,
+status, duration, and failure events without logging passwords, tokens, query
+contents, or document text.
+
+For each release, verify:
+
+```powershell
+$web = "https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io"
+Invoke-WebRequest "$web/health" -UseBasicParsing
+Invoke-WebRequest "$web/login" -UseBasicParsing
+Invoke-WebRequest "$web/api/auth/session" -UseBasicParsing
+```
+
+Then authenticate through the web UI and verify one search, one question, one
+document detail view, and one administrator action. Use the Container Apps log
+stream or Log Analytics to confirm `request_completed`, `job_started`, and
+`job_completed` events when an internal job is run.
+
+The current PostgreSQL firewall allows Azure services and an optional local
+developer IP. This is acceptable for the student development environment but
+is not the final production network boundary. Private networking is deferred
+until a dedicated VNet/private endpoint budget is approved; removing the local
+rule and the Azure-services sentinel is a required production checklist item.
+
+Use immutable image tags (for example, a Git SHA) for production releases.
+The current `m63-auth` image tags are development release identifiers and must
+not be reused for unrelated builds.
+
 ## Cloud corpus bootstrap
 
 Use the API image as a one-off worker for migrations, ingestion, processing, and

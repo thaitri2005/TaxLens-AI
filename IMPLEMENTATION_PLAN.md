@@ -1002,10 +1002,24 @@ Before Azure deployment: run migration, seed, local login/logout/protection/role
 Pytest, and the Next.js production build; then review the Terraform plan for the new Key Vault secrets.
 Do not rebuild or deploy images until this local gate is approved.
 
-The cloud application slice is complete. Remaining M6 hardening includes
-source-catalog reliability, immutable image tags, authentication/rate limits,
-monitoring, private database networking, and cost checks. M7 then deploys
-Airflow separately for daily discovery, processing, embedding, and evaluation.
+The cloud application slice is complete. M6.4 hardening adds request and job
+observability, release smoke checks, explicit cost/scale boundaries, and a
+production checklist for private database networking and immutable image tags.
+The development deployment deliberately remains scale-to-zero with one maximum
+replica to protect the student budget. M7 then deploys Airflow separately for
+daily discovery, processing, embedding, and evaluation.
+
+### M6.4 — Cloud operational hardening
+
+- Log request completion/failure with request ID, route, status, and duration.
+- Log Airflow-triggered job start, completion, failure, timeout, and duration.
+- Keep secrets, prompts, retrieved text, and document contents out of logs.
+- Verify stable web URL, login/session endpoints, authenticated core workflows,
+  and Log Analytics visibility.
+- Keep PostgreSQL public firewall access explicitly marked as development-only;
+  move to private networking in the production network phase.
+- Use immutable image tags for production and preserve scale-to-zero defaults
+  for the low-cost development environment.
 
 M6 began with the storage and deployment contract: `ObjectStorage` selects
 local files or Azure Blob through configuration, while production images use a

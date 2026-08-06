@@ -226,7 +226,7 @@ resource "azurerm_container_app" "api" {
   }
 
   template {
-    revision_suffix = "phase4apifix4"
+    revision_suffix = "m64ops1"
     min_replicas    = 0
     max_replicas    = 1
 

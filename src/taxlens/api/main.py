@@ -1,4 +1,5 @@
 import logging
+import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
@@ -42,8 +43,31 @@ def create_app() -> FastAPI:
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
-        response: Response = await call_next(request)
+        started = time.perf_counter()
+        try:
+            response: Response = await call_next(request)
+        except Exception:
+            logger.exception(
+                "request_failed",
+                extra={
+                    "taxlens_request_id": request_id,
+                    "taxlens_method": request.method,
+                    "taxlens_path": request.url.path,
+                    "taxlens_duration_ms": round((time.perf_counter() - started) * 1000, 2),
+                },
+            )
+            raise
         response.headers["X-Request-ID"] = request_id
+        logger.info(
+            "request_completed",
+            extra={
+                "taxlens_request_id": request_id,
+                "taxlens_method": request.method,
+                "taxlens_path": request.url.path,
+                "taxlens_status_code": response.status_code,
+                "taxlens_duration_ms": round((time.perf_counter() - started) * 1000, 2),
+            },
+        )
         return response
 
     @app.get("/health", tags=["system"])

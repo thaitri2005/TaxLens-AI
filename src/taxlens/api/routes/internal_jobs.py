@@ -1,6 +1,8 @@
+import logging
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 from fastapi import APIRouter, Header, HTTPException, status
@@ -8,6 +10,7 @@ from fastapi import APIRouter, Header, HTTPException, status
 from taxlens.config import get_settings
 
 router = APIRouter(prefix="/internal/airflow", tags=["internal"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/ingest")
@@ -59,6 +62,8 @@ def _run_script(script_name: str, arguments: list[str]) -> dict[str, str]:
     if not script_path.is_file():
         raise HTTPException(status_code=500, detail=f"Job script is unavailable: {script_name}")
     environment = os.environ | {"PYTHONPATH": "/workspace/src"}
+    started = time.perf_counter()
+    logger.info("job_started", extra={"taxlens_job": script_name})
     try:
         result = subprocess.run(
             [sys.executable, str(script_path), *arguments],
@@ -70,9 +75,30 @@ def _run_script(script_name: str, arguments: list[str]) -> dict[str, str]:
             timeout=3600,
         )
     except subprocess.CalledProcessError as error:
+        logger.error(
+            "job_failed",
+            extra={
+                "taxlens_job": script_name,
+                "taxlens_duration_ms": round((time.perf_counter() - started) * 1000, 2),
+            },
+        )
         raise HTTPException(status_code=500, detail=error.stderr[-4000:]) from error
     except subprocess.TimeoutExpired as error:
+        logger.error(
+            "job_timed_out",
+            extra={
+                "taxlens_job": script_name,
+                "taxlens_duration_ms": round((time.perf_counter() - started) * 1000, 2),
+            },
+        )
         raise HTTPException(status_code=504, detail=f"Job timed out: {script_name}") from error
+    logger.info(
+        "job_completed",
+        extra={
+            "taxlens_job": script_name,
+            "taxlens_duration_ms": round((time.perf_counter() - started) * 1000, 2),
+        },
+    )
     return {"status": "completed", "job": script_name, "output": result.stdout[-4000:]}
 
 
