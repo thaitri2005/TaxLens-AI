@@ -20,6 +20,10 @@ jobs:
     env:
       IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
       ACR_LOGIN_SERVER: taxlensdevacr.azurecr.io
+    outputs:
+      api_image: ${{ steps.references.outputs.api_image }}
+      web_image: ${{ steps.references.outputs.web_image }}
+      airflow_image: ${{ steps.references.outputs.airflow_image }}
     steps:
       - uses: actions/checkout@v4
       - uses: azure/login@v2
@@ -42,7 +46,11 @@ jobs:
           docker build -f airflow/Dockerfile -t "$ACR_LOGIN_SERVER/taxlens-airflow:$IMAGE_TAG" .
           docker push "$ACR_LOGIN_SERVER/taxlens-airflow:$IMAGE_TAG"
       - name: Publish image references
+        id: references
         run: |
+          echo "api_image=$ACR_LOGIN_SERVER/taxlens-api:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "web_image=$ACR_LOGIN_SERVER/taxlens-web:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "airflow_image=$ACR_LOGIN_SERVER/taxlens-airflow:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
           echo "API_IMAGE=$ACR_LOGIN_SERVER/taxlens-api:$IMAGE_TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "WEB_IMAGE=$ACR_LOGIN_SERVER/taxlens-web:$IMAGE_TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "AIRFLOW_IMAGE=$ACR_LOGIN_SERVER/taxlens-airflow:$IMAGE_TAG" >> "$GITHUB_STEP_SUMMARY"

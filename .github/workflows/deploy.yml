@@ -1,0 +1,122 @@
+name: Plan or deploy Azure infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Immutable image tag already published to ACR
+        required: true
+        type: string
+      apply:
+        description: Apply after the plan; requires the protected environment
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_IN_AUTOMATION: true
+  TF_INPUT: false
+
+jobs:
+  plan:
+    name: Terraform plan
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ inputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: hashicorp/setup-terraform@v3
+      - name: Write temporary Terraform variables
+        working-directory: infra/terraform
+        env:
+          TF_VAR_POSTGRES_ADMIN_PASSWORD: ${{ secrets.TF_VAR_POSTGRES_ADMIN_PASSWORD }}
+          TF_VAR_HF_TOKEN: ${{ secrets.TF_VAR_HF_TOKEN }}
+          TF_VAR_AUTH_INTERNAL_TOKEN: ${{ secrets.TF_VAR_AUTH_INTERNAL_TOKEN }}
+          TF_VAR_NEXTAUTH_SECRET: ${{ secrets.TF_VAR_NEXTAUTH_SECRET }}
+          TF_VAR_AIRFLOW_ADMIN_PASSWORD: ${{ secrets.TF_VAR_AIRFLOW_ADMIN_PASSWORD }}
+          TF_VAR_AIRFLOW_INTERNAL_TOKEN: ${{ secrets.TF_VAR_AIRFLOW_INTERNAL_TOKEN }}
+        run: |
+          cat > ci.auto.tfvars <<EOF
+          subscription_id = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          postgres_admin_password = "$TF_VAR_POSTGRES_ADMIN_PASSWORD"
+          hf_token = "$TF_VAR_HF_TOKEN"
+          auth_internal_token = "$TF_VAR_AUTH_INTERNAL_TOKEN"
+          nextauth_secret = "$TF_VAR_NEXTAUTH_SECRET"
+          airflow_admin_password = "$TF_VAR_AIRFLOW_ADMIN_PASSWORD"
+          airflow_internal_token = "$TF_VAR_AIRFLOW_INTERNAL_TOKEN"
+          airflow_enabled = true
+          airflow_web_external_enabled = true
+          api_image = "taxlensdevacr.azurecr.io/taxlens-api:$IMAGE_TAG"
+          web_image = "taxlensdevacr.azurecr.io/taxlens-web:$IMAGE_TAG"
+          airflow_image = "taxlensdevacr.azurecr.io/taxlens-airflow:$IMAGE_TAG"
+          EOF
+      - name: Initialize remote backend
+        working-directory: infra/terraform
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: terraform init
+      - name: Validate and plan
+        working-directory: infra/terraform
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          terraform fmt -check -recursive
+          terraform validate
+          terraform plan -out=tfplan
+          terraform show -no-color tfplan >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload reviewed plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ github.run_id }}
+          path: infra/terraform/tfplan
+          retention-days: 1
+
+  apply:
+    name: Apply approved Terraform plan
+    needs: plan
+    if: ${{ inputs.apply }}
+    runs-on: ubuntu-latest
+    environment: azure-deploy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: hashicorp/setup-terraform@v3
+      - name: Initialize remote backend
+        working-directory: infra/terraform
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: terraform init
+      - uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan-${{ github.run_id }}
+          path: infra/terraform
+      - name: Apply reviewed plan
+        working-directory: infra/terraform
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: terraform apply -auto-approve tfplan

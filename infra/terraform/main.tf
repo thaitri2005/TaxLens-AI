@@ -41,6 +41,18 @@ resource "azurerm_storage_container" "normalized" {
   container_access_type = "private"
 }
 
+resource "azurerm_storage_container" "terraform_state" {
+  name                  = "terraform-state"
+  storage_account_id    = azurerm_storage_account.artifacts.id
+  container_access_type = "private"
+}
+
+resource "azurerm_role_assignment" "terraform_state_blob_contributor" {
+  scope                = azurerm_storage_account.artifacts.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
 resource "azurerm_container_registry" "this" {
   name                = replace("${var.name_prefix}acr", "-", "")
   resource_group_name = azurerm_resource_group.this.name

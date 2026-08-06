@@ -1,6 +1,6 @@
 # TaxLens Azure infrastructure
 
-This directory contains the applied M6 Terraform infrastructure for a low-cost
+This directory contains the applied M6/M7 Terraform infrastructure for a low-cost
 development environment. It currently manages:
 
 - resource group;
@@ -37,8 +37,20 @@ the proposed resource changes have been explicitly reviewed.
 Phase 3 adds Key Vault, a user-assigned application identity, and RBAC for
 secrets, Blob Storage, and ACR pull access. The Hugging Face token is supplied
 through the ignored `terraform.tfvars` file and becomes a Key Vault secret.
-Terraform state contains sensitive secret resource values and must be stored
-privately when remote state is introduced.
+Terraform state contains sensitive secret resource values. It is stored in the
+private `terraform-state` Blob container through the Azure AD-authenticated
+`azurerm` backend.
+
+After the one-time local migration, initialize with:
+
+```powershell
+az login
+terraform init
+```
+
+The identity running Terraform needs `Storage Blob Data Contributor` on the
+`taxlensdevartifacts` storage account. GitHub Actions uses the same role with
+its OIDC deployment identity.
 
 Before applying Phase 4, push the image tags configured by `api_image` and
 `web_image` to the Basic ACR. The web image must be built with the API's

@@ -1046,10 +1046,12 @@ approved.
   automatically on pull requests and pushes to `main`.
 - Publish API, web, and Airflow images manually through a protected GitHub
   Actions environment using Azure OIDC and immutable commit-SHA tags.
-- Keep Terraform apply manual until the existing local state is migrated to a
-  remote Azure Blob backend; never let GitHub Actions compete with local state.
+- Store Terraform state in the private Azure Blob backend and grant the GitHub
+  OIDC principal scoped `Storage Blob Data Contributor` access.
+- Generate a reviewable Terraform plan in GitHub Actions and keep apply behind
+  the protected `azure-deploy` environment and an explicit `apply` input.
 - Document required GitHub secrets, environment protection, release tags, and
-  the future remote-state migration.
+  rollback expectations.
 
 M6 began with the storage and deployment contract: `ObjectStorage` selects
 local files or Azure Blob through configuration, while production images use a
