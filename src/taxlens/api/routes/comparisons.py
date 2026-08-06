@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from taxlens.api.auth import require_authenticated_user
 from taxlens.api.routes.search import SearchCitation
 from taxlens.db import get_db_session
 from taxlens.intelligence.chat import get_chat_provider
@@ -16,7 +17,9 @@ from taxlens.intelligence.comparison import (
 )
 from taxlens.retrieval.citations import Citation
 
-router = APIRouter(prefix="/comparisons", tags=["comparisons"])
+router = APIRouter(
+    prefix="/comparisons", tags=["comparisons"], dependencies=[Depends(require_authenticated_user)]
+)
 
 
 class ComparisonRequest(BaseModel):

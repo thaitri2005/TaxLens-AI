@@ -28,3 +28,13 @@ footer { display:flex; justify-content:space-between; width:min(100% - 48px,1080
 .chunk-card details { margin-top:12px; }
 .chunk-card summary { color:var(--teal); cursor:pointer; font-size:12px; font-weight:800; }
 @media (max-width:700px) { .topbar { padding:0 20px; }.shell { width:min(100% - 32px,1080px); }.hero { padding:52px 0 35px; }.tabs { gap:18px; overflow:auto; }.tab { white-space:nowrap; }.section-heading { align-items:start; gap:15px; }.section-heading h2 { font-size:29px; }.compare-form { grid-template-columns:1fr; }.swap { display:none; }.change-content { grid-template-columns:1fr; }.form-actions,footer { align-items:start; flex-direction:column; }.status { display:none; } }
+ .auth-shell { min-height: 100vh; display: grid; place-items: center; padding: 2rem; }
+.auth-card { width: min(100%, 30rem); max-width: 30rem; padding: 2.5rem; background: white; border: 1px solid #d9e3e0; border-radius: 1.25rem; box-shadow: 0 1rem 3rem rgba(24, 55, 53, .08); }
+.auth-card h1 { margin: .25rem 0 .75rem; }
+.auth-card > p:not(.eyebrow) { color: #667b83; line-height: 1.6; }
+.auth-form { display: grid; gap: 1rem; margin-top: 1.5rem; }
+.auth-form label { display: grid; gap: .4rem; color: #234b50; font-weight: 600; }
+.auth-form input { width: 100%; padding: .8rem 1rem; border: 1px solid #c8d8d5; border-radius: .65rem; font: inherit; }
+.auth-form button { padding: .8rem 1rem; border: 0; border-radius: .65rem; background: #397f7b; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+.auth-form button:disabled { opacity: .6; cursor: wait; }
+.auth-error { color: #a33b36; margin: 0; }

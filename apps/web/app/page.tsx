@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { signOut, useSession } from "next-auth/react";
 
 type View = "search" | "ask" | "compare" | "documents";
 type Citation = { document_number: string; title?: string; heading?: string | null; article_number: string | null; page_start: number | null; page_end: number | null; source_url: string | null };
@@ -46,6 +47,7 @@ function CitationLine({ citation, language = "en" }: { citation: Citation; langu
 }
 
 export default function Home() {
+  const { data: session } = useSession();
   const [view, setView] = useState<View>("search");
   const [language, setLanguage] = useState<"en" | "vi">("en");
   const [searchQuery, setSearchQuery] = useState("");
@@ -149,7 +151,7 @@ export default function Home() {
   }
 
   return <>
-    <header className="topbar"><a className="brand" href="#search"><span className="brand-mark">TL</span><span><strong>TaxLens</strong><small>Regulatory intelligence</small></span></a><div className="topbar-actions"><div className="language-toggle" aria-label="Language"><button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button><button className={language === "vi" ? "active" : ""} onClick={() => setLanguage("vi")}>VI</button></div><div className="status"><span className="status-dot" />Local workspace</div></div></header>
+    <header className="topbar"><a className="brand" href="#search"><span className="brand-mark">TL</span><span><strong>TaxLens</strong><small>Regulatory intelligence</small></span></a><div className="topbar-actions"><div className="language-toggle" aria-label="Language"><button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button><button className={language === "vi" ? "active" : ""} onClick={() => setLanguage("vi")}>VI</button></div>{session?.user.role === "admin" && <a href="/admin">Admin</a>}<button type="button" onClick={() => signOut({ callbackUrl: "/login" })}>Sign out</button><div className="status"><span className="status-dot" />Local workspace</div></div></header>
     <main className={`shell ${language === "vi" ? "language-vi" : ""}`}>
       <section className="hero"><p className="eyebrow">{copy.heroEyebrow}</p><h1>{copy.heroTitleOne}<br /><em>{copy.heroTitleTwo}</em></h1><p className="hero-copy">{copy.heroCopy}</p></section>
       <nav className="tabs" aria-label="Workspace views">{([["search", copy.search], ["ask", copy.ask], ["compare", copy.compare], ["documents", copy.documents]] as [View, string][]).map(([key, label]) => <button key={key} className={`tab ${view === key ? "active" : ""}`} onClick={() => setView(key)}>{label}</button>)}</nav>

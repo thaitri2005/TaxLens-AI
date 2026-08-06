@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from taxlens.api.auth import AuthenticatedUser, ask_rate_limiter, require_authenticated_user
 from taxlens.api.routes.search import SearchCitation
 from taxlens.db import get_db_session
 from taxlens.intelligence.chat import get_chat_provider
@@ -44,8 +45,10 @@ class QuestionResponse(BaseModel):
 @router.post("", response_model=QuestionResponse)
 def ask_question(
     request: QuestionRequest,
+    user: AuthenticatedUser = Depends(require_authenticated_user),
     session: Session = Depends(get_db_session),
 ) -> QuestionResponse:
+    ask_rate_limiter.check(str(user.id))
     embedding_provider = (
         get_embedding_provider() if session.get_bind().dialect.name == "postgresql" else None
     )

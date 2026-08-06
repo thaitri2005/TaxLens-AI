@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from taxlens.api.auth import require_authenticated_user
 from taxlens.db import get_db_session
 from taxlens.retrieval.citations import Citation, build_citation
 from taxlens.retrieval.embeddings import get_embedding_provider
@@ -17,7 +18,9 @@ from taxlens.retrieval.search import (
     semantic_search_chunks,
 )
 
-router = APIRouter(prefix="/search", tags=["search"])
+router = APIRouter(
+    prefix="/search", tags=["search"], dependencies=[Depends(require_authenticated_user)]
+)
 
 
 class SearchCitation(BaseModel):
@@ -74,9 +77,7 @@ def search(
         results = keyword_search_chunks(session, q, filters, limit)
     else:
         provider = (
-            get_embedding_provider()
-            if session.get_bind().dialect.name == "postgresql"
-            else None
+            get_embedding_provider() if session.get_bind().dialect.name == "postgresql" else None
         )
         if mode == "semantic" and provider is not None:
             query_embedding = provider.embed_query(q)
@@ -132,9 +133,7 @@ def _build_snippet(content: str, query: str, maximum_length: int = 260) -> str:
     terms = [term.casefold() for term in re.findall(r"\S+", query) if len(term) > 2]
     sentences = [sentence.strip() for sentence in re.split(r"(?<=[.!?])\s+", normalized)]
     relevant_sentences = [
-        sentence
-        for sentence in sentences
-        if any(term in sentence.casefold() for term in terms)
+        sentence for sentence in sentences if any(term in sentence.casefold() for term in terms)
     ]
     if relevant_sentences:
         normalized = max(

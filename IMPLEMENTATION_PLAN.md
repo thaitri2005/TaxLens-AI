@@ -987,6 +987,21 @@ required product component.
 
 ### Following work — M6 operational hardening and M7 Airflow deployment
 
+### M6.3 — Authentication and authorization
+
+Implemented locally; cloud Terraform wiring is prepared but not applied.
+
+- Add `user_accounts` with Argon2id hashes, active state, role, and login timestamps.
+- Keep credential verification and account administration in FastAPI so the web container has no database credentials.
+- Require short-lived HMAC identity assertions from the private Next.js proxy on application routes.
+- Re-check account state in PostgreSQL on every request so disabling a user invalidates existing sessions at the API boundary.
+- Use Auth.js Credentials Provider, JWT HttpOnly cookies, middleware protection, and a minimal admin page.
+- Apply an initial per-user Ask TaxLens rate limit to protect the Hugging Face quota.
+
+Before Azure deployment: run migration, seed, local login/logout/protection/role tests, Ruff, MyPy,
+Pytest, and the Next.js production build; then review the Terraform plan for the new Key Vault secrets.
+Do not rebuild or deploy images until this local gate is approved.
+
 The cloud application slice is complete. Remaining M6 hardening includes
 source-catalog reliability, immutable image tags, authentication/rate limits,
 monitoring, private database networking, and cost checks. M7 then deploys

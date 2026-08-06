@@ -154,6 +154,20 @@ resource "azurerm_key_vault_secret" "hf_token" {
   depends_on   = [azurerm_role_assignment.terraform_key_vault_secrets]
 }
 
+resource "azurerm_key_vault_secret" "auth_internal_token" {
+  name         = "auth-internal-token"
+  value        = var.auth_internal_token
+  key_vault_id = azurerm_key_vault.this.id
+  depends_on   = [azurerm_role_assignment.terraform_key_vault_secrets]
+}
+
+resource "azurerm_key_vault_secret" "nextauth_secret" {
+  name         = "nextauth-secret"
+  value        = var.nextauth_secret
+  key_vault_id = azurerm_key_vault.this.id
+  depends_on   = [azurerm_role_assignment.terraform_key_vault_secrets]
+}
+
 resource "azurerm_container_app_environment" "this" {
   name                       = "${var.name_prefix}-aca-env"
   location                   = azurerm_resource_group.this.location
@@ -202,6 +216,12 @@ resource "azurerm_container_app" "api" {
   secret {
     name                = "postgres-admin-password"
     key_vault_secret_id = azurerm_key_vault_secret.postgres_admin_password.versionless_id
+    identity            = azurerm_user_assigned_identity.app.id
+  }
+
+  secret {
+    name                = "auth-internal-token"
+    key_vault_secret_id = azurerm_key_vault_secret.auth_internal_token.versionless_id
     identity            = azurerm_user_assigned_identity.app.id
   }
 
@@ -261,6 +281,10 @@ resource "azurerm_container_app" "api" {
         secret_name = "hf-token"
       }
       env {
+        name        = "AUTH_INTERNAL_TOKEN"
+        secret_name = "auth-internal-token"
+      }
+      env {
         name        = "DATABASE_PASSWORD"
         secret_name = "postgres-admin-password"
       }
@@ -315,6 +339,18 @@ resource "azurerm_container_app" "web" {
     identity = azurerm_user_assigned_identity.app.id
   }
 
+  secret {
+    name                = "auth-internal-token"
+    key_vault_secret_id = azurerm_key_vault_secret.auth_internal_token.versionless_id
+    identity            = azurerm_user_assigned_identity.app.id
+  }
+
+  secret {
+    name                = "nextauth-secret"
+    key_vault_secret_id = azurerm_key_vault_secret.nextauth_secret.versionless_id
+    identity            = azurerm_user_assigned_identity.app.id
+  }
+
   template {
     revision_suffix = "phase4webfix6"
     min_replicas    = 0
@@ -325,6 +361,15 @@ resource "azurerm_container_app" "web" {
       image  = var.web_image
       cpu    = 0.25
       memory = "0.5Gi"
+
+      env {
+        name        = "AUTH_INTERNAL_TOKEN"
+        secret_name = "auth-internal-token"
+      }
+      env {
+        name        = "NEXTAUTH_SECRET"
+        secret_name = "nextauth-secret"
+      }
     }
   }
 

@@ -5,6 +5,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, Response, status
 
+from taxlens.api.routes.auth import admin_router
+from taxlens.api.routes.auth import router as auth_router
 from taxlens.api.routes.comparisons import router as comparisons_router
 from taxlens.api.routes.documents import router as documents_router
 from taxlens.api.routes.internal_jobs import router as internal_jobs_router
@@ -28,6 +30,8 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
     app.include_router(documents_router)
+    app.include_router(auth_router)
+    app.include_router(admin_router)
     app.include_router(comparisons_router)
     app.include_router(questions_router)
     app.include_router(search_router)

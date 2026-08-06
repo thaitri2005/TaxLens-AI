@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     mlflow_tracking_uri: str = "http://mlflow:5000"
     mlflow_experiment_name: str = "taxlens-qa"
     airflow_internal_token: str | None = None
+    auth_internal_token: str | None = None
+    auth_initial_admin_username: str = "admin"
+    auth_initial_admin_password: str | None = None
+    auth_rate_limit_per_minute: int = 10
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

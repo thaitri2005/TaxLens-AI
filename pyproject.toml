@@ -19,6 +19,7 @@ dependencies = [
   "pypdf>=5.0,<6.0",
   "pypdfium2>=4.30,<5.0",
   "pytesseract>=0.3.13,<1.0",
+  "argon2-cffi>=23.1,<26.0",
   "sentence-transformers>=3.3,<4.0",
   "uvicorn[standard]>=0.32,<1.0",
   "langchain-core>=1.0,<2.0",

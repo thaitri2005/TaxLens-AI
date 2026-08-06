@@ -35,6 +35,10 @@ services:
       AZURE_STORAGE_NORMALIZED_CONTAINER: ${AZURE_STORAGE_NORMALIZED_CONTAINER:-normalized-text}
       EMBEDDING_MODEL_PATH: /opt/taxlens-models/multilingual-e5-small
       AIRFLOW_INTERNAL_TOKEN: ${AIRFLOW_INTERNAL_TOKEN:-taxlens-local-internal-token}
+      AUTH_INTERNAL_TOKEN: ${AUTH_INTERNAL_TOKEN:-taxlens-local-internal-token}
+      AUTH_INITIAL_ADMIN_USERNAME: ${AUTH_INITIAL_ADMIN_USERNAME:-admin}
+      AUTH_INITIAL_ADMIN_PASSWORD: ${AUTH_INITIAL_ADMIN_PASSWORD:-}
+      AUTH_RATE_LIMIT_PER_MINUTE: ${AUTH_RATE_LIMIT_PER_MINUTE:-10}
     ports:
       - "8000:8000"
     volumes:
@@ -52,6 +56,11 @@ services:
       - "3000:3000"
     depends_on:
       - api
+    environment:
+      API_ORIGIN: http://api:8000
+      AUTH_INTERNAL_TOKEN: ${AUTH_INTERNAL_TOKEN:-taxlens-local-internal-token}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-taxlens-local-nextauth-secret}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
 
   airflow-postgres:
     image: postgres:16

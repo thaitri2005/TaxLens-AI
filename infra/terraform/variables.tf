@@ -43,6 +43,18 @@ variable "hf_token" {
   sensitive   = true
 }
 
+variable "auth_internal_token" {
+  type        = string
+  description = "Shared secret used only between Next.js and the private FastAPI service. Never commit it."
+  sensitive   = true
+}
+
+variable "nextauth_secret" {
+  type        = string
+  description = "Auth.js session encryption secret. Never commit it."
+  sensitive   = true
+}
+
 variable "key_vault_name" {
   type        = string
   description = "Globally unique Azure Key Vault name."

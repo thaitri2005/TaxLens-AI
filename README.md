@@ -46,6 +46,10 @@ Open:
 | Airflow | `http://localhost:8080` |
 | MLflow | `http://localhost:5000` |
 
+Authentication is enabled locally. Set `AUTH_INTERNAL_TOKEN`, `NEXTAUTH_SECRET`, and
+`AUTH_INITIAL_ADMIN_PASSWORD` in `.env`, run the migration and seed commands in
+`docs/authentication.md`, then sign in at `http://localhost:3000/login`.
+
 The Airflow user is created from `AIRFLOW_ADMIN_USERNAME` and `AIRFLOW_ADMIN_PASSWORD`. If the Airflow metadata volume already exists, changing `.env` does not change the stored password; reset it with:
 
 ```powershell

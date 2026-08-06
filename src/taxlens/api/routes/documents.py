@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from taxlens.api.auth import require_authenticated_user
 from taxlens.db import get_db_session
 from taxlens.legal_data.models import (
     DocumentChunk,
@@ -15,7 +16,9 @@ from taxlens.legal_data.models import (
     SourceRecord,
 )
 
-router = APIRouter(prefix="/documents", tags=["documents"])
+router = APIRouter(
+    prefix="/documents", tags=["documents"], dependencies=[Depends(require_authenticated_user)]
+)
 
 
 class DocumentSummary(BaseModel):
@@ -194,9 +197,7 @@ def _processing_by_version(
     return statuses
 
 
-def _source_urls_by_version(
-    session: Session, version_ids: list[uuid.UUID]
-) -> dict[uuid.UUID, str]:
+def _source_urls_by_version(session: Session, version_ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
     if not version_ids:
         return {}
     rows = session.execute(
