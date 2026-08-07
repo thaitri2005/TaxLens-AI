@@ -229,12 +229,3 @@ Recommended portfolio screenshots are:
 
 Keep screenshots free of passwords, tokens, personal data, and unnecessary
 browser chrome. A short GIF showing search → cited answer is also effective.
-
-## Resume-ready summary
-
-> Built and deployed a cloud-native Vietnamese tax-regulatory intelligence
-> platform using FastAPI, Next.js, PostgreSQL/pgvector, LangGraph, Airflow,
-> MLflow, Hugging Face inference, Tesseract OCR, Terraform, and Azure Container
-> Apps. Implemented hybrid retrieval, article-level citations, version
-> comparison, authenticated role-based access, scheduled ingestion, evaluation
-> tracking, and OIDC-based protected CI/CD.
