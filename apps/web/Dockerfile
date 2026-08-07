@@ -9,7 +9,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY apps/web ./
 ARG API_ORIGIN=http://api:8000
 ENV API_ORIGIN=${API_ORIGIN}
-RUN npm run build
+RUN mkdir -p public && npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
