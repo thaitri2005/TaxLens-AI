@@ -37,22 +37,9 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
       - name: Write temporary Terraform variables
         working-directory: infra/terraform
-        env:
-          TF_VAR_POSTGRES_ADMIN_PASSWORD: ${{ secrets.TF_VAR_POSTGRES_ADMIN_PASSWORD }}
-          TF_VAR_HF_TOKEN: ${{ secrets.TF_VAR_HF_TOKEN }}
-          TF_VAR_AUTH_INTERNAL_TOKEN: ${{ secrets.TF_VAR_AUTH_INTERNAL_TOKEN }}
-          TF_VAR_NEXTAUTH_SECRET: ${{ secrets.TF_VAR_NEXTAUTH_SECRET }}
-          TF_VAR_AIRFLOW_ADMIN_PASSWORD: ${{ secrets.TF_VAR_AIRFLOW_ADMIN_PASSWORD }}
-          TF_VAR_AIRFLOW_INTERNAL_TOKEN: ${{ secrets.TF_VAR_AIRFLOW_INTERNAL_TOKEN }}
         run: |
           cat > ci.auto.tfvars <<EOF
           subscription_id = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          postgres_admin_password = "$TF_VAR_POSTGRES_ADMIN_PASSWORD"
-          hf_token = "$TF_VAR_HF_TOKEN"
-          auth_internal_token = "$TF_VAR_AUTH_INTERNAL_TOKEN"
-          nextauth_secret = "$TF_VAR_NEXTAUTH_SECRET"
-          airflow_admin_password = "$TF_VAR_AIRFLOW_ADMIN_PASSWORD"
-          airflow_internal_token = "$TF_VAR_AIRFLOW_INTERNAL_TOKEN"
           airflow_enabled = true
           airflow_web_external_enabled = true
           api_image = "taxlensdevacr.azurecr.io/taxlens-api:$IMAGE_TAG"
@@ -66,6 +53,12 @@ jobs:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_POSTGRES_ADMIN_PASSWORD: ${{ secrets.TF_VAR_POSTGRES_ADMIN_PASSWORD }}
+          TF_VAR_HF_TOKEN: ${{ secrets.TF_VAR_HF_TOKEN }}
+          TF_VAR_AUTH_INTERNAL_TOKEN: ${{ secrets.TF_VAR_AUTH_INTERNAL_TOKEN }}
+          TF_VAR_NEXTAUTH_SECRET: ${{ secrets.TF_VAR_NEXTAUTH_SECRET }}
+          TF_VAR_AIRFLOW_ADMIN_PASSWORD: ${{ secrets.TF_VAR_AIRFLOW_ADMIN_PASSWORD }}
+          TF_VAR_AIRFLOW_INTERNAL_TOKEN: ${{ secrets.TF_VAR_AIRFLOW_INTERNAL_TOKEN }}
         run: terraform init
       - name: Validate and plan
         working-directory: infra/terraform
