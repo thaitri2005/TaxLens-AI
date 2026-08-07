@@ -46,7 +46,9 @@ GitHub environment.
 Configure these additional GitHub secrets before using the deployment workflow:
 `TF_VAR_POSTGRES_ADMIN_PASSWORD`, `TF_VAR_HF_TOKEN`,
 `TF_VAR_AUTH_INTERNAL_TOKEN`, `TF_VAR_NEXTAUTH_SECRET`,
-`TF_VAR_AIRFLOW_ADMIN_PASSWORD`, and `TF_VAR_AIRFLOW_INTERNAL_TOKEN`.
+`TF_VAR_AIRFLOW_ADMIN_PASSWORD`, `TF_VAR_AIRFLOW_INTERNAL_TOKEN`, and
+optionally `TF_VAR_POSTGRES_ALLOWED_IP` to preserve the development PostgreSQL
+firewall rule.
 The GitHub OIDC principal also needs `Storage Blob Data Contributor` on the
 Terraform state storage account. The local developer role assignment does not
 automatically grant that permission to GitHub Actions.

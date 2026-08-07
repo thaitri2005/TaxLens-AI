@@ -40,6 +40,7 @@ jobs:
         run: |
           cat > ci.auto.tfvars <<EOF
           subscription_id = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          postgres_allowed_ip = "${{ secrets.TF_VAR_POSTGRES_ALLOWED_IP }}"
           airflow_enabled = true
           airflow_web_external_enabled = true
           api_image = "taxlensdevacr.azurecr.io/taxlens-api:$IMAGE_TAG"
