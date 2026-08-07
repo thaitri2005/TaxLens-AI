@@ -46,6 +46,7 @@ jobs:
           web_image = "taxlensdevacr.azurecr.io/taxlens-web:$IMAGE_TAG"
           airflow_image = "taxlensdevacr.azurecr.io/taxlens-airflow:$IMAGE_TAG"
           EOF
+          terraform fmt ci.auto.tfvars
       - name: Initialize remote backend
         working-directory: infra/terraform
         env:
