@@ -46,9 +46,9 @@ class LangChainChatAdapter:
     """Expose the provider-neutral chat contract through LangChain runnables."""
 
     def __init__(self, provider: ChatProvider) -> None:
-        from langchain_core.runnables import RunnableLambda
+        from langchain_core.runnables import Runnable, RunnableLambda
 
-        self._chain = RunnableLambda(lambda request: provider.complete(request))
+        self._chain: Runnable[ChatRequest, ChatResponse] = RunnableLambda(provider.complete)
 
     def complete(self, request: ChatRequest) -> ChatResponse:
         response = self._chain.invoke(request)
