@@ -1,10 +1,9 @@
-# M6 Azure deployment contract
+# Azure deployment and operations
 
-M6 deploys the existing separated services without changing the domain or
-retrieval contracts. The rollout is deliberately phased: the foundation,
-database, and secret infrastructure are provisioned first; Container Apps is
-the next phase; Airflow is evaluated only after the core API and web services
-are operational in Azure.
+The Azure development deployment runs the existing separated services without
+changing the domain or retrieval contracts. The rollout was deliberately
+phased: foundation, database, secrets, Container Apps, Airflow, and protected
+CI/CD were validated independently before image promotion.
 
 ## Target topology
 
@@ -13,7 +12,7 @@ Azure Container Registry
         │
         ├── TaxLens web Container App
         ├── TaxLens API Container App
-        └── Airflow scheduler/webserver Container Apps (M7)
+        └── Airflow scheduler/webserver Container Apps
 
 Azure Database for PostgreSQL Flexible Server + pgvector
 Azure Blob Storage (raw and normalized artifacts)
@@ -60,20 +59,16 @@ docker build -f apps/api/Dockerfile -t taxlens-api:cloud .
 
 The local Compose build keeps `PIP_EXTRAS=dev` by default.
 
-## Phase 4 image preparation
+## Image preparation and release
 
-Container Apps pulls image tags from the Basic ACR. The current development
-rollout uses the `phase4` tag plus Terraform revision suffixes; production
-should switch to immutable Git SHA tags. Build and push both images before
-applying the Terraform plan:
+Container Apps pulls immutable image tags from the Basic ACR. Use the protected
+GitHub Actions release workflow rather than manually building production
+images:
 
-```powershell
-az acr login --name taxlensdevacr
-docker build -f apps/api/Dockerfile -t taxlensdevacr.azurecr.io/taxlens-api:phase4 .
-docker push taxlensdevacr.azurecr.io/taxlens-api:phase4
-docker build -f apps/web/Dockerfile --build-arg API_ORIGIN=http://taxlens-dev-api -t taxlensdevacr.azurecr.io/taxlens-web:phase4 .
-docker push taxlensdevacr.azurecr.io/taxlens-web:phase4
-```
+1. Run `release-images.yml` on `main`.
+2. Copy the commit-SHA image tag from the workflow summary.
+3. Run `deploy.yml` with `apply=false` and review the plan.
+4. Run it again with `apply=true` only after approval.
 
 The web image keeps `http://api:8000` as its local default and uses the
 Container Apps internal API name on ingress port 80 in the cloud image. The
@@ -121,12 +116,12 @@ until a dedicated VNet/private endpoint budget is approved; removing the local
 rule and the Azure-services sentinel is a required production checklist item.
 
 Use immutable image tags (for example, a Git SHA) for production releases.
-The current `m63-auth` image tags are development release identifiers and must
-not be reused for unrelated builds.
+Development revisions use immutable commit-SHA tags. Do not reuse a tag for
+different image contents; publish a new tag for every release.
 
 ## M7 Airflow deployment
 
-Airflow is an optional, separately scaled deployment. It uses a dedicated
+Airflow is a separately scaled deployment. It uses a dedicated
 `airflow` database on the existing PostgreSQL Flexible Server, a scheduler
 Container App with one replica, and a webserver Container App that can scale to
 zero. The scheduler is the component that must remain running for daily runs;

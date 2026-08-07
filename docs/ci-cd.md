@@ -50,5 +50,7 @@ Configure these additional GitHub secrets before using the deployment workflow:
 optionally `TF_VAR_POSTGRES_ALLOWED_IP` to preserve the development PostgreSQL
 firewall rule.
 The GitHub OIDC principal also needs `Storage Blob Data Contributor` on the
-Terraform state storage account. The local developer role assignment does not
-automatically grant that permission to GitHub Actions.
+Terraform state storage account, `Contributor` and `User Access Administrator`
+on `taxlens-dev-rg`, and `Key Vault Secrets Officer` on `taxlensdevkv` so the
+workflow can plan/apply the Terraform-managed stack. Local developer access is
+kept separately for emergency recovery.

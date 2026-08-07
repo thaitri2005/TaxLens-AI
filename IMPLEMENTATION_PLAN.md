@@ -936,7 +936,7 @@ These estimates assume one developer working part-time to full-time and a prepar
 
 Do not treat dates as promises. Treat the acceptance criteria as the schedule authority.
 
-### Current milestone status — 2026-08-05
+### Current milestone status — 2026-08-07
 
 - **M0–M2:** complete for the local vertical slice, including schema, seed
   ingestion, two official-source connectors, PDF processing, and idempotency.
@@ -1053,13 +1053,18 @@ approved.
 - Document required GitHub secrets, environment protection, release tags, and
   rollback expectations.
 
+M8 is deployed and verified. Remote Terraform state is active, GitHub OIDC
+authenticates without Azure passwords, immutable API/web/Airflow images are
+published to ACR, and a protected workflow has successfully applied a clean
+plan containing four in-place image updates and zero resource destruction.
+
 M6 began with the storage and deployment contract: `ObjectStorage` selects
 local files or Azure Blob through configuration, while production images use a
 separate cloud dependency set. Phase 1 foundation, Phase 2 database, and
 Phase 3 identity/secrets and the core Container Apps deployment are complete.
 Cloud bootstrap has been verified with official documents, OCR, embeddings,
-hybrid search, and Q&A. Airflow remains separate until the core services are
-stable and its hosting cost is understood.
+hybrid search, Q&A, authentication, Airflow, and CI/CD. Airflow remains a
+separate scheduled service with a paused DAG and deliberate manual triggering.
 
 After M5, begin deployment hardening and Azure planning. Do not introduce
 managed OCR or managed embeddings: Tesseract is the permanent OCR fallback,

@@ -1,24 +1,110 @@
 # TaxLens AI
 
-TaxLens is a Vietnamese tax-regulatory intelligence workspace. It discovers official documents, extracts and indexes their contents, supports hybrid keyword/semantic retrieval, and returns evidence-grounded answers with links to the official source.
+**Cloud-native regulatory intelligence for Vietnamese tax professionals.**
 
-## Current architecture
+TaxLens continuously discovers official Vietnamese tax documents, extracts and
+indexes their contents, retrieves relevant provisions, and answers questions
+with article-level citations that link back to the government source.
 
-```text
-Next.js web app
-        │
-        ▼
-FastAPI API ─── PostgreSQL + pgvector
-   │       │
-   │       ├── native PDF extraction → local Tesseract OCR fallback
-   │       ├── baked multilingual-e5-small embeddings
-   │       └── Hugging Face routed chat inference
-   │
-Apache Airflow → authenticated API jobs
-                 discovery → processing → embedding → evaluation
+This is a portfolio project focused on practical AI platform engineering—not a
+generic PDF chatbot. It demonstrates how to build, evaluate, secure, deploy,
+and operate an evidence-first RAG system under a constrained budget.
+
+## Live demo
+
+The development deployment is available at:
+
+**Web application:**
+`https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io`
+
+The application includes authentication, hybrid regulation search, cited Q&A,
+document browsing, and document comparison. The Airflow UI is deployed
+separately and remains protected/paused unless a scheduled ingestion run is
+intentionally enabled.
+
+## Why this project matters
+
+Tax professionals need more than a keyword search box. They need to know:
+
+- Which official document contains the applicable rule?
+- Which article and page support the answer?
+- Is the document current, superseded, or amended?
+- What changed between two versions?
+- What should be reviewed next?
+
+TaxLens addresses those needs with source discovery, versioned legal metadata,
+hybrid retrieval, grounded generation, citation validation, and scheduled
+ingestion.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    User[Authenticated user] --> Web[Next.js web app]
+    Web --> Proxy[Next.js API proxy]
+    Proxy --> API[Private FastAPI API]
+
+    API --> Auth[Auth.js identity headers]
+    API --> Graph[LangGraph Q&A workflow]
+    Graph --> Retrieval[Hybrid retrieval]
+    Retrieval --> FTS[PostgreSQL full-text search]
+    Retrieval --> Vector[pgvector semantic search]
+    Vector --> Embed[Multilingual E5 small CPU model]
+    Graph --> HF[Hugging Face chat inference]
+    Graph --> Citations[Citation validation]
+    Citations --> Web
+
+    Airflow[Airflow scheduler + webserver] --> Jobs[Authenticated API jobs]
+    Jobs --> Discover[Source discovery]
+    Jobs --> Process[PDF extraction + Tesseract fallback]
+    Jobs --> EmbedJob[Embedding and indexing]
+    Jobs --> Eval[MLflow / RAG evaluation]
+
+    API --> DB[(Azure PostgreSQL + pgvector)]
+    API --> Blob[(Azure Blob Storage)]
+    API --> KV[Azure Key Vault]
+    Web -. public ingress .-> Internet((Internet))
 ```
 
-The API and web app are separate services. Airflow is a required scheduled-ingestion component. LangGraph controls the Q&A workflow and LangChain is used only at the provider/prompt boundary. MLflow and deterministic RAGAS-style evaluation are available for evaluation runs, but are disabled during normal user traffic.
+The web and API are separate services. FastAPI is private in Azure and is
+reachable through the Next.js proxy. Airflow does not access application tables
+directly; it calls a small authenticated internal job boundary.
+
+## Engineering highlights
+
+- **Hybrid legal retrieval:** PostgreSQL full-text search, pgvector semantic
+  search, metadata filters, and lightweight score blending.
+- **Grounded Q&A:** LangGraph controls retrieval, evidence validation,
+  generation, citation validation, and safe fallback behavior.
+- **Replaceable providers:** LangChain is used at the adapter boundary;
+  Hugging Face model and routing policy are configuration-driven.
+- **Vietnamese document processing:** native PDF extraction runs first, with
+  Vietnamese/English Tesseract OCR for image-only or unusable PDFs.
+- **Scheduled ingestion:** Airflow runs discovery, processing, OCR, embedding,
+  and retrieval evaluation as idempotent tasks.
+- **LLMOps workflow:** MLflow tracks evaluation runs and deterministic
+  RAG-style metrics measure retrieval and answer behavior.
+- **Security:** Auth.js credentials login, Argon2id password hashing,
+  admin/user roles, private FastAPI ingress, Key Vault secrets, managed
+  identity, and rate limiting for inference-backed Q&A.
+- **Cloud delivery:** Terraform-managed Azure resources, remote Blob state,
+  GitHub OIDC, immutable image tags, protected plans, and human-approved apply.
+
+## Technology stack
+
+| Area | Technology |
+| --- | --- |
+| Frontend | Next.js, TypeScript, Auth.js |
+| API | FastAPI, Python 3.12, SQLAlchemy, Alembic |
+| Retrieval | PostgreSQL full-text search, pgvector, reranking boundary |
+| Embeddings | `intfloat/multilingual-e5-small`, CPU inference |
+| Chat inference | Hugging Face Inference Providers, configurable routing |
+| LLM workflow | LangGraph, LangChain adapter |
+| Evaluation | MLflow, RAGAS-style deterministic metrics |
+| Ingestion | Apache Airflow, idempotent API jobs |
+| OCR | Tesseract with `vie` and `eng` language data |
+| Cloud | Azure Container Apps, PostgreSQL Flexible Server, Blob Storage, Key Vault, ACR |
+| Infrastructure | Terraform, GitHub Actions, Azure OIDC |
 
 ## Run locally
 
@@ -26,14 +112,9 @@ Prerequisites: Python 3.12 and Docker Desktop with Compose.
 
 ```powershell
 Copy-Item .env.example .env
-docker compose up -d
-```
-
-Airflow and MLflow are optional local profiles. Start them only when needed:
-
-```powershell
-docker compose --profile airflow --profile llmops up -d
-docker compose --profile airflow --profile llmops down
+docker compose up -d postgres api web
+docker compose exec -T api alembic upgrade head
+docker compose exec -T api python scripts/seed.py
 ```
 
 Open:
@@ -41,89 +122,119 @@ Open:
 | Service | URL |
 | --- | --- |
 | Web app | `http://localhost:3000` |
-| API | `http://localhost:8000` |
 | API docs | `http://localhost:8000/docs` |
 | Airflow | `http://localhost:8080` |
 | MLflow | `http://localhost:5000` |
 
-Authentication is enabled locally. Set `AUTH_INTERNAL_TOKEN`, `NEXTAUTH_SECRET`, and
-`AUTH_INITIAL_ADMIN_PASSWORD` in `.env`, run the migration and seed commands in
-`docs/authentication.md`, then sign in at `http://localhost:3000/login`.
+Authentication is enabled locally. Configure the development values described
+in `docs/authentication.md`, then sign in at `http://localhost:3000/login`.
 
-The Airflow user is created from `AIRFLOW_ADMIN_USERNAME` and `AIRFLOW_ADMIN_PASSWORD`. If the Airflow metadata volume already exists, changing `.env` does not change the stored password; reset it with:
+Start optional LLMOps services when needed:
 
 ```powershell
-docker compose --profile airflow exec -T airflow-scheduler airflow users reset-password --username admin --password <new-password>
+docker compose --profile airflow --profile llmops up -d
 ```
 
-Run the daily DAG from Airflow by unpausing `tax_regulation_discovery_daily` and triggering it manually. It executes discovery, processing/OCR, embedding, and retrieval evaluation in order.
+The daily DAG is intentionally paused by default. Unpause and trigger
+`tax_regulation_discovery_daily` only when you want to run discovery,
+processing/OCR, embedding, and evaluation.
 
 ## Development checks
 
+Run the same checks used by CI before pushing:
+
 ```powershell
-$env:PYTHONPATH = "src"
-python -m pytest
 python -m ruff check src tests scripts
 python -m mypy src
+python -m pytest
 ```
 
-For optional evaluation dependencies:
+The current test suite covers authentication, protected routes, role-based
+authorization, retrieval, citations, ingestion, document processing, and API
+contracts.
 
-```powershell
-python -m pip install -e ".[dev,llmops]"
+## Deployment workflow
+
+Azure deployment is intentionally controlled rather than automatic:
+
+1. `release-images.yml` builds and publishes API, web, and Airflow images under
+   an immutable commit-SHA tag.
+2. `deploy.yml` generates a Terraform plan using the remote Azure Blob state.
+3. A human reviews the plan.
+4. The protected deployment environment applies the reviewed plan.
+
+Production secrets remain in GitHub Actions secrets and Azure Key Vault. Azure
+authentication uses GitHub OIDC rather than stored cloud passwords.
+
+See:
+
+- `docs/local-development.md` — local API, ingestion, and processing workflow
+- `docs/authentication.md` — local authentication setup and security contract
+- `docs/llmops-local.md` — LangGraph, MLflow, and evaluation workflow
+- `docs/airflow-local.md` — local Airflow profile and DAG operations
+- `docs/deployment.md` — Azure topology, smoke checks, and operations
+- `docs/ci-cd.md` — GitHub Actions, OIDC, remote state, and approvals
+- `IMPLEMENTATION_PLAN.md` — detailed development blueprint and milestone status
+- `projectstructure.txt` — full system structure and design rationale
+
+## Cost-conscious design
+
+- The small multilingual embedding model is baked into the API image and runs
+  on CPU, avoiding a managed embedding endpoint for every chunk.
+- Native extraction runs before Tesseract, so OCR is used only when necessary.
+- Hugging Face routing is configurable and defaults to the cheapest policy.
+- PostgreSQL and pgvector consolidate relational, metadata, full-text, and
+  vector storage into one managed database.
+- Airflow and MLflow are separated from the request path and can be stopped or
+  scaled down during development.
+- Azure resources use small development SKUs and immutable image revisions.
+
+## Portfolio scope and limitations
+
+TaxLens is a working development deployment and resume project, not legal or
+tax advice. The initial corpus is intentionally small and source coverage is
+still curated. OCR quality varies with scanned document quality, and the
+development deployment prioritizes a demonstrable architecture over production
+scale.
+
+The next logical production-hardening items are private database networking,
+monitoring alerts, backup/restore drills, deployment rollback automation, and
+broader source coverage.
+
+## Screenshots
+
+Place screenshots in `docs/assets/` and reference them from Markdown:
+
+```markdown
+![TaxLens hybrid search](docs/assets/search.png)
 ```
 
-Run semantic evaluation inside the API container because the embedding model is baked into that image:
+### Search workspace
 
-```powershell
-docker compose exec -T -e MLFLOW_ENABLED=true -e MLFLOW_TRACKING_URI=http://mlflow:5000 api python scripts/evaluate_qa.py
-```
+![TaxLens search workspace](docs/assets/pic1.png)
 
-Host-side `--keyword-only` mode is only a smoke test and is not comparable to production semantic-hybrid retrieval.
+![TaxLens search results](docs/assets/pic2.png)
 
-## Cost-conscious design decisions
+### Ask TaxLens
 
-- `intfloat/multilingual-e5-small` is packaged into the API image and runs on CPU; embeddings are stored in PostgreSQL/pgvector.
-- Native PDF extraction runs first. Vietnamese/English Tesseract OCR is used only when native extraction is unusable. No managed OCR service is required.
-- Chat inference uses configurable Hugging Face Inference Providers and the `:cheapest` routing policy by default. The model and provider remain replaceable through environment settings.
-- MLflow and evaluation services are opt-in; they do not add normal request costs.
+![Ask TaxLens cited response](docs/assets/pic3.png)
 
-## Milestones
+Recommended portfolio screenshots are:
 
-- M0–M5: local ingestion, OCR, hybrid retrieval, citations, API, frontend, evaluation, and hardening complete.
-- M5.5: LangGraph, LangChain adapter, Airflow scheduling, MLflow tracking, and semantic QA evaluation complete.
-- M6: Azure foundation, PostgreSQL/pgvector, Key Vault, managed identity, RBAC, private API/public web Container Apps, cloud migrations, official-document OCR, embeddings, hybrid search, and grounded Q&A are complete.
-- M6.4: Cloud operational hardening, request/job observability, stable deployment smoke checks, and cost/networking guardrails are complete.
-- M7: Airflow is deployed as a separate Azure scheduler/webserver pair with a dedicated metadata database and Key Vault-backed credentials.
+1. Hybrid search results with article/page citations.
+2. Evidence-grounded Q&A with cited sources.
+3. Document comparison view.
+4. Airflow DAG page showing the scheduled ingestion graph.
+5. GitHub Actions plan/apply workflow or Azure Container Apps topology.
 
-## Azure deployment
+Keep screenshots free of passwords, tokens, personal data, and unnecessary
+browser chrome. A short GIF showing search → cited answer is also effective.
 
-Visit the live cloud deployment at:
+## Resume-ready summary
 
-```text
-https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io
-```
-
-It contains two official documents, OCR-processed chunks, pgvector
-embeddings, hybrid search, and cited Q&A. See `docs/deployment.md` for the
-deployment contract and cloud bootstrap workflow.
-
-The Airflow UI is available at:
-
-```text
-https://taxlens-dev-airflow-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io
-```
-
-The daily DAG is deployed paused. Unpause and trigger it from Airflow only when
-you want to run discovery, processing/OCR, embedding, and retrieval evaluation.
-
-Known development limitations: PostgreSQL currently uses the Azure-services
-firewall sentinel and the government catalog can require a curated manifest.
-See `docs/deployment.md` for the production checklist covering private
-networking, immutable image tags, and Airflow cost controls.
-
-See `IMPLEMENTATION_PLAN.md`, `projectstructure.txt`, and `docs/` for the authoritative implementation blueprint and local operating instructions.
-
-CI/CD is documented in `docs/ci-cd.md`. Pull requests run backend, frontend,
-and Terraform validation; Azure image publishing is a manually triggered,
-protected workflow.
+> Built and deployed a cloud-native Vietnamese tax-regulatory intelligence
+> platform using FastAPI, Next.js, PostgreSQL/pgvector, LangGraph, Airflow,
+> MLflow, Hugging Face inference, Tesseract OCR, Terraform, and Azure Container
+> Apps. Implemented hybrid retrieval, article-level citations, version
+> comparison, authenticated role-based access, scheduled ingestion, evaluation
+> tracking, and OIDC-based protected CI/CD.
