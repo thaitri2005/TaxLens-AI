@@ -1,10 +1,12 @@
 from datetime import date
+from uuid import uuid4
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
+from taxlens.api.auth import AuthenticatedUser, require_authenticated_user
 from taxlens.api.main import create_app
 from taxlens.db import get_db_session
 from taxlens.legal_data.models import (
@@ -42,6 +44,9 @@ def test_search_api_returns_citation_ready_results() -> None:
             yield session
 
     app.dependency_overrides[get_db_session] = override_session
+    app.dependency_overrides[require_authenticated_user] = lambda: AuthenticatedUser(
+        id=uuid4(), username="test-user", role="user"
+    )
     client = TestClient(app)
 
     response = client.get("/search", params={"q": "invoice", "legal_status": "EFFECTIVE"})
@@ -67,6 +72,9 @@ def test_search_api_filters_by_official_source() -> None:
             yield session
 
     app.dependency_overrides[get_db_session] = override_session
+    app.dependency_overrides[require_authenticated_user] = lambda: AuthenticatedUser(
+        id=uuid4(), username="test-user", role="user"
+    )
     client = TestClient(app)
 
     response = client.get("/search", params={"q": "invoice", "source_name": "mof-vbpq"})

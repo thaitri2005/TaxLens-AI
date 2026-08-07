@@ -1,10 +1,12 @@
 from datetime import date
+from uuid import uuid4
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
+from taxlens.api.auth import AuthenticatedUser, require_authenticated_user
 from taxlens.api.main import create_app
 from taxlens.db import get_db_session
 from taxlens.legal_data.models import (
@@ -67,6 +69,9 @@ def test_document_endpoints_return_persisted_documents() -> None:
             yield session
 
     app.dependency_overrides[get_db_session] = override_session
+    app.dependency_overrides[require_authenticated_user] = lambda: AuthenticatedUser(
+        id=uuid4(), username="test-user", role="user"
+    )
     client = TestClient(app)
 
     list_response = client.get("/documents")
