@@ -4,15 +4,12 @@
 **Project type:** Cloud-native regulatory intelligence and LLMOps platform
 **Target users:** Accountants, auditors, tax consultants, accounting firms, and in-house tax professionals
 **Primary cloud:** Microsoft Azure
-**Primary portfolio objective:** Demonstrate end-to-end AI platform engineering rather than another PDF chatbot.
 
-**Implementation rule:** This is a long-term blueprint, not a claim that every component is required on day one. The build should start as a modular monolith and add infrastructure only when a measurable workload or portfolio objective justifies it. Sections below label the intended **MVP**, **later release**, or **stretch** scope without removing the long-term architecture.
-
-The project’s central idea remains:
+The project’s central idea:
 
 > TaxLens continuously collects Vietnamese tax regulations, structures and versions them, detects relevant changes, and helps tax professionals understand what changed, why it matters, and where the conclusion came from.
 
-This preserves the original vision of a hybrid structured–unstructured system using Blob Storage, PostgreSQL, pgvector, Airflow, FastAPI, a self-hosted multilingual embedding model, Hugging Face routed inference, LangGraph, LangChain adapters, MLflow, RAGAS-style evaluation, authentication, monitoring, and automated deployment. The practical path is to introduce these in phases rather than operate all of them in the first local environment.
+This preserves the original vision of a hybrid structured–unstructured system using Blob Storage, PostgreSQL, pgvector, Airflow, FastAPI, a self-hosted multilingual embedding model, Hugging Face routed inference, LangGraph, LangChain adapters, MLflow, RAGAS-style evaluation, authentication, monitoring, and automated deployment. The practical path is to introduce these in phases.
 
 ---
 
@@ -82,8 +79,6 @@ The first supported categories should be:
 * Electronic invoices
 * Import and export tax
 * Customs-related tax obligations
-
-This scope is already large enough to justify the architecture while keeping collection, labeling, evaluation, and demonstration manageable.
 
 ## 2.2 Initial document types
 
@@ -2440,46 +2435,9 @@ Build **one** deeply:
 * Or regulatory alerts
 * Or company-specific impact analysis
 
-For the CV, document versioning and comparison are probably the strongest first differentiator.
-
 ---
 
-# 21. What Not to Add Initially
-
-Do not add these merely to accumulate keywords:
-
-* Kafka
-* Spark
-* Neo4j
-* A separate vector database
-* Multiple microservices
-* Multiple LLM vendors
-* Distributed model serving
-* Fine-tuning
-* GPU infrastructure
-* Autonomous web agents
-* Payment processing
-* A mobile application
-
-They introduce complexity without improving the first demonstration.
-
-The project already provides enough engineering depth through:
-
-* Scheduled ingestion
-* Hybrid storage
-* Legal versioning
-* Structured metadata
-* Vector retrieval
-* LLM workflows
-* Evaluation
-* Authentication
-* Azure deployment
-* CI/CD
-* Observability
-
----
-
-# 22. Primary Demo Scenario
+# 21. Primary Demo Scenario
 
 The final demonstration should tell one coherent story.
 
@@ -2547,29 +2505,7 @@ This proves the project is an operated AI platform, not just a frontend connecte
 
 ---
 
-# 23. CV Positioning
-
-## Project title
-
-**TaxLens AI — Cloud-Native Regulatory Intelligence Platform**
-
-## One-line description
-
-Designed and deployed an Azure-based regulatory intelligence platform that continuously ingests Vietnamese tax regulations, versions legal documents, performs hybrid retrieval, and generates evidence-grounded analysis for accountants and auditors.
-
-## Potential bullets after implementation
-
-* Engineered an Airflow-based ingestion pipeline to detect, extract, classify, version, and index Vietnamese tax regulations across Azure Blob Storage and PostgreSQL.
-* Developed a hybrid legal retrieval system combining PostgreSQL full-text search, pgvector semantic search, metadata filtering, and reranking for article-level cited responses.
-* Built a LangGraph workflow for regulatory Q&A, document comparison, evidence validation, and user-specific impact analysis through FastAPI and a provider-neutral Hugging Face inference adapter.
-* Implemented an LLMOps evaluation pipeline with MLflow, retrieval metrics, faithfulness testing, prompt versioning, latency monitoring, and regression checks.
-* Containerized the platform and automated infrastructure and deployment using Docker, Terraform, GitHub Actions, Azure Container Registry, Key Vault, and managed Azure services.
-
-Only insert measured numbers once the benchmarks genuinely exist.
-
----
-
-# 24. Final Technology Stack
+# 22. Final Technology Stack
 
 | Layer                  | Technology                                 |
 | ---------------------- | ------------------------------------------ |
@@ -2611,27 +2547,3 @@ native extraction plus local Tesseract OCR, baked-in E5 embeddings, the
 configurable Hugging Face chat adapter, LangGraph, LangChain, Airflow, MLflow
 evaluation hooks, Docker Compose, pytest, and Alembic. Redis, monitoring, and
 managed Azure services remain downstream M6/operations work.
-
----
-
-# 25. The Project’s Core Identity
-
-The project should always be described in this order:
-
-1. **Continuous regulatory ingestion**
-2. **Structured legal data and versioning**
-3. **Hybrid legal retrieval**
-4. **Evidence-grounded AI analysis**
-5. **Alerts and professional workflows**
-6. **LLMOps evaluation**
-7. **Azure deployment and operations**
-
-Never lead with:
-
-> “It is a chatbot for Vietnamese tax law.”
-
-Lead with:
-
-> **TaxLens AI is a cloud-native regulatory intelligence platform that continuously collects and versions Vietnamese tax regulations, detects changes, and delivers cited analysis to accountants and auditors.**
-
-That is the established project structure we should treat as the master blueprint going forward.

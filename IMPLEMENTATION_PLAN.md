@@ -5,8 +5,6 @@
 **Related blueprint:** `projectstructure.txt`  
 **Planning rule:** The blueprint describes the target system; this document describes the order in which to build it.
 
-This plan is designed for implementation by one developer or multiple contributors working against stable module interfaces. It focuses on code structure, build order, technical dependencies, test coverage, and executable acceptance criteria.
-
 ---
 
 ## 1. Delivery Strategy
@@ -1052,37 +1050,6 @@ approved.
   the protected `azure-deploy` environment and an explicit `apply` input.
 - Document required GitHub secrets, environment protection, release tags, and
   rollback expectations.
-
-M8 is deployed and verified. Remote Terraform state is active, GitHub OIDC
-authenticates without Azure passwords, immutable API/web/Airflow images are
-published to ACR, and a protected workflow has successfully applied a clean
-plan containing four in-place image updates and zero resource destruction.
-
-M6 began with the storage and deployment contract: `ObjectStorage` selects
-local files or Azure Blob through configuration, while production images use a
-separate cloud dependency set. Phase 1 foundation, Phase 2 database, and
-Phase 3 identity/secrets and the core Container Apps deployment are complete.
-Cloud bootstrap has been verified with official documents, OCR, embeddings,
-hybrid search, Q&A, authentication, Airflow, and CI/CD. Airflow remains a
-separate scheduled service with a paused DAG and deliberate manual triggering.
-
-After M5, begin deployment hardening and Azure planning. Do not introduce
-managed OCR or managed embeddings: Tesseract is the permanent OCR fallback,
-and `multilingual-e5-small` remains packaged in the API image. The hosted
-design should preserve the same API/web separation and use managed
-PostgreSQL with pgvector plus object storage only when persistence requires it.
-
-The API image now separates the cached runtime dependency layer from source
-code, migrations, and scripts so normal code changes do not reinstall PyTorch
-or redownload the embedding model. The initial cloud slice still keeps the
-small E5 model in the API image to minimize moving parts. After cloud bootstrap
-is validated, evaluate a separate embedding worker/service if API cold starts,
-memory pressure, or ingestion throughput justify the extra Container App.
-
-The Airflow implementation deliberately avoids mounting the Docker socket.
-The scheduler calls four authenticated, allowlisted API job endpoints, which
-keeps orchestration separate from the API while allowing the same workflow to
-move to Azure Container Apps Jobs or a managed scheduler during M6.
 
 ---
 

@@ -197,17 +197,7 @@ still curated. OCR quality varies with scanned document quality, and the
 development deployment prioritizes a demonstrable architecture over production
 scale.
 
-The next logical production-hardening items are private database networking,
-monitoring alerts, backup/restore drills, deployment rollback automation, and
-broader source coverage.
-
 ## Screenshots
-
-Place screenshots in `docs/assets/` and reference them from Markdown:
-
-```markdown
-![TaxLens hybrid search](docs/assets/search.png)
-```
 
 ### Search workspace
 
@@ -218,14 +208,3 @@ Place screenshots in `docs/assets/` and reference them from Markdown:
 ### Ask TaxLens
 
 ![Ask TaxLens cited response](docs/assets/pic3.png)
-
-Recommended portfolio screenshots are:
-
-1. Hybrid search results with article/page citations.
-2. Evidence-grounded Q&A with cited sources.
-3. Document comparison view.
-4. Airflow DAG page showing the scheduled ingestion graph.
-5. GitHub Actions plan/apply workflow or Azure Container Apps topology.
-
-Keep screenshots free of passwords, tokens, personal data, and unnecessary
-browser chrome. A short GIF showing search → cited answer is also effective.
