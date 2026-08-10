@@ -110,6 +110,17 @@ resource "azurerm_container_app" "airflow_scheduler" {
         name  = "TAXLENS_API_URL"
         value = "http://${azurerm_container_app.api.name}"
       }
+      # Azure Container Apps terminates HTTP requests after 240 seconds.
+      # Keep processing batches to one document so a slow OCR job cannot
+      # take down the whole Airflow task at the ingress boundary.
+      env {
+        name  = "TAXLENS_PROCESS_BATCH_SIZE"
+        value = "1"
+      }
+      env {
+        name  = "TAXLENS_PROCESS_MAX_BATCHES"
+        value = "20"
+      }
     }
   }
 }

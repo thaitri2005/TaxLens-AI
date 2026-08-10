@@ -28,3 +28,8 @@ request limit. `TAXLENS_PROCESS_BATCH_SIZE` controls documents per request and
 `TAXLENS_PROCESS_MAX_BATCHES` controls how many requests the DAG makes. No
 Docker socket is exposed to Airflow. For M6, these endpoints can be replaced
 by Container Apps Jobs without changing the DAG task boundaries.
+
+Documents that fail processing, such as image-only PDFs that produce
+`OCR_REQUIRED`, are skipped on later scheduled runs so one bad document does
+not consume the whole retry budget. Retry one after fixing OCR with
+`/internal/airflow/process?limit=1&retry_failed=true`.

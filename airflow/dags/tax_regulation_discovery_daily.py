@@ -22,7 +22,7 @@ def run_api_job(endpoint: str, **_: object) -> None:
 
 
 def _run_processing_batches(base_url: str, token: str) -> None:
-    batch_size = int(os.getenv("TAXLENS_PROCESS_BATCH_SIZE", "5"))
+    batch_size = int(os.getenv("TAXLENS_PROCESS_BATCH_SIZE", "1"))
     max_batches = int(os.getenv("TAXLENS_PROCESS_MAX_BATCHES", "20"))
     if batch_size < 1 or max_batches < 1:
         raise ValueError("Processing batch settings must be at least 1")

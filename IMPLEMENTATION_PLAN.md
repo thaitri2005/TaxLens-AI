@@ -650,7 +650,9 @@ scripts for daily discovery, processing, embedding, and evaluation. Airflow
 must keep each API job request below the Container Apps ingress timeout; the
 current processing task therefore sends bounded document batches and repeats
 the internal processing endpoint until the backlog is drained or the configured
-batch budget is reached.
+batch budget is reached. Versions with a recorded processing failure are
+skipped on later scheduled runs by default and can be explicitly retried after
+the underlying OCR or document issue is corrected.
 must not duplicate domain logic. Acceptance requires one successful local DAG
 run, retry visibility, backfill behavior, and a documented path to schedule
 the same DAGs in Azure later.

@@ -165,6 +165,14 @@ and `TAXLENS_PROCESS_MAX_BATCHES`) because standard Container Apps HTTP ingress
 requests are limited to 240 seconds. If OCR backlog grows beyond one scheduled
 batch budget, increase the number of batches or move processing to a dedicated
 Container Apps Job/worker rather than increasing the synchronous request size.
+The Azure Terraform configuration pins the scheduler batch size to `1`; only
+increase it after measuring the slowest document-processing request safely
+below that limit.
+
+Failed document versions are excluded from later scheduled batches by default.
+This prevents an image-only or persistently malformed PDF from being retried on
+every daily run. Use the internal processing endpoint with `retry_failed=true`
+after correcting the underlying OCR or document issue.
 
 ## Required production settings
 

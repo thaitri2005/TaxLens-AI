@@ -1,11 +1,11 @@
 import argparse
 import time
 
-from sqlalchemy import select
+from sqlalchemy import exists, select
 
 from taxlens.db import SessionLocal
 from taxlens.document_processing.process import process_document_version
-from taxlens.legal_data.models import DocumentVersion, LegalDocument
+from taxlens.legal_data.models import DocumentVersion, LegalDocument, ProcessingJob
 from taxlens.storage.factory import get_object_storage
 
 
@@ -17,6 +17,11 @@ def main() -> None:
         type=int,
         help="Process at most this many document versions in one bounded batch",
     )
+    parser.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help="Include document versions whose latest processing job failed",
+    )
     arguments = parser.parse_args()
     if arguments.limit is not None and arguments.limit < 1:
         parser.error("--limit must be at least 1")
@@ -26,6 +31,12 @@ def main() -> None:
         query = select(DocumentVersion).join(LegalDocument).order_by(DocumentVersion.created_at)
         if not arguments.all:
             query = query.where(DocumentVersion.normalized_content_hash.is_(None))
+        if not arguments.retry_failed:
+            failed_job = select(ProcessingJob.id).where(
+                ProcessingJob.document_version_id == DocumentVersion.id,
+                ProcessingJob.status == "FAILED",
+            )
+            query = query.where(~exists(failed_job))
         if arguments.limit is not None:
             query = query.limit(arguments.limit)
         versions = session.scalars(query).all()

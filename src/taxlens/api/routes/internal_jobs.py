@@ -35,10 +35,14 @@ def run_ingestion_job(
 @router.post("/process")
 def run_processing_job(
     x_taxlens_internal_token: str | None = Header(default=None),
-    limit: int = Query(default=5, ge=1, le=100),
+    limit: int = Query(default=1, ge=1, le=100),
+    retry_failed: bool = False,
 ) -> dict[str, str]:
     _authorize(x_taxlens_internal_token)
-    return _run_script("process_corpus.py", ["--limit", str(limit)])
+    arguments = ["--limit", str(limit)]
+    if retry_failed:
+        arguments.append("--retry-failed")
+    return _run_script("process_corpus.py", arguments)
 
 
 @router.post("/embed")
