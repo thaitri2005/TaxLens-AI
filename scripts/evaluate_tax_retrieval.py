@@ -10,6 +10,11 @@ from taxlens.config import get_settings
 from taxlens.db import SessionLocal
 from taxlens.evaluation.metrics import evaluate_retrieval
 from taxlens.evaluation.reports import persist_retrieval_report
+from taxlens.evaluation.retrieval_runner import (
+    evaluation_status,
+    evaluation_status_reason,
+    metrics_summary,
+)
 from taxlens.evaluation.tracking import get_experiment_tracker
 from taxlens.legal_data.models import (
     DocumentChunk,
@@ -158,10 +163,10 @@ def main() -> None:
         report for report in reports if report["coverage_status"] == "fully_covered"
     ]
     coverage_summary = _coverage_summary(reports, corpus_coverage)
-    evaluation_status = _evaluation_status(corpus_coverage)
-    metrics_by_k = {str(k): _metrics_summary(reports, k) for k in ks}
+    status = evaluation_status(corpus_coverage)
+    metrics_by_k = {str(k): metrics_summary(reports, k) for k in ks}
     fully_covered_metrics_by_k = {
-        str(k): _metrics_summary(fully_covered_reports, k) for k in ks
+        str(k): metrics_summary(fully_covered_reports, k) for k in ks
     }
     primary_metrics = metrics_by_k[str(primary_k)]
     primary_covered_metrics = fully_covered_metrics_by_k[str(primary_k)]
@@ -174,11 +179,11 @@ def main() -> None:
         "ks": ks,
         "k": primary_k,
         "case_count": count,
-        "evaluation_status": evaluation_status,
+        "evaluation_status": status,
         "quality_gate": {
-            "status": evaluation_status,
+            "status": status,
             "ranking_metrics_usable": bool(fully_covered_reports),
-            "reason": _evaluation_status_reason(evaluation_status),
+            "reason": evaluation_status_reason(status),
         },
         "corpus_coverage": corpus_coverage,
         "corpus_snapshot": corpus_snapshot,
@@ -266,53 +271,6 @@ def main() -> None:
             )
         tracker.log_metrics(tracking_metrics)
     print(json.dumps(persisted, ensure_ascii=False, indent=2))
-
-
-def _metrics_summary(reports: list[dict[str, Any]], k: int) -> dict[str, Any]:
-    if not reports:
-        return {
-            "case_count": 0,
-            "mean_hit_at_k": None,
-            "mean_precision_at_k": None,
-            "mean_recall_at_k": None,
-            "mean_reciprocal_rank": None,
-            "mean_ndcg_at_k": None,
-        }
-    metrics = [report["metrics_by_k"][str(k)] for report in reports]
-    return {
-        "case_count": len(metrics),
-        "mean_hit_at_k": sum(bool(item["hit_at_k"]) for item in metrics) / len(metrics),
-        "mean_precision_at_k": sum(
-            float(item["precision_at_k"]) for item in metrics
-        )
-        / len(metrics),
-        "mean_recall_at_k": sum(float(item["recall_at_k"]) for item in metrics)
-        / len(metrics),
-        "mean_reciprocal_rank": sum(
-            float(item["reciprocal_rank"]) for item in metrics
-        )
-        / len(metrics),
-        "mean_ndcg_at_k": sum(float(item["ndcg_at_k"]) for item in metrics)
-        / len(metrics),
-    }
-
-
-def _evaluation_status(corpus_coverage: dict[str, object]) -> str:
-    expected_count = int(corpus_coverage["expected_document_count"])
-    embedded_count = int(corpus_coverage["embedded_document_count"])
-    if embedded_count == 0:
-        return "not_evaluable"
-    if embedded_count < expected_count:
-        return "partial_coverage"
-    return "ready"
-
-
-def _evaluation_status_reason(status: str) -> str:
-    if status == "not_evaluable":
-        return "None of the expected evaluation documents are embedded"
-    if status == "partial_coverage":
-        return "Only some expected evaluation documents are embedded"
-    return "All expected evaluation documents are embedded"
 
 
 def _coverage_summary(

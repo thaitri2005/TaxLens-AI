@@ -1615,6 +1615,7 @@ taxlens-ai/
 │   │   ├── metrics.py           # retrieval and citation metrics
 │   │   ├── rag.py               # deterministic answer-quality metrics
 │   │   ├── reports.py           # latest and immutable evaluation artifacts
+│   │   ├── retrieval_runner.py  # coverage gates and metric aggregation
 │   │   └── tracking.py          # optional MLflow/no-op tracker
 │   ├── ingestion/               # seed and official-source connectors
 │   ├── intelligence/            # LangGraph Q&A, LangChain adapter, evidence, compare
