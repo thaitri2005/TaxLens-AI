@@ -163,14 +163,18 @@ latest report is available through the authenticated API endpoint
 `GET /evaluation/retrieval/latest`, while historical reports are retained under
 `evaluation/retrieval/runs/`.
 
-The labeled tax baseline currently reports `Hit@5`, Precision@5, Recall@5,
-MRR, and nDCG@5 for four queries. Each case is also marked as fully covered,
-partially covered, or not covered based on whether its expected documents are
-embedded. The report includes a coverage-adjusted summary for fully covered
-cases, so missing corpus documents are not confused with ranking failures.
+The labeled tax smoke set currently contains four queries. By default the
+runner reports `Hit@K`, Precision@K, Recall@K, MRR, and nDCG@K at K=1, 3, 5,
+and 10. Each case is marked as fully covered, partially covered, or not
+covered based on whether its expected documents are embedded. The report also
+has an explicit `evaluation_status`, dataset hash, corpus fingerprint, and a
+coverage-adjusted summary for fully covered cases. A run with no covered
+expected document is `not_evaluable`, so missing corpus documents are not
+confused with ranking failures.
+
 Treat these numbers as a regression baseline, not a quality claim: the
 evaluation set and corpus must be expanded before ranking quality can be judged
-confidently.
+confidently. See `data/evaluation/README.md` for the label contract.
 
 Search accepts `source_name`, `document_type`, `legal_status`, and
 `issuing_agency` filters. The document library accepts the same source,

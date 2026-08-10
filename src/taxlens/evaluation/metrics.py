@@ -35,7 +35,7 @@ def evaluate_retrieval(
     first_rank = next(
         (
             rank
-            for rank, chunk_id in enumerate(ranked_chunk_ids, start=1)
+            for rank, chunk_id in enumerate(ranked_at_k, start=1)
             if chunk_id in relevant_chunk_ids
         ),
         None,

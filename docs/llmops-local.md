@@ -57,6 +57,30 @@ run parameters and aggregate metrics to MLflow. The API image uses a small
 REST fallback when the optional MLflow Python package is not installed. MLflow
 remains disabled during normal user traffic.
 
+## Evaluation improvement roadmap
+
+The current four-case retrieval file is a smoke test. A trustworthy benchmark
+must first verify that its expected documents and versions exist in the
+embedded corpus. A zero score with zero coverage is reported as a corpus/data
+alignment problem, not as evidence that ranking failed.
+
+The next evaluation expansion is:
+
+1. grow the reviewed set to at least 50 cases with direct lookup, dates,
+   amendments, comparisons, multi-document synthesis, unsupported questions,
+   bilingual wording, and hard negatives;
+2. add article-level labels, version aliases, dataset hashes, and corpus
+   fingerprints;
+3. compare `--mode keyword`, `--mode semantic`, `--mode hybrid`, and optional
+   reranked retrieval at K=1, 3, 5, and 10;
+4. add reviewed answer/citation evaluation and optional bounded judge-model
+   checks; and
+5. add regression thresholds, coverage alerts, trend views, and sampled
+   production queries.
+
+The evaluator must keep corpus coverage, ranking quality, answer quality, and
+operational health as separate dimensions.
+
 ## Scheduled evaluation
 
 The Airflow daily DAG now runs discovery, processing, embedding, and retrieval

@@ -578,15 +578,48 @@ Show selected versions, article-level diff, added/removed/modified labels, sourc
 **Estimated effort:** 4–6 days initially, ongoing afterward  
 **Dependencies:** Phases 5 and 6
 
+### Evaluation roadmap and decision gates
+
+Evaluation work proceeds in this order so that ranking scores are not treated
+as meaningful before the corpus and labels support them:
+
+1. **Validity gate:** validate the dataset schema, normalize document/version
+   aliases, record a dataset hash and corpus snapshot, and report `not_evaluable`
+   when expected documents are absent or unembedded. Coverage must be shown
+   separately from ranking quality.
+2. **Retrieval gate:** measure document- and article-level relevance at multiple
+   K values with Hit@K, Precision@K, Recall@K, MRR, nDCG@K, empty-retrieval
+   rate, latency, and coverage-adjusted metrics.
+3. **Dataset gate:** grow the four-case smoke set into at least 50 reviewed
+   cases spanning lookup, dates, amendments, comparisons, synthesis,
+   unsupported questions, bilingual wording, and hard negatives. Keep stable
+   development and test splits with label provenance.
+4. **Baseline gate:** compare keyword-only, vector-only, hybrid, and optional
+   reranked retrieval against the same dataset and corpus snapshot.
+5. **Answer gate:** add reviewed Q&A cases for groundedness, citation
+   correctness/completeness, faithfulness, answerability, abstention, and legal
+   correctness. Judge-model metrics remain optional and cannot replace human
+   review for legal correctness.
+6. **Operations gate:** persist immutable reports, log model/config/data
+   versions, alert on coverage or protected-metric regressions, expose the
+   latest result through the API, and later add trend dashboards and production
+   query sampling.
+
 ### Work package 8.1 — Evaluation dataset
 
-Start with 50 reviewed questions, growing toward 75–150. Include direct lookup, effective dates, amendment identification, comparisons, multi-document synthesis, applicability, unsupported questions, and adversarial wording.
-
-Each item should record expected documents/articles, answerability, category, difficulty, and reference answer where feasible.
+The current four-case file is a smoke set, not a quality benchmark. Replace it
+with at least 50 reviewed questions, growing toward 75–150. Include direct
+lookup, effective dates, amendment identification, comparisons, multi-document
+synthesis, applicability, unsupported questions, bilingual/diacritic variants,
+and adversarial wording. Store expected documents/articles, version aliases,
+answerability, category, difficulty, label provenance, and reference answers
+where feasible.
 
 ### Work package 8.2 — Retrieval metrics
 
-Implement Recall@K, Precision@K, MRR, nDCG, empty-retrieval rate, and citation coverage.
+Implement Recall@K, Precision@K, MRR, nDCG, empty-retrieval rate, latency,
+article-level relevance, citation coverage, corpus coverage, and
+coverage-adjusted ranking metrics at K=1,3,5,10.
 
 ### Work package 8.3 — Answer metrics
 
@@ -594,14 +627,17 @@ Track answer relevance, factual correctness, citation correctness, citation comp
 
 ### Work package 8.4 — Baselines and regression
 
-Compare:
+Compare using the same corpus and dataset snapshot:
 
 1. metadata plus keyword;
 2. vector-only;
 3. hybrid retrieval;
 4. hybrid plus optional reranking.
 
-Store configuration snapshots and fail CI or scheduled evaluation when a protected metric regresses beyond a documented tolerance.
+Store configuration snapshots, corpus fingerprints, and dataset hashes. Fail
+CI or scheduled evaluation when a protected metric regresses beyond a
+documented tolerance, while distinguishing a stale/incomplete corpus from a
+ranking regression.
 
 ### Work package 8.5 — MLflow experiment tracking
 

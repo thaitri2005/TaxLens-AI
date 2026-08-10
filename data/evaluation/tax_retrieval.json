@@ -1,17 +1,21 @@
 [
   {
+    "case_id": "tax-retrieval-001",
     "query": "phí khai thác tài liệu địa chất",
     "relevant_document_numbers": ["11/2024/TT-BTC"]
   },
   {
+    "case_id": "tax-retrieval-002",
     "query": "hóa đơn điện tử VAT",
     "relevant_document_numbers": ["31/2025/TT-BTC", "02/2025/TT-BTC"]
   },
   {
+    "case_id": "tax-retrieval-003",
     "query": "thuế suất giá trị gia tăng",
     "relevant_document_numbers": ["31/2025/TT-BTC", "02/2025/TT-BTC"]
   },
   {
+    "case_id": "tax-retrieval-004",
     "query": "điều kiện khấu trừ thuế giá trị gia tăng",
     "relevant_document_numbers": ["31/2025/TT-BTC"]
   }

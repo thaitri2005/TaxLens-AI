@@ -1611,7 +1611,11 @@ taxlens-ai/
 ├── src/taxlens/
 │   ├── api/routes/              # FastAPI HTTP contracts
 │   ├── document_processing/     # native extraction + Tesseract fallback
-│   ├── evaluation/              # metrics, durable reports, and MLflow hook
+│   ├── evaluation/              # metrics, coverage gates, reports, MLflow hook
+│   │   ├── metrics.py           # retrieval and citation metrics
+│   │   ├── rag.py               # deterministic answer-quality metrics
+│   │   ├── reports.py           # latest and immutable evaluation artifacts
+│   │   └── tracking.py          # optional MLflow/no-op tracker
 │   ├── ingestion/               # seed and official-source connectors
 │   ├── intelligence/            # LangGraph Q&A, LangChain adapter, evidence, compare
 │   ├── legal_data/              # SQLAlchemy models
@@ -1619,6 +1623,7 @@ taxlens-ai/
 │   ├── storage/                 # local or Azure Blob artifact storage
 │   └── config.py
 ├── migrations/
+├── data/evaluation/             # versioned reviewed retrieval/QA datasets
 ├── requirements/
 │   └── api-runtime.txt          # cache-stable production dependency layer
 ├── scripts/                     # bounded ingestion, processing, embedding, evaluation

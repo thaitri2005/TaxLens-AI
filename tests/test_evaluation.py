@@ -25,6 +25,12 @@ def test_retrieval_metrics_handle_empty_relevance_and_invalid_k() -> None:
         evaluate_retrieval(["a"], {"a"}, k=0)
 
 
+def test_reciprocal_rank_is_bounded_by_k() -> None:
+    metrics = evaluate_retrieval(["irrelevant", "relevant"], {"relevant"}, k=1)
+
+    assert metrics.reciprocal_rank == 0.0
+
+
 def test_citation_completeness_checks_claim_references() -> None:
     claims = [
         CitedClaim(text="Fact one", citation_numbers=(1,)),
