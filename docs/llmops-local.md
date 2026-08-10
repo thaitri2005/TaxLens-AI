@@ -40,6 +40,10 @@ host-side smoke run. Keyword-only results are not comparable to the normal
 semantic-hybrid production path and may return insufficient evidence for
 Vietnamese queries with spelling or diacritic variation.
 
+The API image also packages the evaluation datasets under
+`/workspace/data/evaluation`, because the scheduled Airflow job runs the
+evaluation script inside the API container.
+
 The report includes faithfulness, answer relevancy, context precision, and
 citation completeness. These are deliberately cheap RAGAS-style metrics; a
 future judged evaluation can be added without changing the Q&A contract. The

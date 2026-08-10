@@ -26,6 +26,7 @@ COPY alembic.ini ./alembic.ini
 COPY migrations ./migrations
 COPY src ./src
 COPY scripts ./scripts
+COPY data/evaluation ./data/evaluation
 
 ENV HF_HUB_OFFLINE=1 \
     TRANSFORMERS_OFFLINE=1

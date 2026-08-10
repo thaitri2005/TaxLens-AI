@@ -45,8 +45,10 @@ use private networking or a controlled network boundary.
 ## Image contract
 
 The API image always contains Tesseract with `eng` and `vie` language data, the
-pinned `multilingual-e5-small` model, and the FastAPI application with bounded
-job scripts.
+pinned `multilingual-e5-small` model, the FastAPI application with bounded job
+scripts, and the versioned evaluation datasets under `data/evaluation`. The
+last item is required because Airflow invokes retrieval evaluation inside the
+API image rather than mounting the repository at runtime.
 
 The API Dockerfile installs the cached runtime dependency manifest from
 `requirements/api-runtime.txt` before copying application source. This keeps
