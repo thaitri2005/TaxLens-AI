@@ -20,7 +20,15 @@ def run_ingestion_job(
     _authorize(x_taxlens_internal_token)
     return _run_script(
         "ingest_sources.py",
-        ["--source", "government", "--limit", _source_limit(), "--download"],
+        [
+            "--source",
+            "government",
+            "--limit",
+            _source_limit(),
+            "--pages",
+            _discovery_pages(),
+            "--download",
+        ],
     )
 
 
@@ -103,4 +111,8 @@ def _run_script(script_name: str, arguments: list[str]) -> dict[str, str]:
 
 
 def _source_limit() -> str:
-    return os.getenv("TAXLENS_DAILY_SOURCE_LIMIT", "5")
+    return os.getenv("TAXLENS_DAILY_SOURCE_LIMIT", "100")
+
+
+def _discovery_pages() -> str:
+    return os.getenv("TAXLENS_DISCOVERY_PAGES", "10")

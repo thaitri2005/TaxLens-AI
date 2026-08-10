@@ -33,6 +33,36 @@ def test_official_connector_discovers_pdf_documents_and_deduplicates_links() -> 
     assert documents[0].title == "31/2025/TT-BTC guidance"
 
 
+def test_official_connector_follows_bounded_catalog_pagination() -> None:
+    pages = {
+        "https://government.test/catalog": (
+            '<a href="/catalog?page=2">2</a>'
+            '<a href="/files/31/2025/TT-BTC.pdf">31/2025/TT-BTC first</a>'
+        ),
+        "https://government.test/catalog?page=2": (
+            '<a href="/files/02/2025/TT-BTC.pdf">02/2025/TT-BTC second</a>'
+        ),
+    }
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, text=pages[ str(request.url) ])
+
+    connector = OfficialPortalConnector(
+        source_name="test-source",
+        catalog_url="https://government.test/catalog",
+        allowed_host="government.test",
+        max_pages=2,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    documents = connector.list_documents()
+
+    assert [document.document_number for document in documents] == [
+        "31/2025/TT-BTC",
+        "02/2025/TT-BTC",
+    ]
+
+
 def test_official_connector_extracts_basic_document_metadata() -> None:
     html = '<a href="/files/304/2026/304_2026_nd-cp.pdf">304/2026/NĐ-CP 03/08/2026</a>'
     client = httpx.Client(

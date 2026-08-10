@@ -1,5 +1,6 @@
 import argparse
 import hashlib
+import os
 from datetime import date
 
 from taxlens.db import SessionLocal
@@ -17,6 +18,12 @@ def main() -> None:
     parser.add_argument("--source", choices=("mof", "government"), required=True)
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument(
+        "--pages",
+        type=int,
+        default=int(os.getenv("TAXLENS_DISCOVERY_PAGES", "10")),
+        help="Maximum catalog pages to inspect when discovering documents",
+    )
+    parser.add_argument(
         "--url",
         help="Explicit official PDF URL; useful for portals with dynamic catalogs",
     )
@@ -31,12 +38,14 @@ def main() -> None:
     arguments = parser.parse_args()
     if arguments.limit < 1:
         parser.error("--limit must be at least 1")
+    if arguments.pages < 1:
+        parser.error("--pages must be at least 1")
     if arguments.url and not arguments.document_number:
         parser.error("--document-number is required with --url")
     if arguments.issue_date and not arguments.url:
         parser.error("--issue-date can only be used with --url")
 
-    connector = create_official_connector(arguments.source)
+    connector = create_official_connector(arguments.source, max_pages=arguments.pages)
     if arguments.url:
         try:
             issue_date = date.fromisoformat(arguments.issue_date) if arguments.issue_date else None

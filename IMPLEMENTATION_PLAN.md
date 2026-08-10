@@ -1247,4 +1247,9 @@ optional/configurable to control processing time and image size.
 The first labeled tax retrieval baseline contains four queries and currently
 reports `Hit@5=0.25`, `Recall@5=0.25`, and `MRR=0.25`. This confirms that the
 evaluation runner works and shows that corpus coverage—not prompt wording—must
-be addressed before ranking optimization.
+be addressed before ranking optimization. The evaluator now reports expected
+document coverage (present, chunked, and embedded) so a miss can be separated
+from a ranking failure. Government-source discovery follows bounded pagination
+with configurable `TAXLENS_DISCOVERY_PAGES` and `TAXLENS_DAILY_SOURCE_LIMIT`
+budgets; the default scheduled run inspects up to 10 catalog pages and ingests
+up to 100 documents.

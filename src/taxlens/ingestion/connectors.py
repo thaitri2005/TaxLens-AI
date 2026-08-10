@@ -7,7 +7,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Protocol, TypedDict
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qs, urljoin, urlparse
 
 import httpx
 
@@ -48,10 +48,14 @@ class OfficialPortalConnector:
         allowed_host: str | tuple[str, ...],
         client: httpx.Client | None = None,
         user_agent: str = "TaxLens-AI/0.1 (+https://github.com/taxlens-ai)",
+        max_pages: int = 1,
     ) -> None:
+        if max_pages < 1:
+            raise ValueError("max_pages must be at least 1")
         self.source_name = source_name
         self.catalog_url = catalog_url
         self.allowed_hosts = (allowed_host,) if isinstance(allowed_host, str) else allowed_host
+        self.max_pages = max_pages
         self._client = client or httpx.Client(
             timeout=httpx.Timeout(30.0),
             follow_redirects=True,
@@ -59,15 +63,38 @@ class OfficialPortalConnector:
         )
 
     def list_documents(self, since: date | None = None) -> list[SourceDocument]:
-        del since
-        response = self._request("GET", self.catalog_url)
+        documents: list[SourceDocument] = []
+        pending_urls = [self.catalog_url]
+        visited_urls: set[str] = set()
+        while pending_urls and len(visited_urls) < self.max_pages:
+            catalog_url = pending_urls.pop(0)
+            if catalog_url in visited_urls or not self._is_allowed(catalog_url):
+                continue
+            visited_urls.add(catalog_url)
+            response = self._request("GET", catalog_url)
+            page_documents, pagination_urls = self._parse_catalog_page(
+                response.text, catalog_url, since
+            )
+            documents.extend(page_documents)
+            for pagination_url in pagination_urls:
+                if pagination_url not in visited_urls and pagination_url not in pending_urls:
+                    pending_urls.append(pagination_url)
+        return _deduplicate_documents(documents)
+
+    def _parse_catalog_page(
+        self, html: str, catalog_url: str, since: date | None
+    ) -> tuple[list[SourceDocument], list[str]]:
         documents: list[SourceDocument] = []
         current_document_number: str | None = None
         current_title = ""
-        current_source_url = self.catalog_url
-        for href, raw_title in _extract_links(response.text):
-            content_url = urljoin(self.catalog_url, href)
+        current_source_url = catalog_url
+        pagination_urls: list[str] = []
+        for href, raw_title, attributes in _extract_links(html):
+            content_url = urljoin(catalog_url, href)
             if not self._is_allowed(content_url):
+                continue
+            if _is_pagination_link(href, raw_title, attributes):
+                pagination_urls.append(content_url)
                 continue
             match = _DOCUMENT_NUMBER_PATTERN.search(f"{content_url} {raw_title}".upper())
             is_attachment = (
@@ -81,6 +108,9 @@ class OfficialPortalConnector:
                 continue
             if not _is_pdf_url(content_url) or current_document_number is None:
                 continue
+            issue_date = _extract_issue_date(current_title)
+            if since is not None and issue_date is not None and issue_date < since:
+                continue
             document_number = current_document_number
             source_document_id = hashlib.sha256(content_url.encode()).hexdigest()[:24]
             documents.append(
@@ -93,10 +123,10 @@ class OfficialPortalConnector:
                     content_url=content_url,
                     document_type=_document_type(document_number),
                     issuing_agency=_ISSUING_AGENCIES.get(self.source_name),
-                    issue_date=_extract_issue_date(current_title),
+                    issue_date=issue_date,
                 )
             )
-        return _deduplicate_documents(documents)
+        return documents, pagination_urls
 
     def fetch_document(self, document: SourceDocument) -> bytes:
         self._validate_url(document.content_url)
@@ -150,6 +180,7 @@ class OfficialSourceConfig(TypedDict):
     source_name: str
     catalog_url: str
     allowed_host: str | tuple[str, ...]
+    max_pages: int
 
 
 OFFICIAL_SOURCE_CATALOGS: dict[str, OfficialSourceConfig] = {
@@ -157,23 +188,30 @@ OFFICIAL_SOURCE_CATALOGS: dict[str, OfficialSourceConfig] = {
         "source_name": "mof-vbpq",
         "catalog_url": "https://vbpq.mof.gov.vn/",
         "allowed_host": "vbpq.mof.gov.vn",
+        "max_pages": 5,
     },
     "government": {
         "source_name": "government-portal",
         "catalog_url": "https://vanban.chinhphu.vn/he-thong-van-ban?classid=1",
         "allowed_host": ("vanban.chinhphu.vn", "datafiles.chinhphu.vn"),
+        "max_pages": 10,
     },
 }
 
 
 def create_official_connector(
-    source: str, client: httpx.Client | None = None
+    source: str,
+    client: httpx.Client | None = None,
+    max_pages: int | None = None,
 ) -> OfficialPortalConnector:
     try:
         config = OFFICIAL_SOURCE_CATALOGS[source]
     except KeyError as error:
         raise ConnectorError(f"Unknown official source: {source}") from error
-    return OfficialPortalConnector(**config, client=client)
+    resolved_config = dict(config)
+    if max_pages is not None:
+        resolved_config["max_pages"] = max_pages
+    return OfficialPortalConnector(**resolved_config, client=client)
 
 
 _DOCUMENT_NUMBER_PATTERN = re.compile(
@@ -187,14 +225,25 @@ _ISSUING_AGENCIES = {
 }
 
 
-def _extract_links(html: str) -> Iterator[tuple[str, str]]:
+def _extract_links(html: str) -> Iterator[tuple[str, str, str]]:
     for match in re.finditer(
         r"<a\b[^>]*href=[\"']([^\"']+)[\"'][^>]*>(.*?)</a>",
         html,
         flags=re.IGNORECASE | re.DOTALL,
     ):
         title = re.sub(r"<[^>]+>", " ", match.group(2))
-        yield match.group(1), " ".join(title.split())
+        yield match.group(1), " ".join(title.split()), match.group(0)
+
+
+def _is_pagination_link(href: str, title: str, attributes: str) -> bool:
+    normalized_title = title.casefold().strip()
+    if "rel=\"next\"" in attributes.casefold() or "rel='next'" in attributes.casefold():
+        return True
+    if normalized_title in {"next", "sau", ">", "›", "»"}:
+        return True
+    query = parse_qs(urlparse(href).query)
+    pagination_keys = {"page", "pageindex", "p", "trang"}
+    return any(key.casefold() in pagination_keys for key in query)
 
 
 def _is_pdf_url(url: str) -> bool:

@@ -574,6 +574,7 @@ class SourceConnector:
 Responsibilities:
 
 * Discover source documents
+* Follow bounded catalog pagination where a source exposes it
 * Extract source URLs
 * Retrieve source metadata
 * Download files
@@ -618,6 +619,13 @@ PROCESSING_RETRY
 ```
 
 Every ingestion should be idempotent. Running the same DAG twice must not create duplicate legal records.
+
+The current connector implementation keeps discovery bounded rather than
+crawling an entire national catalog in one run. `TAXLENS_DISCOVERY_PAGES`
+controls the catalog-page budget and `TAXLENS_DAILY_SOURCE_LIMIT` controls the
+number of downloaded documents per scheduled run. Retrieval evaluation reports
+whether each labeled document is present, chunked, and embedded before ranking
+metrics are interpreted.
 
 ## 6.3 Extraction Service
 

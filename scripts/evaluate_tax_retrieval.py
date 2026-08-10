@@ -2,9 +2,17 @@ import argparse
 import json
 from pathlib import Path
 
+from sqlalchemy import func, select
+
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal
 from taxlens.evaluation.metrics import evaluate_retrieval
+from taxlens.legal_data.models import (
+    DocumentChunk,
+    DocumentEmbedding,
+    DocumentVersion,
+    LegalDocument,
+)
 from taxlens.retrieval.embeddings import get_embedding_provider
 from taxlens.retrieval.search import SearchFilters, SearchResult, hybrid_search_chunks
 
@@ -23,6 +31,12 @@ def main() -> None:
     provider = get_embedding_provider()
     reports: list[dict[str, object]] = []
     with SessionLocal() as session:
+        expected_document_numbers = {
+            document_number
+            for case in dataset
+            for document_number in case["relevant_document_numbers"]
+        }
+        corpus_coverage = _corpus_coverage(session, expected_document_numbers)
         for case in dataset:
             results = hybrid_search_chunks(
                 session,
@@ -53,6 +67,7 @@ def main() -> None:
         "model": get_settings().embedding_model_id,
         "k": arguments.k,
         "case_count": count,
+        "corpus_coverage": corpus_coverage,
         "mean_hit_at_k": sum(bool(report["hit_at_k"]) for report in reports) / count,
         "mean_recall_at_k": sum(float(report["recall_at_k"]) for report in reports) / count,
         "mean_reciprocal_rank": sum(float(report["reciprocal_rank"]) for report in reports)
@@ -60,6 +75,59 @@ def main() -> None:
         "cases": reports,
     }
     print(json.dumps(output, ensure_ascii=False, indent=2))
+
+
+def _corpus_coverage(session, expected_document_numbers: set[str]) -> dict[str, object]:
+    statuses: list[dict[str, object]] = []
+    for document_number in sorted(expected_document_numbers):
+        document = session.scalar(
+            select(LegalDocument).where(LegalDocument.document_number == document_number)
+        )
+        if document is None:
+            statuses.append(
+                {
+                    "document_number": document_number,
+                    "present": False,
+                    "version_count": 0,
+                    "chunk_count": 0,
+                    "embedding_count": 0,
+                }
+            )
+            continue
+
+        version_count = session.scalar(
+            select(func.count(DocumentVersion.id)).where(
+                DocumentVersion.document_id == document.id
+            )
+        ) or 0
+        chunk_count = session.scalar(
+            select(func.count(DocumentChunk.id))
+            .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
+            .where(DocumentVersion.document_id == document.id)
+        ) or 0
+        embedding_count = session.scalar(
+            select(func.count(DocumentEmbedding.id))
+            .join(DocumentChunk, DocumentEmbedding.document_chunk_id == DocumentChunk.id)
+            .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
+            .where(DocumentVersion.document_id == document.id)
+        ) or 0
+        statuses.append(
+            {
+                "document_number": document_number,
+                "present": True,
+                "version_count": int(version_count),
+                "chunk_count": int(chunk_count),
+                "embedding_count": int(embedding_count),
+            }
+        )
+
+    return {
+        "expected_document_count": len(statuses),
+        "present_document_count": sum(bool(item["present"]) for item in statuses),
+        "chunked_document_count": sum(bool(item["chunk_count"]) for item in statuses),
+        "embedded_document_count": sum(bool(item["embedding_count"]) for item in statuses),
+        "documents": statuses,
+    }
 
 
 def _unique_document_numbers(results: list[SearchResult]) -> list[str]:

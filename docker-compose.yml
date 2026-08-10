@@ -101,7 +101,8 @@ services:
       DATABASE_PASSWORD: taxlens
       LOCAL_STORAGE_PATH: /workspace/data/local
       EMBEDDING_MODEL_PATH: /opt/taxlens-models/multilingual-e5-small
-      TAXLENS_DAILY_SOURCE_LIMIT: ${TAXLENS_DAILY_SOURCE_LIMIT:-5}
+      TAXLENS_DAILY_SOURCE_LIMIT: ${TAXLENS_DAILY_SOURCE_LIMIT:-100}
+      TAXLENS_DISCOVERY_PAGES: ${TAXLENS_DISCOVERY_PAGES:-10}
       TAXLENS_API_URL: http://api:8000
       TAXLENS_AIRFLOW_INTERNAL_TOKEN: ${AIRFLOW_INTERNAL_TOKEN:-taxlens-local-internal-token}
     volumes:

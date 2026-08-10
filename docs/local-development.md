@@ -82,18 +82,23 @@ python scripts/discover_sources.py --source mof
 python scripts/discover_sources.py --source government
 ```
 
-To persist a small batch of discovered official PDFs, use an explicit limit:
+To persist a bounded batch of discovered official PDFs, use an explicit limit
+and catalog-page budget:
 
 ```powershell
-python scripts/ingest_sources.py --source government --limit 1 --download
+python scripts/ingest_sources.py --source government --limit 100 --pages 10 --download
 python scripts/process_corpus.py
+python scripts/embed_corpus.py
 ```
 
 The command is read-only unless `--download` is provided. Downloaded PDFs are
 stored under local object storage and remain idempotent by content hash. The
-Ministry of Finance portal currently renders its catalog dynamically, so its
-connector is retained for safe official URL fetching while catalog discovery
-will need a portal-specific endpoint or export in a later iteration.
+connector follows bounded pagination links when a source exposes them; keep the
+page budget and document limit explicit so a daily run cannot accidentally crawl
+an entire national catalog. The Ministry of Finance portal currently renders
+its catalog dynamically, so its connector is retained for safe official URL
+fetching while catalog discovery may still need a portal-specific endpoint or
+export in a later iteration.
 
 For a repeatable development corpus, ingest a small Government Portal batch:
 
@@ -154,9 +159,10 @@ Document-level evaluation de-duplicates chunks from the same document while
 preserving their first-ranked order.
 
 The labeled tax baseline currently reports `Hit@5`, Recall@5, and MRR for four
-queries. Treat these numbers as a regression baseline, not a quality claim: the
-current corpus contains sparse text-extractable tax content and several
-official scanned PDFs marked `OCR_REQUIRED`.
+queries. The output also reports whether each expected document is present,
+chunked, and embedded. Treat these numbers as a regression baseline, not a
+quality claim: the evaluation set and corpus must be expanded before ranking
+quality can be judged confidently.
 
 Search accepts `source_name`, `document_type`, `legal_status`, and
 `issuing_agency` filters. The document library accepts the same source,
