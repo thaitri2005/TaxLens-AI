@@ -47,8 +47,10 @@ evaluation script inside the API container.
 The report includes faithfulness, answer relevancy, context precision, and
 citation completeness. These are deliberately cheap RAGAS-style metrics; a
 future judged evaluation can be added without changing the Q&A contract. The
-current five-case semantic-hybrid smoke set is stored in MLflow after running
-the evaluation inside the API container.
+retrieval evaluator reports Hit@K, Precision@K, Recall@K, MRR, nDCG@K, and
+explicit document-coverage status for each case. The current five-case
+semantic-hybrid smoke set is stored in MLflow after running the evaluation
+inside the API container.
 
 Set `MLFLOW_ENABLED=true` and configure `MLFLOW_TRACKING_URI` to log the same
 run parameters and aggregate metrics to MLflow. The API image uses a small
@@ -60,3 +62,11 @@ remains disabled during normal user traffic.
 The Airflow daily DAG now runs discovery, processing, embedding, and retrieval
 evaluation in order. The evaluation task uses the existing labeled dataset and
 is protected by the same internal token boundary as the ingestion jobs.
+
+Each retrieval evaluation writes an immutable JSON report under
+`evaluation/retrieval/runs/` and updates `evaluation/retrieval/latest.json` in
+the configured object store. Authenticated users can read the latest report at
+`/evaluation/retrieval/latest`. When MLflow is enabled, aggregate ranking and
+corpus-coverage metrics are logged to the `retrieval-evaluation` run as well.
+This keeps the numeric result available even when Airflow task logs are
+unavailable.

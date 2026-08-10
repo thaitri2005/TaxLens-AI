@@ -11,8 +11,10 @@ def test_retrieval_metrics_calculate_hit_recall_and_reciprocal_rank() -> None:
     metrics = evaluate_retrieval(["a", "b", "c"], {"b", "c"}, k=2)
 
     assert metrics.hit_at_k is True
+    assert metrics.precision_at_k == 0.5
     assert metrics.recall_at_k == 0.5
     assert metrics.reciprocal_rank == 0.5
+    assert metrics.ndcg_at_k > 0.0
 
 
 def test_retrieval_metrics_handle_empty_relevance_and_invalid_k() -> None:

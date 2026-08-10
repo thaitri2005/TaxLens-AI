@@ -158,11 +158,19 @@ URLs so retrieval quality and provenance can be inspected together.
 Document-level evaluation de-duplicates chunks from the same document while
 preserving their first-ranked order.
 
-The labeled tax baseline currently reports `Hit@5`, Recall@5, and MRR for four
-queries. The output also reports whether each expected document is present,
-chunked, and embedded. Treat these numbers as a regression baseline, not a
-quality claim: the evaluation set and corpus must be expanded before ranking
-quality can be judged confidently.
+The retrieval report is also persisted to the configured object store. The
+latest report is available through the authenticated API endpoint
+`GET /evaluation/retrieval/latest`, while historical reports are retained under
+`evaluation/retrieval/runs/`.
+
+The labeled tax baseline currently reports `Hit@5`, Precision@5, Recall@5,
+MRR, and nDCG@5 for four queries. Each case is also marked as fully covered,
+partially covered, or not covered based on whether its expected documents are
+embedded. The report includes a coverage-adjusted summary for fully covered
+cases, so missing corpus documents are not confused with ranking failures.
+Treat these numbers as a regression baseline, not a quality claim: the
+evaluation set and corpus must be expanded before ranking quality can be judged
+confidently.
 
 Search accepts `source_name`, `document_type`, `legal_status`, and
 `issuing_agency` filters. The document library accepts the same source,

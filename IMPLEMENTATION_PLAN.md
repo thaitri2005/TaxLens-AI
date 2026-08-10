@@ -984,10 +984,10 @@ Do not treat dates as promises. Treat the acceptance criteria as the schedule au
 
 Add the LLMOps ecosystem signal without replacing the working retrieval core.
 This milestone is complete: the graph, adapter, deterministic metrics,
-evaluation script, scheduled retrieval evaluation, five-case semantic-hybrid
-run, and finished MLflow experiment are all working. Keep MLflow and RAGAS
-evaluation services optional outside evaluation runs, but Airflow remains a
-required product component.
+  evaluation script, scheduled retrieval evaluation, durable retrieval reports,
+  five-case semantic-hybrid run, and finished MLflow experiment are all
+  working. Keep MLflow and RAGAS evaluation services optional outside evaluation
+  runs, but Airflow remains a required product component.
 
 ### Following work — M6 operational hardening and M7 Airflow deployment
 
