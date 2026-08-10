@@ -1,0 +1,66 @@
+[
+  {
+    "case_id": "current-invoice-001",
+    "query": "quy định về hóa đơn chứng từ",
+    "relevant_document_numbers": ["18/VBHN-BTC"],
+    "category": "direct_lookup",
+    "difficulty": "easy",
+    "answerable": true
+  },
+  {
+    "case_id": "current-invoice-002",
+    "query": "hướng dẫn thực hiện Luật Quản lý thuế và hóa đơn chứng từ",
+    "relevant_document_numbers": ["32/2025/TT-BTC"],
+    "category": "direct_lookup",
+    "difficulty": "easy",
+    "answerable": true
+  },
+  {
+    "case_id": "current-invoice-003",
+    "query": "nội dung và quy định về hóa đơn điện tử",
+    "relevant_document_numbers": ["18/VBHN-BTC", "32/2025/TT-BTC"],
+    "category": "multi_document",
+    "difficulty": "medium",
+    "answerable": true
+  },
+  {
+    "case_id": "current-business-001",
+    "query": "quy định về đăng ký doanh nghiệp",
+    "relevant_document_numbers": ["168/2025/NĐ-CP"],
+    "category": "direct_lookup",
+    "difficulty": "easy",
+    "answerable": true
+  },
+  {
+    "case_id": "current-public-service-001",
+    "query": "thủ tục hành chính theo cơ chế một cửa và Cổng Dịch vụ công quốc gia",
+    "relevant_document_numbers": ["118/2025/NĐ-CP"],
+    "category": "direct_lookup",
+    "difficulty": "medium",
+    "answerable": true
+  },
+  {
+    "case_id": "current-banking-001",
+    "query": "sử dụng tài khoản ngoại tệ và tài khoản đồng Việt Nam của người cư trú",
+    "relevant_document_numbers": ["16/2014/TT-NHNN"],
+    "category": "direct_lookup",
+    "difficulty": "medium",
+    "answerable": true
+  },
+  {
+    "case_id": "current-finance-001",
+    "query": "bãi bỏ Thông tư 22/2005/TT-BTC",
+    "relevant_document_numbers": ["22/2005/TT-BTC"],
+    "category": "document_identification",
+    "difficulty": "easy",
+    "answerable": true
+  },
+  {
+    "case_id": "current-invoice-004",
+    "query": "hóa đơn chứng từ và quản lý thuế",
+    "relevant_document_numbers": ["18/VBHN-BTC", "32/2025/TT-BTC"],
+    "category": "multi_document",
+    "difficulty": "medium",
+    "answerable": true
+  }
+]

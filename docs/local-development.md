@@ -163,9 +163,12 @@ latest report is available through the authenticated API endpoint
 `GET /evaluation/retrieval/latest`, while historical reports are retained under
 `evaluation/retrieval/runs/`.
 
-The labeled tax smoke set currently contains four queries. By default the
-runner reports `Hit@K`, Precision@K, Recall@K, MRR, and nDCG@K at K=1, 3, 5,
-and 10. Each case is marked as fully covered, partially covered, or not
+The default current-corpus smoke set contains eight title-verified candidate
+queries covering documents currently indexed. They still need human/legal
+review before becoming a quality benchmark. The original four-query file
+remains as a historical coverage regression set. The runner reports `Hit@K`, Precision@K,
+Recall@K, MRR, and nDCG@K at K=1, 3, 5, and 10. Each case is marked as fully
+covered, partially covered, or not
 covered based on whether its expected documents are embedded. The report also
 has an explicit `evaluation_status`, dataset hash, corpus fingerprint, and a
 coverage-adjusted summary for fully covered cases. A run with no covered

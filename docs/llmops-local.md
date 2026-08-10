@@ -59,7 +59,10 @@ remains disabled during normal user traffic.
 
 ## Evaluation improvement roadmap
 
-The current four-case retrieval file is a smoke test. A trustworthy benchmark
+The current-corpus retrieval file contains eight title-verified candidate
+cases and still needs human/legal review. The original four-case file is
+retained as a historical coverage regression test. A
+trustworthy benchmark
 must first verify that its expected documents and versions exist in the
 embedded corpus. A zero score with zero coverage is reported as a corpus/data
 alignment problem, not as evidence that ranking failed.

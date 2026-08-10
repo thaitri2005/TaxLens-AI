@@ -1,7 +1,13 @@
 # Evaluation datasets
 
-These files are versioned human-reviewed labels, not automatically generated
-search examples. A retrieval case should contain:
+These files are versioned labels, not automatically generated search examples.
+`tax_retrieval_current.json` is an eight-case current-corpus smoke set whose
+document targets were checked against the live indexed metadata. It still needs
+human/legal review before being treated as a quality benchmark. The file is
+used by scheduled evaluation. `tax_retrieval.json` is retained as a historical
+coverage regression set whose expected documents are not currently indexed.
+
+A retrieval case should contain:
 
 ```json
 {
@@ -25,7 +31,7 @@ Before treating a score as a ranking result, inspect the report's
 embedded expected documents is `not_evaluable`, even when the search returns
 other documents.
 
-Run the default multi-K retrieval evaluation with:
+Run the default current-corpus multi-K retrieval evaluation with:
 
 ```powershell
 python scripts/evaluate_tax_retrieval.py

@@ -590,8 +590,8 @@ as meaningful before the corpus and labels support them:
 2. **Retrieval gate:** measure document- and article-level relevance at multiple
    K values with Hit@K, Precision@K, Recall@K, MRR, nDCG@K, empty-retrieval
    rate, latency, and coverage-adjusted metrics.
-3. **Dataset gate:** grow the four-case smoke set into at least 50 reviewed
-   cases spanning lookup, dates, amendments, comparisons, synthesis,
+3. **Dataset gate:** grow the current eight-case corpus benchmark into at least
+   50 reviewed cases spanning lookup, dates, amendments, comparisons, synthesis,
    unsupported questions, bilingual wording, and hard negatives. Keep stable
    development and test splits with label provenance.
 4. **Baseline gate:** compare keyword-only, vector-only, hybrid, and optional
@@ -607,8 +607,10 @@ as meaningful before the corpus and labels support them:
 
 ### Work package 8.1 — Evaluation dataset
 
-The current four-case file is a smoke set, not a quality benchmark. Replace it
-with at least 50 reviewed questions, growing toward 75–150. Include direct
+The current-corpus smoke set now contains eight title-verified candidate
+questions; the original four-case file remains a historical coverage regression
+set. Grow the current benchmark to at least 50 human-reviewed questions,
+growing toward 75–150. Include direct
 lookup, effective dates, amendment identification, comparisons, multi-document
 synthesis, applicability, unsupported questions, bilingual/diacritic variants,
 and adversarial wording. Store expected documents/articles, version aliases,
@@ -1286,7 +1288,7 @@ language data when the native text is empty or unusable. It records
 `OCR_REQUIRED` only when both paths fail or OCR is disabled. OCR remains
 optional/configurable to control processing time and image size.
 
-The first labeled tax retrieval baseline contains four queries and currently
+The historical labeled tax retrieval baseline contains four queries and currently
 reports `Hit@5=0.25`, `Recall@5=0.25`, and `MRR=0.25`. This confirms that the
 evaluation runner works and shows that corpus coverage—not prompt wording—must
 be addressed before ranking optimization. The evaluator now reports expected

@@ -36,7 +36,9 @@ from taxlens.retrieval.search import (
 def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate retrieval against labeled tax queries")
     parser.add_argument(
-        "--dataset", type=Path, default=Path("data/evaluation/tax_retrieval.json")
+        "--dataset",
+        type=Path,
+        default=Path("data/evaluation/tax_retrieval_current.json"),
     )
     parser.add_argument(
         "--k",
