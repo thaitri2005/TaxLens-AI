@@ -12,13 +12,22 @@ from taxlens.storage.factory import get_object_storage
 def main() -> None:
     parser = argparse.ArgumentParser(description="Normalize and chunk pending TaxLens documents")
     parser.add_argument("--all", action="store_true", help="Reprocess every document version")
+    parser.add_argument(
+        "--limit",
+        type=int,
+        help="Process at most this many document versions in one bounded batch",
+    )
     arguments = parser.parse_args()
+    if arguments.limit is not None and arguments.limit < 1:
+        parser.error("--limit must be at least 1")
 
     storage = get_object_storage()
     with SessionLocal() as session:
         query = select(DocumentVersion).join(LegalDocument).order_by(DocumentVersion.created_at)
         if not arguments.all:
             query = query.where(DocumentVersion.normalized_content_hash.is_(None))
+        if arguments.limit is not None:
+            query = query.limit(arguments.limit)
         versions = session.scalars(query).all()
         total = len(versions)
         print(f"Processing {total} document version(s)...", flush=True)

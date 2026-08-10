@@ -22,6 +22,9 @@ Airflow has its own Python environment because Airflow and the API use
 different SQLAlchemy compatibility ranges. The DAG calls four allowlisted
 internal API job endpoints over the Compose network using
 `X-TaxLens-Internal-Token`; the API executes the existing scripts in its own
-runtime, preserving Tesseract and the baked-in embedding model. No Docker
-socket is exposed to Airflow. For M6, these endpoints can be replaced by
-Container Apps Jobs without changing the DAG task boundaries.
+runtime, preserving Tesseract and the baked-in embedding model. Processing is
+sent in bounded batches because Azure Container Apps has a 240-second HTTP
+request limit. `TAXLENS_PROCESS_BATCH_SIZE` controls documents per request and
+`TAXLENS_PROCESS_MAX_BATCHES` controls how many requests the DAG makes. No
+Docker socket is exposed to Airflow. For M6, these endpoints can be replaced
+by Container Apps Jobs without changing the DAG task boundaries.

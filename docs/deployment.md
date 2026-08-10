@@ -160,6 +160,12 @@ After the first official import, run `scripts/repair_document_metadata.py`
 against the curated manifest so document titles, issuing agencies, issue dates,
 and official portal links are not lost when a source requires a direct PDF URL.
 
+The scheduled processing task uses bounded batches (`TAXLENS_PROCESS_BATCH_SIZE`
+and `TAXLENS_PROCESS_MAX_BATCHES`) because standard Container Apps HTTP ingress
+requests are limited to 240 seconds. If OCR backlog grows beyond one scheduled
+batch budget, increase the number of batches or move processing to a dedicated
+Container Apps Job/worker rather than increasing the synchronous request size.
+
 ## Required production settings
 
 Production must provide non-default values for database credentials,

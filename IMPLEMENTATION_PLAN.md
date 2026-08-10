@@ -647,6 +647,10 @@ normal API traffic.
 
 Add the required Airflow profile and DAGs that call the existing idempotent
 scripts for daily discovery, processing, embedding, and evaluation. Airflow
+must keep each API job request below the Container Apps ingress timeout; the
+current processing task therefore sends bounded document batches and repeats
+the internal processing endpoint until the backlog is drained or the configured
+batch budget is reached.
 must not duplicate domain logic. Acceptance requires one successful local DAG
 run, retry visibility, backfill behavior, and a documented path to schedule
 the same DAGs in Azure later.

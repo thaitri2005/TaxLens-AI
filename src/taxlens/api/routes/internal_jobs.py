@@ -5,7 +5,7 @@ import sys
 import time
 from pathlib import Path
 
-from fastapi import APIRouter, Header, HTTPException, status
+from fastapi import APIRouter, Header, HTTPException, Query, status
 
 from taxlens.config import get_settings
 
@@ -35,9 +35,10 @@ def run_ingestion_job(
 @router.post("/process")
 def run_processing_job(
     x_taxlens_internal_token: str | None = Header(default=None),
+    limit: int = Query(default=5, ge=1, le=100),
 ) -> dict[str, str]:
     _authorize(x_taxlens_internal_token)
-    return _run_script("process_corpus.py", [])
+    return _run_script("process_corpus.py", ["--limit", str(limit)])
 
 
 @router.post("/embed")
