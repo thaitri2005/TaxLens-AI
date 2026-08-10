@@ -208,10 +208,13 @@ def create_official_connector(
         config = OFFICIAL_SOURCE_CATALOGS[source]
     except KeyError as error:
         raise ConnectorError(f"Unknown official source: {source}") from error
-    resolved_config = dict(config)
-    if max_pages is not None:
-        resolved_config["max_pages"] = max_pages
-    return OfficialPortalConnector(**resolved_config, client=client)
+    return OfficialPortalConnector(
+        source_name=config["source_name"],
+        catalog_url=config["catalog_url"],
+        allowed_host=config["allowed_host"],
+        max_pages=max_pages if max_pages is not None else config["max_pages"],
+        client=client,
+    )
 
 
 _DOCUMENT_NUMBER_PATTERN = re.compile(
