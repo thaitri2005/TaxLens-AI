@@ -36,39 +36,126 @@ TaxLens addresses those needs with source discovery, versioned legal metadata,
 hybrid retrieval, grounded generation, citation validation, and scheduled
 ingestion.
 
-## Architecture
+## Architecture: from official source to defensible answer
+
+The central design is a controlled evidence pipeline, not a chatbot bolted onto
+a PDF folder:
 
 ```mermaid
 flowchart LR
-    User[Authenticated user] --> Web[Next.js web app]
-    Web --> Proxy[Next.js API proxy]
-    Proxy --> API[Private FastAPI API]
+    Source[Official government portals]
+    Discover[Discover and deduplicate sources]
+    Process[Extract text and legal structure]
+    Store[(PostgreSQL metadata<br/>+ Blob artifacts)]
+    Index[Chunk, embed, and index]
+    Search[Hybrid retrieval]
+    Evidence{Evidence gate}
+    Answer[Grounded answer<br/>with article/page citations]
+    Review[Human review and evaluation]
 
-    API --> Auth[Auth.js identity headers]
-    API --> Graph[LangGraph Q&A workflow]
-    Graph --> Retrieval[Hybrid retrieval]
-    Retrieval --> FTS[PostgreSQL full-text search]
-    Retrieval --> Vector[pgvector semantic search]
-    Vector --> Embed[Multilingual E5 small CPU model]
-    Graph --> HF[Hugging Face chat inference]
-    Graph --> Citations[Citation validation]
-    Citations --> Web
+    Source --> Discover --> Process --> Store --> Index --> Search --> Evidence
+    Evidence -->|sufficient and consistent| Answer
+    Evidence -->|missing, ambiguous, or conflicting| Safe[Safe fallback:<br/>abstain or request review]
+    Answer --> Review
+    Safe --> Review
+    Review -. improves labels and source coverage .-> Discover
 
-    Airflow[Airflow scheduler + webserver] --> Jobs[Authenticated API jobs]
-    Jobs --> Discover[Source discovery]
-    Jobs --> Process[PDF extraction + Tesseract fallback]
-    Jobs --> EmbedJob[Embedding and indexing]
-    Jobs --> Eval[MLflow / RAG evaluation]
-
-    API --> DB[(Azure PostgreSQL + pgvector)]
-    API --> Blob[(Azure Blob Storage)]
-    API --> KV[Azure Key Vault]
-    Web -. public ingress .-> Internet((Internet))
+    classDef boundary fill:#eef2ff,stroke:#6366f1,color:#111827;
+    classDef gate fill:#fff7ed,stroke:#ea580c,color:#111827;
+    class Source,Discover,Process,Store,Index,Search,Answer,Review boundary;
+    class Evidence,Safe gate;
 ```
 
-The web and API are separate services. FastAPI is private in Azure and is
-reachable through the Next.js proxy. Airflow does not access application tables
-directly; it calls a small authenticated internal job boundary.
+The beauty of TaxLens is the boundary between retrieval and generation. The
+language model is never the authority: official documents are collected and
+versioned first, retrieval finds inspectable passages, and an evidence gate can
+stop the answer before inference when the support is absent or contradictory.
+That makes the system safer, easier to evaluate, and easier to debug than a
+single opaque `retrieve → prompt → answer` chain.
+
+### Runtime request path
+
+The public web application and private API have different responsibilities. The
+browser never receives database credentials, and Airflow never writes directly
+to application tables.
+
+```mermaid
+flowchart TB
+    User[Authenticated user] --> Web[Next.js web app]
+    Web --> Proxy[Next.js API proxy<br/>adds signed identity headers]
+    Proxy --> API[Private FastAPI API]
+
+    subgraph Q[LangGraph-controlled Q&A]
+        Plan[Plan query and intent]
+        Retrieve[Retrieve hybrid evidence]
+        Assess[Assess legal status<br/>and article/page support]
+        Route{Enough evidence?}
+        Generate[Call provider through<br/>LangChain adapter]
+        Validate[Parse structured output<br/>and validate citations]
+        Fallback[Return unsupported/<br/>insufficient-evidence response]
+        Plan --> Retrieve --> Assess --> Route
+        Route -->|yes| Generate --> Validate
+        Route -->|no| Fallback
+    end
+
+    API --> Plan
+    Validate --> Response[Cited response]
+    Fallback --> Response
+    Response --> Web
+
+    Retrieve --> DB[(PostgreSQL FTS<br/>+ pgvector)]
+    Generate --> Model[Configurable chat provider]
+```
+
+LangGraph is deliberately used as an orchestration and policy layer. Its value
+is the explicit state transition—plan, retrieve, assess, route—not autonomous
+tool wandering. LangChain stays at the model integration boundary, so changing
+the chat provider does not rewrite legal metadata, retrieval, or citation logic.
+
+### Ingestion, indexing, and evaluation loop
+
+The daily workflow is also part of the product architecture. It turns new
+government publications into measurable, searchable knowledge while keeping
+long-running work outside the user request path.
+
+```mermaid
+flowchart LR
+    Airflow[Airflow DAG]
+    Boundary[Authenticated internal API jobs]
+    Discover[Discover official sources]
+    Process[Process bounded batches<br/>native extraction → OCR fallback]
+    Embed[Embed pending chunks]
+    Evaluate[Evaluate retrieval<br/>and persist report]
+    Corpus[(Versioned corpus)]
+    Report[(Immutable evaluation reports)]
+    MLflow[(Optional MLflow runs)]
+
+    Airflow --> Boundary
+    Boundary --> Discover --> Process --> Embed --> Evaluate
+    Discover --> Corpus
+    Process --> Corpus
+    Embed --> Corpus
+    Evaluate --> Report
+    Evaluate -. optional tracking .-> MLflow
+    Report -. coverage and ranking findings .-> Discover
+```
+
+Airflow is an orchestrator, not a second application backend. It calls
+allowlisted internal endpoints; the API executes the same idempotent scripts
+used locally. Processing is bounded because cloud ingress has time limits, and
+evaluation records corpus coverage separately from ranking quality so a missing
+document cannot masquerade as a bad retriever.
+
+### Why the boundaries matter
+
+| Boundary | Responsibility | Why it is valuable |
+| --- | --- | --- |
+| Ingestion → legal data | Discover official sources and preserve document/version identity | The corpus remains traceable and refreshable |
+| Processing → retrieval | Extract, OCR, structure, chunk, and embed | Search operates on inspectable passages, not raw PDFs |
+| Retrieval → generation | Assess consistency and structural support | The model cannot invent evidence that retrieval did not provide |
+| Web → API | Proxy authenticated requests to a private service | Credentials and database access stay server-side |
+| Airflow → API jobs | Orchestrate bounded, idempotent work | Scheduling is replaceable without duplicating domain logic |
+| Evaluation → operations | Persist metrics, coverage, fingerprints, and history | A score can be reproduced and diagnosed |
 
 ## Engineering highlights
 
