@@ -6,13 +6,13 @@ TaxLens continuously discovers official Vietnamese tax documents, extracts and
 indexes their contents, retrieves relevant provisions, and answers questions
 with article-level citations that link back to the government source.
 
-This is a portfolio project focused on practical AI platform engineering—not a
-generic PDF chatbot. It demonstrates how to build, evaluate, secure, deploy,
-and operate an evidence-first RAG system under a constrained budget.
+The repository contains an evidence-first RAG system with source ingestion,
+document processing, retrieval, evaluation, security controls, and Azure
+deployment using development-scale resources.
 
-## Live demo
+## Development deployment
 
-The development deployment is available at:
+The current development deployment is available at:
 
 **Web application:**
 `https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io`
@@ -22,24 +22,24 @@ document browsing, and document comparison. The Airflow UI is deployed
 separately and remains protected/paused unless a scheduled ingestion run is
 intentionally enabled.
 
-## Why this project matters
+## System objectives
 
-Tax professionals need more than a keyword search box. They need to know:
+The system is designed to support the following operations:
 
 - Which official document contains the applicable rule?
 - Which article and page support the answer?
 - Is the document current, superseded, or amended?
 - What changed between two versions?
-- What should be reviewed next?
+- Which source and provision support the answer?
 
 TaxLens addresses those needs with source discovery, versioned legal metadata,
 hybrid retrieval, grounded generation, citation validation, and scheduled
 ingestion.
 
-## Architecture: from official source to defensible answer
+## Architecture: source ingestion to cited answer
 
-The central design is a controlled evidence pipeline, not a chatbot bolted onto
-a PDF folder:
+The Q&A system uses a staged pipeline. Official documents are collected, stored,
+processed, and indexed before they are available for retrieval:
 
 ```mermaid
 flowchart LR
@@ -51,33 +51,30 @@ flowchart LR
     Search[Hybrid retrieval]
     Evidence{Evidence gate}
     Answer[Grounded answer<br/>with article/page citations]
-    Review[Human review and evaluation]
 
     Source --> Discover --> Process --> Store --> Index --> Search --> Evidence
     Evidence -->|sufficient and consistent| Answer
-    Evidence -->|missing, ambiguous, or conflicting| Safe[Safe fallback:<br/>abstain or request review]
-    Answer --> Review
-    Safe --> Review
-    Review -. improves labels and source coverage .-> Discover
+    Evidence -->|missing, ambiguous, or conflicting| Safe[Insufficient-evidence response]
 
     classDef boundary fill:#eef2ff,stroke:#6366f1,color:#111827;
     classDef gate fill:#fff7ed,stroke:#ea580c,color:#111827;
-    class Source,Discover,Process,Store,Index,Search,Answer,Review boundary;
+    class Source,Discover,Process,Store,Index,Search,Answer boundary;
     class Evidence,Safe gate;
 ```
 
-The beauty of TaxLens is the boundary between retrieval and generation. The
-language model is never the authority: official documents are collected and
-versioned first, retrieval finds inspectable passages, and an evidence gate can
-stop the answer before inference when the support is absent or contradictory.
-That makes the system safer, easier to evaluate, and easier to debug than a
-single opaque `retrieve → prompt → answer` chain.
+Retrieval and generation are separate stages. The system stores document identity,
+version metadata, source URLs, and processed passages before a model is called.
+The evidence assessment stage checks the retrieved passages for legal status and
+structural support such as article, clause, and page references. Generation runs
+only when the evidence meets the configured checks. Otherwise, the API returns an
+insufficient-evidence response. This separates retrieval quality from generation
+and provides an explicit failure path for evaluation and debugging.
 
 ### Runtime request path
 
-The public web application and private API have different responsibilities. The
-browser never receives database credentials, and Airflow never writes directly
-to application tables.
+The web application, API, database, and Airflow have separate responsibilities.
+Database credentials remain on the server side. Airflow invokes authenticated
+internal API jobs; it does not write directly to application tables.
 
 ```mermaid
 flowchart TB
@@ -107,16 +104,16 @@ flowchart TB
     Generate --> Model[Configurable chat provider]
 ```
 
-LangGraph is deliberately used as an orchestration and policy layer. Its value
-is the explicit state transition—plan, retrieve, assess, route—not autonomous
-tool wandering. LangChain stays at the model integration boundary, so changing
-the chat provider does not rewrite legal metadata, retrieval, or citation logic.
+LangGraph defines the Q&A state machine: query planning, retrieval, evidence
+assessment, routing, generation, and citation validation. LangChain is used at
+the chat-provider adapter boundary. Provider configuration can therefore change
+without changing the retrieval, legal metadata, or citation-validation modules.
 
 ### Ingestion, indexing, and evaluation loop
 
-The daily workflow is also part of the product architecture. It turns new
-government publications into measurable, searchable knowledge while keeping
-long-running work outside the user request path.
+The daily workflow runs ingestion and evaluation outside the user request path.
+It converts newly discovered government publications into searchable corpus
+records and persists retrieval evaluation reports.
 
 ```mermaid
 flowchart LR
@@ -137,18 +134,17 @@ flowchart LR
     Embed --> Corpus
     Evaluate --> Report
     Evaluate -. optional tracking .-> MLflow
-    Report -. coverage and ranking findings .-> Discover
 ```
 
-Airflow is an orchestrator, not a second application backend. It calls
-allowlisted internal endpoints; the API executes the same idempotent scripts
-used locally. Processing is bounded because cloud ingress has time limits, and
-evaluation records corpus coverage separately from ranking quality so a missing
-document cannot masquerade as a bad retriever.
+Airflow invokes allowlisted internal endpoints, and the API executes the same
+idempotent job scripts used locally. Processing is bounded to fit cloud ingress
+limits. Evaluation records corpus coverage separately from ranking quality, so a
+missing document is reported as a coverage issue rather than a retrieval-ranking
+failure.
 
-### Why the boundaries matter
+### Component boundaries
 
-| Boundary | Responsibility | Why it is valuable |
+| Boundary | Responsibility | Operational effect |
 | --- | --- | --- |
 | Ingestion → legal data | Discover official sources and preserve document/version identity | The corpus remains traceable and refreshable |
 | Processing → retrieval | Extract, OCR, structure, chunk, and embed | Search operates on inspectable passages, not raw PDFs |
@@ -175,7 +171,8 @@ document cannot masquerade as a bad retriever.
   admin/user roles, private FastAPI ingress, Key Vault secrets, managed
   identity, and rate limiting for inference-backed Q&A.
 - **Cloud delivery:** Terraform-managed Azure resources, remote Blob state,
-  GitHub OIDC, immutable image tags, protected plans, and human-approved apply.
+  GitHub OIDC, immutable image tags, protected plans, and an approval gate before
+  infrastructure changes are applied.
 
 ## Technology stack
 
@@ -242,16 +239,16 @@ contracts.
 
 ## Deployment workflow
 
-Azure deployment is intentionally controlled rather than automatic:
+Azure deployment uses the following workflow:
 
 1. `release-images.yml` builds and publishes API, web, and Airflow images under
    an immutable commit-SHA tag.
 2. `deploy.yml` generates a Terraform plan using the remote Azure Blob state.
-3. A human reviews the plan.
-4. The protected deployment environment applies the reviewed plan.
+3. The protected deployment environment requires approval before applying the
+   Terraform plan.
 
-Production secrets remain in GitHub Actions secrets and Azure Key Vault. Azure
-authentication uses GitHub OIDC rather than stored cloud passwords.
+Production secrets are stored in GitHub Actions secrets and Azure Key Vault.
+GitHub Actions authenticates to Azure with OIDC.
 
 See:
 
@@ -276,13 +273,14 @@ See:
   scaled down during development.
 - Azure resources use small development SKUs and immutable image revisions.
 
-## Portfolio scope and limitations
+## Scope and limitations
 
-TaxLens is a working development deployment and resume project, not legal or
-tax advice. The initial corpus is intentionally small and source coverage is
-still curated. OCR quality varies with scanned document quality, and the
-development deployment prioritizes a demonstrable architecture over production
-scale.
+TaxLens is a development-stage regulatory information system. It is not a
+substitute for professional legal or tax advice. Retrieval and evaluation
+results depend on the documents currently indexed and the coverage of the
+configured government sources. OCR accuracy depends on the quality, structure,
+and legibility of scanned documents. The current deployment uses development-
+scale infrastructure and configuration.
 
 ## Screenshots
 

@@ -20,8 +20,8 @@ Azure Key Vault / managed identity (secrets)
 Log Analytics (container logs)
 ```
 
-MLflow is evaluation-only for the portfolio MVP. It is not required in the
-normal production request path. Airflow remains a required scheduled-ingestion
+MLflow is used for evaluation and is not required in the normal production
+request path. Airflow remains a required scheduled-ingestion
 service; its metadata database must be durable and its DAG image must contain
 the DAG files rather than relying on a local volume mount.
 

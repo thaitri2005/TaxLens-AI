@@ -29,7 +29,7 @@ Tax professionals currently have to:
 8. Explain the impact to colleagues or clients.
 9. Continue monitoring later guidance and amendments.
 
-The difficult part is not merely finding legislation. It is answering:
+The system must support the following regulatory information tasks:
 
 * What changed?
 * When does it become effective?
@@ -94,13 +94,13 @@ Support these first:
 
 ## 2.3 Initial data-source policy
 
-For the portfolio version:
+For the initial implementation:
 
 * Use a curated seed corpus for reliability.
 * Implement one or two real source connectors.
 * Design the system so that more connectors can be added later.
-* Do not make the live demo entirely dependent on fragile government websites.
-* Preserve downloaded source files so the demo continues to work when a website changes.
+* Do not make the development deployment entirely dependent on fragile government websites.
+* Preserve downloaded source files so the development deployment remains usable when a website changes.
 
 ## 2.4 Language
 
@@ -313,7 +313,7 @@ Chunking and Indexing
 
 ## 5.1 Resource group
 
-One resource group for the portfolio deployment:
+One resource group for the development deployment:
 
 ```text
 rg-taxlens-dev
@@ -511,9 +511,9 @@ Use:
 
 This is more affordable and realistically maintainable.
 
-### CV stretch deployment
+### Extended deployment option
 
-Demonstrate AKS configuration through infrastructure code:
+Define an AKS deployment path through infrastructure code:
 
 * FastAPI deployment
 * Background worker deployment
@@ -526,7 +526,7 @@ Demonstrate AKS configuration through infrastructure code:
 * ConfigMaps
 * Resource limits
 
-You do not need to keep an expensive AKS cluster running continuously. The repository can still contain a valid AKS deployment path.
+An AKS cluster is not required to run continuously. The repository can retain a valid AKS deployment path for environments that require it.
 
 ## 5.9 Cost and effectiveness guardrails
 
@@ -535,7 +535,7 @@ The Azure mapping is a target deployment blueprint, not a requirement to keep ev
 1. local Docker Compose with PostgreSQL/pgvector and a seed corpus;
 2. one low-cost Azure development environment with API, Blob Storage, PostgreSQL, and secrets;
 3. add workers, scheduling, monitoring, and managed identity as the corresponding workflow becomes real; keep OCR inside the application image;
-4. keep AKS, high availability, and production resource groups as infrastructure-code demonstrations unless sustained usage justifies them.
+4. defer AKS, high availability, and production resource groups until sustained usage justifies them.
 
 Control spend and improve effectiveness by:
 
@@ -546,7 +546,7 @@ Control spend and improve effectiveness by:
 * measuring embedding throughput, CPU time, image size, and cold-start latency;
 * recording requested model, routed provider when returned, token, latency, and estimated-cost data for every request;
 * configuring Hugging Face billing limits and a low maximum output-token cap before enabling generative endpoints;
-* setting a development budget and disabling nonessential resources outside demos;
+* setting a development budget and disabling nonessential resources when they are not in use;
 * measuring citation correctness and answer usefulness before increasing model size or adding infrastructure.
 
 Azure prices vary by region, agreement, and usage. Use the Azure Pricing Calculator immediately before provisioning rather than hard-coding a monthly estimate in this blueprint.
@@ -934,7 +934,7 @@ Logging and Evaluation
 END
 ```
 
-The graph provides CV value because it demonstrates:
+The graph provides the following implementation properties:
 
 * Stateful LLM workflows
 * Tool calling
@@ -1466,9 +1466,9 @@ The interface should allow:
 # 10. Airflow DAG Structure
 
 Airflow is the required scheduler for daily discovery, continuous ingestion,
-weekly digests, and evaluation. It is not required to make the first
-search/Q&A demo work, but it is required before the product is considered
-cloud-ready. Start with the same task functions behind CLI commands, then
+weekly digests, and evaluation. The initial search and Q&A workflow can run
+without Airflow, but Airflow is required for the cloud ingestion workflow. Start
+with the same task functions behind CLI commands, then
 place those functions in DAGs once the processing path is stable and
 idempotent.
 
@@ -1760,7 +1760,7 @@ taxlens-ai/
 │   ├── seed_corpus.py
 │   ├── create_admin.py
 │   ├── run_evaluation.py
-│   └── export_demo_data.py
+│   └── export_data.py
 │
 ├── docs/
 │   ├── architecture.md
@@ -1769,7 +1769,7 @@ taxlens-ai/
 │   ├── rag-evaluation.md
 │   ├── security.md
 │   ├── deployment.md
-│   └── demo-script.md
+│   └── walkthrough.md
 │
 └── .github/
     └── workflows/
@@ -1847,7 +1847,7 @@ MLflow:       http://localhost:5000
 MailHog:      http://localhost:8025
 ```
 
-This keeps the core demo runnable with one command. The scheduled ingestion
+This keeps the core workflow runnable with one command. The scheduled ingestion
 profile is a deliberate second command because it starts an additional
 database and scheduler, but it is part of the product workflow rather than a
 future placeholder. See `docs/airflow-local.md` for the exact commands.
@@ -2169,7 +2169,7 @@ with fields for:
 * Export access
 * Team members
 
-This demonstrates SaaS architecture without getting trapped in payment integration.
+This defines the SaaS tenancy model without adding payment integration.
 
 ---
 
@@ -2177,14 +2177,14 @@ This demonstrates SaaS architecture without getting trapped in payment integrati
 
 The MVP should be a complete vertical slice, not every feature.
 
-Use two gates to avoid confusing “portfolio-complete” with “first runnable”:
+Use two gates to distinguish the first runnable slice from the complete system:
 
 * **Core MVP:** a curated corpus, one connector or seed loader, extraction, metadata, legal schema, article-aware chunks, hybrid retrieval, cited Q&A, one comparison workflow, API/UI, tests, and local Docker Compose.
-* **Portfolio MVP:** the core MVP plus the cloud deployment, Airflow ingestion, authentication, monitoring, evaluation automation, and CI/CD listed below.
+* **Extended MVP:** the core MVP plus the cloud deployment, Airflow ingestion, authentication, monitoring, evaluation automation, and CI/CD listed below.
 
-Build the core MVP first. Every portfolio-MVP component should have a working local fallback so cloud credentials or a fragile source website cannot block development.
+Build the core MVP first. Every extended-MVP component should have a working local fallback so cloud credentials or a fragile source website cannot block development.
 
-## Portfolio MVP target
+## Extended MVP target
 
 ### Data engineering
 
@@ -2261,7 +2261,7 @@ Build the core MVP first. Every portfolio-MVP component should have a working lo
 * Suggested action checklists
 * Saved impact reports
 
-## Version 0.5 — Multi-tenant SaaS demonstration
+## Version 0.5 — Multi-tenant SaaS support
 
 * Organizations
 * Team membership
@@ -2406,7 +2406,7 @@ Build:
 
 Deliverable:
 
-A usable application rather than an API demo.
+A usable application with UI workflows in addition to API endpoints.
 
 ## Phase 8 — LLMOps
 
@@ -2451,9 +2451,9 @@ Build **one** deeply:
 
 ---
 
-# 21. Primary Demo Scenario
+# 21. Primary End-to-End Workflow
 
-The final demonstration should tell one coherent story.
+The primary end-to-end workflow is:
 
 ## Step 1: A new circular is discovered
 
@@ -2515,7 +2515,8 @@ Open:
 * GitHub Actions
 * Azure resources
 
-This proves the project is an operated AI platform, not just a frontend connected to an LLM.
+This workflow exercises source ingestion, document processing, retrieval,
+grounded generation, version comparison, and operational services.
 
 ---
 

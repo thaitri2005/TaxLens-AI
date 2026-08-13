@@ -115,7 +115,7 @@ Domain packages must not import FastAPI route modules. UI code must not call the
 
 ### Work package 0.1 — Scope lock
 
-Define the first supported categories, document types, supported languages, source policy, and demo workflows.
+Define the first supported categories, document types, supported languages, source policy, and user workflows.
 
 **Deliverables:**
 
@@ -569,7 +569,7 @@ Show answer, evidence status, citations, retrieved sources, uncertainty, and fee
 
 Show selected versions, article-level diff, added/removed/modified labels, source passages, and effective-date notes.
 
-**Acceptance criteria:** a reviewer can complete the primary demo without using API tools.
+**Acceptance criteria:** a user can complete the primary workflow without using API tools.
 
 ---
 
@@ -939,9 +939,8 @@ profiles; Redis, mail, and monitoring remain optional operational additions.
 - tag all resources with environment, project, and expiry;
 - use a dev resource group that can be destroyed and recreated;
 - configure budgets and alerts;
-- avoid high-availability SKUs for portfolio development;
-- stop or delete nonessential dev resources outside demonstrations;
-- do not keep AKS running merely to display Kubernetes on a résumé.
+- avoid high-availability SKUs in development environments;
+- stop or delete nonessential development resources when they are not in use;
 
 ### Effectiveness metrics
 
@@ -1156,7 +1155,7 @@ Cost impact: Larger API image and CPU time for OCR; lower OCR cost and bounded H
 
 ```text
 Change: Add a pre-M6 M5.5 milestone for LangGraph orchestration, LangChain provider-boundary adapters, MLflow tracking, RAGAS-style evaluation, and required Airflow ingestion DAGs.
-Reason: Demonstrate practical LLMOps and workflow-orchestration experience while retaining the existing custom PostgreSQL/pgvector retrieval core and low operating cost.
+Reason: Add LLMOps and workflow-orchestration capabilities while retaining the existing custom PostgreSQL/pgvector retrieval core and low operating cost.
 Affected phase/module: Phase 6 intelligence workflows, Phase 8 evaluation/LLMOps, optional scheduler profile, and downstream cloud deployment.
 Migration or compatibility impact: Existing retrieval, evidence, citations, and provider-neutral interfaces remain the domain boundary; new tools wrap them rather than replacing them.
 Cost impact: Open-source dependencies and self-hosted services add development and container complexity but no mandatory per-request platform fees; judge-model and MLflow services are disabled in normal user traffic. Airflow is required because daily source checks are core product behavior.
@@ -1184,7 +1183,7 @@ Cost impact: No cloud resources are created by this change. The Terraform founda
 
 ### Current assumptions to revisit
 
-- the seed corpus is legally usable for the intended demo;
+- the seed corpus is legally usable for the intended system scope;
 - one source connector is sufficient for the first release;
 - PostgreSQL remains sufficient for the initial corpus size;
 - article parsing quality is adequate for the selected document types;
@@ -1229,7 +1228,7 @@ The core MVP is complete when:
 - evaluation reports show quality, latency, and cost;
 - tests and documentation pass in CI.
 
-The portfolio deployment is complete only when the same workflows run in Azure through reproducible infrastructure and smoke-tested deployment steps.
+The cloud deployment is complete when the same workflows run in Azure through reproducible infrastructure and smoke-tested deployment steps.
 
 ---
 

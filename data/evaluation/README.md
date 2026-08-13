@@ -2,9 +2,9 @@
 
 These files are versioned labels, not automatically generated search examples.
 `tax_retrieval_current.json` is an eight-case current-corpus smoke set whose
-document targets were checked against the live indexed metadata. It still needs
-human/legal review before being treated as a quality benchmark. The file is
-used by scheduled evaluation. `tax_retrieval.json` is retained as a historical
+document targets were checked against the live indexed metadata. It is not a
+human- or legal-reviewed quality benchmark. The file is used by scheduled
+evaluation. `tax_retrieval.json` is retained as a historical
 coverage regression set whose expected documents are not currently indexed.
 
 A retrieval case should contain:
@@ -24,7 +24,7 @@ A retrieval case should contain:
 Only `case_id`, `query`, and `relevant_document_numbers` are currently required
 by the runner. Article labels and the other fields are the expansion path for
 article-level and answer-quality evaluation. Record the official source and
-reviewer notes in the dataset change when adding or changing a label.
+label-provenance notes in the dataset change when adding or changing a label.
 
 Before treating a score as a ranking result, inspect the report's
 `evaluation_status`, `quality_gate`, and `corpus_snapshot`. A run with no

@@ -108,7 +108,8 @@ docker compose exec -T api python scripts/process_corpus.py
 docker compose exec -T api python scripts/embed_corpus.py
 ```
 
-This is intentionally a bounded demo corpus, not a production crawl.
+This command creates a bounded development corpus. It is not a full catalog
+crawl.
 
 Some official PDFs are image-only scans. The processor does not create empty
 search chunks for these files. The API first tries native PDF extraction and
@@ -124,7 +125,7 @@ docker compose exec -T api python scripts/process_corpus.py
 docker compose exec -T api python scripts/embed_corpus.py
 ```
 
-Edit `data/corpus/tax_documents.json` to add or remove explicitly reviewed
+Edit `data/corpus/tax_documents.json` to add or remove explicitly selected
 official tax documents. Keep the manifest small and topical during development.
 
 For a portal with dynamic catalog rendering, ingest an explicitly selected
@@ -164,9 +165,9 @@ latest report is available through the authenticated API endpoint
 `evaluation/retrieval/runs/`.
 
 The default current-corpus smoke set contains eight title-verified candidate
-queries covering documents currently indexed. They still need human/legal
-review before becoming a quality benchmark. The original four-query file
-remains as a historical coverage regression set. The runner reports `Hit@K`, Precision@K,
+queries covering documents currently indexed. The cases are not human- or
+legal-reviewed benchmarks. The original four-query file remains as a historical
+coverage regression set. The runner reports `Hit@K`, Precision@K,
 Recall@K, MRR, and nDCG@K at K=1, 3, 5, and 10. Each case is marked as fully
 covered, partially covered, or not
 covered based on whether its expected documents are embedded. The report also
@@ -175,9 +176,9 @@ coverage-adjusted summary for fully covered cases. A run with no covered
 expected document is `not_evaluable`, so missing corpus documents are not
 confused with ranking failures.
 
-Treat these numbers as a regression baseline, not a quality claim: the
-evaluation set and corpus must be expanded before ranking quality can be judged
-confidently. See `data/evaluation/README.md` for the label contract.
+Treat these numbers as a regression baseline. Expand the evaluation set and
+corpus before using the results to assess ranking quality. See
+`data/evaluation/README.md` for the label contract.
 
 Search accepts `source_name`, `document_type`, `legal_status`, and
 `issuing_agency` filters. The document library accepts the same source,
