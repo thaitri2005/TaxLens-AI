@@ -38,7 +38,7 @@ def main() -> None:
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=Path("data/evaluation/tax_retrieval_current.json"),
+        default=Path("data/evaluation/tax_article_retrieval.json"),
     )
     parser.add_argument(
         "--k",
@@ -74,6 +74,9 @@ def main() -> None:
     for index, case in enumerate(raw_dataset, start=1):
         if not isinstance(case, dict):
             parser.error(f"Evaluation case {index} must be a JSON object")
+        if case.get("answerable") is False:
+            # Out-of-corpus cases test answer refusal, not ranking.
+            continue
         query = case.get("query")
         relevant_documents = case.get("relevant_document_numbers")
         case_id = case.get("case_id", f"case-{index:03d}")
@@ -97,6 +100,7 @@ def main() -> None:
                 "case_id": case_id,
                 "query": query,
                 "relevant_document_numbers": relevant_documents,
+                "relevant_articles": case.get("relevant_articles") or {},
             }
         )
     mode: SearchMode = arguments.mode
@@ -145,6 +149,22 @@ def main() -> None:
                     "reciprocal_rank": metrics.reciprocal_rank,
                     "ndcg_at_k": metrics.ndcg_at_k,
                 }
+            if case["relevant_articles"]:
+                article_hits = [
+                    str(result.chunk.article_number)
+                    in case["relevant_articles"].get(result.document.document_number, [])
+                    for result in results
+                ]
+                first_article_rank = next(
+                    (rank for rank, hit in enumerate(article_hits, start=1) if hit), None
+                )
+                for k in ks:
+                    metrics_by_k[str(k)]["article_hit_at_k"] = any(article_hits[:k])
+                    metrics_by_k[str(k)]["article_reciprocal_rank"] = (
+                        1 / first_article_rank
+                        if first_article_rank and first_article_rank <= k
+                        else 0.0
+                    )
             primary_metrics = metrics_by_k[str(primary_k)]
             reports.append(
                 {
@@ -167,6 +187,18 @@ def main() -> None:
     coverage_summary = _coverage_summary(reports, corpus_coverage)
     status = evaluation_status(corpus_coverage)
     metrics_by_k = {str(k): metrics_summary(reports, k) for k in ks}
+    article_reports = [
+        report for report in reports if "article_hit_at_k" in report["metrics_by_k"][str(ks[0])]
+    ]
+    for k in ks:
+        if article_reports:
+            article_metrics = [report["metrics_by_k"][str(k)] for report in article_reports]
+            metrics_by_k[str(k)]["mean_article_hit_at_k"] = sum(
+                bool(item["article_hit_at_k"]) for item in article_metrics
+            ) / len(article_metrics)
+            metrics_by_k[str(k)]["mean_article_reciprocal_rank"] = sum(
+                float(item["article_reciprocal_rank"]) for item in article_metrics
+            ) / len(article_metrics)
     fully_covered_metrics_by_k = {
         str(k): metrics_summary(fully_covered_reports, k) for k in ks
     }

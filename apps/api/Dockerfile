@@ -33,4 +33,6 @@ ENV HF_HUB_OFFLINE=1 \
 
 EXPOSE 8000
 
-CMD ["uvicorn", "taxlens.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# The API runs as a single replica, so applying pending migrations at start is safe and
+# removes the manual release step; an already-current schema makes this a no-op.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn taxlens.api.main:app --host 0.0.0.0 --port 8000"]

@@ -1,3 +1,4 @@
+import hmac
 import logging
 import os
 import subprocess
@@ -37,20 +38,24 @@ def run_processing_job(
     x_taxlens_internal_token: str | None = Header(default=None),
     limit: int = Query(default=1, ge=1, le=100),
     retry_failed: bool = False,
+    rechunk_outdated: bool = False,
 ) -> dict[str, str]:
     _authorize(x_taxlens_internal_token)
     arguments = ["--limit", str(limit)]
     if retry_failed:
         arguments.append("--retry-failed")
+    if rechunk_outdated:
+        arguments.append("--rechunk-outdated")
     return _run_script("process_corpus.py", arguments)
 
 
 @router.post("/embed")
 def run_embedding_job(
     x_taxlens_internal_token: str | None = Header(default=None),
+    limit: int = Query(default=400, ge=1, le=5000),
 ) -> dict[str, str]:
     _authorize(x_taxlens_internal_token)
-    return _run_script("embed_corpus.py", [])
+    return _run_script("embed_corpus.py", ["--limit", str(limit)])
 
 
 @router.post("/evaluate-retrieval")
@@ -63,7 +68,7 @@ def run_retrieval_evaluation_job(
 
 def _authorize(token: str | None) -> None:
     expected = get_settings().airflow_internal_token
-    if not expected or token != expected:
+    if not expected or not token or not hmac.compare_digest(token, expected):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized internal job",

@@ -2,8 +2,10 @@ import hashlib
 import hmac
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from functools import lru_cache
 from threading import Lock
 from typing import Annotated
 
@@ -107,21 +109,79 @@ def require_admin(
     return user
 
 
-class AskRateLimiter:
-    def __init__(self) -> None:
+class SlidingWindowRateLimiter:
+    """In-process sliding-window limiter; the API runs as a single replica."""
+
+    def __init__(
+        self,
+        limit: Callable[[], int],
+        window_seconds: Callable[[], float],
+        detail: str,
+        max_keys: int = 10_000,
+    ) -> None:
+        self._limit = limit
+        self._window_seconds = window_seconds
+        self._detail = detail
+        self._max_keys = max_keys
         self._lock = Lock()
-        self._requests: dict[str, list[float]] = {}
+        self._events: dict[str, list[float]] = {}
 
     def check(self, key: str) -> None:
-        now = datetime.now(UTC).timestamp()
+        """Reject the call when the key is over its limit; otherwise count it."""
+
         with self._lock:
-            recent = [
-                timestamp for timestamp in self._requests.get(key, []) if now - timestamp < 60
-            ]
-            if len(recent) >= get_settings().auth_rate_limit_per_minute:
-                raise HTTPException(status_code=429, detail="Ask rate limit exceeded")
-            recent.append(now)
-            self._requests[key] = recent
+            self._raise_if_limited(key)
+            self._record(key)
+
+    def ensure_allowed(self, key: str) -> None:
+        with self._lock:
+            self._raise_if_limited(key)
+
+    def record(self, key: str) -> None:
+        with self._lock:
+            self._record(key)
+
+    def reset(self, key: str) -> None:
+        with self._lock:
+            self._events.pop(key, None)
+
+    def _raise_if_limited(self, key: str) -> None:
+        if len(self._recent(key, _now())) >= self._limit():
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=self._detail)
+
+    def _record(self, key: str) -> None:
+        now = _now()
+        self._events[key] = [*self._recent(key, now), now]
+        if len(self._events) > self._max_keys:
+            # Keys can come from unauthenticated input (login usernames); keep memory bounded.
+            for stale_key in [item for item in self._events if not self._recent(item, now)]:
+                del self._events[stale_key]
+            while len(self._events) > self._max_keys:
+                del self._events[next(iter(self._events))]
+
+    def _recent(self, key: str, now: float) -> list[float]:
+        window = self._window_seconds()
+        return [timestamp for timestamp in self._events.get(key, []) if now - timestamp < window]
 
 
-ask_rate_limiter = AskRateLimiter()
+def _now() -> float:
+    return datetime.now(UTC).timestamp()
+
+
+ask_rate_limiter = SlidingWindowRateLimiter(
+    limit=lambda: get_settings().auth_rate_limit_per_minute,
+    window_seconds=lambda: 60,
+    detail="Ask rate limit exceeded",
+)
+login_failure_limiter = SlidingWindowRateLimiter(
+    limit=lambda: get_settings().auth_login_max_failures,
+    window_seconds=lambda: get_settings().auth_login_failure_window_seconds,
+    detail="Too many failed sign-in attempts; try again later",
+)
+
+
+@lru_cache(maxsize=1)
+def dummy_password_hash() -> str:
+    """A hash to verify against for unknown usernames, so timing does not reveal them."""
+
+    return password_hasher.hash(uuid.uuid4().hex)

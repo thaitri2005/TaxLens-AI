@@ -6,6 +6,7 @@ from pathlib import Path
 from taxlens.db import SessionLocal
 from taxlens.ingestion.connectors import SourceDocument, create_official_connector
 from taxlens.ingestion.seed import ingest_source_document
+from taxlens.legal_data.document_numbers import issuing_agency_for
 from taxlens.storage.factory import get_object_storage
 
 
@@ -37,9 +38,8 @@ def main() -> None:
                 source_url=entry["source_url"],
                 content_url=entry["content_url"],
                 document_type=entry["document_number"].rsplit("/", 1)[-1],
-                issuing_agency=(
-                    "Ministry of Finance" if entry["source"] == "mof" else "Government of Vietnam"
-                ),
+                issuing_agency=issuing_agency_for(entry["document_number"])
+                or ("Ministry of Finance" if entry["source"] == "mof" else "Government of Vietnam"),
                 issue_date=date.fromisoformat(entry["issue_date"])
                 if entry.get("issue_date")
                 else None,

@@ -12,14 +12,17 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from sqlalchemy.orm import Session
 
+from taxlens.config import get_settings
 from taxlens.intelligence.chat import ChatMessage, ChatProvider, ChatProviderError, ChatRequest
 from taxlens.intelligence.evidence import EvidenceAssessment, assess_evidence
 from taxlens.intelligence.planning import QueryIntent, QueryPlan, plan_query
 from taxlens.retrieval.citations import Citation, build_citation
 from taxlens.retrieval.embeddings import EmbeddingProvider
 from taxlens.retrieval.search import SearchResult, hybrid_search_chunks
+from taxlens.retrieval.snippets import lexical_support
 
 logger = logging.getLogger(__name__)
+EVIDENCE_CLAIM_MAX_LENGTH = 240
 
 
 class AnswerStatus(StrEnum):
@@ -43,6 +46,8 @@ class GeneratedAnswer:
     interpretation: str | None
     uncertainties: list[str]
     review_actions: list[str]
+    omitted_fact_count: int = 0
+    answerable: bool = True
 
 
 @dataclass(frozen=True)
@@ -140,9 +145,13 @@ def _retrieve_evidence_node(state: QuestionGraphState) -> dict[str, object]:
 
 def _assess_evidence_node(state: QuestionGraphState) -> dict[str, object]:
     results = state.get("results", [])
+    evidence = assess_evidence(results, get_settings().qa_min_semantic_score)
+    # Generation only sees the selected evidence, so citation numbers must follow it too.
+    cited_results = list(evidence.results) if evidence.is_sufficient else results
+    question = state["query_plan"].original_query
     return {
-        "evidence": assess_evidence(results),
-        "citations": [build_citation(result) for result in results],
+        "evidence": evidence,
+        "citations": [build_citation(result, question) for result in cited_results],
     }
 
 
@@ -180,7 +189,7 @@ def _finalize_insufficient_node(state: QuestionGraphState) -> dict[str, object]:
 def _generate_answer_node(state: QuestionGraphState) -> dict[str, object]:
     query_plan = state["query_plan"]
     evidence = state["evidence"]
-    results = state.get("results", [])
+    results = list(evidence.results)
     citations = state.get("citations", [])
     try:
         completion = state["chat_provider"].complete(
@@ -209,15 +218,35 @@ def _generate_answer_node(state: QuestionGraphState) -> dict[str, object]:
             result = _evidence_fallback_answer(query_plan, evidence, results, citations)
         return {"result": result}
 
+    if not generated.answerable:
+        return {
+            "result": _safe_answer(
+                AnswerStatus.INSUFFICIENT_EVIDENCE,
+                query_plan,
+                evidence,
+                "The retrieved passages do not answer this question.",
+                citations,
+                extra_uncertainties=generated.uncertainties,
+            )
+        }
+
+    supported_facts = [fact for fact in generated.confirmed_facts if _is_supported(fact, results)]
+    omitted = generated.omitted_fact_count + len(generated.confirmed_facts) - len(supported_facts)
+    uncertainties = [*generated.uncertainties, *evidence.notes]
+    if omitted:
+        uncertainties.append(
+            f"{omitted} statement(s) from the model were omitted because the cited passages "
+            "do not contain them."
+        )
     return {
         "result": QuestionAnswer(
             status=AnswerStatus.ANSWERED,
             query_plan=query_plan,
             evidence=evidence,
             answer=generated.answer,
-            confirmed_facts=generated.confirmed_facts,
+            confirmed_facts=supported_facts,
             interpretation=generated.interpretation,
-            uncertainties=generated.uncertainties,
+            uncertainties=uncertainties,
             citations=citations,
             review_actions=generated.review_actions,
             disclaimer=_disclaimer(),
@@ -226,6 +255,12 @@ def _generate_answer_node(state: QuestionGraphState) -> dict[str, object]:
 
 
 def parse_generated_answer(content: str, citation_count: int) -> GeneratedAnswer:
+    """Parse model JSON, keeping only claims whose citations can be validated.
+
+    Only a missing answer makes the response unusable; malformed optional fields and
+    claims without valid citations are dropped rather than discarding the whole answer.
+    """
+
     content = _extract_json_content(content)
     try:
         payload = json.loads(content)
@@ -234,18 +269,36 @@ def parse_generated_answer(content: str, citation_count: int) -> GeneratedAnswer
     if not isinstance(payload, dict):
         raise ValueError("Model response must be a JSON object")
 
-    answer = _required_text(payload, "answer")
-    confirmed_facts = _parse_claims(payload.get("confirmed_facts"), citation_count)
-    interpretation = _optional_text(payload.get("interpretation"))
-    uncertainties = _text_list(payload.get("uncertainties"), "uncertainties")
-    review_actions = _text_list(payload.get("review_actions"), "review_actions")
+    answerable = payload.get("answerable") is not False
+    # An answer is only required when the model says the evidence answers the question.
+    answer = _required_text(payload, "answer") if answerable else ""
+    confirmed_facts, omitted_fact_count = _parse_claims(
+        payload.get("confirmed_facts"), citation_count
+    )
     return GeneratedAnswer(
         answer=answer,
         confirmed_facts=confirmed_facts,
-        interpretation=interpretation,
-        uncertainties=uncertainties,
-        review_actions=review_actions,
+        interpretation=_optional_text(payload.get("interpretation")),
+        uncertainties=_text_list(payload.get("uncertainties")),
+        review_actions=_text_list(payload.get("review_actions")),
+        omitted_fact_count=omitted_fact_count,
+        answerable=answerable,
     )
+
+
+def _is_supported(fact: CitedClaim, results: Sequence[SearchResult]) -> bool:
+    """Whether the cited passages contain most of the fact's words (diacritics ignored).
+
+    Range checks alone let a model attach any citation number to any statement; this
+    rejects statements that the cited text does not actually contain.
+    """
+
+    cited_text = " ".join(
+        f"{results[number - 1].chunk.heading or ''} {results[number - 1].chunk.content[:2500]}"
+        for number in fact.citation_numbers
+        if 1 <= number <= len(results)
+    )
+    return lexical_support(fact.text, cited_text) >= get_settings().qa_min_fact_support
 
 
 def _build_messages(
@@ -254,24 +307,22 @@ def _build_messages(
     citations: Sequence[Citation],
 ) -> list[ChatMessage]:
     evidence_blocks = "\n\n".join(
-        (
-            f"[{index}] {citation.document_number} | {citation.legal_status} | "
-            f"Article {citation.article_number or 'n/a'} | "
-            f"Clause {citation.clause_number or 'n/a'} | "
-            f"Pages {citation.page_start or 'n/a'}-{citation.page_end or 'n/a'}\n"
-            f"{result.chunk.content[:2500]}"
-        )
+        _evidence_block(index, result, citation)
         for index, (result, citation) in enumerate(zip(results, citations, strict=True), start=1)
     )
     system_prompt = (
-        "You are a Vietnamese tax-regulation research assistant. Use only the provided evidence. "
-        "Do not invent legal facts, give definitive professional advice, or cite sources outside "
-        "the list. Keep answer under 80 words. Return exactly 3 confirmed facts when evidence "
-        "supports them; keep each fact under 25 words. Do not repeat the answer in the facts. "
-        "Return valid JSON only with: answer (string), confirmed_facts (array of objects "
-        "with text and citation_numbers), interpretation (string or null), uncertainties (array "
-        "of strings), and review_actions (array of strings). Every confirmed fact needs one or "
-        "more valid citation numbers."
+        "You are a Vietnamese tax-regulation research assistant. Use only the numbered "
+        "evidence passages; they are OCR text of official documents and may contain "
+        "recognition errors. Answer in the language of the question (a Vietnamese question "
+        "gets a Vietnamese answer). If the passages do not answer the question, set "
+        "answerable to false and explain what is missing in uncertainties instead of "
+        "guessing. Keep the answer under 120 words and name the document and article it "
+        "relies on. Give up to 3 confirmed facts; each must restate what its cited passage "
+        "says, reusing the passage wording, and cite only passages that contain it. Do not "
+        "invent legal facts or give definitive professional advice. Return valid JSON only "
+        "with: answerable (boolean), answer (string), confirmed_facts (array of objects with "
+        "text and citation_numbers), interpretation (string or null), uncertainties (array of "
+        "strings), and review_actions (array of strings)."
     )
     user_prompt = PromptTemplate.from_template(
         "Intent: {intent}\nQuestion: {question}\n\nEvidence:\n{evidence}"
@@ -286,12 +337,25 @@ def _build_messages(
     ]
 
 
+def _evidence_block(index: int, result: SearchResult, citation: Citation) -> str:
+    header = (
+        f"[{index}] {citation.document_number} | {citation.legal_status} | "
+        f"Article {citation.article_number or 'n/a'} | "
+        f"Clause {citation.clause_number or 'n/a'} | "
+        f"Pages {citation.page_start or 'n/a'}-{citation.page_end or 'n/a'}"
+    )
+    # Clause-level chunks do not repeat the article title, so pass it explicitly.
+    heading = f"\nHeading: {citation.heading}" if citation.heading else ""
+    return f"{header}{heading}\n{result.chunk.content[:2500]}"
+
+
 def _safe_answer(
     status: AnswerStatus,
     query_plan: QueryPlan,
     evidence: EvidenceAssessment | None,
     uncertainty: str,
     citations: list[Citation],
+    extra_uncertainties: Sequence[str] = (),
 ) -> QuestionAnswer:
     return QuestionAnswer(
         status=status,
@@ -300,7 +364,11 @@ def _safe_answer(
         answer=None,
         confirmed_facts=[],
         interpretation=None,
-        uncertainties=[uncertainty],
+        uncertainties=[
+            uncertainty,
+            *extra_uncertainties,
+            *(evidence.notes if evidence else ()),
+        ],
         citations=citations,
         review_actions=["Review the cited source material or refine the question and filters."],
         disclaimer=_disclaimer(),
@@ -313,27 +381,19 @@ def _evidence_fallback_answer(
     results: Sequence[SearchResult],
     citations: list[Citation],
 ) -> QuestionAnswer:
-    claims = [
-        CitedClaim(
-            text=(result.chunk.heading or result.chunk.content).strip(),
-            citation_numbers=(index,),
-        )
-        for index, result in enumerate(results, start=1)
-        if (result.chunk.heading or result.chunk.content).strip()
-    ]
+    # The model produced nothing usable, so report that instead of presenting an answer;
+    # the evidence excerpts remain available for direct review.
     return QuestionAnswer(
-        status=AnswerStatus.ANSWERED,
+        status=AnswerStatus.INVALID_MODEL_OUTPUT,
         query_plan=query_plan,
         evidence=evidence,
-        answer=(
-            "The retrieved evidence contains relevant provisions for this question. "
-            "Review the cited articles below; the language model response could not be "
-            "formatted reliably."
-        ),
-        confirmed_facts=claims,
+        answer=None,
+        confirmed_facts=_evidence_claims(results),
         interpretation=None,
         uncertainties=[
-            "The response is an evidence summary because the language model output was not usable."
+            "The language model response could not be used; the relevant evidence passages "
+            "are listed instead.",
+            *evidence.notes,
         ],
         citations=citations,
         review_actions=["Review the cited source material for the complete rule and context."],
@@ -348,16 +408,17 @@ def _recovered_answer(
     citations: list[Citation],
     answer: str,
 ) -> QuestionAnswer:
-    claims = _evidence_claims(results)
     return QuestionAnswer(
         status=AnswerStatus.ANSWERED,
         query_plan=query_plan,
         evidence=evidence,
         answer=answer,
-        confirmed_facts=claims,
+        confirmed_facts=_evidence_claims(results),
         interpretation=None,
         uncertainties=[
-            "The model response was truncated before all structured citations could be validated."
+            "The model response was malformed, so its statements could not be checked against "
+            "citations; the listed facts are the retrieved evidence passages.",
+            *evidence.notes,
         ],
         citations=citations,
         review_actions=["Review the cited source material for the complete rule and context."],
@@ -366,14 +427,15 @@ def _recovered_answer(
 
 
 def _evidence_claims(results: Sequence[SearchResult]) -> list[CitedClaim]:
-    return [
-        CitedClaim(
-            text=(result.chunk.heading or result.chunk.content).strip(),
-            citation_numbers=(index,),
-        )
-        for index, result in enumerate(results, start=1)
-        if (result.chunk.heading or result.chunk.content).strip()
-    ]
+    claims: list[CitedClaim] = []
+    for index, result in enumerate(results, start=1):
+        text = " ".join((result.chunk.heading or result.chunk.content).split())
+        if not text:
+            continue
+        if len(text) > EVIDENCE_CLAIM_MAX_LENGTH:
+            text = text[: EVIDENCE_CLAIM_MAX_LENGTH - 1].rsplit(" ", 1)[0] + "…"
+        claims.append(CitedClaim(text=text, citation_numbers=(index,)))
+    return claims
 
 
 def _recover_answer_text(content: str) -> str | None:
@@ -395,42 +457,44 @@ def _required_text(payload: dict[object, object], name: str) -> str:
 
 
 def _optional_text(value: object) -> str | None:
-    if value is None:
-        return None
     if not isinstance(value, str):
-        raise ValueError("Optional text must be a string or null")
+        return None
     return value.strip() or None
 
 
-def _text_list(value: object, name: str) -> list[str]:
-    if not isinstance(value, list) or not all(
-        isinstance(item, str) and item.strip() for item in value
-    ):
-        raise ValueError(f"{name} must be an array of non-empty strings")
-    return [item.strip() for item in value]
-
-
-def _parse_claims(value: object, citation_count: int) -> list[CitedClaim]:
+def _text_list(value: object) -> list[str]:
+    if isinstance(value, str):
+        value = [value]
     if not isinstance(value, list):
-        raise ValueError("confirmed_facts must be an array")
-    if all(isinstance(item, str) and item.strip() for item in value):
-        if citation_count == 0:
-            raise ValueError("Confirmed facts require citations")
-        return [
-            CitedClaim(text=item.strip(), citation_numbers=tuple(range(1, citation_count + 1)))
-            for item in value
-        ]
+        return []
+    return [item.strip() for item in value if isinstance(item, str) and item.strip()]
+
+
+def _parse_claims(value: object, citation_count: int) -> tuple[list[CitedClaim], int]:
+    """Return claims with valid citations and the number of claims that were dropped."""
+
+    if not isinstance(value, list):
+        return [], 0
     claims: list[CitedClaim] = []
+    omitted = 0
     for item in value:
+        # A bare string has no citation the model committed to, so it cannot be presented
+        # as a confirmed fact.
         if not isinstance(item, dict):
-            raise ValueError("Each confirmed fact must be an object")
-        text = _required_text(item, "text")
-        citation_numbers = item.get("citation_numbers")
-        normalized_numbers = _normalize_citation_numbers(citation_numbers, citation_count)
+            omitted += 1
+            continue
+        text = item.get("text")
+        if not isinstance(text, str) or not text.strip():
+            omitted += 1
+            continue
+        normalized_numbers = _normalize_citation_numbers(
+            item.get("citation_numbers"), citation_count
+        )
         if not normalized_numbers:
-            raise ValueError("Each confirmed fact needs valid citation numbers")
-        claims.append(CitedClaim(text=text, citation_numbers=tuple(normalized_numbers)))
-    return claims
+            omitted += 1
+            continue
+        claims.append(CitedClaim(text=text.strip(), citation_numbers=tuple(normalized_numbers)))
+    return claims, omitted
 
 
 def _normalize_citation_numbers(value: object, citation_count: int) -> list[int]:

@@ -8,8 +8,10 @@ from taxlens.ingestion.connectors import (
     ConnectorError,
     SourceDocument,
     create_official_connector,
+    is_tax_relevant,
 )
 from taxlens.ingestion.seed import ingest_source_document
+from taxlens.legal_data.document_numbers import issuing_agency_for
 from taxlens.storage.factory import get_object_storage
 
 
@@ -34,6 +36,11 @@ def main() -> None:
         "--download",
         action="store_true",
         help="Download and persist documents; without this flag, only discover",
+    )
+    parser.add_argument(
+        "--include-non-tax",
+        action="store_true",
+        help="Keep discovered documents whose titles are not about tax topics",
     )
     arguments = parser.parse_args()
     if arguments.limit < 1:
@@ -60,15 +67,24 @@ def main() -> None:
                 source_url=arguments.url,
                 content_url=arguments.url,
                 document_type=arguments.document_number.rsplit("/", 1)[-1],
-                issuing_agency="Ministry of Finance" if arguments.source == "mof" else None,
+                issuing_agency=issuing_agency_for(arguments.document_number)
+                or ("Ministry of Finance" if arguments.source == "mof" else None),
                 issue_date=issue_date,
             )
         ]
     else:
         try:
-            documents = connector.list_documents()[: arguments.limit]
+            discovered = connector.list_documents()
         except ConnectorError as error:
             parser.exit(1, f"Source discovery failed: {error}\n")
+        if not arguments.include_non_tax:
+            relevant = [document for document in discovered if is_tax_relevant(document)]
+            print(
+                f"Kept {len(relevant)} of {len(discovered)} discovered document(s) "
+                "as tax-related"
+            )
+            discovered = relevant
+        documents = discovered[: arguments.limit]
     if not arguments.download:
         for document in documents:
             print(f"{document.document_number}\t{document.title}\t{document.content_url}")

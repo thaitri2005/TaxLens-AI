@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     hf_chat_timeout_seconds: float = 30.0
     hf_chat_max_output_tokens: int = 1400
     hf_chat_temperature: float = 0.1
+    qa_min_semantic_score: float = 0.80
+    qa_min_fact_support: float = 0.5
     mlflow_enabled: bool = False
     mlflow_tracking_uri: str = "http://mlflow:5000"
     mlflow_experiment_name: str = "taxlens-qa"
@@ -46,6 +48,8 @@ class Settings(BaseSettings):
     auth_initial_admin_username: str = "admin"
     auth_initial_admin_password: str | None = None
     auth_rate_limit_per_minute: int = 10
+    auth_login_max_failures: int = 10
+    auth_login_failure_window_seconds: int = 900
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

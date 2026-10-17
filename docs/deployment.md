@@ -80,10 +80,11 @@ HTTPS.
 
 ## Required deployment jobs
 
-Run these as explicit release steps, not in the API web process:
-
-1. Apply Alembic migrations.
-2. Deploy or update API and web revisions.
+1. Deploy or update API and web revisions. The API container applies pending
+   Alembic migrations before starting uvicorn (single replica), so there is no
+   separate migration step.
+2. Trigger the `tax_regulation_discovery_daily` DAG once so documents processed
+   by an older chunker version are re-chunked and re-embedded.
 3. Run `/health` and `/ready` smoke checks.
 4. Verify Blob round-trip, search, and Q&A citations.
 5. Verify the separately deployed Airflow scheduler and webserver.
@@ -159,6 +160,13 @@ is idempotent and stores all durable output in Azure.
 After the first official import, run `scripts/repair_document_metadata.py`
 against the curated manifest so document titles, issuing agencies, issue dates,
 and official portal links are not lost when a source requires a direct PDF URL.
+
+Q&A depends on the Hugging Face router accepting the configured token. Provider
+failures are logged as `chat_provider_error status=<code> body=<message>`; a
+`402` means the account has no inference credits, and every answer then returns
+`PROVIDER_UNAVAILABLE`. Any OpenAI-compatible endpoint can be used instead by
+setting `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, and an empty
+`HF_CHAT_ROUTING_POLICY`.
 
 The scheduled processing task uses bounded batches (`TAXLENS_PROCESS_BATCH_SIZE`
 and `TAXLENS_PROCESS_MAX_BATCHES`) because standard Container Apps HTTP ingress

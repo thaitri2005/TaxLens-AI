@@ -5,11 +5,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from taxlens.api.auth import AuthenticatedUser, ask_rate_limiter, require_authenticated_user
-from taxlens.api.routes.search import SearchCitation
+from taxlens.api.routes.search import SearchCitation, to_search_citation
 from taxlens.db import get_db_session
 from taxlens.intelligence.chat import get_chat_provider
 from taxlens.intelligence.qa import QuestionAnswer, answer_question
-from taxlens.retrieval.embeddings import get_embedding_provider
+from taxlens.retrieval.embeddings import get_available_embedding_provider
 
 router = APIRouter(prefix="/questions", tags=["questions"])
 
@@ -50,14 +50,16 @@ def ask_question(
 ) -> QuestionResponse:
     ask_rate_limiter.check(str(user.id))
     embedding_provider = (
-        get_embedding_provider() if session.get_bind().dialect.name == "postgresql" else None
+        get_available_embedding_provider()
+        if session.get_bind().dialect.name == "postgresql"
+        else None
     )
     result = answer_question(
         session,
         request.question,
         get_chat_provider(),
         embedding_provider,
-        retrieval_limit=3,
+        retrieval_limit=5,
     )
     return _to_response(result)
 
@@ -74,25 +76,7 @@ def _to_response(result: QuestionAnswer) -> QuestionResponse:
         ],
         interpretation=result.interpretation,
         uncertainties=result.uncertainties,
-        citations=[
-            SearchCitation(
-                document_id=citation.document_id,
-                version_id=citation.version_id,
-                document_number=citation.document_number,
-                title=citation.title,
-                heading=citation.heading,
-                version_label=citation.version_label,
-                legal_status=citation.legal_status,
-                effective_date=citation.effective_date,
-                article_number=citation.article_number,
-                clause_number=citation.clause_number,
-                page_start=citation.page_start,
-                page_end=citation.page_end,
-                source_artifact_key=citation.source_artifact_key,
-                source_url=citation.source_url,
-            )
-            for citation in result.citations
-        ],
+        citations=[to_search_citation(citation) for citation in result.citations],
         review_actions=result.review_actions,
         disclaimer=result.disclaimer,
     )

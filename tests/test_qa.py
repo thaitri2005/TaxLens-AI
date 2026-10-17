@@ -29,7 +29,7 @@ def test_answer_question_returns_validated_cited_answer() -> None:
     engine = _create_engine_with_evidence()
     provider = FakeChatProvider(
         '{"answer":"Hóa đơn phải đáp ứng yêu cầu được nêu.",'
-        '"confirmed_facts":[{"text":"Hướng dẫn áp dụng cho hóa đơn VAT.",'
+        '"confirmed_facts":[{"text":"VAT invoice requirements apply to taxpayers.",'
         '"citation_numbers":[1]}],"interpretation":null,'
         '"uncertainties":[],"review_actions":["Review Article 1."]}'
     )
@@ -44,6 +44,41 @@ def test_answer_question_returns_validated_cited_answer() -> None:
     assert len(provider.requests) == 1
 
 
+def test_answer_question_drops_facts_that_the_cited_passage_does_not_contain() -> None:
+    engine = _create_engine_with_evidence()
+    provider = FakeChatProvider(
+        '{"answer":"Yes.","confirmed_facts":['
+        '{"text":"Corporate income tax is twenty percent.","citation_numbers":[1]},'
+        '{"text":"VAT invoice requirements for taxpayers.","citation_numbers":[1]}],'
+        '"interpretation":null,"uncertainties":[],"review_actions":[]}'
+    )
+
+    with Session(engine) as session:
+        answer = answer_question(session, "VAT invoice", provider)
+
+    assert [fact.text for fact in answer.confirmed_facts] == [
+        "VAT invoice requirements for taxpayers."
+    ]
+    assert any("omitted" in item for item in answer.uncertainties)
+
+
+def test_answer_question_reports_model_judgement_that_evidence_does_not_answer() -> None:
+    engine = _create_engine_with_evidence()
+    provider = FakeChatProvider(
+        '{"answerable":false,"answer":"","confirmed_facts":[],"interpretation":null,'
+        '"uncertainties":["The passages do not cover personal income tax."],'
+        '"review_actions":[]}'
+    )
+
+    with Session(engine) as session:
+        answer = answer_question(session, "VAT", provider)
+
+    assert answer.status is AnswerStatus.INSUFFICIENT_EVIDENCE
+    assert answer.answer is None
+    assert "The passages do not cover personal income tax." in answer.uncertainties
+    assert answer.citations[0].excerpt == "VAT invoice requirements for taxpayers."
+
+
 def test_answer_question_does_not_call_model_without_evidence() -> None:
     engine = _create_engine_with_evidence()
     provider = FakeChatProvider("{}")
@@ -56,22 +91,21 @@ def test_answer_question_does_not_call_model_without_evidence() -> None:
     assert provider.requests == []
 
 
-def test_parse_generated_answer_rejects_claim_without_valid_citation() -> None:
+def test_parse_generated_answer_drops_claim_without_valid_citation() -> None:
     content = (
         '{"answer":"Kết luận", "confirmed_facts":['
-        '{"text":"Sự kiện", "citation_numbers":[2]}],'
+        '{"text":"Sự kiện sai", "citation_numbers":[2]},'
+        '{"text":"Sự kiện đúng", "citation_numbers":[1]}],'
         '"interpretation":null,"uncertainties":[],"review_actions":[]}'
     )
 
-    try:
-        parse_generated_answer(content, citation_count=1)
-    except ValueError as error:
-        assert "citation" in str(error)
-    else:
-        raise AssertionError("Expected invalid citation numbers to be rejected")
+    answer = parse_generated_answer(content, citation_count=1)
+
+    assert [fact.text for fact in answer.confirmed_facts] == ["Sự kiện đúng"]
+    assert answer.omitted_fact_count == 1
 
 
-def test_parse_generated_answer_links_plain_fact_strings_to_retrieved_citations() -> None:
+def test_parse_generated_answer_does_not_invent_citations_for_plain_fact_strings() -> None:
     content = (
         '{"answer":"Kết luận", "confirmed_facts":["Sự kiện"],'
         '"interpretation":null,"uncertainties":[],"review_actions":[]}'
@@ -79,7 +113,17 @@ def test_parse_generated_answer_links_plain_fact_strings_to_retrieved_citations(
 
     answer = parse_generated_answer(content, citation_count=2)
 
-    assert answer.confirmed_facts[0].citation_numbers == (1, 2)
+    assert answer.answer == "Kết luận"
+    assert answer.confirmed_facts == []
+    assert answer.omitted_fact_count == 1
+
+
+def test_parse_generated_answer_tolerates_missing_optional_fields() -> None:
+    answer = parse_generated_answer('{"answer":"Kết luận"}', citation_count=1)
+
+    assert answer.answer == "Kết luận"
+    assert answer.uncertainties == []
+    assert answer.review_actions == []
 
 
 def test_parse_generated_answer_normalizes_numeric_citation_strings() -> None:
@@ -108,15 +152,15 @@ def test_parse_generated_answer_accepts_reasoning_and_markdown_wrappers() -> Non
     assert answer.confirmed_facts[0].citation_numbers == (1,)
 
 
-def test_answer_question_returns_evidence_fallback_for_unparseable_model_output() -> None:
+def test_answer_question_reports_unparseable_model_output() -> None:
     engine = _create_engine_with_evidence()
     provider = FakeChatProvider("This is an unstructured response.")
 
     with Session(engine) as session:
         answer = answer_question(session, "VAT", provider)
 
-    assert answer.status is AnswerStatus.ANSWERED
-    assert answer.answer is not None
+    assert answer.status is AnswerStatus.INVALID_MODEL_OUTPUT
+    assert answer.answer is None
     assert answer.confirmed_facts[0].citation_numbers == (1,)
     assert answer.citations
 
