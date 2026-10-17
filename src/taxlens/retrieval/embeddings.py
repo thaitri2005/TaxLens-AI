@@ -131,10 +131,10 @@ def embed_pending_chunks(
             [chunk_text(chunk) for chunk, _, _ in batch]
         )
         truncated_inputs += embedding_batch.truncated_inputs
-        for (chunk, existing, content_hash), vector in zip(
+        for (chunk, stored, content_hash), vector in zip(
             batch, embedding_batch.vectors, strict=True
         ):
-            if existing is None:
+            if stored is None:
                 session.add(
                     DocumentEmbedding(
                         document_chunk_id=chunk.id,
@@ -146,9 +146,9 @@ def embed_pending_chunks(
                     )
                 )
             else:
-                existing.dimensions = provider.dimensions
-                existing.content_hash = content_hash
-                existing.embedding = vector
+                stored.dimensions = provider.dimensions
+                stored.content_hash = content_hash
+                stored.embedding = vector
             embedded += 1
         # Commit per batch so an interrupted backfill keeps the work already done.
         session.commit()

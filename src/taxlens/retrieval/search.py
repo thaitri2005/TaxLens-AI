@@ -114,17 +114,7 @@ def semantic_search_chunks(
     )
     statement = _apply_filters(statement, active_filters)
     rows = session.execute(statement.order_by(distance, DocumentChunk.id).limit(limit)).all()
-    return [
-        SearchResult(
-            chunk=chunk,
-            version=version,
-            document=document,
-            source_url=source_url.source_url if source_url is not None else None,
-            vector_score=float(score_value),
-            fused_score=float(score_value),
-        )
-        for chunk, version, document, source_url, score_value in rows
-    ]
+    return _to_semantic_results(rows)
 
 
 def hybrid_search_chunks(
@@ -308,6 +298,20 @@ def _apply_filters(statement: Select[Any], filters: SearchFilters) -> Select[Any
     if filters.effective_to is not None:
         statement = statement.where(DocumentVersion.effective_date <= filters.effective_to)
     return statement
+
+
+def _to_semantic_results(rows: Sequence[Any]) -> list[SearchResult]:
+    return [
+        SearchResult(
+            chunk=chunk,
+            version=version,
+            document=document,
+            source_url=source_url.source_url if source_url is not None else None,
+            vector_score=float(score_value),
+            fused_score=float(score_value),
+        )
+        for chunk, version, document, source_url, score_value in rows
+    ]
 
 
 def _to_keyword_results(rows: Sequence[Any]) -> list[SearchResult]:
