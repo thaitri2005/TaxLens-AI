@@ -1,4 +1,5 @@
 import importlib.util
+import uuid
 from pathlib import Path
 
 from sqlalchemy.dialects import postgresql
@@ -11,7 +12,13 @@ from taxlens.document_processing.process import (
 )
 from taxlens.intelligence.evidence import EvidenceStatus, assess_evidence
 from taxlens.legal_data.document_numbers import find_document_numbers, issuing_agency_for
-from taxlens.retrieval.search import SearchFilters, _postgresql_keyword_statement, keyword_terms
+from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
+from taxlens.retrieval.search import (
+    SearchFilters,
+    SearchResult,
+    _postgresql_keyword_statement,
+    keyword_terms,
+)
 from taxlens.retrieval.snippets import build_excerpt, lexical_support
 from taxlens.retrieval.text import VIETNAMESE_ACCENTED, VIETNAMESE_UNACCENTED, fold_vietnamese
 
@@ -132,12 +139,24 @@ def test_lexical_support_ignores_lost_diacritics() -> None:
 
 
 def test_evidence_with_low_semantic_similarity_is_not_sent_to_the_model() -> None:
-    from tests.test_intelligence import _result
-
-    result = _result(legal_status="EFFECTIVE", article_number="1")
-    weak = type(result)(
-        chunk=result.chunk, version=result.version, document=result.document, vector_score=0.71
+    document = LegalDocument(
+        id=uuid.uuid4(), document_number="31/2025/TT-BTC", title="Invoices", document_type="TT"
     )
+    version = DocumentVersion(
+        id=uuid.uuid4(),
+        document_id=document.id,
+        legal_status="EFFECTIVE",
+        raw_content_hash="e" * 64,
+        raw_artifact_key="raw/invoice.txt",
+    )
+    chunk = DocumentChunk(
+        id=uuid.uuid4(),
+        document_version_id=version.id,
+        article_number="1",
+        content="Invoice requirements.",
+        token_count=2,
+    )
+    weak = SearchResult(chunk=chunk, version=version, document=document, vector_score=0.71)
 
     assert assess_evidence([weak], min_semantic_score=0.8).status is EvidenceStatus.LOW_RELEVANCE
     assert assess_evidence([weak]).status is EvidenceStatus.SUFFICIENT
