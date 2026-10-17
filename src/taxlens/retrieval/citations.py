@@ -21,9 +21,13 @@ class Citation:
     page_end: int | None
     source_artifact_key: str
     source_url: str | None
+    excerpt: str | None = None
+    """Verbatim source text most relevant to the query, when a query is given."""
 
 
-def build_citation(result: SearchResult) -> Citation:
+def build_citation(result: SearchResult, query: str | None = None) -> Citation:
+    from taxlens.retrieval.snippets import build_excerpt
+
     return Citation(
         document_id=result.document.id,
         version_id=result.version.id,
@@ -39,4 +43,5 @@ def build_citation(result: SearchResult) -> Citation:
         page_end=result.chunk.page_end,
         source_artifact_key=result.version.raw_artifact_key,
         source_url=result.source_url,
+        excerpt=build_excerpt(result.chunk.content, query) if query else None,
     )

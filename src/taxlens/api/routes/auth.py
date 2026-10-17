@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 
 from taxlens.api.auth import (
     AuthenticatedUser,
+    dummy_password_hash,
     hash_password,
+    login_failure_limiter,
     require_admin,
     require_internal_token,
     verify_password,
@@ -48,13 +50,17 @@ class UserAdminResponse(UserResponse):
 
 @router.post("/login", response_model=UserResponse, dependencies=[Depends(require_internal_token)])
 def login(request: LoginRequest, session: Session = Depends(get_db_session)) -> UserResponse:
+    throttle_key = request.username.casefold()
+    login_failure_limiter.ensure_allowed(throttle_key)
     user = session.scalar(select(UserAccount).where(UserAccount.username == request.username))
-    if (
-        user is None
-        or not user.is_active
-        or not verify_password(request.password, user.password_hash)
-    ):
+    # Always run one Argon2 verification so response time does not reveal valid usernames.
+    password_valid = verify_password(
+        request.password, user.password_hash if user is not None else dummy_password_hash()
+    )
+    if user is None or not user.is_active or not password_valid:
+        login_failure_limiter.record(throttle_key)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    login_failure_limiter.reset(throttle_key)
     user.last_login_at = datetime.now(UTC)
     session.commit()
     return UserResponse(id=user.id, username=user.username, role=user.role)
@@ -117,11 +123,27 @@ def reset_password(
 @admin_router.post("/{user_id}/disable", response_model=UserAdminResponse)
 def disable_user(
     user_id: uuid.UUID,
+    current: AuthenticatedUser = Depends(require_admin),
+    session: Session = Depends(get_db_session),
+) -> UserAdminResponse:
+    if user_id == current.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot disable yourself"
+        )
+    user = _get_user(session, user_id)
+    user.is_active = False
+    session.commit()
+    return _admin_response(user)
+
+
+@admin_router.post("/{user_id}/enable", response_model=UserAdminResponse)
+def enable_user(
+    user_id: uuid.UUID,
     _: AuthenticatedUser = Depends(require_admin),
     session: Session = Depends(get_db_session),
 ) -> UserAdminResponse:
     user = _get_user(session, user_id)
-    user.is_active = False
+    user.is_active = True
     session.commit()
     return _admin_response(user)
 

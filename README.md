@@ -18,7 +18,7 @@ The current development deployment is available at:
 `https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io`
 
 The application includes authentication, hybrid regulation search, cited Q&A,
-document browsing, and document comparison. The Airflow UI is deployed
+and document browsing. The Airflow UI is deployed
 separately and remains protected/paused unless a scheduled ingestion run is
 intentionally enabled.
 
@@ -155,8 +155,10 @@ failure.
 
 ## Engineering highlights
 
-- **Hybrid legal retrieval:** PostgreSQL full-text search, pgvector semantic
-  search, metadata filters, and lightweight score blending.
+- **Hybrid legal retrieval:** clause-level chunks of Vietnamese legal structure,
+  diacritic-insensitive full-text search ranked by query-term coverage, pgvector
+  semantic search, and reciprocal rank fusion. See `docs/retrieval.md` for the
+  method and its measured effect.
 - **Grounded Q&A:** LangGraph controls retrieval, evidence validation,
   generation, citation validation, and safe fallback behavior.
 - **Replaceable providers:** LangChain is used at the adapter boundary;
@@ -246,12 +248,17 @@ Azure deployment uses the following workflow:
 2. `deploy.yml` generates a Terraform plan using the remote Azure Blob state.
 3. The protected deployment environment requires approval before applying the
    Terraform plan.
+4. The API applies pending Alembic migrations when its container starts.
+5. Trigger the `tax_regulation_discovery_daily` DAG once; it processes new
+   documents, re-chunks documents indexed by an older chunker version from their
+   stored text, embeds new passages in bounded batches, and evaluates retrieval.
 
 Production secrets are stored in GitHub Actions secrets and Azure Key Vault.
 GitHub Actions authenticates to Azure with OIDC.
 
 See:
 
+- `docs/retrieval.md` — chunking, retrieval, evidence gate, and answer validation
 - `docs/local-development.md` — local API, ingestion, and processing workflow
 - `docs/authentication.md` — local authentication setup and security contract
 - `docs/llmops-local.md` — LangGraph, MLflow, and evaluation workflow

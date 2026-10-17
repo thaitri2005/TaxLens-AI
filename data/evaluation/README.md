@@ -1,6 +1,11 @@
 # Evaluation datasets
 
 These files are versioned labels, not automatically generated search examples.
+`tax_article_retrieval.json` is the default scheduled dataset: 18 answerable
+Vietnamese questions (four typed without diacritics) labelled with the document
+and article that answers them, plus two out-of-corpus questions that are skipped
+by the ranking metrics. Its labels were checked against the article headings of
+the five curated tax documents; see `docs/retrieval.md` for measured results.
 `tax_retrieval_current.json` is an eight-case current-corpus smoke set whose
 document targets were checked against the live indexed metadata. It is not a
 human- or legal-reviewed quality benchmark. The file is used by scheduled

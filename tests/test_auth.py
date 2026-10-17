@@ -105,3 +105,42 @@ def _identity_headers(user: UserAccount, username: str) -> dict[str, str]:
         "X-TaxLens-Auth-Timestamp": timestamp,
         "X-TaxLens-Auth-Signature": signature,
     }
+
+
+def test_repeated_failed_logins_are_throttled_per_username(monkeypatch) -> None:
+    from taxlens.api.auth import login_failure_limiter
+
+    engine = _engine_with_users()
+    _add_user(engine, "victim", "correct-password-123", "user")
+    _configure_auth(monkeypatch)
+    monkeypatch.setenv("AUTH_LOGIN_MAX_FAILURES", "2")
+    get_settings.cache_clear()
+    login_failure_limiter.reset("victim")
+    client = _client(engine)
+
+    def login(password: str) -> int:
+        return client.post(
+            "/auth/login",
+            headers={"X-TaxLens-Internal-Token": TOKEN},
+            json={"username": "victim", "password": password},
+        ).status_code
+
+    assert login("wrong-1") == 401
+    assert login("wrong-2") == 401
+    assert login("correct-password-123") == 429
+    login_failure_limiter.reset("victim")
+    assert login("correct-password-123") == 200
+
+
+def test_admin_cannot_disable_self_and_can_re_enable_users(monkeypatch) -> None:
+    engine = _engine_with_users()
+    admin = _add_user(engine, "admin", "admin-password-123", "admin")
+    user = _add_user(engine, "user", "user-password-123", "user", active=False)
+    _configure_auth(monkeypatch)
+    client = _client(engine)
+    headers = _identity_headers(admin, "admin")
+
+    assert client.post(f"/admin/users/{admin.id}/disable", headers=headers).status_code == 400
+    enabled = client.post(f"/admin/users/{user.id}/enable", headers=headers)
+    assert enabled.status_code == 200
+    assert enabled.json()["is_active"] is True

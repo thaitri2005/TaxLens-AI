@@ -73,3 +73,42 @@ def test_embedding_backfill_is_idempotent() -> None:
     assert second.unchanged == 1
     assert len(embeddings) == 1
     assert embeddings[0].dimensions == 384
+
+
+def test_embedding_backfill_respects_the_batch_limit() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    LegalDocument.metadata.create_all(engine)
+    with Session(engine) as session:
+        document = LegalDocument(
+            document_number="04/2025/TT-BTC", title="Limit", document_type="CIRCULAR"
+        )
+        session.add(document)
+        session.flush()
+        version = DocumentVersion(
+            document_id=document.id,
+            legal_status="EFFECTIVE",
+            raw_content_hash="d" * 64,
+            raw_artifact_key="raw/limit.txt",
+        )
+        session.add(version)
+        session.flush()
+        for index in range(3):
+            session.add(
+                DocumentChunk(
+                    document_version_id=version.id,
+                    article_number=str(index + 1),
+                    content=f"Chunk {index}",
+                    token_count=2,
+                )
+            )
+        session.commit()
+
+        first = embed_pending_chunks(session, FakeEmbeddingProvider(), batch_size=10, limit=2)
+        second = embed_pending_chunks(session, FakeEmbeddingProvider(), batch_size=10, limit=2)
+
+    assert (first.embedded, first.remaining) == (2, 1)
+    assert (second.embedded, second.unchanged, second.remaining) == (1, 2, 0)

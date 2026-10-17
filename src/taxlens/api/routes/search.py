@@ -1,4 +1,3 @@
-import re
 import uuid
 from datetime import date
 from typing import Literal
@@ -10,13 +9,14 @@ from sqlalchemy.orm import Session
 from taxlens.api.auth import require_authenticated_user
 from taxlens.db import get_db_session
 from taxlens.retrieval.citations import Citation, build_citation
-from taxlens.retrieval.embeddings import get_embedding_provider
+from taxlens.retrieval.embeddings import get_available_embedding_provider
 from taxlens.retrieval.search import (
     SearchFilters,
     hybrid_search_chunks,
     keyword_search_chunks,
     semantic_search_chunks,
 )
+from taxlens.retrieval.snippets import build_excerpt
 
 router = APIRouter(
     prefix="/search", tags=["search"], dependencies=[Depends(require_authenticated_user)]
@@ -38,6 +38,7 @@ class SearchCitation(BaseModel):
     page_end: int | None
     source_artifact_key: str
     source_url: str | None
+    excerpt: str | None = None
 
 
 class SearchHit(BaseModel):
@@ -77,7 +78,9 @@ def search(
         results = keyword_search_chunks(session, q, filters, limit)
     else:
         provider = (
-            get_embedding_provider() if session.get_bind().dialect.name == "postgresql" else None
+            get_available_embedding_provider()
+            if session.get_bind().dialect.name == "postgresql"
+            else None
         )
         if mode == "semantic" and provider is not None:
             query_embedding = provider.embed_query(q)
@@ -98,15 +101,15 @@ def search(
             keyword_score=result.keyword_score,
             vector_score=result.vector_score,
             fused_score=result.fused_score,
-            snippet=_build_snippet(result.chunk.content, q),
+            snippet=build_excerpt(result.chunk.content, q, maximum_length=260),
             content=result.chunk.content,
-            citation=_to_search_citation(build_citation(result)),
+            citation=to_search_citation(build_citation(result)),
         )
         for result in results
     ]
 
 
-def _to_search_citation(citation: Citation) -> SearchCitation:
+def to_search_citation(citation: Citation) -> SearchCitation:
     return SearchCitation(
         document_id=citation.document_id,
         version_id=citation.version_id,
@@ -122,24 +125,5 @@ def _to_search_citation(citation: Citation) -> SearchCitation:
         page_end=citation.page_end,
         source_artifact_key=citation.source_artifact_key,
         source_url=citation.source_url,
+        excerpt=citation.excerpt,
     )
-
-
-def _build_snippet(content: str, query: str, maximum_length: int = 260) -> str:
-    normalized = re.sub(r"\s+", " ", content).strip()
-    if len(normalized) <= maximum_length:
-        return normalized
-
-    terms = [term.casefold() for term in re.findall(r"\S+", query) if len(term) > 2]
-    sentences = [sentence.strip() for sentence in re.split(r"(?<=[.!?])\s+", normalized)]
-    relevant_sentences = [
-        sentence for sentence in sentences if any(term in sentence.casefold() for term in terms)
-    ]
-    if relevant_sentences:
-        normalized = max(
-            relevant_sentences,
-            key=lambda sentence: sum(sentence.casefold().count(term) for term in terms),
-        )
-    if len(normalized) <= maximum_length:
-        return normalized
-    return normalized[: maximum_length - 1].rsplit(" ", 1)[0] + "…"

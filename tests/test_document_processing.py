@@ -164,4 +164,78 @@ def test_processing_uses_ocr_when_native_pdf_text_is_unusable(
         assert result.status == "PROCESSED"
         assert result.chunk_count == 1
         assert job is not None
-        assert job.stage == "OCR_CHUNKED"
+        assert job.stage == "OCR_CHUNKED:v2"
+
+
+def test_missing_raw_artifact_is_recorded_as_failed_instead_of_raising(tmp_path: Path) -> None:
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    LegalDocument.metadata.create_all(engine)
+    storage = LocalObjectStorage(tmp_path / "storage")
+    with Session(engine) as session:
+        ingestion = ingest_seed_document(
+            session,
+            storage,
+            SeedDocument(
+                source_name="seed-corpus",
+                source_url="https://example.invalid/missing",
+                source_document_id="missing",
+                document_number="97/2025/TT-BTC",
+                title="Missing artifact",
+                document_type="CIRCULAR",
+                issuing_agency=None,
+                issue_date=None,
+                effective_date=None,
+                legal_status="DISCOVERED",
+                content=b"Article 1. Scope\nText that will be deleted from storage.",
+            ),
+        )
+        version = session.get(DocumentVersion, UUID(ingestion.version_id))
+        assert version is not None
+        storage.delete(version.raw_artifact_key)
+
+        result = process_document_version(session, storage, version)
+        job = session.scalar(select(ProcessingJob))
+
+    assert result.status == "FAILED"
+    assert result.error_code == "RAW_ARTIFACT_UNAVAILABLE"
+    assert job is not None and job.status == "FAILED"
+
+
+def test_forced_processing_rechunks_from_stored_text_and_marks_chunker_version(
+    tmp_path: Path, monkeypatch
+) -> None:
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    LegalDocument.metadata.create_all(engine)
+    storage = LocalObjectStorage(tmp_path / "storage")
+    with Session(engine) as session:
+        ingestion = ingest_seed_document(
+            session,
+            storage,
+            SeedDocument(
+                source_name="seed-corpus",
+                source_url="https://example.invalid/rechunk",
+                source_document_id="rechunk",
+                document_number="96/2025/TT-BTC",
+                title="Rechunk",
+                document_type="CIRCULAR",
+                issuing_agency=None,
+                issue_date=None,
+                effective_date=None,
+                legal_status="DISCOVERED",
+                content=b"Article 1. Scope\nFirst content.\n\nArticle 2. Dates\nSecond content.",
+            ),
+        )
+        version = session.get(DocumentVersion, UUID(ingestion.version_id))
+        assert version is not None
+        process_document_version(session, storage, version)
+
+        def fail_extraction(*args: object) -> list[str]:
+            raise AssertionError("re-chunking must not extract or OCR again")
+
+        monkeypatch.setattr("taxlens.document_processing.process.extract_pages", fail_extraction)
+        result = process_document_version(session, storage, version, force=True)
+        job = session.scalar(select(ProcessingJob))
+
+    assert result.extraction_method == "rechunked"
+    assert result.chunk_count == 2
+    assert job is not None and job.stage == "CHUNKED:v2"

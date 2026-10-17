@@ -1,14 +1,16 @@
 import hashlib
+import logging
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Protocol
 
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from taxlens.config import Settings, get_settings
 from taxlens.legal_data.models import DocumentChunk, DocumentEmbedding
 
+logger = logging.getLogger(__name__)
 QUERY_PREFIX = "query: "
 PASSAGE_PREFIX = "passage: "
 
@@ -24,6 +26,7 @@ class EmbeddingBackfillResult:
     embedded: int
     unchanged: int
     truncated_inputs: int
+    remaining: int = 0
 
 
 class EmbeddingProvider(Protocol):
@@ -90,24 +93,35 @@ def embed_pending_chunks(
     session: Session,
     provider: EmbeddingProvider,
     batch_size: int,
+    limit: int | None = None,
 ) -> EmbeddingBackfillResult:
-    chunks = session.scalars(select(DocumentChunk).order_by(DocumentChunk.created_at)).all()
+    """Embed chunks without a current embedding; ``limit`` bounds one call's work."""
+
+    rows = session.execute(
+        select(DocumentChunk, DocumentEmbedding)
+        .outerjoin(
+            DocumentEmbedding,
+            and_(
+                DocumentEmbedding.document_chunk_id == DocumentChunk.id,
+                DocumentEmbedding.model_id == provider.model_id,
+                DocumentEmbedding.model_revision == provider.model_revision,
+            ),
+        )
+        .order_by(DocumentChunk.created_at, DocumentChunk.id)
+    ).all()
     pending: list[tuple[DocumentChunk, DocumentEmbedding | None, str]] = []
     unchanged = 0
 
-    for chunk in chunks:
+    for chunk, existing in rows:
         content_hash = chunk_content_hash(chunk)
-        existing = session.scalar(
-            select(DocumentEmbedding).where(
-                DocumentEmbedding.document_chunk_id == chunk.id,
-                DocumentEmbedding.model_id == provider.model_id,
-                DocumentEmbedding.model_revision == provider.model_revision,
-            )
-        )
         if existing is not None and existing.content_hash == content_hash:
             unchanged += 1
             continue
         pending.append((chunk, existing, content_hash))
+    remaining = 0
+    if limit is not None and len(pending) > limit:
+        remaining = len(pending) - limit
+        pending = pending[:limit]
 
     embedded = 0
     truncated_inputs = 0
@@ -136,12 +150,14 @@ def embed_pending_chunks(
                 existing.content_hash = content_hash
                 existing.embedding = vector
             embedded += 1
+        # Commit per batch so an interrupted backfill keeps the work already done.
+        session.commit()
 
-    session.commit()
     return EmbeddingBackfillResult(
         embedded=embedded,
         unchanged=unchanged,
         truncated_inputs=truncated_inputs,
+        remaining=remaining,
     )
 
 
@@ -156,3 +172,17 @@ def chunk_text(chunk: DocumentChunk) -> str:
 @lru_cache
 def get_embedding_provider() -> LocalE5Embedder:
     return LocalE5Embedder(get_settings())
+
+
+@lru_cache
+def get_available_embedding_provider() -> LocalE5Embedder | None:
+    """Return the embedding provider, or None so retrieval degrades to keyword search.
+
+    The model is loaded from local files, so a failure is not retried per request.
+    """
+
+    try:
+        return get_embedding_provider()
+    except Exception:
+        logger.exception("Embedding model unavailable; falling back to keyword retrieval")
+        return None

@@ -60,6 +60,7 @@ class ChunkSummary(BaseModel):
 @router.get("", response_model=list[DocumentSummary])
 def list_documents(
     limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     source_name: str | None = Query(default=None, max_length=120),
     document_type: str | None = Query(default=None, max_length=50),
     issuing_agency: str | None = Query(default=None, max_length=255),
@@ -78,7 +79,7 @@ def list_documents(
         statement = statement.where(LegalDocument.document_type == document_type)
     if issuing_agency is not None:
         statement = statement.where(LegalDocument.issuing_agency.ilike(f"%{issuing_agency}%"))
-    documents = session.scalars(statement.limit(limit)).all()
+    documents = session.scalars(statement.offset(offset).limit(limit)).all()
     source_names = _source_names_by_document(session, [document.id for document in documents])
     return [_document_summary(document, source_names.get(document.id)) for document in documents]
 

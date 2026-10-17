@@ -6,9 +6,17 @@ const apiOrigin = process.env.API_ORIGIN ?? "http://api:8000";
 
 type RouteContext = { params: Promise<{ path: string[] }> };
 
+// Only the API groups the browser uses; internal job and login endpoints stay unreachable
+// through the proxy even though they also check their own tokens.
+const allowedPrefixes = new Set(["documents", "search", "questions", "evaluation", "admin"]);
+
 async function proxy(request: NextRequest, context: RouteContext) {
   const { path } = await context.params;
-  const target = `${apiOrigin.replace(/\/$/, "")}/${path.join("/")}${request.nextUrl.search}`;
+  if (!path.length || !allowedPrefixes.has(path[0]) || path.some(segment => segment === ".." || segment === ".")) {
+    return NextResponse.json({ detail: "Not found" }, { status: 404 });
+  }
+  const encodedPath = path.map(segment => encodeURIComponent(segment)).join("/");
+  const target = `${apiOrigin.replace(/\/$/, "")}/${encodedPath}${request.nextUrl.search}`;
   const headers = new Headers(request.headers);
   headers.delete("host");
   headers.delete("content-length");

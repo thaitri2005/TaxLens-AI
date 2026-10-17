@@ -6,6 +6,7 @@ from taxlens.ingestion.connectors import (
     OfficialPortalConnector,
     SourceDocument,
     create_official_connector,
+    is_tax_relevant,
 )
 
 
@@ -123,3 +124,52 @@ def test_official_connector_rejects_non_pdf_and_unsafe_urls() -> None:
 
     with pytest.raises(ConnectorError, match="allowed official host"):
         connector.fetch_document(document)
+
+
+def test_result_rows_keep_each_document_own_number_and_date() -> None:
+    html = """
+    <table><tr>
+      <td><a href='/?pageid=1&docid=2'><span class="code">388/2026/NĐ-CP</span></a></td>
+      <td><span class="issued-date">13/10/2026</span></td>
+      <td><a href='/?pageid=1&docid=2'><span class="substract">Sửa đổi, bổ sung một số điều
+        của Nghị định số 112/2017/NĐ-CP ngày 06 tháng 10 năm 2017</span></a>
+        <div class="bl-doc-file"><a href="https://datafiles.chinhphu.vn/files/388.pdf">
+          Tài liệu đính kèm</a></div></td>
+    </tr></table>
+    """
+    connector = OfficialPortalConnector(
+        source_name="government-portal",
+        catalog_url="https://vanban.chinhphu.vn/he-thong-van-ban?classid=1",
+        allowed_host=("vanban.chinhphu.vn", "datafiles.chinhphu.vn"),
+        client=httpx.Client(
+            transport=httpx.MockTransport(lambda request: httpx.Response(200, text=html))
+        ),
+    )
+
+    [document] = connector.list_documents()
+
+    assert document.document_number == "388/2026/NĐ-CP"
+    assert document.title.startswith("Sửa đổi, bổ sung")
+    assert document.issue_date is not None and document.issue_date.isoformat() == "2026-10-13"
+    assert document.source_url == "https://vanban.chinhphu.vn/?pageid=1&docid=2"
+
+
+def test_tax_relevance_filter_keeps_tax_topics_and_drops_other_legal_documents() -> None:
+    def document(number: str, title: str) -> SourceDocument:
+        return SourceDocument(
+            source_name="government-portal",
+            source_document_id=number,
+            document_number=number,
+            title=title,
+            source_url="https://vanban.chinhphu.vn/",
+            content_url="https://datafiles.chinhphu.vn/x.pdf",
+        )
+
+    assert is_tax_relevant(document("152/2026/TT-BTC", "Quy định mức thu, nộp phí và lệ phí"))
+    assert is_tax_relevant(document("48/2024/QH15", "Luật Thuế giá trị gia tăng"))
+    assert not is_tax_relevant(document("41/2026/TT-BYT", "Hướng dẫn tổ chức diễn đàn trẻ em"))
+    assert not is_tax_relevant(
+        document("64/2026/TT-BCT", "Quy định thực hiện kiểm toán năng lượng và kinh phí")
+    )
+    # Without a summary, Ministry of Finance documents are kept.
+    assert is_tax_relevant(document("12/2026/TT-BTC", "12/2026/TT-BTC"))

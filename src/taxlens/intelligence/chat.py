@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Literal, Protocol
 
 import httpx
@@ -8,6 +10,7 @@ import httpx
 from taxlens.config import Settings, get_settings
 from taxlens.intelligence.telemetry import ModelCallTelemetry, record_model_call
 
+logger = logging.getLogger(__name__)
 ChatRole = Literal["system", "user", "assistant"]
 
 
@@ -65,7 +68,7 @@ class HuggingFaceChatProvider:
         self._timeout_seconds = settings.hf_chat_timeout_seconds
         self._max_output_tokens = settings.hf_chat_max_output_tokens
         self._temperature = settings.hf_chat_temperature
-        self._client = client or httpx.Client(timeout=self._timeout_seconds)
+        self._client = client or _shared_client(self._timeout_seconds)
 
     def complete(self, request: ChatRequest) -> ChatResponse:
         from time import perf_counter
@@ -99,6 +102,16 @@ class HuggingFaceChatProvider:
             )
             response.raise_for_status()
         except httpx.HTTPError as error:
+            # The router explains failures in the body ("no remaining credits", unsupported
+            # model, context too long); without it every failure looks the same.
+            if isinstance(error, httpx.HTTPStatusError):
+                logger.warning(
+                    "chat_provider_error status=%s body=%s",
+                    error.response.status_code,
+                    error.response.text[:300],
+                )
+            else:
+                logger.warning("chat_provider_error transport=%s", type(error).__name__)
             record_model_call(
                 ModelCallTelemetry(
                     model=self._model,
@@ -111,7 +124,10 @@ class HuggingFaceChatProvider:
             )
             raise ChatProviderError("Hugging Face chat inference request failed") from error
 
-        payload = response.json()
+        try:
+            payload = response.json()
+        except ValueError as error:
+            raise ChatProviderError("Hugging Face returned a non-JSON chat response") from error
         if not isinstance(payload, dict):
             raise ChatProviderError("Hugging Face returned an invalid chat response")
         try:
@@ -146,6 +162,12 @@ class HuggingFaceChatProvider:
 
 def get_chat_provider() -> ChatProvider:
     return LangChainChatAdapter(HuggingFaceChatProvider(get_settings()))
+
+
+@lru_cache(maxsize=4)
+def _shared_client(timeout_seconds: float) -> httpx.Client:
+    # One pooled client per process; a client per request leaks connections.
+    return httpx.Client(timeout=timeout_seconds)
 
 
 def _routed_model(model: str, routing_policy: str) -> str:

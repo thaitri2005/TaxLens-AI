@@ -31,7 +31,9 @@ The seed is idempotent and creates an administrator only when
 - Auth.js stores the session in an encrypted, HttpOnly JWT cookie.
 - The Next.js proxy validates the session and signs a short-lived HMAC identity assertion.
 - FastAPI validates the assertion and checks the account is still active in PostgreSQL on every request.
-- Search, questions, documents, comparisons, and admin endpoints reject missing or invalid assertions.
+- Search, questions, documents, and admin endpoints reject missing or invalid assertions.
+- The web proxy forwards only those endpoint groups; `/auth/*` and `/internal/*` are not reachable through it.
+- Failed sign-ins are throttled per username (`AUTH_LOGIN_MAX_FAILURES` within `AUTH_LOGIN_FAILURE_WINDOW_SECONDS`), and unknown usernames take as long to reject as wrong passwords.
 - The browser never receives `HF_TOKEN`, database credentials, or the internal service secret.
 
 ## Roles and administration
