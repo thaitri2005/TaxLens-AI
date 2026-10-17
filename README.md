@@ -1,233 +1,108 @@
 # TaxLens AI
 
-**Cloud-native regulatory intelligence for Vietnamese tax professionals.**
+**Search Vietnamese tax regulations and get answers cited to the exact article.**
 
-TaxLens continuously discovers official Vietnamese tax documents, extracts and
-indexes their contents, retrieves relevant provisions, and answers questions
-with article-level citations that link back to the government source.
+TaxLens collects official tax documents from Vietnamese government portals, splits
+them into article- and clause-level passages, and answers questions only from
+those passages. Every answer cites the document, article, clause, and page it
+relies on, quotes the source text, and says so when the indexed documents do not
+answer the question.
 
-The repository contains an evidence-first RAG system with source ingestion,
-document processing, retrieval, evaluation, security controls, and Azure
-deployment using development-scale resources.
+**Live development deployment:**
+[taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io](https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io)
+(sign-in required)
 
-## Development deployment
+![Ask TaxLens: a cited answer to a Vietnamese question](docs/assets/pic3.png)
 
-The current development deployment is available at:
+## Features
 
-**Web application:**
-`https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io`
+- **Hybrid search**: keyword and semantic search over Vietnamese legal text that
+  tolerates missing diacritics (`hoa don` finds `hóa đơn`) and OCR errors.
+- **Cited answers**: answers in the language of the question, with confirmed facts
+  that are checked against the passages they cite and verbatim source excerpts.
+- **Explicit refusals**: out-of-scope questions, missing evidence, superseded-only
+  evidence, and model failures each return a distinct status instead of a guess.
+- **Document library**: every indexed document with its versions, processing
+  status, and passages.
+- **Daily ingestion**: an Airflow pipeline discovers new tax documents, OCRs them,
+  indexes them, and evaluates retrieval quality.
+- **Accounts**: username/password sign-in with admin and user roles.
 
-The application includes authentication, hybrid regulation search, cited Q&A,
-and document browsing. The Airflow UI is deployed
-separately and remains protected/paused unless a scheduled ingestion run is
-intentionally enabled.
-
-## System objectives
-
-The system is designed to support the following operations:
-
-- Which official document contains the applicable rule?
-- Which article and page support the answer?
-- Is the document current, superseded, or amended?
-- What changed between two versions?
-- Which source and provision support the answer?
-
-TaxLens addresses those needs with source discovery, versioned legal metadata,
-hybrid retrieval, grounded generation, citation validation, and scheduled
-ingestion.
-
-## Architecture: source ingestion to cited answer
-
-The Q&A system uses a staged pipeline. Official documents are collected, stored,
-processed, and indexed before they are available for retrieval:
+## How it works
 
 ```mermaid
 flowchart LR
-    Source[Official government portals]
-    Discover[Discover and deduplicate sources]
-    Process[Extract text and legal structure]
-    Store[(PostgreSQL metadata<br/>+ Blob artifacts)]
-    Index[Chunk, embed, and index]
-    Search[Hybrid retrieval]
-    Evidence{Evidence gate}
-    Answer[Grounded answer<br/>with article/page citations]
-
-    Source --> Discover --> Process --> Store --> Index --> Search --> Evidence
-    Evidence -->|sufficient and consistent| Answer
-    Evidence -->|missing, ambiguous, or conflicting| Safe[Insufficient-evidence response]
-
-    classDef boundary fill:#eef2ff,stroke:#6366f1,color:#111827;
-    classDef gate fill:#fff7ed,stroke:#ea580c,color:#111827;
-    class Source,Discover,Process,Store,Index,Search,Answer boundary;
-    class Evidence,Safe gate;
+    Portal[Government portals] --> Ingest[Discover tax documents<br/>+ download PDFs]
+    Ingest --> OCR[Native text or<br/>Tesseract OCR]
+    OCR --> Chunk[Split by article<br/>and clause]
+    Chunk --> Index[(PostgreSQL full-text<br/>+ pgvector embeddings)]
+    Question --> Search[Hybrid search]
+    Index --> Search
+    Search --> Gate{Evidence<br/>gate}
+    Gate -->|usable evidence| LLM[Language model]
+    Gate -->|none| Refuse[Insufficient evidence]
+    LLM --> Check[Validate citations<br/>and grounding]
+    Check --> Answer[Cited answer]
 ```
 
-Retrieval and generation are separate stages. The system stores document identity,
-version metadata, source URLs, and processed passages before a model is called.
-The evidence assessment stage checks the retrieved passages for legal status and
-structural support such as article, clause, and page references. Generation runs
-only when the evidence meets the configured checks. Otherwise, the API returns an
-insufficient-evidence response. This separates retrieval quality from generation
-and provides an explicit failure path for evaluation and debugging.
+1. **Ingestion**: the crawler reads each portal listing, keeps tax-related titles,
+   and stores the PDF in Blob Storage with its document number and source URL.
+2. **Processing**: text is extracted natively or with Vietnamese Tesseract OCR, then
+   split along the legal structure (*Điều* → *khoản*) into passages of at most
+   1,500 characters, each with article, clause, and page numbers.
+3. **Retrieval**: keyword search ranks passages by how many query terms they
+   contain, ignoring diacritics; semantic search uses `multilingual-e5-small`
+   embeddings; reciprocal rank fusion combines the two.
+4. **Evidence gate**: superseded and unlocated passages are set aside, and clearly
+   unrelated questions are refused before any model call.
+5. **Answer**: the model answers from the numbered passages or reports that they do
+   not answer the question; facts not contained in their cited passage are removed.
 
-### Runtime request path
+The full method, thresholds, and measured results are in
+[docs/retrieval.md](docs/retrieval.md). On an article-labelled set of 18 Vietnamese
+questions, hybrid retrieval puts the correct article first for 83% of questions and
+in the top five for all of them.
 
-The web application, API, database, and Airflow have separate responsibilities.
-Database credentials remain on the server side. Airflow invokes authenticated
-internal API jobs; it does not write directly to application tables.
-
-```mermaid
-flowchart TB
-    User[Authenticated user] --> Web[Next.js web app]
-    Web --> Proxy[Next.js API proxy<br/>adds signed identity headers]
-    Proxy --> API[Private FastAPI API]
-
-    subgraph Q[LangGraph-controlled Q&A]
-        Plan[Plan query and intent]
-        Retrieve[Retrieve hybrid evidence]
-        Assess[Assess legal status<br/>and article/page support]
-        Route{Enough evidence?}
-        Generate[Call provider through<br/>LangChain adapter]
-        Validate[Parse structured output<br/>and validate citations]
-        Fallback[Return unsupported/<br/>insufficient-evidence response]
-        Plan --> Retrieve --> Assess --> Route
-        Route -->|yes| Generate --> Validate
-        Route -->|no| Fallback
-    end
-
-    API --> Plan
-    Validate --> Response[Cited response]
-    Fallback --> Response
-    Response --> Web
-
-    Retrieve --> DB[(PostgreSQL FTS<br/>+ pgvector)]
-    Generate --> Model[Configurable chat provider]
-```
-
-LangGraph defines the Q&A state machine: query planning, retrieval, evidence
-assessment, routing, generation, and citation validation. LangChain is used at
-the chat-provider adapter boundary. Provider configuration can therefore change
-without changing the retrieval, legal metadata, or citation-validation modules.
-
-### Ingestion, indexing, and evaluation loop
-
-The daily workflow runs ingestion and evaluation outside the user request path.
-It converts newly discovered government publications into searchable corpus
-records and persists retrieval evaluation reports.
-
-```mermaid
-flowchart LR
-    Airflow[Airflow DAG]
-    Boundary[Authenticated internal API jobs]
-    Discover[Discover official sources]
-    Process[Process bounded batches<br/>native extraction → OCR fallback]
-    Embed[Embed pending chunks]
-    Evaluate[Evaluate retrieval<br/>and persist report]
-    Corpus[(Versioned corpus)]
-    Report[(Immutable evaluation reports)]
-    MLflow[(Optional MLflow runs)]
-
-    Airflow --> Boundary
-    Boundary --> Discover --> Process --> Embed --> Evaluate
-    Discover --> Corpus
-    Process --> Corpus
-    Embed --> Corpus
-    Evaluate --> Report
-    Evaluate -. optional tracking .-> MLflow
-```
-
-Airflow invokes allowlisted internal endpoints, and the API executes the same
-idempotent job scripts used locally. Processing is bounded to fit cloud ingress
-limits. Evaluation records corpus coverage separately from ranking quality, so a
-missing document is reported as a coverage issue rather than a retrieval-ranking
-failure.
-
-### Component boundaries
-
-| Boundary | Responsibility | Operational effect |
-| --- | --- | --- |
-| Ingestion → legal data | Discover official sources and preserve document/version identity | The corpus remains traceable and refreshable |
-| Processing → retrieval | Extract, OCR, structure, chunk, and embed | Search operates on inspectable passages, not raw PDFs |
-| Retrieval → generation | Assess consistency and structural support | The model cannot invent evidence that retrieval did not provide |
-| Web → API | Proxy authenticated requests to a private service | Credentials and database access stay server-side |
-| Airflow → API jobs | Orchestrate bounded, idempotent work | Scheduling is replaceable without duplicating domain logic |
-| Evaluation → operations | Persist metrics, coverage, fingerprints, and history | A score can be reproduced and diagnosed |
-
-## Engineering highlights
-
-- **Hybrid legal retrieval:** clause-level chunks of Vietnamese legal structure,
-  diacritic-insensitive full-text search ranked by query-term coverage, pgvector
-  semantic search, and reciprocal rank fusion. See `docs/retrieval.md` for the
-  method and its measured effect.
-- **Grounded Q&A:** LangGraph controls retrieval, evidence validation,
-  generation, citation validation, and safe fallback behavior.
-- **Replaceable providers:** LangChain is used at the adapter boundary;
-  Hugging Face model and routing policy are configuration-driven.
-- **Vietnamese document processing:** native PDF extraction runs first, with
-  Vietnamese/English Tesseract OCR for image-only or unusable PDFs.
-- **Scheduled ingestion:** Airflow runs discovery, processing, OCR, embedding,
-  and retrieval evaluation as idempotent tasks.
-- **LLMOps workflow:** MLflow tracks evaluation runs and deterministic
-  RAG-style metrics measure retrieval and answer behavior.
-- **Security:** Auth.js credentials login, Argon2id password hashing,
-  admin/user roles, private FastAPI ingress, Key Vault secrets, managed
-  identity, and rate limiting for inference-backed Q&A.
-- **Cloud delivery:** Terraform-managed Azure resources, remote Blob state,
-  GitHub OIDC, immutable image tags, protected plans, and an approval gate before
-  infrastructure changes are applied.
-
-## Technology stack
+## Tech stack
 
 | Area | Technology |
 | --- | --- |
-| Frontend | Next.js, TypeScript, Auth.js |
+| Web | Next.js, TypeScript, Auth.js |
 | API | FastAPI, Python 3.12, SQLAlchemy, Alembic |
-| Retrieval | PostgreSQL full-text search, pgvector, reranking boundary |
-| Embeddings | `intfloat/multilingual-e5-small`, CPU inference |
-| Chat inference | Hugging Face Inference Providers, configurable routing |
-| LLM workflow | LangGraph, LangChain adapter |
-| Evaluation | MLflow, RAGAS-style deterministic metrics |
-| Ingestion | Apache Airflow, idempotent API jobs |
-| OCR | Tesseract with `vie` and `eng` language data |
-| Cloud | Azure Container Apps, PostgreSQL Flexible Server, Blob Storage, Key Vault, ACR |
-| Infrastructure | Terraform, GitHub Actions, Azure OIDC |
+| Search | PostgreSQL full-text search, pgvector |
+| Embeddings | `intfloat/multilingual-e5-small` on CPU, baked into the API image |
+| Answers | Hugging Face Inference Providers (OpenAI-compatible), LangGraph |
+| OCR | Tesseract (`vie` + `eng`) |
+| Pipelines | Apache Airflow, MLflow (optional) |
+| Cloud | Azure Container Apps, PostgreSQL Flexible Server, Blob Storage, Key Vault, Container Registry |
+| Delivery | Terraform, GitHub Actions with Azure OIDC |
 
 ## Run locally
 
-Prerequisites: Python 3.12 and Docker Desktop with Compose.
+Requires Python 3.12 and Docker Desktop.
 
 ```powershell
-Copy-Item .env.example .env
+Copy-Item .env.example .env          # then set HF_TOKEN and AUTH_INITIAL_ADMIN_PASSWORD
 docker compose up -d postgres api web
 docker compose exec -T api alembic upgrade head
 docker compose exec -T api python scripts/seed.py
 ```
 
-Open:
-
 | Service | URL |
 | --- | --- |
-| Web app | `http://localhost:3000` |
-| API docs | `http://localhost:8000/docs` |
-| Airflow | `http://localhost:8080` |
-| MLflow | `http://localhost:5000` |
+| Web app | http://localhost:3000 |
+| API docs | http://localhost:8000/docs |
+| Airflow (optional) | http://localhost:8080 |
+| MLflow (optional) | http://localhost:5000 |
 
-Authentication is enabled locally. Configure the development values described
-in `docs/authentication.md`, then sign in at `http://localhost:3000/login`.
+Start Airflow and MLflow with
+`docker compose --profile airflow --profile llmops up -d`. See
+[docs/local-development.md](docs/local-development.md) for ingesting official
+documents, processing, and embedding.
 
-Start optional LLMOps services when needed:
+### Checks
 
-```powershell
-docker compose --profile airflow --profile llmops up -d
-```
-
-The daily DAG is intentionally paused by default. Unpause and trigger
-`tax_regulation_discovery_daily` only when you want to run discovery,
-processing/OCR, embedding, and evaluation.
-
-## Development checks
-
-Run the same checks used by CI before pushing:
+These are the checks CI runs:
 
 ```powershell
 python -m ruff check src tests scripts
@@ -235,68 +110,46 @@ python -m mypy src
 python -m pytest
 ```
 
-The current test suite covers authentication, protected routes, role-based
-authorization, retrieval, citations, ingestion, document processing, and API
-contracts.
+## Deploy to Azure
 
-## Deployment workflow
+1. Run **Publish release images** on `main`. It builds the API, web, and Airflow
+   images tagged with the commit SHA.
+2. Run **Plan or deploy Azure infrastructure** with that tag. It shows the
+   Terraform plan and applies it after approval in the `azure-deploy` environment.
+   The API applies database migrations when it starts.
+3. Trigger the `tax_regulation_discovery_daily` DAG in Airflow when chunking has
+   changed; it re-chunks older documents from their stored text and re-embeds them.
 
-Azure deployment uses the following workflow:
+Answers need a Hugging Face token with inference credits. Without them, every
+question returns `PROVIDER_UNAVAILABLE`, and the API logs the provider's error.
+See [docs/deployment.md](docs/deployment.md) and [docs/ci-cd.md](docs/ci-cd.md).
 
-1. `release-images.yml` builds and publishes API, web, and Airflow images under
-   an immutable commit-SHA tag.
-2. `deploy.yml` generates a Terraform plan using the remote Azure Blob state.
-3. The protected deployment environment requires approval before applying the
-   Terraform plan.
-4. The API applies pending Alembic migrations when its container starts.
-5. Trigger the `tax_regulation_discovery_daily` DAG once; it processes new
-   documents, re-chunks documents indexed by an older chunker version from their
-   stored text, embeds new passages in bounded batches, and evaluates retrieval.
+## Documentation
 
-Production secrets are stored in GitHub Actions secrets and Azure Key Vault.
-GitHub Actions authenticates to Azure with OIDC.
+| Document | Contents |
+| --- | --- |
+| [retrieval.md](docs/retrieval.md) | Chunking, search, evidence gate, answer validation, evaluation results |
+| [local-development.md](docs/local-development.md) | Local API, ingestion, and processing workflow |
+| [authentication.md](docs/authentication.md) | Sign-in, roles, and the web-to-API security contract |
+| [airflow-local.md](docs/airflow-local.md) | The ingestion DAG and its batching |
+| [llmops-local.md](docs/llmops-local.md) | Evaluation and MLflow tracking |
+| [deployment.md](docs/deployment.md) | Azure topology and operations |
+| [ci-cd.md](docs/ci-cd.md) | GitHub Actions, OIDC, and Terraform state |
+| [adr/](docs/adr/) | Architecture decisions |
 
-See:
+## Limitations
 
-- `docs/retrieval.md` — chunking, retrieval, evidence gate, and answer validation
-- `docs/local-development.md` — local API, ingestion, and processing workflow
-- `docs/authentication.md` — local authentication setup and security contract
-- `docs/llmops-local.md` — LangGraph, MLflow, and evaluation workflow
-- `docs/airflow-local.md` — local Airflow profile and DAG operations
-- `docs/deployment.md` — Azure topology, smoke checks, and operations
-- `docs/ci-cd.md` — GitHub Actions, OIDC, remote state, and approvals
-- `IMPLEMENTATION_PLAN.md` — detailed development blueprint and milestone status
-- `projectstructure.txt` — full system structure and design rationale
+TaxLens is a development-stage research tool, **not legal or tax advice**.
 
-## Cost-conscious design
-
-- The small multilingual embedding model is baked into the API image and runs
-  on CPU, avoiding a managed embedding endpoint for every chunk.
-- Native extraction runs before Tesseract, so OCR is used only when necessary.
-- Hugging Face routing is configurable and defaults to the cheapest policy.
-- PostgreSQL and pgvector consolidate relational, metadata, full-text, and
-  vector storage into one managed database.
-- Airflow and MLflow are separated from the request path and can be stopped or
-  scaled down during development.
-- Azure resources use small development SKUs and immutable image revisions.
-
-## Scope and limitations
-
-TaxLens is a development-stage regulatory information system. It is not a
-substitute for professional legal or tax advice. Retrieval and evaluation
-results depend on the documents currently indexed and the coverage of the
-configured government sources. OCR accuracy depends on the quality, structure,
-and legibility of scanned documents. The current deployment uses development-
-scale infrastructure and configuration.
+- Answers can only be as complete as the indexed corpus.
+- Most government PDFs are scans, so OCR errors can affect search and quotations.
+- Newly discovered documents are marked `DISCOVERED` until their legal status is
+  recorded; answers flag this.
+- The deployment uses development-scale Azure resources that scale to zero, so the
+  first request after idle is slow.
 
 ## Screenshots
 
-### Search workspace
-
-![TaxLens search workspace](docs/assets/pic1.png)
-
-![TaxLens search results](docs/assets/pic2.png)
-
-### Ask TaxLens
-
-![Ask TaxLens cited response](docs/assets/pic3.png)
+| Search | Results |
+| --- | --- |
+| ![Search workspace](docs/assets/pic1.png) | ![Search results](docs/assets/pic2.png) |
