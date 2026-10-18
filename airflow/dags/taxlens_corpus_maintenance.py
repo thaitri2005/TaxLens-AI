@@ -22,7 +22,7 @@ def run_maintenance(params: dict[str, object], **_: object) -> None:
             raise ValueError("ocr_benchmark needs a document_number with a clean text layer")
         run_api_job(
             "/internal/airflow/ocr-benchmark",
-            {"document_number": params["document_number"], "pages": params["pages"]},
+            {"document_number": params["document_number"], "pages": params.get("pages") or 3},
         )
         return
     process_params = {"limit": 1000}
@@ -49,8 +49,13 @@ with DAG(
             "ocr_benchmark",
             enum=["ocr_benchmark", "reocr_scanned_documents", "retry_failed_documents"],
         ),
-        "document_number": Param("", type="string"),
-        "pages": Param(3, type="integer", minimum=1, maximum=10),
+        # Only used by ocr_benchmark; optional so other actions can leave them empty.
+        "document_number": Param(
+            None, type=["null", "string"], description="ocr_benchmark only"
+        ),
+        "pages": Param(
+            3, type=["null", "integer"], minimum=1, maximum=10, description="ocr_benchmark only"
+        ),
     },
     tags=["taxlens", "maintenance"],
 ) as dag:
