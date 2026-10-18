@@ -29,8 +29,9 @@ class Settings(BaseSettings):
     embedding_batch_size: int = 32
     ocr_enabled: bool = True
     ocr_language: str = "vie+eng"
-    ocr_render_scale: float = 2.0
-    ocr_timeout_seconds: float = 30.0
+    ocr_dpi: int = 300
+    ocr_page_segmentation_mode: int = 3
+    ocr_timeout_seconds: float = 90.0
     hf_token: str | None = None
     hf_chat_base_url: str = "https://router.huggingface.co/v1"
     hf_chat_model: str = "Qwen/Qwen3-4B-Instruct-2507"
@@ -48,6 +49,7 @@ class Settings(BaseSettings):
     auth_initial_admin_username: str = "admin"
     auth_initial_admin_password: str | None = None
     auth_rate_limit_per_minute: int = 10
+    run_migrations_on_startup: bool = False
     auth_login_max_failures: int = 10
     auth_login_failure_window_seconds: int = 900
 

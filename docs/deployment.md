@@ -80,9 +80,11 @@ HTTPS.
 
 ## Required deployment jobs
 
-1. Deploy or update API and web revisions. The API container applies pending
-   Alembic migrations before starting uvicorn (single replica), so there is no
-   separate migration step.
+1. Deploy or update API and web revisions. The API applies pending Alembic
+   migrations in a background thread after it starts (single replica): `/health`
+   answers the liveness probe at once, and `/ready` returns 503 until the schema is
+   current, so there is no separate migration step. A failed migration keeps the
+   revision unready and logs `migrations_failed`.
 2. Trigger the `tax_regulation_discovery_daily` DAG once so documents processed
    by an older chunker version are re-chunked and re-embedded.
 3. Run `/health` and `/ready` smoke checks.
@@ -168,19 +170,14 @@ failures are logged as `chat_provider_error status=<code> body=<message>`; a
 setting `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, and an empty
 `HF_CHAT_ROUTING_POLICY`.
 
-The scheduled processing task uses bounded batches (`TAXLENS_PROCESS_BATCH_SIZE`
-and `TAXLENS_PROCESS_MAX_BATCHES`) because standard Container Apps HTTP ingress
-requests are limited to 240 seconds. If OCR backlog grows beyond one scheduled
-batch budget, increase the number of batches or move processing to a dedicated
-Container Apps Job/worker rather than increasing the synchronous request size.
-The Azure Terraform configuration pins the scheduler batch size to `1`; only
-increase it after measuring the slowest document-processing request safely
-below that limit.
+Internal jobs run in the background on the API, and Airflow polls their status,
+so no HTTP request approaches the 240-second Container Apps ingress limit even
+when OCR of one scan takes many minutes (see `docs/airflow-local.md`). OCR shares
+the API's single vCPU with user requests, so a large re-OCR slows the app while it
+runs; move processing to a Container Apps Job if that becomes a problem.
 
-Failed document versions are excluded from later scheduled batches by default.
-This prevents an image-only or persistently malformed PDF from being retried on
-every daily run. Use the internal processing endpoint with `retry_failed=true`
-after correcting the underlying OCR or document issue.
+Failed document versions are excluded from later scheduled runs. After fixing the
+cause, run the `taxlens_corpus_maintenance` DAG with `retry_failed_documents`.
 
 ## Required production settings
 

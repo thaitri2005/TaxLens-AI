@@ -28,12 +28,31 @@ flowchart LR
 
 ## 1. Text extraction
 
-Native PDF text is used when it is usable (at least 40 non-space characters, at least
-20% letters). Otherwise the page images are OCR'd with Tesseract `vie+eng`. In practice
-the government portal publishes scans, so nearly every document is OCR text and contains
-recognition errors such as lost diacritics (`hóa don`), stray punctuation before headings
-(`| Điều 5.`), and misread separators (`Điều 9, Thời điểm`). Later stages are built to
-tolerate these errors rather than assume clean text.
+The decision is made per page: a page keeps its PDF text layer when that text is usable
+(at least 40 non-space characters, at least 20% letters), and only the other pages are
+rendered and OCR'd with Tesseract `vie+eng`. In practice the government portal publishes
+scans, so nearly every page is OCR text.
+
+OCR settings (`OCR_DPI`, `OCR_PAGE_SEGMENTATION_MODE`, `OCR_TIMEOUT_SECONDS`):
+
+- **300 DPI** rendering (previously about 144 DPI). Vietnamese diacritics are small marks
+  and Tesseract is trained for about 300 DPI; at the lower resolution many were lost.
+- **Page segmentation mode 3** (automatic layout, previously 6, "one uniform block"). The
+  two-column header of Vietnamese legal documents ("CHÍNH PHỦ | CỘNG HÒA XÃ HỘI…") was
+  merged into one garbled line under mode 6.
+- **Grayscale** rendering and `OMP_THREAD_LIMIT=1`, since Tesseract's threads only contend
+  on the API's single vCPU.
+- A page that times out is left empty instead of failing the whole document.
+
+These defaults follow Tesseract's guidance; the `ocr_benchmark` action of the
+`taxlens_corpus_maintenance` DAG (`scripts/benchmark_ocr.py`) measures word error rate,
+with and without diacritics, against a born-digital PDF so they can be confirmed or
+tuned. New documents use the current settings; existing ones are re-OCR'd only on request
+(`reocr_scanned_documents`).
+
+Remaining OCR errors include lost diacritics (`hóa don`), stray punctuation before
+headings (`| Điều 5.`), and misread separators (`Điều 9, Thời điểm`). Later stages are
+built to tolerate them rather than assume clean text.
 
 Text is normalized to Unicode NFC (PDF text layers may use decomposed characters that
 would never match a typed query), whitespace is collapsed per line, and pages are joined
@@ -66,7 +85,7 @@ passages, so chunking follows the legal structure:
 
 `CHUNKER_VERSION` is recorded in the processing job's stage (`CHUNKED:v2`). When the
 chunker changes, the version is bumped and the daily DAG re-chunks every older version
-from its stored normalized text (no repeated OCR) in bounded batches.
+from its stored normalized text (no repeated OCR).
 
 While processing, the number printed in the document header (`Số: 301/2026/NĐ-CP`) is
 compared with the stored document number; a mismatch is recorded on the processing job as

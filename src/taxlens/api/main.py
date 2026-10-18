@@ -6,6 +6,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, Response, status
 
+from taxlens.api.migrations import (
+    MigrationState,
+    mark_migrations_skipped,
+    migration_state,
+    start_migrations,
+)
 from taxlens.api.routes.auth import admin_router
 from taxlens.api.routes.auth import router as auth_router
 from taxlens.api.routes.documents import router as documents_router
@@ -24,6 +30,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     logging.basicConfig(level=settings.log_level)
     logger.info("Starting %s in %s", settings.app_name, settings.app_env)
+    if settings.run_migrations_on_startup:
+        start_migrations()
+    else:
+        mark_migrations_skipped()
     yield
 
 
@@ -76,6 +86,12 @@ def create_app() -> FastAPI:
 
     @app.get("/ready", tags=["system"])
     def ready() -> dict[str, str]:
+        state = migration_state()
+        if state is not MigrationState.COMPLETED:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"status": "not_ready", "dependency": "migrations", "state": state},
+            )
         if not database_is_ready():
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

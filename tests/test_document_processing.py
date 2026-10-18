@@ -107,7 +107,7 @@ def test_processing_marks_image_only_pdf_as_ocr_required(
     with Session(engine) as session:
         monkeypatch.setattr(
             "taxlens.document_processing.process.ocr_pages",
-            lambda raw_content, settings: [""],
+            lambda raw_content, settings, page_indices=None: {0: ""},
         )
         ingestion = ingest_seed_document(session, storage, seed_document)
         version = session.get(DocumentVersion, UUID(ingestion.version_id))
@@ -149,9 +149,9 @@ def test_processing_uses_ocr_when_native_pdf_text_is_unusable(
 
     monkeypatch.setattr(
         "taxlens.document_processing.process.ocr_pages",
-            lambda raw_content, settings: [
-                "Article 1. OCR scope\nVietnamese tax content for the fallback test."
-            ],
+        lambda raw_content, settings, page_indices=None: {
+            0: "Article 1. OCR scope\nVietnamese tax content for the fallback test."
+        },
     )
     with Session(engine) as session:
         ingestion = ingest_seed_document(session, storage, seed_document)
@@ -239,3 +239,48 @@ def test_forced_processing_rechunks_from_stored_text_and_marks_chunker_version(
     assert result.extraction_method == "rechunked"
     assert result.chunk_count == 2
     assert job is not None and job.stage == "CHUNKED:v2"
+
+
+def test_only_pages_without_a_text_layer_are_ocrd(tmp_path: Path, monkeypatch) -> None:
+    requested: list[list[int]] = []
+
+    def fake_ocr(raw_content: bytes, settings: object, page_indices: list[int]) -> dict[int, str]:
+        requested.append(list(page_indices))
+        return {index: "Phụ lục được nhận dạng bằng OCR với đủ nội dung." for index in page_indices}
+
+    monkeypatch.setattr("taxlens.document_processing.process.ocr_pages", fake_ocr)
+    monkeypatch.setattr(
+        "taxlens.document_processing.process.extract_pages",
+        lambda raw_content, artifact_key: [
+            "Article 1. Scope\nNative text layer with plenty of readable legal content.",
+            "",
+        ],
+    )
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    LegalDocument.metadata.create_all(engine)
+    storage = LocalObjectStorage(tmp_path / "storage")
+    with Session(engine) as session:
+        ingestion = ingest_seed_document(
+            session,
+            storage,
+            SeedDocument(
+                source_name="official-source",
+                source_url="https://example.invalid/mixed",
+                source_document_id="mixed",
+                document_number="95/2025/TT-BTC",
+                title="Mixed",
+                document_type="TT-BTC",
+                issuing_agency=None,
+                issue_date=None,
+                effective_date=None,
+                legal_status="DISCOVERED",
+                content=b"%PDF-mixed",
+                content_type="application/pdf",
+            ),
+        )
+        version = session.get(DocumentVersion, UUID(ingestion.version_id))
+        assert version is not None
+        result = process_document_version(session, storage, version)
+
+    assert requested == [[1]]
+    assert result.extraction_method == "ocr"

@@ -63,16 +63,19 @@ def process_document_version(
     storage: ObjectStorage,
     version: DocumentVersion,
     force: bool = False,
+    reextract: bool = False,
 ) -> ProcessResult:
     """Extract, normalize, and chunk one document version.
 
     With ``force``, an already processed version is re-chunked from its stored normalized
-    text, so chunking changes do not repeat PDF extraction or OCR.
+    text, so chunking changes do not repeat PDF extraction or OCR. ``reextract`` repeats
+    extraction and OCR instead (after OCR settings change).
     """
 
     existing_chunks = session.scalars(
         select(DocumentChunk).where(DocumentChunk.document_version_id == version.id)
     ).all()
+    force = force or reextract
     if (
         not force
         and version.normalized_content_hash is not None
@@ -87,6 +90,7 @@ def process_document_version(
 
     if (
         force
+        and not reextract
         and version.normalized_artifact_key is not None
         and storage.exists(version.normalized_artifact_key)
     ):
@@ -124,13 +128,20 @@ def process_document_version(
     used_ocr = False
     try:
         pages = extract_pages(raw_content, version.raw_artifact_key)
-        if not _has_usable_text(pages):
-            if not raw_content.startswith(b"%PDF"):
-                raise ValueError("No usable extractable text found")
-            pages = ocr_pages(raw_content, get_settings())
+        settings = get_settings()
+        # OCR only the pages without a usable text layer: a digital PDF with a few scanned
+        # appendix pages should not be OCR'd in full.
+        scanned_pages = [index for index, page in enumerate(pages) if not _has_usable_text([page])]
+        if scanned_pages and raw_content.startswith(b"%PDF") and settings.ocr_enabled:
+            for index, text in ocr_pages(raw_content, settings, scanned_pages).items():
+                pages[index] = text
             used_ocr = True
-            if not _has_usable_text(pages):
-                raise ValueError("No usable text found after Tesseract OCR")
+        if not _has_usable_text(pages):
+            raise ValueError(
+                "No usable text found after Tesseract OCR"
+                if used_ocr
+                else "No usable extractable text found"
+            )
     except Exception as error:
         is_pdf = raw_content.startswith(b"%PDF")
         error_code = (

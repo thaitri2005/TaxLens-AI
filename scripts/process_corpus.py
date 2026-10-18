@@ -28,6 +28,11 @@ def main() -> None:
         help="Re-chunk processed versions whose chunks predate the current chunker version",
     )
     parser.add_argument(
+        "--reocr",
+        action="store_true",
+        help="Re-run extraction and OCR for scanned versions with the current OCR settings",
+    )
+    parser.add_argument(
         "--limit",
         type=int,
         help="Process at most this many document versions in one bounded batch",
@@ -45,6 +50,8 @@ def main() -> None:
     candidates = (
         _outdated_query()
         if arguments.rechunk_outdated
+        else _scanned_query()
+        if arguments.reocr
         else _candidate_query(reprocess_all=arguments.all, retry_failed=arguments.retry_failed)
     )
     force = arguments.all or arguments.rechunk_outdated
@@ -79,7 +86,7 @@ def main() -> None:
             started_at = time.perf_counter()
             try:
                 result = process_document_version(
-                    session, storage, version, force=force
+                    session, storage, version, force=force, reextract=arguments.reocr
                 )
             except Exception as error:
                 # One broken document must not stop the batch or block later runs.
@@ -113,6 +120,21 @@ def _outdated_query() -> Select[tuple[DocumentVersion]]:
         select(DocumentVersion)
         .join(LegalDocument)
         .where(DocumentVersion.normalized_artifact_key.is_not(None), ~exists(current_job))
+        .order_by(DocumentVersion.created_at)
+    )
+
+
+def _scanned_query() -> Select[tuple[DocumentVersion]]:
+    """Versions whose text came from OCR, or whose OCR failed and may now succeed."""
+
+    ocr_job = select(ProcessingJob.id).where(
+        ProcessingJob.document_version_id == DocumentVersion.id,
+        (ProcessingJob.stage.startswith("OCR_")) | (ProcessingJob.error_code == "OCR_REQUIRED"),
+    )
+    return (
+        select(DocumentVersion)
+        .join(LegalDocument)
+        .where(exists(ocr_job))
         .order_by(DocumentVersion.created_at)
     )
 

@@ -24,17 +24,32 @@ only tax-related titles), processes new documents, re-chunks documents indexed b
 older chunker version, embeds pending passages, and evaluates retrieval by calling
 allowlisted internal API job endpoints over the Compose network using
 `X-TaxLens-Internal-Token`; the API executes the existing scripts in its own
-runtime, preserving Tesseract and the baked-in embedding model. Processing is
-sent in bounded batches because Azure Container Apps has a 240-second HTTP
-request limit. `TAXLENS_PROCESS_BATCH_SIZE` controls documents per request and
-`TAXLENS_PROCESS_MAX_BATCHES` controls how many requests the DAG makes.
-Embedding uses the same pattern (`TAXLENS_EMBED_BATCH_SIZE`, default 400 passages
-per request, and `TAXLENS_EMBED_MAX_BATCHES`). Processing still runs when the
-day's portal crawl fails, so a source outage does not block the backlog. No
-Docker socket is exposed to Airflow. For M6, these endpoints can be replaced
-by Container Apps Jobs without changing the DAG task boundaries.
+runtime, preserving Tesseract and the baked-in embedding model.
+
+Jobs run in the background on the API. Each task starts its job with one short
+POST, which returns a job ID, and then polls `GET /internal/airflow/jobs/{id}`
+every 20 seconds until the job completes or fails (`airflow/dags/taxlens_jobs.py`).
+Azure Container Apps ends HTTP requests after 240 seconds and OCR of one long scan
+takes several minutes, so the earlier design that held the request open for the
+whole job failed on such documents; the polling also keeps the scale-to-zero API
+awake while a job runs. A retried task reattaches to its still-running job rather
+than starting a duplicate. Jobs are limited to six hours, and an API restart loses
+running jobs (the poll then gets 404 and Airflow retries). `TAXLENS_PROCESS_BATCH_SIZE`
+× `TAXLENS_PROCESS_MAX_BATCHES` sets how many new documents one run processes.
+Processing, re-chunking, and embedding still run when an earlier task fails, so a
+portal outage or one bad document does not block the rest. No Docker socket is
+exposed to Airflow.
 
 Documents that fail processing, such as image-only PDFs that produce
-`OCR_REQUIRED`, are skipped on later scheduled runs so one bad document does
-not consume the whole retry budget. Retry one after fixing OCR with
-`/internal/airflow/process?limit=1&retry_failed=true`.
+`OCR_REQUIRED`, are skipped on later scheduled runs.
+
+## Maintenance DAG
+
+`taxlens_corpus_maintenance` has no schedule. Start it with **Trigger DAG w/ config**
+and choose an `action`:
+
+| Action | What it does |
+| --- | --- |
+| `ocr_benchmark` | OCRs a few pages of `document_number` with several DPI and page-segmentation settings and prints word error rates against the PDF's text layer. Use a born-digital PDF. |
+| `reocr_scanned_documents` | Re-runs OCR for every OCR'd document with the current settings, then embeds. Slow: several minutes per long scan. |
+| `retry_failed_documents` | Retries versions whose processing failed, then embeds. |

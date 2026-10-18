@@ -131,7 +131,7 @@ See [docs/deployment.md](docs/deployment.md) and [docs/ci-cd.md](docs/ci-cd.md).
 | [retrieval.md](docs/retrieval.md) | Chunking, search, evidence gate, answer validation, evaluation results |
 | [local-development.md](docs/local-development.md) | Local API, ingestion, and processing workflow |
 | [authentication.md](docs/authentication.md) | Sign-in, roles, and the web-to-API security contract |
-| [airflow-local.md](docs/airflow-local.md) | The ingestion DAG and its batching |
+| [airflow-local.md](docs/airflow-local.md) | The ingestion and maintenance DAGs and how they run API jobs |
 | [llmops-local.md](docs/llmops-local.md) | Evaluation and MLflow tracking |
 | [deployment.md](docs/deployment.md) | Azure topology and operations |
 | [ci-cd.md](docs/ci-cd.md) | GitHub Actions, OIDC, and Terraform state |

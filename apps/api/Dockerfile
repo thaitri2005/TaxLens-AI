@@ -28,11 +28,17 @@ COPY src ./src
 COPY scripts ./scripts
 COPY data/evaluation ./data/evaluation
 
+# Tesseract's OpenMP threads contend with each other on the 1-vCPU container and slow OCR
+# down; one thread per process is faster there.
 ENV HF_HUB_OFFLINE=1 \
-    TRANSFORMERS_OFFLINE=1
+    TRANSFORMERS_OFFLINE=1 \
+    OMP_THREAD_LIMIT=1
 
 EXPOSE 8000
 
-# The API runs as a single replica, so applying pending migrations at start is safe and
-# removes the manual release step; an already-current schema makes this a no-op.
-CMD ["sh", "-c", "alembic upgrade head && exec uvicorn taxlens.api.main:app --host 0.0.0.0 --port 8000"]
+# The API runs as a single replica, so it applies pending migrations itself. They run in a
+# background thread after uvicorn starts (see taxlens/api/migrations.py): /health answers
+# the liveness probe at once and /ready stays 503 until the schema is current.
+ENV RUN_MIGRATIONS_ON_STARTUP=true
+
+CMD ["uvicorn", "taxlens.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
