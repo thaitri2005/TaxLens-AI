@@ -33,7 +33,8 @@ Azure Container Apps ends HTTP requests after 240 seconds and OCR of one long sc
 takes several minutes, so the earlier design that held the request open for the
 whole job failed on such documents; the polling also keeps the scale-to-zero API
 awake while a job runs. A retried task reattaches to its still-running job rather
-than starting a duplicate. Jobs are limited to six hours, and an API restart loses
+than starting a duplicate. The first request retries for up to five minutes while a
+scaled-to-zero API starts (image pull, startup migrations). Jobs are limited to six hours, and an API restart loses
 running jobs (the poll then gets 404 and Airflow retries). `TAXLENS_PROCESS_BATCH_SIZE`
 × `TAXLENS_PROCESS_MAX_BATCHES` sets how many new documents one run processes.
 Processing, re-chunking, and embedding still run when an earlier task fails, so a
@@ -42,6 +43,10 @@ exposed to Airflow.
 
 Documents that fail processing, such as image-only PDFs that produce
 `OCR_REQUIRED`, are skipped on later scheduled runs.
+
+In Azure, the scheduler and webserver are separate Container Apps that cannot reach each
+other's log server, so both mount the `airflow-logs` Azure Files share at
+`/opt/airflow/logs`; the webserver reads task logs from that share.
 
 ## Maintenance DAG
 

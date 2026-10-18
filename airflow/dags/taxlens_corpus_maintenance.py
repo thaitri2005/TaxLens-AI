@@ -7,7 +7,7 @@
 - ``retry_failed_documents``: retry versions whose processing failed, then embed.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.models.param import Param
@@ -43,6 +43,7 @@ with DAG(
     start_date=datetime(2026, 1, 1),
     catchup=False,
     max_active_runs=1,
+    default_args={"owner": "taxlens", "retries": 1, "retry_delay": timedelta(minutes=2)},
     params={
         "action": Param(
             "ocr_benchmark",

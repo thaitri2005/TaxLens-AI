@@ -68,3 +68,33 @@ def _job(status: str, exit_code: int | None = 0) -> dict[str, Any]:
         "duration_seconds": 1.0,
         "output": "Processing complete",
     }
+
+
+def test_run_api_job_waits_for_a_cold_api_to_start(monkeypatch: pytest.MonkeyPatch) -> None:
+    attempts: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.method == "POST":
+            attempts.append("post")
+            if len(attempts) == 1:
+                raise httpx.ReadTimeout("cold start", request=request)
+            if len(attempts) == 2:
+                return httpx.Response(503, json={"detail": "not ready"})
+            return httpx.Response(202, json=_job("running"))
+        return httpx.Response(200, json=_job("completed"))
+
+    jobs = _load_jobs_module(monkeypatch, handler)
+    monkeypatch.setattr(jobs, "WARM_UP_RETRY_SECONDS", 0)
+
+    assert jobs.run_api_job("/internal/airflow/ocr-benchmark") == "Processing complete"
+    assert attempts == ["post", "post", "post"]
+
+
+def test_run_api_job_does_not_retry_client_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(401, json={"detail": "Unauthorized internal job"})
+
+    jobs = _load_jobs_module(monkeypatch, handler)
+
+    with pytest.raises(httpx.HTTPStatusError):
+        jobs.run_api_job("/internal/airflow/embed")

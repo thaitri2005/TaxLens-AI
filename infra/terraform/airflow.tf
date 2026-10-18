@@ -38,6 +38,26 @@ resource "azurerm_key_vault_secret" "airflow_web_secret" {
   depends_on   = [azurerm_role_assignment.terraform_key_vault_secrets]
 }
 
+# Task logs are written by the scheduler (LocalExecutor) and read by the webserver. Separate
+# Container Apps cannot reach each other's log server, so both mount one Azure Files share at
+# /opt/airflow/logs and the webserver reads the log files directly.
+resource "azurerm_storage_share" "airflow_logs" {
+  count              = var.airflow_enabled ? 1 : 0
+  name               = "airflow-logs"
+  storage_account_id = azurerm_storage_account.artifacts.id
+  quota              = 5
+}
+
+resource "azurerm_container_app_environment_storage" "airflow_logs" {
+  count                        = var.airflow_enabled ? 1 : 0
+  name                         = "airflow-logs"
+  container_app_environment_id = azurerm_container_app_environment.this.id
+  account_name                 = azurerm_storage_account.artifacts.name
+  share_name                   = azurerm_storage_share.airflow_logs[0].name
+  access_key                   = azurerm_storage_account.artifacts.primary_access_key
+  access_mode                  = "ReadWrite"
+}
+
 resource "azurerm_container_app" "airflow_scheduler" {
   count                        = var.airflow_enabled ? 1 : 0
   name                         = "${var.name_prefix}-airflow-scheduler"
@@ -78,6 +98,14 @@ resource "azurerm_container_app" "airflow_scheduler" {
     min_replicas    = 1
     max_replicas    = 1
 
+    volume {
+      name         = "airflow-logs"
+      storage_type = "AzureFile"
+      storage_name = azurerm_container_app_environment_storage.airflow_logs[0].name
+      # The Airflow image runs as uid 50000; SMB mounts default to root ownership.
+      mount_options = "uid=50000,gid=0,dir_mode=0775,file_mode=0664"
+    }
+
     container {
       name    = "scheduler"
       image   = var.airflow_image
@@ -85,6 +113,11 @@ resource "azurerm_container_app" "airflow_scheduler" {
       memory  = "1Gi"
       command = ["bash", "-c"]
       args    = ["airflow db migrate && exec airflow scheduler"]
+
+      volume_mounts {
+        name = "airflow-logs"
+        path = "/opt/airflow/logs"
+      }
 
       env {
         name  = "AIRFLOW__CORE__EXECUTOR"
@@ -110,9 +143,8 @@ resource "azurerm_container_app" "airflow_scheduler" {
         name  = "TAXLENS_API_URL"
         value = "http://${azurerm_container_app.api.name}"
       }
-      # Azure Container Apps terminates HTTP requests after 240 seconds.
-      # Keep processing batches to one document so a slow OCR job cannot
-      # take down the whole Airflow task at the ingress boundary.
+      # Documents processed per daily run (batch size x batches). Jobs run in the
+      # background on the API, so the 240-second ingress limit no longer applies.
       env {
         name  = "TAXLENS_PROCESS_BATCH_SIZE"
         value = "1"
@@ -171,6 +203,14 @@ resource "azurerm_container_app" "airflow_webserver" {
     min_replicas    = 0
     max_replicas    = 1
 
+    volume {
+      name         = "airflow-logs"
+      storage_type = "AzureFile"
+      storage_name = azurerm_container_app_environment_storage.airflow_logs[0].name
+      # The Airflow image runs as uid 50000; SMB mounts default to root ownership.
+      mount_options = "uid=50000,gid=0,dir_mode=0775,file_mode=0664"
+    }
+
     container {
       name    = "webserver"
       image   = var.airflow_image
@@ -178,6 +218,11 @@ resource "azurerm_container_app" "airflow_webserver" {
       memory  = "1Gi"
       command = ["bash", "-c"]
       args    = ["airflow db migrate && airflow users create --username \"$AIRFLOW_ADMIN_USERNAME\" --password \"$AIRFLOW_ADMIN_PASSWORD\" --firstname TaxLens --lastname Admin --role Admin --email admin@taxlens.local || true; exec airflow webserver"]
+
+      volume_mounts {
+        name = "airflow-logs"
+        path = "/opt/airflow/logs"
+      }
 
       env {
         name  = "AIRFLOW__CORE__EXECUTOR"
