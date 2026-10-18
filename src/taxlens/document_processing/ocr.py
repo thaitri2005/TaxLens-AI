@@ -1,10 +1,10 @@
 """Tesseract OCR for scanned PDF pages.
 
 Vietnamese diacritics are small marks; Tesseract is trained for about 300 DPI, and the
-earlier ~144 DPI rendering lost many of them ("hóa don"). Page segmentation mode 3 (fully
-automatic layout) handles the two-column header block of Vietnamese legal documents that
-mode 6 ("one uniform block") merges into one garbled line. Both are settings, and
-``scripts/benchmark_ocr.py`` measures them against documents with a clean text layer.
+earlier ~144 DPI rendering lost many of them ("hóa don"). Measured on 301/2026/NĐ-CP
+(``scripts/benchmark_ocr.py``, 3 pages): 300 DPI cut word error rate from 31.7% to 25.6%;
+page segmentation mode 6 (one text block) scored 25.6% against 26.0% for mode 3 and 30.1%
+for mode 4, so mode 6 stays the default.
 """
 
 from collections.abc import Sequence

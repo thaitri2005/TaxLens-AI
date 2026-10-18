@@ -36,18 +36,25 @@ scans, so nearly every page is OCR text.
 OCR settings (`OCR_DPI`, `OCR_PAGE_SEGMENTATION_MODE`, `OCR_TIMEOUT_SECONDS`):
 
 - **300 DPI** rendering (previously about 144 DPI). Vietnamese diacritics are small marks
-  and Tesseract is trained for about 300 DPI; at the lower resolution many were lost.
-- **Page segmentation mode 3** (automatic layout, previously 6, "one uniform block"). The
-  two-column header of Vietnamese legal documents ("CHÍNH PHỦ | CỘNG HÒA XÃ HỘI…") was
-  merged into one garbled line under mode 6.
+  and Tesseract is trained for about 300 DPI.
+- **Page segmentation mode 6** (one uniform text block), which measured best.
 - **Grayscale** rendering and `OMP_THREAD_LIMIT=1`, since Tesseract's threads only contend
   on the API's single vCPU.
 - A page that times out is left empty instead of failing the whole document.
 
-These defaults follow Tesseract's guidance; the `ocr_benchmark` action of the
-`taxlens_corpus_maintenance` DAG (`scripts/benchmark_ocr.py`) measures word error rate,
-with and without diacritics, against a born-digital PDF so they can be confirmed or
-tuned. New documents use the current settings; existing ones are re-OCR'd only on request
+The `ocr_benchmark` action of the `taxlens_corpus_maintenance` DAG
+(`scripts/benchmark_ocr.py`) measures word error rate, with and without diacritics,
+against a born-digital PDF. On three pages of 301/2026/NĐ-CP:
+
+| DPI | Mode | Word error rate | Ignoring diacritics | Seconds/page |
+| --- | --- | --- | --- | --- |
+| 144 | 6 | 31.7% | 25.8% | 1.9 |
+| 300 | 6 | 25.6% | 18.0% | 2.3 |
+| 300 | 3 | 26.0% | 19.6% | 2.4 |
+| 300 | 4 | 30.1% | 21.7% | 2.4 |
+
+The error rates include differences in reading order between the text layer and OCR
+(headers, signature blocks), so they overstate true recognition errors. New documents use the current settings; existing ones are re-OCR'd only on request
 (`reocr_scanned_documents`).
 
 Remaining OCR errors include lost diacritics (`hóa don`), stray punctuation before
