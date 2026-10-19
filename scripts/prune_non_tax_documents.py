@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 
 from taxlens.db import SessionLocal
 from taxlens.ingestion.connectors import is_tax_title
+from taxlens.legal_data.document_numbers import issuer_code
 from taxlens.legal_data.models import (
     DocumentChunk,
     DocumentEmbedding,
@@ -31,6 +32,10 @@ from taxlens.legal_data.models import (
 
 CURATED_MANIFEST = Path("data/corpus/tax_documents.json")
 SEED_SOURCE_NAME = "seed-corpus"
+# Finance, tax, and customs documents are kept even when their stored title has no tax
+# keyword: some were filed under the number of the circular they amend, with a truncated
+# summary, and may still concern fees or invoices.
+PROTECTED_ISSUER_CODES = frozenset({"BTC", "TCT", "TCHQ"})
 
 
 def main() -> None:
@@ -46,7 +51,9 @@ def main() -> None:
         for document, reason in candidates:
             print(f"  {document.document_number} | {reason} | {document.title[:100]}")
         if not arguments.apply:
-            print("Dry run only; nothing deleted. Re-run with --apply to delete.")
+            total = session.scalar(select(func.count(LegalDocument.id))) or 0
+            # Printed last: job logs keep only the end of the output.
+            print(f"Dry run: {len(candidates)} of {total} document(s) would be removed.")
             return
         for document, _ in candidates:
             _delete_document(session, document)
@@ -75,7 +82,10 @@ def _documents_to_remove(
     for document in session.scalars(
         select(LegalDocument).order_by(LegalDocument.document_number)
     ).all():
-        if document.document_number in curated:
+        if (
+            document.document_number in curated
+            or issuer_code(document.document_number) in PROTECTED_ISSUER_CODES
+        ):
             continue
         if document.id in seed_documents:
             candidates.append((document, "sample seed document"))

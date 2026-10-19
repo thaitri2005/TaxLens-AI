@@ -32,6 +32,7 @@ def test_prune_removes_non_tax_and_seed_documents_but_keeps_tax_and_curated() ->
         _add(session, "86/2026/TT-BGDĐT", "Quy định chương trình giáo dục", "government-portal")
         _add(session, "31/2025/TT-BTC", "Sample electronic invoice guidance", "seed-corpus")
         _add(session, "99/2026/NĐ-CP", "Quy định về quản lý cụm công nghiệp", "government-portal")
+        _add(session, "98/2025/TT-BTC", "Sửa đổi một số điều của Thông tư số 98/2025", "portal")
         session.commit()
 
         candidates = prune._documents_to_remove(session, curated={"99/2026/NĐ-CP"})
@@ -44,10 +45,10 @@ def test_prune_removes_non_tax_and_seed_documents_but_keeps_tax_and_curated() ->
         session.commit()
 
         remaining = session.scalars(select(LegalDocument.document_number)).all()
-        assert sorted(remaining) == ["152/2026/TT-BTC", "99/2026/NĐ-CP"]
-        assert session.scalar(select(func.count(DocumentChunk.id))) == 2
-        assert session.scalar(select(func.count(DocumentEmbedding.id))) == 2
-        assert session.scalar(select(func.count(SourceRecord.id))) == 2
+        assert sorted(remaining) == ["152/2026/TT-BTC", "98/2025/TT-BTC", "99/2026/NĐ-CP"]
+        assert session.scalar(select(func.count(DocumentChunk.id))) == 3
+        assert session.scalar(select(func.count(DocumentEmbedding.id))) == 3
+        assert session.scalar(select(func.count(SourceRecord.id))) == 3
 
 
 def _add(session: Session, number: str, title: str, source: str) -> None:
