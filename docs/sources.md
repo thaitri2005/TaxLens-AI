@@ -76,6 +76,34 @@ In Azure:
   nothing remaining. Listing the full ministry selection takes about ten minutes because
   its API is slow with large pages.
 
+## Ministry of Finance access from Azure
+
+`vbpq.mof.gov.vn` does not accept connections from Azure (the East Asia region, Hong Kong):
+TCP connections time out, while the same API answers in seconds from a Vietnamese network
+and the government portal is reachable from Azure. The site appears to accept Vietnamese
+IP addresses only, and Azure has no region in Vietnam. Scheduled runs therefore collect
+from the government portal and report the ministry as unavailable instead of failing.
+
+Ministry collection runs from a machine in Vietnam against the Azure database and Blob
+Storage; it only lists and downloads, so it needs no OCR or embedding model:
+
+```powershell
+pip install -e ".[cloud]"
+$env:DATABASE_HOST = "taxlens-dev-pg.postgres.database.azure.com"
+$env:DATABASE_USER = "taxlensadmin"
+$env:DATABASE_PASSWORD = "<PostgreSQL admin password>"
+$env:DATABASE_SSL_MODE = "require"
+$env:OBJECT_STORAGE_BACKEND = "azure_blob"
+$env:AZURE_STORAGE_CONNECTION_STRING = "<artifacts storage connection string>"
+python scripts/collect_sources.py --source mof --from-year 1990 --dry-run
+python scripts/collect_sources.py --source mof --from-year 1990 --limit 300
+```
+
+The PostgreSQL firewall must allow the machine's public IP (`postgres_allowed_ip` in
+Terraform). Then run the `taxlens_corpus_maintenance` DAG with `process_and_embed` so OCR
+and embedding happen in Azure. For unattended collection, the alternative is a small
+proxy hosted in Vietnam.
+
 ## Not used
 
 - **vbpl.vn** (national legal database): did not respond during evaluation.

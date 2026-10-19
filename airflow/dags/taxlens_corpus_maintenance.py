@@ -8,6 +8,8 @@
 - ``prune_non_tax_dry_run``: list documents whose titles fail the tax filter (and sample
   seed documents) without deleting anything.
 - ``prune_non_tax_apply``: delete those documents from the database.
+- ``process_and_embed``: process and embed documents collected outside Airflow (for example
+  the Ministry of Finance collection run from a machine in Vietnam).
 - ``backfill_dry_run``: count historical tax documents not yet collected.
 - ``backfill_corpus``: collect up to ``limit`` of them from the Ministry of Finance database
   and the government portal, then process and embed. Repeat until nothing remains.
@@ -51,6 +53,10 @@ def run_maintenance(params: dict[str, object], **_: object) -> None:
             {"apply": str(action == "prune_non_tax_apply").lower()},
         )
         return
+    if action == "process_and_embed":
+        run_api_job("/internal/airflow/process", {"limit": 1000})
+        run_api_job("/internal/airflow/embed")
+        return
     process_params = {"limit": 1000}
     if action == "reocr_scanned_documents":
         process_params["reocr"] = "true"
@@ -81,6 +87,7 @@ with DAG(
                 "prune_non_tax_apply",
                 "backfill_dry_run",
                 "backfill_corpus",
+                "process_and_embed",
             ],
         ),
         # Only used by ocr_benchmark; optional so other actions can leave them empty.

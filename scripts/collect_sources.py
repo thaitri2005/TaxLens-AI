@@ -20,6 +20,7 @@ import argparse
 from collections.abc import Callable
 from datetime import date, timedelta
 
+import httpx
 from sqlalchemy import select
 
 from taxlens.db import SessionLocal
@@ -55,18 +56,32 @@ def main() -> None:
 
     Fetch = Callable[[SourceDocument], bytes]
     candidates: list[tuple[SourceDocument, Fetch]] = []
+    unavailable: list[str] = []
+    # Each source is optional: one unreachable site must not stop collection from the other.
     if arguments.source in ("mof", "all"):
         mof = MofLegalDocumentConnector()
-        found = mof.list_documents(
-            MofSearchOptions(issued_from=issued_from, include_expired=arguments.include_expired)
-        )
-        print(f"Ministry of Finance: {len(found)} tax document(s) listed", flush=True)
-        candidates.extend((document, mof.fetch_document) for document in found)
+        try:
+            found = mof.list_documents(
+                MofSearchOptions(issued_from=issued_from, include_expired=arguments.include_expired)
+            )
+        except ConnectorError as error:
+            unavailable.append("Ministry of Finance")
+            print(f"Ministry of Finance unavailable: {error}", flush=True)
+        else:
+            print(f"Ministry of Finance: {len(found)} tax document(s) listed", flush=True)
+            candidates.extend((document, mof.fetch_document) for document in found)
     if arguments.source in ("government", "all"):
         government = GovernmentPortalSearch()
-        found = government.tax_documents(range(today.year, first_year - 1, -1))
-        print(f"Government portal: {len(found)} tax document(s) listed", flush=True)
-        candidates.extend((document, government.fetch_document) for document in found)
+        try:
+            found = government.tax_documents(range(today.year, first_year - 1, -1))
+        except (ConnectorError, httpx.HTTPError) as error:
+            unavailable.append("government portal")
+            print(f"Government portal unavailable: {error}", flush=True)
+        else:
+            print(f"Government portal: {len(found)} tax document(s) listed", flush=True)
+            candidates.extend((document, government.fetch_document) for document in found)
+    if len(unavailable) == (2 if arguments.source == "all" else 1):
+        raise SystemExit(f"No source reachable: {', '.join(unavailable)}")
 
     storage = get_object_storage()
     downloaded = skipped = failed = 0
@@ -103,6 +118,7 @@ def main() -> None:
     print(
         f"Collection complete: {downloaded} collected, {failed} failed, "
         f"{remaining} remaining for later runs"
+        + (f"; unavailable: {', '.join(unavailable)}" if unavailable else "")
     )
 
 

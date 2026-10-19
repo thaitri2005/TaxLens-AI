@@ -77,7 +77,7 @@ class MofLegalDocumentConnector:
         retries: int = 4,
     ) -> None:
         self._client = client or httpx.Client(
-            timeout=httpx.Timeout(90.0),
+            timeout=httpx.Timeout(90.0, connect=15.0),
             follow_redirects=True,
             headers={"User-Agent": "TaxLens-AI/0.1 (+https://github.com/thaitri2005/TaxLens-AI)"},
         )
