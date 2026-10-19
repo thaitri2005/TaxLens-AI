@@ -146,15 +146,18 @@ def run_prune_non_tax_job(
 @router.get("/jobs/{job_id}")
 def get_job(
     job_id: str,
+    since: int | None = Query(default=None, ge=0),
     x_taxlens_internal_token: str | None = Header(default=None),
 ) -> dict[str, Any]:
+    """Job status. With ``since`` (the previous ``output_offset``), only newer output."""
+
     _authorize(x_taxlens_internal_token)
     with _jobs_lock:
         job = _jobs.get(job_id)
         if job is None:
             # Jobs live in this process; a restart (deploy, crash) loses them.
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown job")
-        return _job_status(job)
+        return _job_status(job, since)
 
 
 def _authorize(token: str | None) -> None:
@@ -225,8 +228,9 @@ def _is_running(job: _Job) -> bool:
     return False
 
 
-def _job_status(job: _Job) -> dict[str, Any]:
+def _job_status(job: _Job, since: int | None = None) -> dict[str, Any]:
     running = _is_running(job)
+    output, output_offset = _read_output(job.output_path, since, complete_lines=running)
     if running:
         state = "running"
     elif job.process.returncode == 0 and not job.timed_out:
@@ -241,18 +245,32 @@ def _job_status(job: _Job) -> dict[str, Any]:
         "exit_code": None if running else job.process.returncode,
         "timed_out": job.timed_out,
         "duration_seconds": round(end - job.started_at, 1),
-        "output": _output_tail(job.output_path),
+        "output": output,
+        "output_offset": output_offset,
     }
 
 
-def _output_tail(path: Path) -> str:
+def _read_output(path: Path, since: int | None, complete_lines: bool) -> tuple[str, int]:
+    """Output from byte ``since`` (or the tail), and the offset to continue from.
+
+    At most the last OUTPUT_TAIL_CHARACTERS are returned, so a poller that fell far
+    behind skips ahead instead of receiving megabytes. While the job runs, only complete
+    lines are returned: a line still being written, or a multi-byte character split
+    mid-write, is returned whole by the next poll.
+    """
+
     try:
         with path.open("rb") as output:
             size = output.seek(0, os.SEEK_END)
-            output.seek(max(0, size - OUTPUT_TAIL_CHARACTERS * 4))
-            return output.read().decode("utf-8", errors="replace")[-OUTPUT_TAIL_CHARACTERS:]
+            start = max(since or 0, size - OUTPUT_TAIL_CHARACTERS * 4)
+            output.seek(min(start, size))
+            data = output.read(size - start) if start < size else b""
     except OSError:
-        return ""
+        return "", since or 0
+    if complete_lines:
+        data = data[: data.rfind(b"\n") + 1]
+    text = data.decode("utf-8", errors="replace")[-OUTPUT_TAIL_CHARACTERS:]
+    return text, max(start, 0) + len(data)
 
 
 def _forget_old_jobs() -> None:

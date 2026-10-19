@@ -457,6 +457,7 @@ NATIONAL_ISSUER_IDS = ("1", "163", "690", "2", "3", "169", "166", "8", "149")
 # Provincial people's committees and councils issue local fee rules, outside the corpus.
 LOCAL_ISSUER_CODES = frozenset({"UBND", "HĐND", "UB"})
 SEARCH_RESULT_CAP = 50
+SEARCH_ATTEMPTS = 3
 _FORM_PREFIX = "ctrl_191017_163$"
 
 
@@ -478,12 +479,34 @@ class GovernmentPortalSearch:
         self._blank_form: dict[str, str] | None = None
 
     def tax_documents(self, years: Iterable[int]) -> list[SourceDocument]:
+        """Tax documents for the given years.
+
+        A year whose search keeps timing out is skipped with a warning rather than failing
+        the whole listing (one slow year once cost a 37-year listing); the next run retries
+        it, because nothing from that year is marked as collected. If every year fails,
+        the portal is reported unreachable.
+        """
+
         documents: dict[str, SourceDocument] = {}
+        skipped: list[int] = []
+        searched = 0
         for year in years:
-            found, capped = self._search(year)
-            if capped:
-                for issuer in NATIONAL_ISSUER_IDS:
-                    found.extend(self._search(year, issuer)[0])
+            searched += 1
+            try:
+                found, capped = self._search_with_retries(year)
+                if capped:
+                    for issuer in NATIONAL_ISSUER_IDS:
+                        found.extend(self._search_with_retries(year, issuer)[0])
+            except httpx.HTTPError as error:
+                skipped.append(year)
+                logger.warning(
+                    "Government portal %d: skipped after %d attempts (%s); the next run "
+                    "retries it",
+                    year,
+                    SEARCH_ATTEMPTS,
+                    type(error).__name__,
+                )
+                continue
             logger.info(
                 "Government portal %d: %d result(s)%s",
                 year,
@@ -493,10 +516,34 @@ class GovernmentPortalSearch:
             for document in found:
                 if issuer_code(document.document_number) not in LOCAL_ISSUER_CODES:
                     documents.setdefault(document.content_url, document)
+        if skipped and len(skipped) == searched:
+            raise ConnectorError("Government portal search failed for every year")
+        if skipped:
+            logger.warning("Government portal: years skipped this run: %s", skipped)
         return list(documents.values())
 
     def fetch_document(self, document: SourceDocument) -> bytes:
         return self._portal.fetch_document(document)
+
+    def _search_with_retries(
+        self, year: int, issuer: str | None = None
+    ) -> tuple[list[SourceDocument], bool]:
+        for attempt in range(1, SEARCH_ATTEMPTS + 1):
+            try:
+                return self._search(year, issuer)
+            except (httpx.TimeoutException, httpx.TransportError):
+                if attempt == SEARCH_ATTEMPTS:
+                    raise
+                wait = self._delay_seconds * 5 * attempt
+                logger.info(
+                    "Government portal %d: search timed out; attempt %d/%d, retrying in %.0fs",
+                    year,
+                    attempt,
+                    SEARCH_ATTEMPTS,
+                    wait,
+                )
+                time.sleep(wait)
+        raise AssertionError("unreachable")
 
     def _search(self, year: int, issuer: str | None = None) -> tuple[list[SourceDocument], bool]:
         form = dict(self._form())

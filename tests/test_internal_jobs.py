@@ -116,3 +116,21 @@ def _wait(client: TestClient, job_id: str) -> dict[str, Any]:
             return job
         time.sleep(0.1)
     raise AssertionError(f"job {job_id} did not finish")
+
+
+def test_job_output_is_read_incrementally_in_complete_lines(tmp_path: Path) -> None:
+    log = tmp_path / "job.log"
+    log.write_bytes("[1/2] DONE 1/2020/TT-BTC\n[2/2] START Đi".encode())
+
+    first, offset = internal_jobs._read_output(log, 0, complete_lines=True)
+    with log.open("ab") as output:
+        output.write("ều 5\nProcessing complete\n".encode())
+    second, final_offset = internal_jobs._read_output(log, offset, complete_lines=True)
+
+    assert first == "[1/2] DONE 1/2020/TT-BTC\n"
+    assert second == "[2/2] START Điều 5\nProcessing complete\n"
+    assert final_offset == log.stat().st_size
+    assert internal_jobs._read_output(log, final_offset, complete_lines=False) == (
+        "",
+        final_offset,
+    )

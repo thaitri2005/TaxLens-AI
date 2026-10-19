@@ -5,6 +5,7 @@ for completion. A single call must never approach the 240-second Container Apps 
 limit, and regular polling keeps the scale-to-zero API replica alive while a job runs.
 """
 
+import logging
 import os
 import time
 from typing import Any
@@ -19,6 +20,11 @@ MAX_JOB_MINUTES = 370  # slightly above the API's own 6-hour job limit
 WARM_UP_SECONDS = 300
 WARM_UP_RETRY_SECONDS = 15
 _UNAVAILABLE_STATUS_CODES = {502, 503, 504}
+OUTPUT_RETURN_CHARACTERS = 4000
+
+# httpx logs every request at INFO, which buried the job output under a poll line every
+# 20 seconds.
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def run_api_job(endpoint: str, params: dict[str, Any] | None = None, **_: object) -> str:
@@ -33,17 +39,38 @@ def run_api_job(endpoint: str, params: dict[str, Any] | None = None, **_: object
         # Retrying the start is safe: an identical running job is reattached, not duplicated.
         job = _request_json(client, "POST", endpoint, params)
         print(f"Started {job['job']} as job {job['job_id']}")
+        # Print the job's output as it is written, so progress shows in the task log
+        # while the job runs instead of only after it finishes.
+        shown = _show_new_output(job, "")
         while job["status"] == "running":
             if time.monotonic() > deadline:
                 raise TimeoutError(f"{job['job']} did not finish within {MAX_JOB_MINUTES} minutes")
             time.sleep(POLL_INTERVAL_SECONDS)
             # 404 means the API restarted and lost the job; failing lets Airflow retry it.
-            job = _request_json(client, "GET", f"/internal/airflow/jobs/{job['job_id']}")
-    print(job["output"])
+            job = _request_json(
+                client,
+                "GET",
+                f"/internal/airflow/jobs/{job['job_id']}",
+                {"since": job.get("output_offset", 0)},
+            )
+            shown = _show_new_output(job, shown)
     print(f"{job['job']} {job['status']} after {job['duration_seconds']}s")
     if job["status"] != "completed":
         raise RuntimeError(f"{job['job']} failed with exit code {job['exit_code']}")
-    return str(job["output"])
+    return shown[-OUTPUT_RETURN_CHARACTERS:]
+
+
+def _show_new_output(job: dict[str, Any], shown: str) -> str:
+    output = str(job.get("output") or "")
+    if "output_offset" not in job:
+        # An API from before incremental output returns its tail each time: show it once.
+        if job["status"] == "running":
+            return shown
+        print(output)
+        return output
+    if output:
+        print(output.rstrip("\n"))
+    return (shown + output)[-OUTPUT_RETURN_CHARACTERS:]
 
 
 def _request_json(

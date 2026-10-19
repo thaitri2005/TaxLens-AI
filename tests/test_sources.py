@@ -7,13 +7,14 @@ from pathlib import Path
 from typing import Any
 
 import httpx
+import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from taxlens.document_processing.formats import detect_format, extract_word_processor_text
 from taxlens.document_processing.legacy_text import convert_tcvn3
 from taxlens.document_processing.process import build_article_chunks, find_section_headings
-from taxlens.ingestion.connectors import GovernmentPortalSearch, SourceDocument
+from taxlens.ingestion.connectors import ConnectorError, GovernmentPortalSearch, SourceDocument
 from taxlens.ingestion.mof import MofLegalDocumentConnector, MofSearchOptions
 from taxlens.ingestion.seed import ingest_source_document, is_already_ingested
 from taxlens.legal_data.document_numbers import find_document_numbers
@@ -155,6 +156,33 @@ def test_government_search_splits_capped_years_by_issuer_and_drops_local_documen
     assert len(posts) == 1 + 9
     decree = next(d for d in documents if d.document_number == "167/2016/NĐ-CP")
     assert decree.content_type == "application/msword"
+
+
+def test_government_search_retries_a_slow_year_and_skips_one_that_keeps_failing() -> None:
+    attempts: dict[str, int] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.method == "GET":
+            return httpx.Response(200, text=_portal_form())
+        year = dict(httpx.QueryParams(request.content.decode()))["ctrl_191017_163$drdDocYear"]
+        attempts[year] = attempts.get(year, 0) + 1
+        if year == "2008" or (year == "2009" and attempts[year] == 1):
+            raise httpx.ReadTimeout("slow portal", request=request)
+        return httpx.Response(200, text=f"<table>{_portal_row(f'1/{year}/TT-BTC', 'pdf')}</table>")
+
+    search = GovernmentPortalSearch(
+        client=httpx.Client(transport=httpx.MockTransport(handler)), delay_seconds=0
+    )
+
+    documents = search.tax_documents([2009, 2008, 2007])
+
+    assert {document.document_number for document in documents} == {
+        "1/2009/TT-BTC",
+        "1/2007/TT-BTC",
+    }
+    assert attempts == {"2009": 2, "2008": 3, "2007": 1}
+    with pytest.raises(ConnectorError):
+        search.tax_documents([2008])
 
 
 def test_ingestion_records_source_status_and_improves_weak_titles(tmp_path: Path) -> None:

@@ -59,15 +59,48 @@ def test_run_api_job_fails_the_task_when_the_job_fails(monkeypatch: pytest.Monke
         jobs.run_api_job("/internal/airflow/embed")
 
 
-def _job(status: str, exit_code: int | None = 0) -> dict[str, Any]:
-    return {
+def test_run_api_job_prints_job_output_while_the_job_runs(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    pages = ["[1/2] DONE a\n", "[2/2] DONE b\n", "Processing complete\n"]
+    offsets: list[str | None] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.method == "POST":
+            return httpx.Response(202, json=_job("running", output="", offset=0))
+        offsets.append(request.url.params.get("since"))
+        index = len(offsets) - 1
+        status = "running" if index < 2 else "completed"
+        return httpx.Response(200, json=_job(status, output=pages[index], offset=index + 1))
+
+    jobs = _load_jobs_module(monkeypatch, handler)
+
+    output = jobs.run_api_job("/internal/airflow/process")
+
+    assert offsets == ["0", "1", "2"]
+    printed = capsys.readouterr().out
+    assert printed.index("[1/2] DONE a") < printed.index("[2/2] DONE b")
+    assert printed.count("[1/2] DONE a") == 1
+    assert output.endswith("Processing complete\n")
+
+
+def _job(
+    status: str,
+    exit_code: int | None = 0,
+    output: str = "Processing complete",
+    offset: int | None = None,
+) -> dict[str, Any]:
+    job: dict[str, Any] = {
         "job_id": "abc",
         "job": "process_corpus.py",
         "status": status,
         "exit_code": None if status == "running" else exit_code,
         "duration_seconds": 1.0,
-        "output": "Processing complete",
+        "output": output,
     }
+    if offset is not None:
+        job["output_offset"] = offset
+    return job
 
 
 def test_run_api_job_waits_for_a_cold_api_to_start(monkeypatch: pytest.MonkeyPatch) -> None:

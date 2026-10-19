@@ -76,6 +76,10 @@ In Azure:
   `limit` documents, then processes and embeds them; run it until the dry run reports
   nothing remaining. Listing the full ministry selection takes about ten minutes because
   its API is slow with large pages.
+- A portal year whose search keeps timing out (three attempts) is skipped with a warning
+  and listed again by the next run; only a run where every year fails stops collection.
+- The task log shows the job's progress lines as they are written (every 20 seconds),
+  not only when the job ends.
 
 ## Ministry of Finance access from Azure
 
