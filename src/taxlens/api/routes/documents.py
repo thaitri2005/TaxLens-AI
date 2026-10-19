@@ -3,7 +3,7 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import func, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session
 
 from taxlens.api.auth import require_authenticated_user
@@ -57,6 +57,12 @@ class ChunkSummary(BaseModel):
     content: str
 
 
+class DocumentFacets(BaseModel):
+    total: int
+    source_names: list[str]
+    document_types: list[str]
+
+
 @router.get("", response_model=list[DocumentSummary])
 def list_documents(
     limit: int = Query(default=50, ge=1, le=100),
@@ -66,12 +72,52 @@ def list_documents(
     issuing_agency: str | None = Query(default=None, max_length=255),
     session: Session = Depends(get_db_session),
 ) -> list[DocumentSummary]:
-    statement = (
+    matching = _matching_document_ids(source_name, document_type, issuing_agency)
+    documents = session.scalars(
         select(LegalDocument)
+        .where(LegalDocument.id.in_(matching))
+        .order_by(LegalDocument.document_number)
+        .offset(offset)
+        .limit(limit)
+    ).all()
+    source_names = _source_names_by_document(session, [document.id for document in documents])
+    return [_document_summary(document, source_names.get(document.id)) for document in documents]
+
+
+@router.get("/facets", response_model=DocumentFacets)
+def document_facets(
+    source_name: str | None = Query(default=None, max_length=120),
+    document_type: str | None = Query(default=None, max_length=50),
+    issuing_agency: str | None = Query(default=None, max_length=255),
+    session: Session = Depends(get_db_session),
+) -> DocumentFacets:
+    """The total matching the filters, and every filter value present in the corpus.
+
+    The library loads documents a page at a time, so counts and filter options must come
+    from the server rather than from the loaded page.
+    """
+
+    matching = _matching_document_ids(source_name, document_type, issuing_agency)
+    total = session.scalar(select(func.count()).select_from(matching.subquery())) or 0
+    sources = session.scalars(
+        select(SourceRecord.source_name).distinct().order_by(SourceRecord.source_name)
+    ).all()
+    types = session.scalars(
+        select(LegalDocument.document_type).distinct().order_by(LegalDocument.document_type)
+    ).all()
+    return DocumentFacets(
+        total=int(total), source_names=list(sources), document_types=list(types)
+    )
+
+
+def _matching_document_ids(
+    source_name: str | None, document_type: str | None, issuing_agency: str | None
+) -> Select[tuple[uuid.UUID]]:
+    statement = (
+        select(LegalDocument.id)
         .outerjoin(DocumentVersion, DocumentVersion.document_id == LegalDocument.id)
         .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
         .distinct()
-        .order_by(LegalDocument.document_number)
     )
     if source_name is not None:
         statement = statement.where(SourceRecord.source_name == source_name)
@@ -79,9 +125,7 @@ def list_documents(
         statement = statement.where(LegalDocument.document_type == document_type)
     if issuing_agency is not None:
         statement = statement.where(LegalDocument.issuing_agency.ilike(f"%{issuing_agency}%"))
-    documents = session.scalars(statement.offset(offset).limit(limit)).all()
-    source_names = _source_names_by_document(session, [document.id for document in documents])
-    return [_document_summary(document, source_names.get(document.id)) for document in documents]
+    return statement
 
 
 @router.get("/{document_id}", response_model=DocumentDetail)

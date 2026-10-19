@@ -86,3 +86,15 @@ def test_document_endpoints_return_persisted_documents() -> None:
     assert detail_response.json()["versions"][0]["processing_status"] == "COMPLETED"
     assert detail_response.json()["versions"][0]["chunk_count"] == 0
     assert detail_response.json()["versions"][0]["source_url"] == "https://example.test/01-2025.pdf"
+
+    facets = client.get("/documents/facets").json()
+    filtered = client.get("/documents/facets", params={"source_name": "mof-vbpq"}).json()
+    paged = client.get("/documents", params={"limit": 1, "offset": 1}).json()
+
+    assert facets == {
+        "total": 1,
+        "source_names": ["government-portal"],
+        "document_types": ["CIRCULAR"],
+    }
+    assert filtered["total"] == 0
+    assert paged == []

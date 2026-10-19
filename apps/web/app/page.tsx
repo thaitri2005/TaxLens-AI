@@ -30,6 +30,7 @@ type Version = {
   chunk_count: number;
 };
 type DocumentDetail = Document & { versions: Version[] };
+type DocumentFacets = { total: number; source_names: string[]; document_types: string[] };
 type Chunk = { id: string; version_id: string; article_number: string | null; clause_number: string | null; heading: string | null; page_start: number | null; page_end: number | null; content: string };
 type Claim = { text: string; citation_numbers: number[] };
 type AnswerStatus = "ANSWERED" | "UNSUPPORTED" | "INSUFFICIENT_EVIDENCE" | "PROVIDER_UNAVAILABLE" | "INVALID_MODEL_OUTPUT";
@@ -172,6 +173,7 @@ export default function Home() {
   const [answerError, setAnswerError] = useState("");
   const [documents, setDocuments] = useState<Document[] | null>(null);
   const [documentsHasMore, setDocumentsHasMore] = useState(false);
+  const [documentFacets, setDocumentFacets] = useState<DocumentFacets | null>(null);
   const [documentSourceFilter, setDocumentSourceFilter] = useState("all");
   const [documentTypeFilter, setDocumentTypeFilter] = useState("all");
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
@@ -181,25 +183,27 @@ export default function Home() {
   const [documentError, setDocumentError] = useState("");
   const copy = COPY[language];
 
-  const visibleDocuments = documents?.filter(document =>
-    (documentSourceFilter === "all" || document.source_name === documentSourceFilter) &&
-    (documentTypeFilter === "all" || document.document_type === documentTypeFilter)
-  );
-
+  // Filters and counts come from the server: the library loads one page at a time, so the
+  // loaded page alone cannot tell how many documents exist or which filters apply.
   async function loadDocuments(offset: number) {
     setDocumentError("");
+    const filters = new URLSearchParams();
+    if (documentSourceFilter !== "all") filters.set("source_name", documentSourceFilter);
+    if (documentTypeFilter !== "all") filters.set("document_type", documentTypeFilter);
     try {
-      const page = await request<Document[]>(`/documents?limit=${DOCUMENT_PAGE_SIZE}&offset=${offset}`);
+      const page = await request<Document[]>(`/documents?limit=${DOCUMENT_PAGE_SIZE}&offset=${offset}&${filters}`);
       setDocuments(previous => (offset === 0 ? page : [...(previous || []), ...page]));
       setDocumentsHasMore(page.length === DOCUMENT_PAGE_SIZE);
+      if (offset === 0) setDocumentFacets(await request<DocumentFacets>(`/documents/facets?${filters}`));
     } catch (error) {
       setDocumentError((error as Error).message);
     }
   }
 
   useEffect(() => {
-    if (view === "documents" && documents === null) void loadDocuments(0);
-  }, [view, documents]);
+    if (view === "documents") void loadDocuments(0);
+    // Reload from the first page whenever the view opens or a filter changes.
+  }, [view, documentSourceFilter, documentTypeFilter]);
 
   async function openDocument(document: Document) {
     setSelectedDocument(document); setDocumentDetail(null); setDocumentChunks([]); setDocumentError(""); setDocumentBusy(true);
@@ -319,31 +323,31 @@ export default function Home() {
             : documentError ? <div className="error-state">{documentError}</div>
             : documentDetail && <DocumentDetailView detail={documentDetail} chunks={documentChunks} copy={copy} />}
         </> : <>
-          <Heading eyebrow={copy.documentsEyebrow} title={copy.documentsTitle} chip={`${visibleDocuments?.length || 0} ${copy.indexed}`} />
+          <Heading eyebrow={copy.documentsEyebrow} title={copy.documentsTitle} chip={`${documentFacets?.total ?? documents?.length ?? 0} ${copy.indexed}`} />
           <div className="form-row">
             <label>{copy.source}
               <select value={documentSourceFilter} onChange={event => setDocumentSourceFilter(event.target.value)}>
                 <option value="all">{copy.allSources}</option>
-                {Array.from(new Set(documents?.map(document => document.source_name).filter(Boolean))).map(source => <option key={source} value={source || ""}>{source}</option>)}
+                {documentFacets?.source_names.map(source => <option key={source} value={source}>{source}</option>)}
               </select>
             </label>
             <label>{copy.type}
               <select value={documentTypeFilter} onChange={event => setDocumentTypeFilter(event.target.value)}>
                 <option value="all">{copy.allTypes}</option>
-                {Array.from(new Set(documents?.map(document => document.document_type))).map(type => <option key={type} value={type}>{type}</option>)}
+                {documentFacets?.document_types.map(type => <option key={type} value={type}>{type}</option>)}
               </select>
             </label>
           </div>
           {documentError ? <div className="error-state">{documentError}</div>
             : documents === null ? <Empty title={copy.working} text={copy.readingLibrary} />
             : <div className="document-list">
-              {visibleDocuments?.length ? visibleDocuments.map(document => <button className="document-card document-button" key={document.id} onClick={() => openDocument(document)}>
+              {documents.length ? documents.map(document => <button className="document-card document-button" key={document.id} onClick={() => openDocument(document)}>
                 <div className="doc-top"><span className="doc-number">{document.document_number}</span><span className="tag">{document.document_type}</span></div>
                 <strong>{document.title}</strong>
                 <div className="doc-meta">{document.issuing_agency || copy.agencyUnavailable}<span>{document.source_name || copy.sourceUnavailable} · {copy.openDetails}</span></div>
               </button>) : <Empty title={copy.noMatch} text={copy.adjustFilters} />}
             </div>}
-          {documentsHasMore && <button className="load-more" type="button" onClick={() => loadDocuments(documents?.length || 0)}>{copy.loadMoreDocuments}</button>}
+          {documentsHasMore && <button className="load-more" type="button" onClick={() => loadDocuments(documents?.length || 0)}>{copy.loadMoreDocuments} ({documents?.length || 0}/{documentFacets?.total ?? "…"})</button>}
         </>}
       </section>}
     </main>
