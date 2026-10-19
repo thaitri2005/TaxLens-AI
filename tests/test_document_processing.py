@@ -164,7 +164,7 @@ def test_processing_uses_ocr_when_native_pdf_text_is_unusable(
         assert result.status == "PROCESSED"
         assert result.chunk_count == 1
         assert job is not None
-        assert job.stage == "OCR_CHUNKED:v2"
+        assert job.stage == "OCR_CHUNKED:v3"
 
 
 def test_missing_raw_artifact_is_recorded_as_failed_instead_of_raising(tmp_path: Path) -> None:
@@ -238,7 +238,7 @@ def test_forced_processing_rechunks_from_stored_text_and_marks_chunker_version(
 
     assert result.extraction_method == "rechunked"
     assert result.chunk_count == 2
-    assert job is not None and job.stage == "CHUNKED:v2"
+    assert job is not None and job.stage == "CHUNKED:v3"
 
 
 def test_only_pages_without_a_text_layer_are_ocrd(tmp_path: Path, monkeypatch) -> None:

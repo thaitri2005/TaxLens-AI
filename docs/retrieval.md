@@ -65,6 +65,10 @@ Text is normalized to Unicode NFC (PDF text layers may use decomposed characters
 would never match a typed query), whitespace is collapsed per line, and pages are joined
 with a form-feed marker so every chunk keeps page numbers.
 
+Word, RTF, and DOCX files (common for historical documents) are read directly instead
+(`document_processing/formats.py`), with legacy TCVN3 and Windows Vietnamese code page
+text converted to Unicode; see `docs/sources.md`.
+
 ## 2. Chunking (`document_processing/process.py`)
 
 Vietnamese legal documents are organized as *Điều* (article) → *khoản* (numbered clause)
@@ -89,6 +93,12 @@ passages, so chunking follows the legal structure:
    `clause_number`, the article title as `heading`, and its page range.
 4. **Size cap**: any remaining segment longer than 1,500 characters is split at line,
    then word, boundaries.
+5. **Documents without articles**: older circulars are organized as "PHẦN A / I. / 1."
+   instead of "Điều". When no article headings are found, section headings
+   ("PHẦN A", "Chương II", "I. ĐỐI TƯỢNG ÁP DỤNG", Roman numerals increasing or restarting
+   at I) are used, with the section title as the passage heading and clauses split
+   inside. Word and text documents have no page numbers, so the section heading is
+   their locator.
 
 `CHUNKER_VERSION` is recorded in the processing job's stage (`CHUNKED:v2`). When the
 chunker changes, the version is bumped and the daily DAG re-chunks every older version

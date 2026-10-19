@@ -48,6 +48,10 @@ def ingest_seed_document(
         select(DocumentVersion).where(DocumentVersion.raw_content_hash == raw_content_hash)
     )
     if existing_version is not None:
+        existing_document = session.get(LegalDocument, existing_version.document_id)
+        if existing_document is not None:
+            _refresh_document_metadata(session, existing_document, document)
+            session.commit()
         return IngestionResult(
             status="UNCHANGED",
             document_id=str(existing_version.document_id),
@@ -83,6 +87,8 @@ def ingest_seed_document(
         )
         session.add(legal_document)
         session.flush()
+    else:
+        _refresh_document_metadata(session, legal_document, document)
 
     artifact_key = _artifact_key(document, raw_content_hash)
     if not storage.exists(artifact_key):
@@ -135,8 +141,8 @@ def ingest_source_document(
             document_type=document.document_type,
             issuing_agency=document.issuing_agency,
             issue_date=document.issue_date,
-            effective_date=None,
-            legal_status="DISCOVERED",
+            effective_date=document.effective_date,
+            legal_status=document.legal_status,
             content=content,
             content_type=document.content_type,
         ),
@@ -180,8 +186,64 @@ def _artifact_key(document: SeedDocument, content_hash: str) -> str:
     )
 
 
+_SUFFIXES_BY_CONTENT_TYPE = {
+    "application/pdf": ".pdf",
+    "application/msword": ".doc",
+    "application/rtf": ".rtf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+}
+# Statuses that say nothing about validity; a known status from a source replaces them.
+_UNRESOLVED_STATUSES = frozenset({"DISCOVERED", "UNKNOWN"})
+
+
+def is_already_ingested(session: Session, source_name: str, source_document_id: str) -> bool:
+    """Whether this source file was ingested before, so it need not be downloaded again."""
+
+    return (
+        session.scalar(
+            select(DocumentVersion.id)
+            .join(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
+            .where(
+                SourceRecord.source_name == source_name,
+                SourceRecord.source_document_id == source_document_id,
+            )
+            .limit(1)
+        )
+        is not None
+    )
+
+
+def _refresh_document_metadata(
+    session: Session, legal_document: LegalDocument, document: SeedDocument
+) -> None:
+    """Fill gaps from a better-described source without overwriting curated values."""
+
+    if _is_weak_title(legal_document.title, legal_document.document_number) and not (
+        _is_weak_title(document.title, document.document_number)
+    ):
+        legal_document.title = document.title
+    if legal_document.issuing_agency is None and document.issuing_agency:
+        legal_document.issuing_agency = document.issuing_agency
+    if document.legal_status in _UNRESOLVED_STATUSES:
+        return
+    for version in session.scalars(
+        select(DocumentVersion).where(DocumentVersion.document_id == legal_document.id)
+    ).all():
+        # Status belongs to the document number, and the source's current status is newer
+        # than what was recorded at an earlier ingestion.
+        version.legal_status = document.legal_status
+        if version.effective_date is None and document.effective_date is not None:
+            version.effective_date = document.effective_date
+
+
+def _is_weak_title(title: str, document_number: str) -> bool:
+    # Listing pages sometimes yield only "388/2026/NĐ-CP 13/10/2026" as the title.
+    remainder = title.casefold().replace(document_number.casefold(), " ")
+    return len(re.findall(r"[^\W\d_]{2,}", remainder)) < 3
+
+
 def _artifact_suffix(content_type: str) -> str:
-    return ".pdf" if content_type.casefold().split(";", 1)[0] == "application/pdf" else ".txt"
+    return _SUFFIXES_BY_CONTENT_TYPE.get(content_type.casefold().split(";", 1)[0], ".txt")
 
 
 def _required_string(item: dict[str, object], field: str) -> str:

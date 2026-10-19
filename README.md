@@ -45,8 +45,10 @@ flowchart LR
     Check --> Answer[Cited answer]
 ```
 
-1. **Ingestion**: the crawler reads each portal listing, keeps tax-related titles,
-   and stores the PDF in Blob Storage with its document number and source URL.
+1. **Ingestion**: tax documents are collected from the Ministry of Finance database
+   (with legal status and effective dates) and the government portal's tax category,
+   back to the 1990s, preferring Word files whose text needs no OCR. See
+   [docs/sources.md](docs/sources.md).
 2. **Processing**: text is extracted natively or with Vietnamese Tesseract OCR, then
    split along the legal structure (*Điều* → *khoản*) into passages of at most
    1,500 characters, each with article, clause, and page numbers.
@@ -128,6 +130,7 @@ See [docs/deployment.md](docs/deployment.md) and [docs/ci-cd.md](docs/ci-cd.md).
 
 | Document | Contents |
 | --- | --- |
+| [sources.md](docs/sources.md) | Official sources, what is collected, cost, and backfill |
 | [retrieval.md](docs/retrieval.md) | Chunking, search, evidence gate, answer validation, evaluation results |
 | [local-development.md](docs/local-development.md) | Local API, ingestion, and processing workflow |
 | [authentication.md](docs/authentication.md) | Sign-in, roles, and the web-to-API security contract |

@@ -128,7 +128,9 @@ def hybrid_search_chunks(
 ) -> list[SearchResult]:
     keyword_results = keyword_search_chunks(session, query, filters, candidate_limit)
     if provider is None or session.get_bind().dialect.name != "postgresql":
-        return (reranker or NoOpReranker()).rerank(query, keyword_results, limit).results
+        return (reranker or NoOpReranker()).rerank(
+            query, deduplicate_passages(keyword_results), limit
+        ).results
 
     query_embedding = provider.embed_query(query)
     semantic_results = semantic_search_chunks(
@@ -139,7 +141,33 @@ def hybrid_search_chunks(
         candidate_limit,
     )
     fused_results = fuse_ranked_results(keyword_results, semantic_results, candidate_limit)
-    return (reranker or NoOpReranker()).rerank(query, fused_results, limit).results
+    return (reranker or NoOpReranker()).rerank(
+        query, deduplicate_passages(fused_results), limit
+    ).results
+
+
+def deduplicate_passages(results: list[SearchResult]) -> list[SearchResult]:
+    """Keep the best-ranked copy of a passage that exists in several versions.
+
+    One document can be held twice (an OCR'd PDF and a Word file of the same text, or a
+    re-published attachment); the same article and clause would otherwise fill several of
+    the few slots given to the model.
+    """
+
+    versions_by_location: dict[tuple[object, ...], object] = {}
+    unique: list[SearchResult] = []
+    for result in results:
+        chunk = result.chunk
+        if chunk.article_number is None and chunk.heading is None:
+            unique.append(result)
+            continue
+        location = (result.document.id, chunk.article_number, chunk.clause_number, chunk.heading)
+        kept_version = versions_by_location.setdefault(location, result.version.id)
+        # Parts of one long clause share a location within a version and are all kept; the
+        # same location in another version of the document is a duplicate.
+        if kept_version == result.version.id:
+            unique.append(result)
+    return unique
 
 
 def fuse_ranked_results(

@@ -54,19 +54,31 @@ _jobs_lock = Lock()
 def run_ingestion_job(
     x_taxlens_internal_token: str | None = Header(default=None),
 ) -> dict[str, Any]:
+    """Daily collection: tax documents issued in the last 60 days from all sources."""
+
     _authorize(x_taxlens_internal_token)
     return _start_job(
-        "ingest_sources.py",
-        [
-            "--source",
-            "government",
-            "--limit",
-            _source_limit(),
-            "--pages",
-            _discovery_pages(),
-            "--download",
-        ],
+        "collect_sources.py", ["--since-days", "60", "--limit", _source_limit()]
     )
+
+
+@router.post("/backfill", status_code=status.HTTP_202_ACCEPTED)
+def run_backfill_job(
+    x_taxlens_internal_token: str | None = Header(default=None),
+    from_year: int = Query(default=1990, ge=1945, le=2100),
+    limit: int = Query(default=300, ge=1, le=2000),
+    include_expired: bool = False,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Historical collection, at most ``limit`` downloads per run; repeat until done."""
+
+    _authorize(x_taxlens_internal_token)
+    arguments = ["--from-year", str(from_year), "--limit", str(limit)]
+    if include_expired:
+        arguments.append("--include-expired")
+    if dry_run:
+        arguments.append("--dry-run")
+    return _start_job("collect_sources.py", arguments)
 
 
 @router.post("/process", status_code=status.HTTP_202_ACCEPTED)
@@ -251,7 +263,3 @@ def _forget_old_jobs() -> None:
 
 def _source_limit() -> str:
     return os.getenv("TAXLENS_DAILY_SOURCE_LIMIT", "100")
-
-
-def _discovery_pages() -> str:
-    return os.getenv("TAXLENS_DISCOVERY_PAGES", "10")

@@ -61,7 +61,7 @@ def assess_evidence(
     if not located:
         return EvidenceAssessment(
             status=EvidenceStatus.INSUFFICIENT_STRUCTURAL_SUPPORT,
-            reason="No retrieved result has an article, clause, or page locator.",
+            reason="No retrieved result has an article, clause, section, or page locator.",
         )
     if len(located) < len(results):
         notes.append(
@@ -114,11 +114,14 @@ def assess_evidence(
 
 
 def _has_structural_locator(result: SearchResult) -> bool:
+    # A section heading counts: older documents have sections instead of articles, and
+    # Word documents have no page numbers.
     return any(
         value is not None
         for value in (
             result.chunk.article_number,
             result.chunk.clause_number,
+            result.chunk.heading,
             result.chunk.page_start,
             result.chunk.page_end,
         )

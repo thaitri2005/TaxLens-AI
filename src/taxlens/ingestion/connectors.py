@@ -5,7 +5,7 @@ import html as html_module
 import re
 import time
 import unicodedata
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Protocol, TypedDict
@@ -13,10 +13,12 @@ from urllib.parse import parse_qs, urljoin, urlparse
 
 import httpx
 
+from taxlens.document_processing.formats import detect_format
 from taxlens.legal_data.document_numbers import (
     DOCUMENT_NUMBER_PATTERN,
     issuer_code,
     issuing_agency_for,
+    normalize_number_text,
 )
 
 
@@ -36,6 +38,8 @@ class SourceDocument:
     document_type: str = "official_pdf"
     issuing_agency: str | None = None
     issue_date: date | None = None
+    legal_status: str = "DISCOVERED"
+    effective_date: date | None = None
 
 
 class SourceConnector(Protocol):
@@ -160,14 +164,18 @@ class OfficialPortalConnector:
         documents: list[SourceDocument] = []
         for row in rows:
             code_match = _CODE_SPAN_PATTERN.search(row)
-            number_match = (
-                DOCUMENT_NUMBER_PATTERN.search(_html_text(code_match.group(1)).upper())
-                if code_match
-                else None
-            )
-            if number_match is None:
+            if code_match is None:
                 continue
-            document_number = number_match.group(0)
+            code = normalize_number_text(_html_text(code_match.group(1))).upper()
+            number_match = DOCUMENT_NUMBER_PATTERN.search(code)
+            if number_match is not None:
+                document_number = number_match.group(0)
+            elif re.match(r"^\d+\s*[/-]", code):
+                # Older numbering ("28-CP", "94-TC/TCT") predates the modern pattern; the
+                # row's own number field is still authoritative.
+                document_number = " ".join(code.split())
+            else:
+                continue
             summary_match = _SUMMARY_SPAN_PATTERN.search(row)
             title = _html_text(summary_match.group(1)) if summary_match else document_number
             date_match = _ISSUED_DATE_SPAN_PATTERN.search(row)
@@ -179,33 +187,37 @@ class OfficialPortalConnector:
             links = [urljoin(catalog_url, href) for href, _, _ in _extract_links(row)]
             allowed_links = [link for link in links if self._is_allowed(link)]
             detail_url = next(
-                (link for link in allowed_links if not _is_pdf_url(link)), catalog_url
+                (link for link in allowed_links if _file_extension(link) is None), catalog_url
             )
-            for content_url in allowed_links:
-                if not _is_pdf_url(content_url):
-                    continue
-                documents.append(
-                    SourceDocument(
-                        source_name=self.source_name,
-                        source_document_id=hashlib.sha256(content_url.encode()).hexdigest()[:24],
-                        document_number=document_number,
-                        title=title or document_number,
-                        source_url=detail_url,
-                        content_url=content_url,
-                        document_type=_document_type(document_number),
-                        issuing_agency=issuing_agency_for(document_number)
-                        or _ISSUING_AGENCIES.get(self.source_name),
-                        issue_date=issue_date,
-                    )
+            # One file per document: a Word file has exact text, a PDF usually needs OCR,
+            # and further PDFs are appendices (forms) that cost OCR time for little value.
+            content_url = _preferred_file(allowed_links)
+            if content_url is None:
+                continue
+            documents.append(
+                SourceDocument(
+                    source_name=self.source_name,
+                    source_document_id=hashlib.sha256(content_url.encode()).hexdigest()[:24],
+                    document_number=document_number,
+                    title=title or document_number,
+                    source_url=detail_url,
+                    content_url=content_url,
+                    content_type=_content_type_for(content_url),
+                    document_type=_document_type(document_number),
+                    issuing_agency=issuing_agency_for(document_number)
+                    or _ISSUING_AGENCIES.get(self.source_name),
+                    issue_date=issue_date,
                 )
+            )
         return documents
 
     def fetch_document(self, document: SourceDocument) -> bytes:
         self._validate_url(document.content_url)
         response = self._request("GET", document.content_url)
         content = response.content
-        if not content.startswith(b"%PDF"):
-            raise ConnectorError(f"Expected a PDF document: {document.content_url}")
+        if detect_format(content) == "text":
+            # An HTML error page or an unsupported file, not a document.
+            raise ConnectorError(f"Expected a PDF or Word document: {document.content_url}")
         return content
 
     def fetch_metadata(self, document: SourceDocument) -> dict[str, str]:
@@ -389,6 +401,31 @@ def _is_pdf_url(url: str) -> bool:
     return urlparse(url).path.lower().endswith(".pdf")
 
 
+_FILE_PREFERENCE = (".docx", ".doc", ".rtf", ".pdf")
+_CONTENT_TYPES = {
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".doc": "application/msword",
+    ".rtf": "application/rtf",
+    ".pdf": "application/pdf",
+}
+
+
+def _file_extension(url: str) -> str | None:
+    path = urlparse(url).path.lower()
+    return next((extension for extension in _FILE_PREFERENCE if path.endswith(extension)), None)
+
+
+def _preferred_file(urls: list[str]) -> str | None:
+    files = [url for url in urls if _file_extension(url) is not None]
+    if not files:
+        return None
+    return min(files, key=lambda url: _FILE_PREFERENCE.index(_file_extension(url) or ".pdf"))
+
+
+def _content_type_for(url: str) -> str:
+    return _CONTENT_TYPES.get(_file_extension(url) or ".pdf", "application/pdf")
+
+
 def _document_type(document_number: str) -> str:
     return document_number.rsplit("/", 1)[-1].upper()
 
@@ -408,3 +445,94 @@ def _deduplicate_documents(documents: list[SourceDocument]) -> list[SourceDocume
     for document in documents:
         unique.setdefault(document.content_url, document)
     return list(unique.values())
+
+
+GOVERNMENT_SEARCH_URL = "https://vanban.chinhphu.vn/he-thong-van-ban?classid=1"
+TAX_CATEGORY_ID = "29"  # "Thuế - Lệ phí"
+# National issuers, used to split a year whose search hits the result cap.
+NATIONAL_ISSUER_IDS = ("1", "163", "690", "2", "3", "169", "166", "8", "149")
+# Provincial people's committees and councils issue local fee rules, outside the corpus.
+LOCAL_ISSUER_CODES = frozenset({"UBND", "HĐND", "UB"})
+SEARCH_RESULT_CAP = 50
+_FORM_PREFIX = "ctrl_191017_163$"
+
+
+class GovernmentPortalSearch:
+    """Search the government portal's tax category year by year (vanban.chinhphu.vn).
+
+    The listing pages only reach the newest documents (pagination is an ASP.NET
+    post-back), but the search form filters by category, year, and issuer. A search shows
+    at most 50 results without usable paging, so a year that hits the cap is searched again
+    per national issuer.
+    """
+
+    source_name = "government-portal"
+
+    def __init__(self, client: httpx.Client | None = None, delay_seconds: float = 1.0) -> None:
+        self._portal = create_official_connector("government", client=client)
+        self._client = self._portal._client
+        self._delay_seconds = delay_seconds
+        self._blank_form: dict[str, str] | None = None
+
+    def tax_documents(self, years: Iterable[int]) -> list[SourceDocument]:
+        documents: dict[str, SourceDocument] = {}
+        for year in years:
+            found, capped = self._search(year)
+            if capped:
+                for issuer in NATIONAL_ISSUER_IDS:
+                    found.extend(self._search(year, issuer)[0])
+            for document in found:
+                if issuer_code(document.document_number) not in LOCAL_ISSUER_CODES:
+                    documents.setdefault(document.content_url, document)
+        return list(documents.values())
+
+    def fetch_document(self, document: SourceDocument) -> bytes:
+        return self._portal.fetch_document(document)
+
+    def _search(self, year: int, issuer: str | None = None) -> tuple[list[SourceDocument], bool]:
+        form = dict(self._form())
+        form.update(
+            {
+                f"{_FORM_PREFIX}drdDocCategory": TAX_CATEGORY_ID,
+                f"{_FORM_PREFIX}drdDocYear": str(year),
+                f"{_FORM_PREFIX}drdDocOrg": issuer or "0",
+                f"{_FORM_PREFIX}btnSearch": "Tìm kiếm",
+            }
+        )
+        time.sleep(self._delay_seconds)
+        response = self._client.post(GOVERNMENT_SEARCH_URL, data=form)
+        response.raise_for_status()
+        page = response.text
+        rows = self._portal._parse_result_rows(page, GOVERNMENT_SEARCH_URL, None) or []
+        return rows, len(_CODE_SPAN_PATTERN.findall(page)) >= SEARCH_RESULT_CAP
+
+    def _form(self) -> dict[str, str]:
+        if self._blank_form is None:
+            response = self._client.get(GOVERNMENT_SEARCH_URL)
+            response.raise_for_status()
+            self._blank_form = _form_fields(response.text)
+        return self._blank_form
+
+
+def _form_fields(page: str) -> dict[str, str]:
+    """The current values of an ASP.NET form, including its view state."""
+
+    fields: dict[str, str] = {}
+    for match in re.finditer(r"<input\b[^>]*>", page):
+        tag = match.group(0)
+        name = re.search(r'name="([^"]+)"', tag)
+        if not name:
+            continue
+        kind = re.search(r'type="([^"]+)"', tag)
+        if kind and kind.group(1) in ("submit", "button", "image"):
+            continue
+        value = re.search(r'value="([^"]*)"', tag)
+        fields[html_module.unescape(name.group(1))] = (
+            html_module.unescape(value.group(1)) if value else ""
+        )
+    for match in re.finditer(r'<select\b[^>]*name="([^"]+)"[^>]*>(.*?)</select>', page, re.S):
+        selected = re.search(r'<option[^>]*selected="selected"[^>]*value="([^"]*)"', match.group(2))
+        first = re.search(r'<option[^>]*value="([^"]*)"', match.group(2))
+        option = selected or first
+        fields[html_module.unescape(match.group(1))] = option.group(1) if option else ""
+    return fields

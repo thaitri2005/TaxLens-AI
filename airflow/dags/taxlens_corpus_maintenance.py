@@ -8,6 +8,9 @@
 - ``prune_non_tax_dry_run``: list documents whose titles fail the tax filter (and sample
   seed documents) without deleting anything.
 - ``prune_non_tax_apply``: delete those documents from the database.
+- ``backfill_dry_run``: count historical tax documents not yet collected.
+- ``backfill_corpus``: collect up to ``limit`` of them from the Ministry of Finance database
+  and the government portal, then process and embed. Repeat until nothing remains.
 """
 
 from datetime import datetime, timedelta
@@ -27,6 +30,20 @@ def run_maintenance(params: dict[str, object], **_: object) -> None:
             "/internal/airflow/ocr-benchmark",
             {"document_number": params["document_number"], "pages": params.get("pages") or 3},
         )
+        return
+    if action in ("backfill_dry_run", "backfill_corpus"):
+        run_api_job(
+            "/internal/airflow/backfill",
+            {
+                "from_year": params.get("from_year") or 1990,
+                "limit": params.get("limit") or 300,
+                "include_expired": str(bool(params.get("include_expired"))).lower(),
+                "dry_run": str(action == "backfill_dry_run").lower(),
+            },
+        )
+        if action == "backfill_corpus":
+            run_api_job("/internal/airflow/process", {"limit": 1000})
+            run_api_job("/internal/airflow/embed")
         return
     if action in ("prune_non_tax_dry_run", "prune_non_tax_apply"):
         run_api_job(
@@ -62,6 +79,8 @@ with DAG(
                 "retry_failed_documents",
                 "prune_non_tax_dry_run",
                 "prune_non_tax_apply",
+                "backfill_dry_run",
+                "backfill_corpus",
             ],
         ),
         # Only used by ocr_benchmark; optional so other actions can leave them empty.
@@ -71,6 +90,11 @@ with DAG(
         "pages": Param(
             3, type=["null", "integer"], minimum=1, maximum=10, description="ocr_benchmark only"
         ),
+        "from_year": Param(1990, type=["null", "integer"], description="backfill only"),
+        "limit": Param(
+            300, type=["null", "integer"], minimum=1, description="backfill: downloads per run"
+        ),
+        "include_expired": Param(False, type="boolean", description="backfill only"),
     },
     tags=["taxlens", "maintenance"],
 ) as dag:

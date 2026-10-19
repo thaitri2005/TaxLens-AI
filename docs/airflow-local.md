@@ -58,3 +58,6 @@ and choose an `action`:
 | `ocr_benchmark` | OCRs a few pages of `document_number` with several DPI and page-segmentation settings and prints word error rates against the PDF's text layer. Use a born-digital PDF. |
 | `reocr_scanned_documents` | Re-runs OCR for every OCR'd document with the current settings, then embeds. Slow: several minutes per long scan. |
 | `retry_failed_documents` | Retries versions whose processing failed, then embeds. |
+| `prune_non_tax_dry_run` / `prune_non_tax_apply` | Lists, then deletes, documents whose titles are not about tax. |
+| `backfill_dry_run` | Counts historical tax documents not yet collected (see `docs/sources.md`). |
+| `backfill_corpus` | Collects up to `limit` of them from `from_year`, then processes and embeds. Repeat until the dry run reports none remaining. |

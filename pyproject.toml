@@ -18,6 +18,7 @@ dependencies = [
   "pgvector>=0.3,<1.0",
   "pypdf>=5.0,<6.0",
   "pypdfium2>=4.30,<5.0",
+  "olefile>=0.47,<1.0",
   "pytesseract>=0.3.13,<1.0",
   "argon2-cffi>=23.1,<26.0",
   "sentence-transformers>=3.3,<4.0",

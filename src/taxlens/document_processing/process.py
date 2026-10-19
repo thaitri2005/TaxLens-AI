@@ -11,6 +11,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from taxlens.config import get_settings
+from taxlens.document_processing.formats import detect_format, extract_word_processor_text
 from taxlens.document_processing.ocr import ocr_pages
 from taxlens.legal_data.document_numbers import find_document_numbers
 from taxlens.legal_data.models import (
@@ -33,6 +34,12 @@ ARTICLE_PATTERN = re.compile(
 )
 # Clause numbers "1.", "2." at line start; OCR may add leading noise or read "." as ",".
 CLAUSE_PATTERN = re.compile(r"(?m)^(?:[^\w\n]|_){0,6}(\d{1,3})[.,]\s+(?=[^\W\d_])")
+# Section headings of documents without articles: "PHẦN A ...", "Chương II ...", or a
+# Roman-numeral heading "I. ĐỐI TƯỢNG ÁP DỤNG" (the title must start in uppercase).
+SECTION_PATTERN = re.compile(
+    r"(?m)^[ \t]*(?:(?:PHẦN|Phần|CHƯƠNG|Chương|MỤC|Mục)[ \t]+(?:[IVXLC]+|\d+|[A-ZĐ])\b.*"
+    r"|(?P<roman>[IVXL]{1,6})[ \t]*[\./][ \t]+(?=[A-ZĐÀ-Ỹ]).*)$"
+)
 # Words that make "Điều 8, khoản 4 ..." a cross-reference rather than a heading.
 _REFERENCE_WORDS = ("khoản", "điều", "điểm", "mục", "chương")
 PAGE_SEPARATOR = "\n\f\n"
@@ -44,7 +51,7 @@ MAX_MERGED_INTRO_CHARACTERS = 400
 MIN_PREAMBLE_CHARACTERS = 20
 # Bump when chunking changes; processed versions with an older stage suffix are re-chunked
 # from stored text by ``process_corpus.py --rechunk-outdated``.
-CHUNKER_VERSION = 2
+CHUNKER_VERSION = 3
 CHUNKER_STAGE_SUFFIX = f":v{CHUNKER_VERSION}"
 _HEADER_NUMBER_PATTERN = re.compile(r"(?i)\bs[ốóôo]\s*(?:hiệu)?\s*[:.]\s*(\S{3,40})")
 
@@ -275,10 +282,21 @@ def _has_usable_text(pages: list[str]) -> bool:
 
 
 def extract_pages(raw_content: bytes, artifact_key: str) -> list[str]:
-    if artifact_key.casefold().endswith(".pdf"):
+    """Pages of a PDF, or the whole text of a Word, RTF, DOCX, or plain-text document."""
+
+    document_format = detect_format(raw_content)
+    if document_format == "pdf":
         reader = PdfReader(BytesIO(raw_content))
         return [page.extract_text() or "" for page in reader.pages]
-    return [raw_content.decode("utf-8")]
+    if document_format in ("doc", "rtf", "docx"):
+        return [extract_word_processor_text(raw_content)]
+    return [raw_content.decode("utf-8", errors="replace")]
+
+
+def is_paginated(artifact_key: str) -> bool:
+    """Only PDFs have meaningful page numbers; Word and text files are one flow of text."""
+
+    return artifact_key.casefold().endswith(".pdf")
 
 
 def extract_text(raw_content: bytes, artifact_key: str) -> str:
@@ -292,9 +310,9 @@ def build_article_chunks(
 ) -> list[ParsedChunk]:
     """Split legal text into article chunks, and long articles into clause chunks."""
 
-    if page_boundaries is None:
-        page_boundaries = [0]
-    headings = find_article_headings(text)
+    # Documents from before about 2011 are often organized as "Phần / I. / 1." without
+    # "Điều" articles; their section headings become the structure instead.
+    headings = find_article_headings(text) or find_section_headings(text)
     chunks: list[ParsedChunk] = []
 
     # Text before the first article holds the title, issuing body, and legal bases.
@@ -328,7 +346,8 @@ def build_article_chunks(
 class ArticleHeading:
     start: int
     end: int
-    number: str
+    number: str | None
+    """Article number; None for a section heading of a document without articles."""
     title: str | None
 
 
@@ -361,6 +380,41 @@ def find_article_headings(text: str) -> list[ArticleHeading]:
             )
         )
     return headings
+
+
+def find_section_headings(text: str) -> list[ArticleHeading]:
+    """Section headings ("PHẦN A", "Chương II", "I. ĐỐI TƯỢNG ÁP DỤNG") in order.
+
+    Roman numerals must increase by one, or restart at I under a new part, which rejects
+    numbered list items that happen to look like headings.
+    """
+
+    headings: list[ArticleHeading] = []
+    previous_roman = 0
+    for match in SECTION_PATTERN.finditer(text):
+        line = match.group(0).strip()
+        roman = match.group("roman")
+        if roman is not None:
+            value = _roman_value(roman)
+            if value not in (previous_roman + 1, 1):
+                continue
+            previous_roman = value
+        else:
+            previous_roman = 0
+        headings.append(
+            ArticleHeading(start=match.start(), end=match.end(), number=None, title=line[:200])
+        )
+    return headings
+
+
+def _roman_value(numeral: str) -> int:
+    values = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100}
+    total = 0
+    for index, character in enumerate(numeral):
+        value = values[character]
+        following = values[numeral[index + 1]] if index + 1 < len(numeral) else 0
+        total += -value if value < following else value
+    return total
 
 
 def _continues_sentence(text: str, line_start: int) -> bool:
@@ -434,7 +488,7 @@ def _trim(text: str, start: int, end: int) -> tuple[int, int]:
 
 def _parsed_chunk(
     text: str,
-    page_boundaries: list[int],
+    page_boundaries: list[int] | None,
     start: int,
     end: int,
     article_number: str | None,
@@ -446,8 +500,10 @@ def _parsed_chunk(
         heading=heading,
         clause_number=clause_number,
         content=text[start:end],
-        page_start=_page_for_offset(page_boundaries, start),
-        page_end=_page_for_offset(page_boundaries, max(end - 1, start)),
+        page_start=_page_for_offset(page_boundaries, start) if page_boundaries else None,
+        page_end=(
+            _page_for_offset(page_boundaries, max(end - 1, start)) if page_boundaries else None
+        ),
     )
 
 
@@ -459,7 +515,10 @@ def _replace_chunks(
 ) -> int:
     _delete_chunks_and_embeddings(session, version.id, existing_chunks)
     normalized_text = PAGE_SEPARATOR.join(normalized_pages)
-    chunks = build_article_chunks(normalized_text, _page_boundaries(normalized_pages))
+    page_boundaries = (
+        _page_boundaries(normalized_pages) if is_paginated(version.raw_artifact_key) else None
+    )
+    chunks = build_article_chunks(normalized_text, page_boundaries)
     for chunk in chunks:
         session.add(
             DocumentChunk(

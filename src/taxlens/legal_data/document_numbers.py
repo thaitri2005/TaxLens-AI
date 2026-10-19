@@ -24,11 +24,23 @@ _ISSUING_AGENCIES_BY_CODE = {
 }
 
 
+# Cyrillic letters that look identical to Latin ones; source listings contain numbers such
+# as "255/2026/NĐ-CР" with a Cyrillic "Р", which would otherwise never match.
+_LOOKALIKES = str.maketrans(
+    "АВСЕНІЈКМОРЅТХаеорсух", "ABCEHIJKMOPSTXaeopcyx"
+)
+
+
+def normalize_number_text(text: str) -> str:
+    return text.translate(_LOOKALIKES)
+
+
 def find_document_numbers(text: str) -> tuple[str, ...]:
     """Return distinct document numbers in order of appearance, upper-cased."""
 
+    normalized = normalize_number_text(text).upper()
     return tuple(
-        dict.fromkeys(match.group(0) for match in DOCUMENT_NUMBER_PATTERN.finditer(text.upper()))
+        dict.fromkeys(match.group(0) for match in DOCUMENT_NUMBER_PATTERN.finditer(normalized))
     )
 
 
