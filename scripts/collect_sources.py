@@ -186,6 +186,14 @@ def _check_targets() -> None:
             "DATABASE_HOST and the other settings in this same terminal window and allow "
             "your IP in the PostgreSQL firewall (docs/sources.md)."
         )
+    try:
+        get_object_storage().exists("evaluation/retrieval/latest.json")
+    except Exception as error:
+        raise SystemExit(
+            f"Cannot use {settings.object_storage_backend} storage: {error}. For Azure, run "
+            '`pip install -e ".[cloud]"` and set AZURE_STORAGE_CONNECTION_STRING '
+            "(docs/sources.md)."
+        ) from error
     if settings.database_host in ("localhost", "127.0.0.1") or (
         settings.object_storage_backend != "azure_blob"
     ):
