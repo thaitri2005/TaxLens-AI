@@ -82,13 +82,13 @@ def _documents_to_remove(
     for document in session.scalars(
         select(LegalDocument).order_by(LegalDocument.document_number)
     ).all():
-        if (
-            document.document_number in curated
-            or issuer_code(document.document_number) in PROTECTED_ISSUER_CODES
-        ):
+        if document.document_number in curated:
             continue
+        # Sample seed documents are fake data, whatever number they carry.
         if document.id in seed_documents:
             candidates.append((document, "sample seed document"))
+        elif issuer_code(document.document_number) in PROTECTED_ISSUER_CODES:
+            continue
         elif not is_tax_title(document.title, document.document_number):
             candidates.append((document, "not tax-related"))
     return candidates
