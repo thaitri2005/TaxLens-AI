@@ -18,18 +18,21 @@ documents whose number is already in the corpus are skipped (the ministry record
 """
 
 import argparse
+import json
 import logging
 import sys
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import date, timedelta
+from pathlib import Path
 
 import httpx
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from taxlens.db import SessionLocal
+from taxlens.config import get_settings
+from taxlens.db import SessionLocal, database_is_ready
 from taxlens.ingestion.connectors import ConnectorError, GovernmentPortalSearch, SourceDocument
 from taxlens.ingestion.mof import SOURCE_NAME as MOF_SOURCE
 from taxlens.ingestion.mof import MofLegalDocumentConnector, MofSearchOptions
@@ -38,6 +41,7 @@ from taxlens.legal_data.models import DocumentVersion, LegalDocument, SourceReco
 from taxlens.storage.factory import get_object_storage
 
 logger = logging.getLogger("collect_sources")
+LISTING_CACHE_DIRECTORY = Path("data/local/cache")
 Fetch = Callable[[SourceDocument], bytes]
 
 
@@ -59,6 +63,9 @@ def main() -> None:
         " (dry run)" if arguments.dry_run else "",
     )
 
+    # Check where results will be written before the slow listing, so a missing setting
+    # fails in seconds instead of after ten minutes.
+    _check_targets()
     candidates, unavailable = _list_sources(arguments.source, issued_from, arguments)
     if not candidates and unavailable:
         raise SystemExit(f"No source reachable: {', '.join(unavailable)}")
@@ -88,6 +95,11 @@ def _parse_arguments() -> argparse.Namespace:
     parser.add_argument("--include-expired", action="store_true")
     parser.add_argument("--limit", type=int, default=100, help="Maximum downloads per run")
     parser.add_argument("--dry-run", action="store_true", help="List and count only")
+    parser.add_argument(
+        "--refresh-listing",
+        action="store_true",
+        help="Ignore the cached Ministry of Finance listing (kept for 24 hours)",
+    )
     arguments = parser.parse_args()
     if arguments.limit < 1:
         parser.error("--limit must be at least 1")
@@ -125,10 +137,11 @@ def _list_sources(
     if source in ("mof", "all"):
         started = time.monotonic()
         mof = MofLegalDocumentConnector()
+        options = MofSearchOptions(
+            issued_from=issued_from, include_expired=arguments.include_expired
+        )
         try:
-            found = mof.list_documents(
-                MofSearchOptions(issued_from=issued_from, include_expired=arguments.include_expired)
-            )
+            found = _cached_mof_listing(mof, options, arguments.refresh_listing)
         except ConnectorError as error:
             unavailable.append("Ministry of Finance")
             logger.warning("Ministry of Finance unavailable: %s", error)
@@ -156,6 +169,69 @@ def _list_sources(
             )
             candidates.extend(Candidate(document, government.fetch_document) for document in found)
     return candidates, unavailable
+
+
+def _check_targets() -> None:
+    settings = get_settings()
+    logger.info(
+        "Database: %s@%s/%s | storage: %s",
+        settings.database_user,
+        settings.database_host,
+        settings.database_name,
+        settings.object_storage_backend,
+    )
+    if not database_is_ready():
+        raise SystemExit(
+            f"Cannot reach the database at {settings.database_host}. For a laptop run, set "
+            "DATABASE_HOST and the other settings in this same terminal window and allow "
+            "your IP in the PostgreSQL firewall (docs/sources.md)."
+        )
+    if settings.database_host in ("localhost", "127.0.0.1") or (
+        settings.object_storage_backend != "azure_blob"
+    ):
+        logger.warning(
+            "Writing to a local database or local storage; documents will not reach Azure."
+        )
+
+
+def _cached_mof_listing(
+    connector: MofLegalDocumentConnector, options: MofSearchOptions, refresh: bool
+) -> list[SourceDocument]:
+    """The ministry listing takes about ten minutes; reuse one from the last 24 hours."""
+
+    cache = LISTING_CACHE_DIRECTORY / (
+        f"mof-{options.issued_from or 'all'}-"
+        f"{'with-expired' if options.include_expired else 'current'}.json"
+    )
+    if not refresh and cache.is_file() and time.time() - cache.stat().st_mtime < 86_400:
+        documents = [
+            SourceDocument(
+                **{
+                    **item,
+                    "issue_date": _date_or_none(item["issue_date"]),
+                    "effective_date": _date_or_none(item["effective_date"]),
+                }
+            )
+            for item in json.loads(cache.read_text(encoding="utf-8"))
+        ]
+        logger.info(
+            "Ministry of Finance: reusing listing from %s (%d documents; "
+            "--refresh-listing to fetch again)",
+            time.strftime("%H:%M", time.localtime(cache.stat().st_mtime)),
+            len(documents),
+        )
+        return documents
+    documents = connector.list_documents(options)
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(
+        json.dumps([asdict(document) for document in documents], default=str, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    return documents
+
+
+def _date_or_none(value: str | None) -> date | None:
+    return date.fromisoformat(value) if value else None
 
 
 def _new_documents(session: Session, candidates: list[Candidate]) -> list[Candidate]:

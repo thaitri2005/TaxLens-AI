@@ -6,7 +6,11 @@ from sqlalchemy.orm import Session, sessionmaker
 from taxlens.config import get_settings
 
 settings = get_settings()
-engine = create_engine(settings.database_url, pool_pre_ping=True)
+# A short connect timeout makes an unreachable database fail fast (readiness checks,
+# laptop collection runs) instead of hanging.
+engine = create_engine(
+    settings.database_url, pool_pre_ping=True, connect_args={"connect_timeout": 10}
+)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 
