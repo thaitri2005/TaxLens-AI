@@ -29,6 +29,7 @@ from pathlib import Path
 
 import httpx
 from sqlalchemy import select
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from taxlens.config import get_settings
@@ -116,7 +117,9 @@ def _configure_logging() -> None:
         stream=sys.stdout,
         force=True,
     )
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    # Client libraries log every HTTP request at INFO; keep only their warnings.
+    for noisy in ("httpx", "azure", "urllib3"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
 
 
 def _issued_from(arguments: argparse.Namespace) -> date | None:
@@ -277,11 +280,17 @@ def _download(session: Session, batch: list[Candidate]) -> tuple[int, int]:
         try:
             content = candidate.fetch(document)
             result = ingest_source_document(session, storage, document, content)
-        except (ConnectorError, OSError) as error:
+        except (ConnectorError, OSError, DBAPIError) as error:
+            # A dropped database connection or a failed download affects this document only:
+            # the transaction is rolled back, the pool reconnects, and the next run retries it.
             session.rollback()
             failed += 1
             logger.warning(
-                "[%d/%d] FAILED %s: %s", index, len(batch), document.document_number, error
+                "[%d/%d] FAILED %s: %s",
+                index,
+                len(batch),
+                document.document_number,
+                str(error).strip().splitlines()[0][:200],
             )
             continue
         collected += 1
