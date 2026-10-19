@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
@@ -105,14 +106,12 @@ def document_facets(
     types = session.scalars(
         select(LegalDocument.document_type).distinct().order_by(LegalDocument.document_type)
     ).all()
-    return DocumentFacets(
-        total=int(total), source_names=list(sources), document_types=list(types)
-    )
+    return DocumentFacets(total=int(total), source_names=list(sources), document_types=list(types))
 
 
 def _matching_document_ids(
     source_name: str | None, document_type: str | None, issuing_agency: str | None
-) -> Select[tuple[uuid.UUID]]:
+) -> Select[Any]:  # typed Select[tuple[UUID]] in SQLAlchemy 2.0, Select[UUID] in 2.1
     statement = (
         select(LegalDocument.id)
         .outerjoin(DocumentVersion, DocumentVersion.document_id == LegalDocument.id)
