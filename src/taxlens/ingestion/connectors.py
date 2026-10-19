@@ -349,12 +349,18 @@ def is_tax_relevant(document: SourceDocument) -> bool:
     customs. Titles without a summary fall back to the issuing body.
     """
 
-    title = unicodedata.normalize("NFC", document.title).casefold()
-    summary = title.replace(document.document_number.casefold(), " ")
+    return is_tax_title(document.title, document.document_number)
+
+
+def is_tax_title(title: str, document_number: str) -> bool:
+    """The tax-relevance rule of ``is_tax_relevant`` for a stored title and number."""
+
+    normalized = unicodedata.normalize("NFC", title).casefold()
+    summary = normalized.replace(document_number.casefold(), " ")
     if _TAX_TOPIC_PATTERN.search(summary):
         return True
     if len(re.findall(r"[^\W\d_]{2,}", summary)) < 3:
-        return issuer_code(document.document_number) in _TAX_ISSUER_CODES
+        return issuer_code(document_number) in _TAX_ISSUER_CODES
     return False
 
 

@@ -5,6 +5,9 @@
 - ``reocr_scanned_documents``: re-run OCR for every OCR'd document with the current
   settings, then re-embed. Slow (minutes per long scan) and CPU-heavy on the API.
 - ``retry_failed_documents``: retry versions whose processing failed, then embed.
+- ``prune_non_tax_dry_run``: list documents whose titles fail the tax filter (and sample
+  seed documents) without deleting anything.
+- ``prune_non_tax_apply``: delete those documents from the database.
 """
 
 from datetime import datetime, timedelta
@@ -23,6 +26,12 @@ def run_maintenance(params: dict[str, object], **_: object) -> None:
         run_api_job(
             "/internal/airflow/ocr-benchmark",
             {"document_number": params["document_number"], "pages": params.get("pages") or 3},
+        )
+        return
+    if action in ("prune_non_tax_dry_run", "prune_non_tax_apply"):
+        run_api_job(
+            "/internal/airflow/prune-non-tax",
+            {"apply": str(action == "prune_non_tax_apply").lower()},
         )
         return
     process_params = {"limit": 1000}
@@ -47,7 +56,13 @@ with DAG(
     params={
         "action": Param(
             "ocr_benchmark",
-            enum=["ocr_benchmark", "reocr_scanned_documents", "retry_failed_documents"],
+            enum=[
+                "ocr_benchmark",
+                "reocr_scanned_documents",
+                "retry_failed_documents",
+                "prune_non_tax_dry_run",
+                "prune_non_tax_apply",
+            ],
         ),
         # Only used by ocr_benchmark; optional so other actions can leave them empty.
         "document_number": Param(

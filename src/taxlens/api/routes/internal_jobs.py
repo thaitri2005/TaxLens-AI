@@ -117,6 +117,15 @@ def run_ocr_benchmark_job(
     )
 
 
+@router.post("/prune-non-tax", status_code=status.HTTP_202_ACCEPTED)
+def run_prune_non_tax_job(
+    apply: bool = False,
+    x_taxlens_internal_token: str | None = Header(default=None),
+) -> dict[str, Any]:
+    _authorize(x_taxlens_internal_token)
+    return _start_job("prune_non_tax_documents.py", ["--apply"] if apply else [])
+
+
 @router.get("/jobs/{job_id}")
 def get_job(
     job_id: str,
