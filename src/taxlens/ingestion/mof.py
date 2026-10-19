@@ -9,6 +9,7 @@ drafting departments for tax, tax policy, and customs (which cover later documen
 
 from __future__ import annotations
 
+import logging
 import re
 import time
 from collections.abc import Iterable
@@ -22,17 +23,18 @@ import httpx
 from taxlens.ingestion.connectors import ConnectorError, SourceDocument
 from taxlens.legal_data.document_numbers import issuing_agency_for, normalize_number_text
 
+logger = logging.getLogger(__name__)
 BASE_URL = "https://vbpq.mof.gov.vn"
 SOURCE_NAME = "mof-vbpq"
 SEARCH_PATH = "/api/legaldoc/Search/POSTSearchQuery"
 FILE_PATH = "/DKC.FileManagement/FileStorage/File/{file_id}"
 
 # Selections whose union is the tax corpus; documents found by several are kept once.
-TAX_SELECTIONS: tuple[dict[str, Any], ...] = (
-    {"Field": {"id": 6}},  # Quản lý thuế, phí và lệ phí
-    {"Editor": {"id": 3}},  # Cục Quản lý, giám sát chính sách thuế, phí và lệ phí
-    {"Editor": {"id": 21}},  # Cục Thuế
-    {"Editor": {"id": 22}},  # Cục Hải quan
+TAX_SELECTIONS: tuple[tuple[str, dict[str, Any]], ...] = (
+    ("tax field", {"Field": {"id": 6}}),  # Quản lý thuế, phí và lệ phí
+    ("tax policy department", {"Editor": {"id": 3}}),
+    ("tax department", {"Editor": {"id": 21}}),  # Cục Thuế
+    ("customs department", {"Editor": {"id": 22}}),  # Cục Hải quan
 )
 # Normative documents. Decisions (mostly appointments and procedure lists) and official
 # letters are excluded by default to keep collection and indexing costs down.
@@ -90,8 +92,8 @@ class MofLegalDocumentConnector:
 
         options = options or MofSearchOptions()
         records: dict[int, dict[str, Any]] = {}
-        for selection in TAX_SELECTIONS:
-            for record in self._search(selection, options.issued_from):
+        for label, selection in TAX_SELECTIONS:
+            for record in self._search(label, selection, options.issued_from):
                 records.setdefault(int(record["id"]), record)
         documents = [
             document
@@ -99,6 +101,13 @@ class MofLegalDocumentConnector:
             if _is_wanted(record, options)
             and (document := _to_source_document(record)) is not None
         ]
+        logger.info(
+            "Ministry of Finance: kept %d of %d records (normative documents%s with a "
+            "Word or PDF file)",
+            len(documents),
+            len(records),
+            "" if options.include_expired else " not expired",
+        )
         return sorted(
             documents,
             key=lambda document: (
@@ -119,7 +128,7 @@ class MofLegalDocumentConnector:
         return response.content
 
     def _search(
-        self, selection: dict[str, Any], issued_from: date | None
+        self, label: str, selection: dict[str, Any], issued_from: date | None
     ) -> Iterable[dict[str, Any]]:
         page = 1
         while True:
@@ -141,10 +150,17 @@ class MofLegalDocumentConnector:
                 body["IssuedDateFrom"] = issued_from.strftime("%m/%d/%Y")
             payload = self._request("POST", BASE_URL + SEARCH_PATH, json=body).json()
             records = payload.get("documents") or []
+            total = int(payload.get("totalItem") or 0)
+            logger.info(
+                "Ministry of Finance %s: page %d/%d (%d of %d records)",
+                label,
+                page,
+                max(1, -(-total // self._page_size)),
+                min(page * self._page_size, total),
+                total,
+            )
             yield from records
-            if len(records) < self._page_size or page * self._page_size >= int(
-                payload.get("totalItem") or 0
-            ):
+            if len(records) < self._page_size or page * self._page_size >= total:
                 return
             page += 1
             time.sleep(self._delay_seconds)
@@ -159,7 +175,15 @@ class MofLegalDocumentConnector:
             except httpx.HTTPError as error:
                 # The ministry's server times out under large requests; back off and retry.
                 last_error = error
-                time.sleep(self._delay_seconds * 4 * (attempt + 1))
+                wait = self._delay_seconds * 4 * (attempt + 1)
+                logger.warning(
+                    "Ministry of Finance request failed (%s); attempt %d/%d, retrying in %.0fs",
+                    type(error).__name__,
+                    attempt + 1,
+                    self._retries,
+                    wait,
+                )
+                time.sleep(wait)
         raise ConnectorError(f"Ministry of Finance request failed: {url}") from last_error
 
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import html as html_module
+import logging
 import re
 import time
 import unicodedata
@@ -20,6 +21,8 @@ from taxlens.legal_data.document_numbers import (
     issuing_agency_for,
     normalize_number_text,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectorError(RuntimeError):
@@ -481,6 +484,12 @@ class GovernmentPortalSearch:
             if capped:
                 for issuer in NATIONAL_ISSUER_IDS:
                     found.extend(self._search(year, issuer)[0])
+            logger.info(
+                "Government portal %d: %d result(s)%s",
+                year,
+                len(found),
+                " (capped; searched per national issuer)" if capped else "",
+            )
             for document in found:
                 if issuer_code(document.document_number) not in LOCAL_ISSUER_CODES:
                     documents.setdefault(document.content_url, document)

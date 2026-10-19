@@ -54,11 +54,16 @@ _jobs_lock = Lock()
 def run_ingestion_job(
     x_taxlens_internal_token: str | None = Header(default=None),
 ) -> dict[str, Any]:
-    """Daily collection: tax documents issued in the last 60 days from all sources."""
+    """Daily collection: tax documents issued in the last 60 days.
+
+    Only the government portal is used: the Ministry of Finance database refuses
+    connections from Azure and is collected from a machine in Vietnam (docs/sources.md).
+    """
 
     _authorize(x_taxlens_internal_token)
     return _start_job(
-        "collect_sources.py", ["--since-days", "60", "--limit", _source_limit()]
+        "collect_sources.py",
+        ["--source", "government", "--since-days", "60", "--limit", _source_limit()],
     )
 
 
@@ -73,7 +78,7 @@ def run_backfill_job(
     """Historical collection, at most ``limit`` downloads per run; repeat until done."""
 
     _authorize(x_taxlens_internal_token)
-    arguments = ["--from-year", str(from_year), "--limit", str(limit)]
+    arguments = ["--source", "government", "--from-year", str(from_year), "--limit", str(limit)]
     if include_expired:
         arguments.append("--include-expired")
     if dry_run:

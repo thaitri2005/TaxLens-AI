@@ -59,17 +59,18 @@ no page numbers.
 
 ## Running collection
 
-`scripts/collect_sources.py` does both sources in one run, ministry first:
+`scripts/collect_sources.py` collects from `--source government` (the default), `mof`, or
+`all` (ministry first):
 
 ```powershell
-python scripts/collect_sources.py --since-days 60 --limit 100   # daily
+python scripts/collect_sources.py --since-days 60 --limit 100   # daily (Airflow)
 python scripts/collect_sources.py --from-year 1990 --dry-run     # how much is missing
 python scripts/collect_sources.py --from-year 1990 --limit 300   # one backfill batch
 ```
 
 In Azure:
 
-- The daily DAG's first task runs the `--since-days 60` form (a few requests per source).
+- The daily DAG's first task runs the `--since-days 60` form against the government portal.
 - The `taxlens_corpus_maintenance` DAG has `backfill_dry_run` and `backfill_corpus`
   actions (`from_year`, `limit`, `include_expired`). `backfill_corpus` collects up to
   `limit` documents, then processes and embeds them; run it until the dry run reports
@@ -81,8 +82,8 @@ In Azure:
 `vbpq.mof.gov.vn` does not accept connections from Azure (the East Asia region, Hong Kong):
 TCP connections time out, while the same API answers in seconds from a Vietnamese network
 and the government portal is reachable from Azure. The site appears to accept Vietnamese
-IP addresses only, and Azure has no region in Vietnam. Scheduled runs therefore collect
-from the government portal and report the ministry as unavailable instead of failing.
+IP addresses only, and Azure has no region in Vietnam. Airflow therefore collects from
+the government portal only (daily and `backfill_corpus`).
 
 Ministry collection runs from a machine in Vietnam against the Azure database and Blob
 Storage; it only lists and downloads, so it needs no OCR or embedding model:
@@ -98,6 +99,19 @@ $env:AZURE_STORAGE_CONNECTION_STRING = "<artifacts storage connection string>"
 python scripts/collect_sources.py --source mof --from-year 1990 --dry-run
 python scripts/collect_sources.py --source mof --from-year 1990 --limit 300
 ```
+
+The run prints timestamped progress, so a quiet console never means "maybe stuck":
+
+```text
+13:44:15 Ministry of Finance tax department: page 1/4 (100 of 335 records)
+13:54:02 Ministry of Finance: kept 928 of 2700 records (normative documents not expired ...)
+13:54:03 412 new document(s) to collect; 516 already in the corpus
+13:54:05 [1/300] 111/2013/TT-BTC | NEW_DOCUMENT | msword 152 KB | 14m10s left
+13:54:07 Ministry of Finance request failed (ConnectTimeout); attempt 1/4, retrying in 2s
+```
+
+Listing the full ministry selection takes about ten minutes (its API is slow), and each
+download takes a few seconds.
 
 The PostgreSQL firewall must allow the machine's public IP (`postgres_allowed_ip` in
 Terraform). Then run the `taxlens_corpus_maintenance` DAG with `process_and_embed` so OCR
