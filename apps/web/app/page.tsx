@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 
 type View = "search" | "ask" | "documents";
@@ -17,7 +17,21 @@ type Citation = {
   source_url: string | null;
 };
 type SearchHit = { chunk_id: string; snippet: string; content: string; fused_score: number; citation: Citation };
-type Document = { id: string; document_number: string; title: string; document_type: string; issuing_agency: string | null; source_name: string | null };
+type Document = { id: string; document_number: string; title: string; document_type: string; kind: string; issuing_agency: string | null; source_name: string | null };
+type DocumentListItem = Document & { legal_status: string | null; issue_date: string | null };
+type DocumentPage = { total: number; items: DocumentListItem[] };
+type CountByValue = { value: string; count: number };
+type DocumentOverview = {
+  total_documents: number;
+  searchable_documents: number;
+  passages: number;
+  embedded_passages: number;
+  failed_versions: number;
+  by_status: CountByValue[];
+  by_source: CountByValue[];
+  by_kind: CountByValue[];
+};
+type DocumentFilters = { q: string; source: string; kind: string; status: string };
 type Version = {
   id: string;
   issue_date: string | null;
@@ -30,7 +44,6 @@ type Version = {
   chunk_count: number;
 };
 type DocumentDetail = Document & { versions: Version[] };
-type DocumentFacets = { total: number; source_names: string[]; document_types: string[] };
 type Chunk = { id: string; version_id: string; article_number: string | null; clause_number: string | null; heading: string | null; page_start: number | null; page_end: number | null; content: string };
 type Claim = { text: string; citation_numbers: number[] };
 type AnswerStatus = "ANSWERED" | "UNSUPPORTED" | "INSUFFICIENT_EVIDENCE" | "PROVIDER_UNAVAILABLE" | "INVALID_MODEL_OUTPUT";
@@ -46,7 +59,12 @@ type Answer = {
 };
 type SearchDocumentGroup = { document_number: string; title: string; hits: SearchHit[] };
 
-const DOCUMENT_PAGE_SIZE = 100;
+const DOCUMENT_PAGE_SIZE = 20;
+const CHUNK_PAGE_SIZE = 50;
+const NO_FILTERS: DocumentFilters = { q: "", source: "", kind: "", status: "" };
+// A scaled-to-zero API answers 502-504 while it starts; reads are retried instead of failing.
+const RETRY_DELAYS_MS = [3000, 8000];
+const SLOW_REQUEST_MS = 4000;
 
 const COPY = {
   en: {
@@ -66,19 +84,40 @@ const COPY = {
       PROVIDER_UNAVAILABLE: "The language model is unavailable right now. Review the retrieved sources directly.",
       INVALID_MODEL_OUTPUT: "The model response could not be validated, so no answer is shown. The relevant passages are listed below.",
     },
-    documentsEyebrow: "Source library", documentsTitle: "Documents", source: "Source", type: "Type",
-    allSources: "All sources", allTypes: "All types", noMatch: "No matching documents",
-    adjustFilters: "Adjust the source or document type filters.", indexed: "indexed", loadMoreDocuments: "Load more documents",
+    documentsEyebrow: "Source library", documentsTitle: "Documents", libraryDocuments: "documents",
+    statDocuments: "Documents", statInForce: "in force",
+    statSearchable: "Searchable", statOfLibrary: "of the library",
+    statPassages: "Passages", statEmbedded: "ready for semantic search",
+    statAttention: "Need attention", statAttentionNote: "failed processing",
+    bySource: "Source", byKind: "Kind", byStatus: "Status",
+    searchDocuments: "Find a document by number or title, e.g. 219/2013 or hóa đơn", searchDocumentsButton: "Find",
+    filteredBy: "Filtered by", clearFilters: "Clear filters", removeFilter: "Remove filter",
+    showing: (from: number, to: number, total: string) => `${from}–${to} of ${total}`,
+    pageOf: (page: number, pages: number) => `Page ${page} of ${pages}`,
+    previous: "← Previous", next: "Next →",
+    noMatch: "No matching documents", adjustFilters: "Try another number or title, or clear the filters.",
+    slowService: "The service is starting up after a quiet period. This can take a minute.",
+    loadFailed: "The library could not be loaded:", retry: "Try again",
+    loadMorePassages: "Load more passages",
+    kinds: {
+      law: "Law", ordinance: "Ordinance", resolution: "Resolution", decree: "Decree", decision: "Decision",
+      circular: "Circular", joint_circular: "Joint circular", consolidated: "Consolidated text", directive: "Directive", other: "Other",
+    } as Record<string, string>,
+    legalStatuses: {
+      EFFECTIVE: "In force", PARTIALLY_EXPIRED: "Partly expired", EXPIRED: "Expired",
+      NOT_YET_EFFECTIVE: "Not yet in force", DISCOVERED: "Status not recorded", UNKNOWN: "Status unknown",
+    } as Record<string, string>,
+    sourceNames: { "government-portal": "Government portal", "mof-vbpq": "Ministry of Finance" } as Record<string, string>,
     working: "Working…", evidencePassage: "evidence passage", evidencePassages: "evidence passages", relevantPassage: "Relevant passage",
     noResults: "No matching passages", broaden: "Try a broader Vietnamese or English query.", loadMore: "Load more results",
     searchCorpus: "Search the corpus", searchHelp: "Each document appears once with its strongest evidence passages.",
     article: "Article", clause: "clause", page: "p.", sourcePassage: "Source passage", officialSource: "Official source ↗",
-    back: "Back to documents", readingDocument: "Reading versions and indexed passages.", readingLibrary: "Reading the indexed legal documents.",
+    back: "Back to documents", readingDocument: "Reading versions and indexed passages.",
     indexedSource: "Indexed source", sourceUnavailable: "Source unavailable", agencyUnavailable: "Issuing agency not recorded",
-    version: "Version", dateUnavailable: "date unavailable", effective: "Effective: ", notRecorded: "not recorded", chunks: "chunks",
+    version: "Version", dateUnavailable: "date unavailable", effective: "Effective: ", notRecorded: "not recorded", chunks: "passages",
     indexedPassages: "Indexed passages", documentPassage: "Document passage", pageLabel: "Page", pageUnavailable: "Page unavailable",
-    readPassage: "Read indexed passage", noChunks: "No indexed chunks", noChunksText: "This document has not produced searchable passages yet.",
-    openDetails: "Open details →", admin: "Admin", signOut: "Sign out", brandTagline: "Regulatory intelligence",
+    readPassage: "Read indexed passage", noChunks: "No indexed passages", noChunksText: "This document has not produced searchable passages yet.",
+    admin: "Admin", signOut: "Sign out", brandTagline: "Regulatory intelligence",
   },
   vi: {
     search: "Tìm kiếm", ask: "Hỏi TaxLens", documents: "Văn bản",
@@ -97,19 +136,40 @@ const COPY = {
       PROVIDER_UNAVAILABLE: "Mô hình ngôn ngữ hiện không khả dụng. Vui lòng xem trực tiếp các nguồn đã truy xuất.",
       INVALID_MODEL_OUTPUT: "Không thể kiểm chứng câu trả lời của mô hình nên câu trả lời không được hiển thị. Các đoạn trích liên quan được liệt kê bên dưới.",
     },
-    documentsEyebrow: "Thư viện văn bản", documentsTitle: "Văn bản pháp luật", source: "Nguồn", type: "Loại văn bản",
-    allSources: "Tất cả nguồn", allTypes: "Tất cả loại", noMatch: "Không có văn bản phù hợp",
-    adjustFilters: "Hãy điều chỉnh bộ lọc nguồn hoặc loại văn bản.", indexed: "văn bản đã xử lý", loadMoreDocuments: "Tải thêm văn bản",
+    documentsEyebrow: "Thư viện văn bản", documentsTitle: "Văn bản pháp luật", libraryDocuments: "văn bản",
+    statDocuments: "Văn bản", statInForce: "còn hiệu lực",
+    statSearchable: "Tra cứu được", statOfLibrary: "tổng số văn bản",
+    statPassages: "Đoạn trích", statEmbedded: "sẵn sàng tìm kiếm ngữ nghĩa",
+    statAttention: "Cần xử lý", statAttentionNote: "xử lý không thành công",
+    bySource: "Nguồn", byKind: "Loại", byStatus: "Hiệu lực",
+    searchDocuments: "Tìm theo số hiệu hoặc trích yếu, ví dụ 219/2013 hoặc hóa đơn", searchDocumentsButton: "Tìm",
+    filteredBy: "Đang lọc theo", clearFilters: "Xóa bộ lọc", removeFilter: "Bỏ bộ lọc",
+    showing: (from: number, to: number, total: string) => `${from}–${to} trên ${total}`,
+    pageOf: (page: number, pages: number) => `Trang ${page}/${pages}`,
+    previous: "← Trang trước", next: "Trang sau →",
+    noMatch: "Không có văn bản phù hợp", adjustFilters: "Hãy thử số hiệu hoặc trích yếu khác, hoặc xóa bộ lọc.",
+    slowService: "Hệ thống đang khởi động lại sau một thời gian không hoạt động. Việc này có thể mất khoảng một phút.",
+    loadFailed: "Không tải được thư viện văn bản:", retry: "Thử lại",
+    loadMorePassages: "Tải thêm đoạn trích",
+    kinds: {
+      law: "Luật", ordinance: "Pháp lệnh", resolution: "Nghị quyết", decree: "Nghị định", decision: "Quyết định",
+      circular: "Thông tư", joint_circular: "Thông tư liên tịch", consolidated: "Văn bản hợp nhất", directive: "Chỉ thị", other: "Khác",
+    } as Record<string, string>,
+    legalStatuses: {
+      EFFECTIVE: "Còn hiệu lực", PARTIALLY_EXPIRED: "Hết hiệu lực một phần", EXPIRED: "Hết hiệu lực",
+      NOT_YET_EFFECTIVE: "Chưa có hiệu lực", DISCOVERED: "Chưa ghi nhận hiệu lực", UNKNOWN: "Không xác định",
+    } as Record<string, string>,
+    sourceNames: { "government-portal": "Cổng TTĐT Chính phủ", "mof-vbpq": "Bộ Tài chính" } as Record<string, string>,
     working: "Đang xử lý…", evidencePassage: "đoạn trích", evidencePassages: "đoạn trích", relevantPassage: "Đoạn trích liên quan",
     noResults: "Không tìm thấy đoạn phù hợp", broaden: "Hãy thử câu hỏi rộng hơn bằng tiếng Việt hoặc tiếng Anh.", loadMore: "Tải thêm kết quả",
     searchCorpus: "Tìm kiếm trong kho văn bản", searchHelp: "Các văn bản phù hợp kèm đoạn trích liên quan.",
     article: "Điều", clause: "khoản", page: "tr.", sourcePassage: "Đoạn trích nguồn", officialSource: "Nguồn chính thức ↗",
-    back: "Quay lại danh sách", readingDocument: "Đang đọc thông tin văn bản và các đoạn trích.", readingLibrary: "Đang đọc thư viện văn bản pháp luật.",
+    back: "Quay lại danh sách", readingDocument: "Đang đọc thông tin văn bản và các đoạn trích.",
     indexedSource: "Văn bản đã xử lý", sourceUnavailable: "Nguồn chưa được ghi nhận", agencyUnavailable: "Cơ quan ban hành chưa được ghi nhận",
     version: "Ngày ban hành", dateUnavailable: "chưa ghi nhận", effective: "Hiệu lực: ", notRecorded: "chưa ghi nhận", chunks: "đoạn trích",
     indexedPassages: "Các đoạn trích đã xử lý", documentPassage: "Đoạn trích văn bản", pageLabel: "Trang", pageUnavailable: "Chưa ghi nhận số trang",
     readPassage: "Xem đoạn trích", noChunks: "Chưa có đoạn trích", noChunksText: "Văn bản này chưa có đoạn trích để tìm kiếm.",
-    openDetails: "Chi tiết →", admin: "Quản trị", signOut: "Đăng xuất", brandTagline: "Thông tin pháp lý",
+    admin: "Quản trị", signOut: "Đăng xuất", brandTagline: "Thông tin pháp lý",
   },
 };
 type Copy = (typeof COPY)["en"];
@@ -125,11 +185,29 @@ function groupSearchResults(results: SearchHit[]): SearchDocumentGroup[] {
   return Array.from(groups.values());
 }
 
+const UNAVAILABLE_STATUSES = new Set([502, 503, 504]);
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`/api${path}`, { headers: { "Content-Type": "application/json" }, ...options });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(typeof body.detail === "string" ? body.detail : "The request could not be completed.");
-  return body as T;
+  // Reads are retried while the API starts; a question (POST) is never sent twice.
+  const retries = !options?.method || options.method === "GET" ? RETRY_DELAYS_MS.length : 0;
+  for (let attempt = 0; ; attempt += 1) {
+    let response: Response | null = null;
+    try {
+      response = await fetch(`/api${path}`, { headers: { "Content-Type": "application/json" }, ...options });
+    } catch {
+      response = null;
+    }
+    if ((response === null || UNAVAILABLE_STATUSES.has(response.status)) && attempt < retries) {
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS_MS[attempt]));
+      continue;
+    }
+    if (response === null) throw new Error("The service could not be reached.");
+    const body = await response.json().catch(() => ({}));
+    // The sign-in session (8 hours) has ended: go back to the login page.
+    if (response.status === 401 && body.detail === "Authentication required") window.location.assign("/login");
+    if (!response.ok) throw new Error(typeof body.detail === "string" ? body.detail : "The request could not be completed.");
+    return body as T;
+  }
 }
 
 function pageRange(start: number | null, end: number | null, prefix: string) {
@@ -142,6 +220,23 @@ function locationLabel(citation: Citation, copy: Copy) {
     ? `${copy.article} ${citation.article_number}${citation.clause_number ? ` ${copy.clause} ${citation.clause_number}` : ""}`
     : null;
   return [article, pageRange(citation.page_start, citation.page_end, copy.page)].filter(Boolean).join(" · ");
+}
+
+function labelFor(labels: Record<string, string>, value: string) {
+  return labels[value] ?? value;
+}
+
+function formatDate(isoDate: string) {
+  return isoDate.split("-").reverse().join("/");
+}
+
+function documentListQuery(filters: DocumentFilters, pageIndex: number) {
+  const params = new URLSearchParams({ limit: String(DOCUMENT_PAGE_SIZE), offset: String(pageIndex * DOCUMENT_PAGE_SIZE) });
+  if (filters.q) params.set("q", filters.q);
+  if (filters.source) params.set("source_name", filters.source);
+  if (filters.kind) params.set("kind", filters.kind);
+  if (filters.status) params.set("legal_status", filters.status);
+  return params.toString();
 }
 
 function CitationLine({ citation, copy, number }: { citation: Citation; copy: Copy; number?: number }) {
@@ -171,50 +266,109 @@ export default function Home() {
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [answerBusy, setAnswerBusy] = useState(false);
   const [answerError, setAnswerError] = useState("");
-  const [documents, setDocuments] = useState<Document[] | null>(null);
-  const [documentsHasMore, setDocumentsHasMore] = useState(false);
-  const [documentFacets, setDocumentFacets] = useState<DocumentFacets | null>(null);
-  const [documentSourceFilter, setDocumentSourceFilter] = useState("all");
-  const [documentTypeFilter, setDocumentTypeFilter] = useState("all");
+  const [overview, setOverview] = useState<DocumentOverview | null>(null);
+  const [overviewError, setOverviewError] = useState("");
+  const [documentFilters, setDocumentFilters] = useState<DocumentFilters>(NO_FILTERS);
+  const [documentQueryInput, setDocumentQueryInput] = useState("");
+  const [documentPageIndex, setDocumentPageIndex] = useState(0);
+  const [documentPage, setDocumentPage] = useState<DocumentPage | null>(null);
+  const [documentListBusy, setDocumentListBusy] = useState(false);
+  const [documentListError, setDocumentListError] = useState("");
+  const [documentsSlow, setDocumentsSlow] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [documentDetail, setDocumentDetail] = useState<DocumentDetail | null>(null);
   const [documentChunks, setDocumentChunks] = useState<Chunk[]>([]);
   const [documentBusy, setDocumentBusy] = useState(false);
+  const [chunksBusy, setChunksBusy] = useState(false);
   const [documentError, setDocumentError] = useState("");
+  const loadedListQuery = useRef("");
+  const latestListRequest = useRef(0);
+  const listTop = useRef<HTMLDivElement>(null);
   const copy = COPY[language];
+  const numberFormat = new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US");
+  const listQuery = documentListQuery(documentFilters, documentPageIndex);
 
-  // Filters and counts come from the server: the library loads one page at a time, so the
-  // loaded page alone cannot tell how many documents exist or which filters apply.
-  async function loadDocuments(offset: number) {
-    setDocumentError("");
-    const filters = new URLSearchParams();
-    if (documentSourceFilter !== "all") filters.set("source_name", documentSourceFilter);
-    if (documentTypeFilter !== "all") filters.set("document_type", documentTypeFilter);
+  // The Documents tab loads a small summary and one page of 20 documents; the list is
+  // never loaded whole. Both requests start together so the summary shows first.
+  async function loadOverview() {
+    setOverviewError("");
     try {
-      const page = await request<Document[]>(`/documents?limit=${DOCUMENT_PAGE_SIZE}&offset=${offset}&${filters}`);
-      setDocuments(previous => (offset === 0 ? page : [...(previous || []), ...page]));
-      setDocumentsHasMore(page.length === DOCUMENT_PAGE_SIZE);
-      if (offset === 0) setDocumentFacets(await request<DocumentFacets>(`/documents/facets?${filters}`));
+      setOverview(await request<DocumentOverview>("/documents/overview"));
     } catch (error) {
-      setDocumentError((error as Error).message);
+      setOverviewError((error as Error).message);
+    }
+  }
+
+  async function loadDocumentPage(query: string) {
+    const requestId = ++latestListRequest.current;
+    loadedListQuery.current = query;
+    setDocumentListBusy(true); setDocumentListError("");
+    const slowTimer = setTimeout(() => setDocumentsSlow(true), SLOW_REQUEST_MS);
+    try {
+      const page = await request<DocumentPage>(`/documents?${query}`);
+      if (requestId === latestListRequest.current) setDocumentPage(page);
+    } catch (error) {
+      if (requestId === latestListRequest.current) {
+        loadedListQuery.current = "";
+        setDocumentListError((error as Error).message);
+      }
+    } finally {
+      clearTimeout(slowTimer);
+      if (requestId === latestListRequest.current) { setDocumentListBusy(false); setDocumentsSlow(false); }
     }
   }
 
   useEffect(() => {
-    if (view === "documents") void loadDocuments(0);
-    // Reload from the first page whenever the view opens or a filter changes.
-  }, [view, documentSourceFilter, documentTypeFilter]);
+    if (view === "documents" && overview === null && !overviewError) void loadOverview();
+  }, [view, overview, overviewError]);
+
+  useEffect(() => {
+    // Returning to the tab keeps the page already shown; only a new page or filter loads.
+    if (view === "documents" && listQuery !== loadedListQuery.current) void loadDocumentPage(listQuery);
+  }, [view, listQuery]);
+
+  function updateDocumentFilters(change: Partial<DocumentFilters>) {
+    setDocumentFilters(previous => ({ ...previous, ...change }));
+    setDocumentPageIndex(0);
+  }
+
+  function clearDocumentFilters() {
+    setDocumentQueryInput("");
+    setDocumentFilters(NO_FILTERS);
+    setDocumentPageIndex(0);
+  }
+
+  function goToDocumentPage(pageIndex: number) {
+    setDocumentPageIndex(pageIndex);
+    listTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   async function openDocument(document: Document) {
     setSelectedDocument(document); setDocumentDetail(null); setDocumentChunks([]); setDocumentError(""); setDocumentBusy(true);
     try {
-      const detail = await request<DocumentDetail>(`/documents/${document.id}`);
+      const [detail, chunks] = await Promise.all([
+        request<DocumentDetail>(`/documents/${document.id}`),
+        request<Chunk[]>(`/documents/${document.id}/chunks?limit=${CHUNK_PAGE_SIZE}&offset=0`),
+      ]);
       setDocumentDetail(detail);
-      setDocumentChunks(await request<Chunk[]>(`/documents/${detail.id}/chunks`));
+      setDocumentChunks(chunks);
     } catch (error) {
       setDocumentError((error as Error).message);
     } finally {
       setDocumentBusy(false);
+    }
+  }
+
+  async function loadMoreChunks() {
+    if (!documentDetail) return;
+    setChunksBusy(true);
+    try {
+      const more = await request<Chunk[]>(`/documents/${documentDetail.id}/chunks?limit=${CHUNK_PAGE_SIZE}&offset=${documentChunks.length}`);
+      setDocumentChunks(previous => [...previous, ...more]);
+    } catch (error) {
+      setDocumentError((error as Error).message);
+    } finally {
+      setChunksBusy(false);
     }
   }
 
@@ -249,7 +403,19 @@ export default function Home() {
     }
   }
 
+  function findDocuments(event: FormEvent) {
+    event.preventDefault();
+    updateDocumentFilters({ q: documentQueryInput.trim() });
+  }
+
   const tabs: [View, string][] = [["search", copy.search], ["ask", copy.ask], ["documents", copy.documents]];
+  const activeFilters: [keyof DocumentFilters, string][] = [
+    ["q", documentFilters.q ? `“${documentFilters.q}”` : ""],
+    ["source", documentFilters.source && labelFor(copy.sourceNames, documentFilters.source)],
+    ["kind", documentFilters.kind && labelFor(copy.kinds, documentFilters.kind)],
+    ["status", documentFilters.status && labelFor(copy.legalStatuses, documentFilters.status)],
+  ];
+  const shownFilters = activeFilters.filter(([, label]) => label);
 
   return <>
     <header className="topbar">
@@ -321,38 +487,132 @@ export default function Home() {
           <button className="back-button" onClick={() => setSelectedDocument(null)}>← {copy.back}</button>
           {documentBusy ? <Empty title={copy.working} text={copy.readingDocument} />
             : documentError ? <div className="error-state">{documentError}</div>
-            : documentDetail && <DocumentDetailView detail={documentDetail} chunks={documentChunks} copy={copy} />}
+            : documentDetail && <DocumentDetailView detail={documentDetail} chunks={documentChunks} copy={copy} numberFormat={numberFormat} onLoadMore={loadMoreChunks} loadingMore={chunksBusy} />}
         </> : <>
-          <Heading eyebrow={copy.documentsEyebrow} title={copy.documentsTitle} chip={`${documentFacets?.total ?? documents?.length ?? 0} ${copy.indexed}`} />
-          <div className="form-row">
-            <label>{copy.source}
-              <select value={documentSourceFilter} onChange={event => setDocumentSourceFilter(event.target.value)}>
-                <option value="all">{copy.allSources}</option>
-                {documentFacets?.source_names.map(source => <option key={source} value={source}>{source}</option>)}
-              </select>
+          <Heading eyebrow={copy.documentsEyebrow} title={copy.documentsTitle} chip={overview ? `${numberFormat.format(overview.total_documents)} ${copy.libraryDocuments}` : "…"} />
+          {overviewError
+            ? <div className="error-state">{copy.loadFailed} {overviewError} <button className="link-button" type="button" onClick={() => setOverviewError("")}>{copy.retry}</button></div>
+            : <OverviewPanel overview={overview} filters={documentFilters} copy={copy} numberFormat={numberFormat} onFilter={updateDocumentFilters} />}
+
+          <form className="library-search" onSubmit={findDocuments}>
+            <label className="search-box">
+              <span>⌕</span>
+              <input value={documentQueryInput} onChange={event => setDocumentQueryInput(event.target.value)} maxLength={200} placeholder={copy.searchDocuments} aria-label={copy.searchDocuments} />
+              <button type="submit">{copy.searchDocumentsButton}</button>
             </label>
-            <label>{copy.type}
-              <select value={documentTypeFilter} onChange={event => setDocumentTypeFilter(event.target.value)}>
-                <option value="all">{copy.allTypes}</option>
-                {documentFacets?.document_types.map(type => <option key={type} value={type}>{type}</option>)}
-              </select>
-            </label>
-          </div>
-          {documentError ? <div className="error-state">{documentError}</div>
-            : documents === null ? <Empty title={copy.working} text={copy.readingLibrary} />
-            : <div className="document-list">
-              {documents.length ? documents.map(document => <button className="document-card document-button" key={document.id} onClick={() => openDocument(document)}>
-                <div className="doc-top"><span className="doc-number">{document.document_number}</span><span className="tag">{document.document_type}</span></div>
-                <strong>{document.title}</strong>
-                <div className="doc-meta">{document.issuing_agency || copy.agencyUnavailable}<span>{document.source_name || copy.sourceUnavailable} · {copy.openDetails}</span></div>
-              </button>) : <Empty title={copy.noMatch} text={copy.adjustFilters} />}
+          </form>
+          {shownFilters.length > 0 && <div className="active-filters">
+            <span>{copy.filteredBy}</span>
+            {shownFilters.map(([key, label]) => <button key={key} className="facet-chip active" type="button" aria-label={`${copy.removeFilter}: ${label}`} onClick={() => { if (key === "q") setDocumentQueryInput(""); updateDocumentFilters({ [key]: "" } as Partial<DocumentFilters>); }}>{label} ×</button>)}
+            <button className="link-button" type="button" onClick={clearDocumentFilters}>{copy.clearFilters}</button>
+          </div>}
+
+          <div ref={listTop} className="list-anchor" />
+          {documentsSlow && <p className="slow-note">{copy.slowService}</p>}
+          {documentListError
+            ? <div className="error-state">{copy.loadFailed} {documentListError} <button className="link-button" type="button" onClick={() => loadDocumentPage(listQuery)}>{copy.retry}</button></div>
+            : documentPage === null ? <div className="document-table" aria-busy="true">{Array.from({ length: 6 }, (_, index) => <div className="skeleton-row" key={index} />)}</div>
+            : documentPage.items.length === 0 ? <Empty title={copy.noMatch} text={copy.adjustFilters} />
+            : <div className={`document-table ${documentListBusy ? "is-busy" : ""}`} aria-busy={documentListBusy}>
+              {documentPage.items.map(document => <button className="document-row" type="button" key={document.id} onClick={() => openDocument(document)}>
+                <span className="document-row-number">{document.document_number}</span>
+                <span className="document-row-title">{document.title}</span>
+                <span className="document-row-meta">
+                  <span className="tag">{labelFor(copy.kinds, document.kind)}</span>
+                  {document.legal_status && <StatusTag status={document.legal_status} copy={copy} />}
+                  <span className="document-row-date">{document.issue_date ? formatDate(document.issue_date) : "—"}</span>
+                </span>
+              </button>)}
             </div>}
-          {documentsHasMore && <button className="load-more" type="button" onClick={() => loadDocuments(documents?.length || 0)}>{copy.loadMoreDocuments} ({documents?.length || 0}/{documentFacets?.total ?? "…"})</button>}
+          {documentPage && documentPage.total > 0 && <Pager
+            pageIndex={documentPageIndex}
+            total={documentPage.total}
+            copy={copy}
+            numberFormat={numberFormat}
+            busy={documentListBusy}
+            onPage={goToDocumentPage}
+          />}
         </>}
       </section>}
     </main>
     <footer><span>TaxLens AI</span><span>Evidence first</span></footer>
   </>;
+}
+
+function OverviewPanel({ overview, filters, copy, numberFormat, onFilter }: {
+  overview: DocumentOverview | null;
+  filters: DocumentFilters;
+  copy: Copy;
+  numberFormat: Intl.NumberFormat;
+  onFilter: (change: Partial<DocumentFilters>) => void;
+}) {
+  if (overview === null) {
+    return <div className="stat-grid" aria-busy="true">{[copy.statDocuments, copy.statSearchable, copy.statPassages, copy.statAttention].map(label =>
+      <div className="stat-card placeholder" key={label}><span>{label}</span><strong>…</strong><small>&nbsp;</small></div>)}</div>;
+  }
+  const format = (value: number) => numberFormat.format(value);
+  const percent = (part: number, whole: number) => `${whole ? Math.round((part / whole) * 100) : 0}%`;
+  const inForce = overview.by_status.find(item => item.value === "EFFECTIVE")?.count ?? 0;
+  return <>
+    <div className="stat-grid">
+      <StatCard label={copy.statDocuments} value={format(overview.total_documents)} note={`${format(inForce)} ${copy.statInForce}`} />
+      <StatCard label={copy.statSearchable} value={format(overview.searchable_documents)} note={`${percent(overview.searchable_documents, overview.total_documents)} ${copy.statOfLibrary}`} />
+      <StatCard label={copy.statPassages} value={format(overview.passages)} note={`${percent(overview.embedded_passages, overview.passages)} ${copy.statEmbedded}`} />
+      <StatCard label={copy.statAttention} value={format(overview.failed_versions)} note={copy.statAttentionNote} warn={overview.failed_versions > 0} />
+    </div>
+    <div className="facet-groups">
+      <FacetRow label={copy.bySource} items={overview.by_source} active={filters.source} labels={copy.sourceNames} format={format} onSelect={source => onFilter({ source })} />
+      <FacetRow label={copy.byKind} items={overview.by_kind} active={filters.kind} labels={copy.kinds} format={format} onSelect={kind => onFilter({ kind })} />
+      <FacetRow label={copy.byStatus} items={overview.by_status} active={filters.status} labels={copy.legalStatuses} format={format} onSelect={status => onFilter({ status })} />
+    </div>
+  </>;
+}
+
+function StatCard({ label, value, note, warn = false }: { label: string; value: string; note: string; warn?: boolean }) {
+  return <div className={`stat-card ${warn ? "warn" : ""}`}><span>{label}</span><strong>{value}</strong><small>{note}</small></div>;
+}
+
+function FacetRow({ label, items, active, labels, format, onSelect }: {
+  label: string;
+  items: CountByValue[];
+  active: string;
+  labels: Record<string, string>;
+  format: (value: number) => string;
+  onSelect: (value: string) => void;
+}) {
+  if (!items.length) return null;
+  return <div className="facet-row">
+    <span className="facet-label">{label}</span>
+    <div className="facet-chips">{items.map(item => <button
+      key={item.value}
+      type="button"
+      className={`facet-chip ${active === item.value ? "active" : ""}`}
+      aria-pressed={active === item.value}
+      onClick={() => onSelect(active === item.value ? "" : item.value)}
+    >{labelFor(labels, item.value)}<span>{format(item.count)}</span></button>)}</div>
+  </div>;
+}
+
+function StatusTag({ status, copy }: { status: string; copy: Copy }) {
+  return <span className={`status-tag status-${status.toLowerCase()}`}>{labelFor(copy.legalStatuses, status)}</span>;
+}
+
+function Pager({ pageIndex, total, copy, numberFormat, busy, onPage }: {
+  pageIndex: number;
+  total: number;
+  copy: Copy;
+  numberFormat: Intl.NumberFormat;
+  busy: boolean;
+  onPage: (pageIndex: number) => void;
+}) {
+  const pages = Math.max(1, Math.ceil(total / DOCUMENT_PAGE_SIZE));
+  const from = pageIndex * DOCUMENT_PAGE_SIZE + 1;
+  const to = Math.min(total, from + DOCUMENT_PAGE_SIZE - 1);
+  return <nav className="pager" aria-label={copy.pageOf(pageIndex + 1, pages)}>
+    <button type="button" disabled={busy || pageIndex === 0} onClick={() => onPage(pageIndex - 1)}>{copy.previous}</button>
+    <span>{copy.pageOf(pageIndex + 1, pages)} · {copy.showing(from, to, numberFormat.format(total))}</span>
+    <button type="button" disabled={busy || pageIndex >= pages - 1} onClick={() => onPage(pageIndex + 1)}>{copy.next}</button>
+  </nav>;
 }
 
 function AnswerCard({ answer, copy }: { answer: Answer; copy: Copy }) {
@@ -395,22 +655,30 @@ function ResultState({ error, hasResults, emptyTitle, emptyText }: { error: stri
   return hasResults ? null : <Empty title={emptyTitle} text={emptyText} />;
 }
 
-function DocumentDetailView({ detail, chunks, copy }: { detail: DocumentDetail; chunks: Chunk[]; copy: Copy }) {
+function DocumentDetailView({ detail, chunks, copy, numberFormat, onLoadMore, loadingMore }: {
+  detail: DocumentDetail;
+  chunks: Chunk[];
+  copy: Copy;
+  numberFormat: Intl.NumberFormat;
+  onLoadMore: () => void;
+  loadingMore: boolean;
+}) {
+  const totalChunks = detail.versions.reduce((sum, version) => sum + version.chunk_count, 0);
   return <>
-    <Heading eyebrow={copy.indexedSource} title={detail.document_number} chip={detail.document_type} />
+    <Heading eyebrow={copy.indexedSource} title={detail.document_number} chip={labelFor(copy.kinds, detail.kind)} />
     <p className="document-title">{detail.title}</p>
     <p className="document-source">
-      {detail.source_name || copy.sourceUnavailable} · {detail.issuing_agency || copy.agencyUnavailable}{" "}
+      {labelFor(copy.sourceNames, detail.source_name || "") || copy.sourceUnavailable} · {detail.issuing_agency || copy.agencyUnavailable}{" "}
       {detail.versions[0]?.source_url && <a href={detail.versions[0].source_url} target="_blank" rel="noreferrer">{copy.officialSource}</a>}
     </p>
     <div className="version-grid">{detail.versions.map(version => <div className="version-card" key={version.id}>
-      <span className="tag">{version.legal_status}</span>
-      <strong>{copy.version} {version.issue_date || copy.dateUnavailable}</strong>
-      <small>{copy.effective}{version.effective_date || copy.notRecorded}</small>
-      <small>{version.processing_status || "NOT_PROCESSED"} · {version.chunk_count} {copy.chunks}</small>
+      <StatusTag status={version.legal_status} copy={copy} />
+      <strong>{copy.version} {version.issue_date ? formatDate(version.issue_date) : copy.dateUnavailable}</strong>
+      <small>{copy.effective}{version.effective_date ? formatDate(version.effective_date) : copy.notRecorded}</small>
+      <small>{version.processing_status || "NOT_PROCESSED"} · {numberFormat.format(version.chunk_count)} {copy.chunks}</small>
       {version.processing_error_code && <small>{version.processing_error_code}</small>}
     </div>)}</div>
-    <div className="chunk-heading"><p className="eyebrow">{copy.indexedPassages}</p><span>{chunks.length} {copy.chunks}</span></div>
+    <div className="chunk-heading"><p className="eyebrow">{copy.indexedPassages}</p><span>{numberFormat.format(totalChunks)} {copy.chunks}</span></div>
     {chunks.length ? <div className="chunk-list">{chunks.map(chunk => <article className="chunk-card" key={chunk.id}>
       <div className="chunk-top">
         <strong>{chunk.article_number ? `${copy.article} ${chunk.article_number}${chunk.clause_number ? ` ${copy.clause} ${chunk.clause_number}` : ""}` : copy.documentPassage}</strong>
@@ -419,5 +687,8 @@ function DocumentDetailView({ detail, chunks, copy }: { detail: DocumentDetail; 
       {chunk.heading && <h3>{chunk.heading}</h3>}
       <details><summary>{copy.readPassage}</summary><p>{chunk.content}</p></details>
     </article>)}</div> : <Empty title={copy.noChunks} text={copy.noChunksText} />}
+    {chunks.length < totalChunks && chunks.length > 0 && <button className="load-more" type="button" onClick={onLoadMore} disabled={loadingMore}>
+      {loadingMore ? "…" : `${copy.loadMorePassages} (${numberFormat.format(chunks.length)}/${numberFormat.format(totalChunks)})`}
+    </button>}
   </>;
 }

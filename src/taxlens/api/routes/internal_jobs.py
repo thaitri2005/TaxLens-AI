@@ -10,6 +10,7 @@ the orphaned job.
 import hmac
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -32,6 +33,10 @@ WORKING_DIRECTORY = Path("/workspace")
 MAX_JOB_SECONDS = 6 * 60 * 60
 FINISHED_JOB_RETENTION_SECONDS = 24 * 60 * 60
 OUTPUT_TAIL_CHARACTERS = 4000
+# Jobs (OCR, embedding) share the API's single vCPU with web requests. At a lower
+# priority they still use all idle CPU, but a page request is served first instead of
+# waiting behind Tesseract.
+_LOW_PRIORITY = ["nice", "-n", "10"] if os.name == "posix" and shutil.which("nice") else []
 
 
 @dataclass
@@ -186,7 +191,7 @@ def _start_job(script_name: str, arguments: list[str]) -> dict[str, Any]:
         # path, so reading never moves the child's write position.
         with open(output_name, "ab") as output:
             process = subprocess.Popen(
-                [sys.executable, str(script_path), *arguments],
+                [*_LOW_PRIORITY, sys.executable, str(script_path), *arguments],
                 cwd=WORKING_DIRECTORY,
                 env=os.environ | {"PYTHONPATH": str(WORKING_DIRECTORY / "src")},
                 stdout=output,

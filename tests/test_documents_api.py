@@ -1,15 +1,17 @@
-from datetime import date
+from datetime import UTC, date, datetime
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from taxlens.api.auth import AuthenticatedUser, require_authenticated_user
 from taxlens.api.main import create_app
 from taxlens.db import get_db_session
+from taxlens.legal_data.document_kinds import document_kind
 from taxlens.legal_data.models import (
+    DocumentChunk,
     DocumentVersion,
     LegalDocument,
     ProcessingJob,
@@ -78,8 +80,12 @@ def test_document_endpoints_return_persisted_documents() -> None:
     detail_response = client.get(f"/documents/{document_id}")
 
     assert list_response.status_code == 200
-    assert list_response.json()[0]["document_number"] == "01/2025/TT-BTC"
-    assert list_response.json()[0]["source_name"] == "government-portal"
+    page = list_response.json()
+    assert page["total"] == 1
+    assert page["items"][0]["document_number"] == "01/2025/TT-BTC"
+    assert page["items"][0]["source_name"] == "government-portal"
+    assert page["items"][0]["legal_status"] == "EFFECTIVE"
+    assert page["items"][0]["issue_date"] == "2025-01-01"
     assert detail_response.status_code == 200
     assert detail_response.json()["versions"][0]["legal_status"] == "EFFECTIVE"
     assert detail_response.json()["source_name"] == "government-portal"
@@ -87,14 +93,89 @@ def test_document_endpoints_return_persisted_documents() -> None:
     assert detail_response.json()["versions"][0]["chunk_count"] == 0
     assert detail_response.json()["versions"][0]["source_url"] == "https://example.test/01-2025.pdf"
 
-    facets = client.get("/documents/facets").json()
-    filtered = client.get("/documents/facets", params={"source_name": "mof-vbpq"}).json()
+    overview = client.get("/documents/overview").json()
+    other_source = client.get("/documents", params={"source_name": "mof-vbpq"}).json()
+    by_number = client.get("/documents", params={"q": "01/2025"}).json()
+    by_title = client.get("/documents", params={"q": "sample", "legal_status": "EFFECTIVE"})
+    no_match = client.get("/documents", params={"q": "100%"}).json()
     paged = client.get("/documents", params={"limit": 1, "offset": 1}).json()
 
-    assert facets == {
-        "total": 1,
-        "source_names": ["government-portal"],
-        "document_types": ["CIRCULAR"],
+    assert overview == {
+        "total_documents": 1,
+        "searchable_documents": 0,
+        "passages": 0,
+        "embedded_passages": 0,
+        "failed_versions": 0,
+        "by_status": [{"value": "EFFECTIVE", "count": 1}],
+        "by_source": [{"value": "government-portal", "count": 1}],
+        "by_kind": [{"value": "circular", "count": 1}],
     }
-    assert filtered["total"] == 0
-    assert paged == []
+    assert client.get("/documents", params={"kind": "circular"}).json()["total"] == 1
+    assert client.get("/documents", params={"kind": "decree"}).json()["total"] == 0
+    assert page["items"][0]["kind"] == "circular"
+    assert other_source == {"total": 0, "items": []}
+    assert by_number["total"] == 1
+    assert by_title.json()["total"] == 1
+    assert no_match["total"] == 0
+    assert paged == {"total": 1, "items": []}
+
+    with Session(engine) as session:
+        version_id = session.scalars(select(DocumentVersion.id)).one()
+        session.add(
+            ProcessingJob(
+                document_version_id=version_id,
+                status="FAILED",
+                stage="EXTRACTION",
+                attempt_count=2,
+                updated_at=datetime(2030, 1, 1, tzinfo=UTC),
+            )
+        )
+        session.add(
+            DocumentChunk(
+                document_version_id=version_id, content="Điều 1", token_count=2, article_number="1"
+            )
+        )
+        session.commit()
+
+    overview = client.get("/documents/overview").json()
+    chunks = client.get(f"/documents/{document_id}/chunks", params={"limit": 1}).json()
+
+    assert overview["failed_versions"] == 1
+    assert overview["searchable_documents"] == 1
+    assert overview["passages"] == 1
+    assert [chunk["content"] for chunk in chunks] == ["Điều 1"]
+
+
+def test_recorded_document_types_are_grouped_into_kinds() -> None:
+    assert [
+        document_kind(value)
+        for value in (
+            "TT-BTC",
+            "Thông tư",
+            "CIRCULAR",
+            "TTLT-BTC-BKHĐT",
+            "Thông tư liên tịch",
+            "NĐ-CP",
+            "Nghị định",
+            "NQ-UBTVQH14",
+            "QH14",
+            "Luật",
+            "QĐ-TTG",
+            "VBHN-BTC",
+            "Văn bản",
+        )
+    ] == [
+        "circular",
+        "circular",
+        "circular",
+        "joint_circular",
+        "joint_circular",
+        "decree",
+        "decree",
+        "resolution",
+        "law",
+        "law",
+        "decision",
+        "consolidated",
+        "other",
+    ]

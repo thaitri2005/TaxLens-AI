@@ -1,16 +1,19 @@
 import uuid
+from collections.abc import Callable, Iterable
 from datetime import date
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import Session
 
 from taxlens.api.auth import require_authenticated_user
 from taxlens.db import get_db_session
+from taxlens.legal_data.document_kinds import document_kind
 from taxlens.legal_data.models import (
     DocumentChunk,
+    DocumentEmbedding,
     DocumentVersion,
     LegalDocument,
     ProcessingJob,
@@ -27,8 +30,19 @@ class DocumentSummary(BaseModel):
     document_number: str
     title: str
     document_type: str
+    kind: str
     issuing_agency: str | None
     source_name: str | None
+
+
+class DocumentListItem(DocumentSummary):
+    legal_status: str | None
+    issue_date: date | None
+
+
+class DocumentPage(BaseModel):
+    total: int
+    items: list[DocumentListItem]
 
 
 class VersionSummary(BaseModel):
@@ -58,59 +72,162 @@ class ChunkSummary(BaseModel):
     content: str
 
 
-class DocumentFacets(BaseModel):
-    total: int
-    source_names: list[str]
-    document_types: list[str]
+class CountByValue(BaseModel):
+    value: str
+    count: int
 
 
-@router.get("", response_model=list[DocumentSummary])
+class DocumentOverview(BaseModel):
+    total_documents: int
+    searchable_documents: int
+    passages: int
+    embedded_passages: int
+    failed_versions: int
+    by_status: list[CountByValue]
+    by_source: list[CountByValue]
+    by_kind: list[CountByValue]
+
+
+@router.get("", response_model=DocumentPage)
 def list_documents(
-    limit: int = Query(default=50, ge=1, le=100),
+    limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    q: str | None = Query(default=None, max_length=200),
     source_name: str | None = Query(default=None, max_length=120),
     document_type: str | None = Query(default=None, max_length=50),
+    kind: str | None = Query(default=None, max_length=30),
+    legal_status: str | None = Query(default=None, max_length=50),
     issuing_agency: str | None = Query(default=None, max_length=255),
     session: Session = Depends(get_db_session),
-) -> list[DocumentSummary]:
-    matching = _matching_document_ids(source_name, document_type, issuing_agency)
+) -> DocumentPage:
+    """One page of documents, newest issue first, and how many match in total.
+
+    The library is browsed a page at a time; nothing here grows with the corpus except
+    the count.
+    """
+
+    document_types: list[str] | None = None
+    if kind is not None:
+        recorded = session.scalars(select(LegalDocument.document_type).distinct()).all()
+        document_types = [value for value in recorded if document_kind(value) == kind]
+    if document_type is not None:
+        document_types = [
+            value for value in (document_types or [document_type]) if value == document_type
+        ]
+    matching = _matching_document_ids(
+        q=q,
+        source_name=source_name,
+        document_types=document_types,
+        legal_status=legal_status,
+        issuing_agency=issuing_agency,
+    )
+    total = session.scalar(select(func.count()).select_from(matching.subquery())) or 0
+    latest_issue = (
+        select(
+            DocumentVersion.document_id,
+            func.max(DocumentVersion.issue_date).label("issue_date"),
+        )
+        .group_by(DocumentVersion.document_id)
+        .subquery()
+    )
     documents = session.scalars(
         select(LegalDocument)
+        .outerjoin(latest_issue, latest_issue.c.document_id == LegalDocument.id)
         .where(LegalDocument.id.in_(matching))
-        .order_by(LegalDocument.document_number)
+        .order_by(latest_issue.c.issue_date.desc().nulls_last(), LegalDocument.document_number)
         .offset(offset)
         .limit(limit)
     ).all()
-    source_names = _source_names_by_document(session, [document.id for document in documents])
-    return [_document_summary(document, source_names.get(document.id)) for document in documents]
+    document_ids = [document.id for document in documents]
+    source_names = _source_names_by_document(session, document_ids)
+    latest_versions = _latest_versions_by_document(session, document_ids)
+    items = []
+    for document in documents:
+        version = latest_versions.get(document.id)
+        items.append(
+            DocumentListItem(
+                **_document_summary(document, source_names.get(document.id)).model_dump(),
+                legal_status=version.legal_status if version is not None else None,
+                issue_date=version.issue_date if version is not None else None,
+            )
+        )
+    return DocumentPage(total=int(total), items=items)
 
 
-@router.get("/facets", response_model=DocumentFacets)
-def document_facets(
-    source_name: str | None = Query(default=None, max_length=120),
-    document_type: str | None = Query(default=None, max_length=50),
-    issuing_agency: str | None = Query(default=None, max_length=255),
-    session: Session = Depends(get_db_session),
-) -> DocumentFacets:
-    """The total matching the filters, and every filter value present in the corpus.
+@router.get("/overview", response_model=DocumentOverview)
+def document_overview(session: Session = Depends(get_db_session)) -> DocumentOverview:
+    """Corpus statistics and the values the library can be filtered by.
 
-    The library loads documents a page at a time, so counts and filter options must come
-    from the server rather than from the loaded page.
+    A handful of aggregate queries, so the Documents tab can show its summary at once
+    and load the list separately.
     """
 
-    matching = _matching_document_ids(source_name, document_type, issuing_agency)
-    total = session.scalar(select(func.count()).select_from(matching.subquery())) or 0
-    sources = session.scalars(
-        select(SourceRecord.source_name).distinct().order_by(SourceRecord.source_name)
-    ).all()
-    types = session.scalars(
-        select(LegalDocument.document_type).distinct().order_by(LegalDocument.document_type)
-    ).all()
-    return DocumentFacets(total=int(total), source_names=list(sources), document_types=list(types))
+    searchable = session.scalar(
+        select(func.count(func.distinct(DocumentVersion.document_id))).join(
+            DocumentChunk, DocumentChunk.document_version_id == DocumentVersion.id
+        )
+    )
+    latest_job = (
+        select(
+            ProcessingJob.status,
+            func.row_number()
+            .over(
+                partition_by=ProcessingJob.document_version_id,
+                order_by=(ProcessingJob.updated_at.desc(), ProcessingJob.created_at.desc()),
+            )
+            .label("position"),
+        )
+    ).subquery()
+    failed = session.scalar(
+        select(func.count())
+        .select_from(latest_job)
+        .where(latest_job.c.position == 1, latest_job.c.status == "FAILED")
+    )
+    documents_per = func.count(func.distinct(DocumentVersion.document_id))
+    by_status = select(DocumentVersion.legal_status, documents_per).group_by(
+        DocumentVersion.legal_status
+    )
+    by_source = (
+        select(SourceRecord.source_name, documents_per)
+        .join(DocumentVersion, DocumentVersion.source_record_id == SourceRecord.id)
+        .group_by(SourceRecord.source_name)
+    )
+    by_type = select(LegalDocument.document_type, func.count(LegalDocument.id)).group_by(
+        LegalDocument.document_type
+    )
+    return DocumentOverview(
+        total_documents=session.scalar(select(func.count(LegalDocument.id))) or 0,
+        searchable_documents=searchable or 0,
+        passages=session.scalar(select(func.count(DocumentChunk.id))) or 0,
+        embedded_passages=session.scalar(
+            select(func.count(func.distinct(DocumentEmbedding.document_chunk_id)))
+        )
+        or 0,
+        failed_versions=failed or 0,
+        by_status=_counts(session.execute(by_status).all()),
+        by_source=_counts(session.execute(by_source).all()),
+        by_kind=_counts(session.execute(by_type).all(), group=document_kind),
+    )
+
+
+def _counts(rows: Iterable[Any], group: Callable[[str], str] = str) -> list[CountByValue]:
+    """(value, count) rows as counts, largest first; ``group`` merges values."""
+
+    totals: dict[str, int] = {}
+    for value, count in rows:
+        key = group(str(value))
+        totals[key] = totals.get(key, 0) + int(count)
+    counts = [CountByValue(value=value, count=count) for value, count in totals.items()]
+    return sorted(counts, key=lambda item: (-item.count, item.value))
 
 
 def _matching_document_ids(
-    source_name: str | None, document_type: str | None, issuing_agency: str | None
+    *,
+    q: str | None,
+    source_name: str | None,
+    document_types: list[str] | None,
+    legal_status: str | None,
+    issuing_agency: str | None,
 ) -> Select[Any]:  # typed Select[tuple[UUID]] in SQLAlchemy 2.0, Select[UUID] in 2.1
     statement = (
         select(LegalDocument.id)
@@ -118,12 +235,24 @@ def _matching_document_ids(
         .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
         .distinct()
     )
+    if q and q.strip():
+        text = q.strip()
+        statement = statement.where(
+            or_(
+                LegalDocument.document_number.icontains(text, autoescape=True),
+                LegalDocument.title.icontains(text, autoescape=True),
+            )
+        )
     if source_name is not None:
         statement = statement.where(SourceRecord.source_name == source_name)
-    if document_type is not None:
-        statement = statement.where(LegalDocument.document_type == document_type)
+    if document_types is not None:
+        statement = statement.where(LegalDocument.document_type.in_(document_types))
+    if legal_status is not None:
+        statement = statement.where(DocumentVersion.legal_status == legal_status)
     if issuing_agency is not None:
-        statement = statement.where(LegalDocument.issuing_agency.ilike(f"%{issuing_agency}%"))
+        statement = statement.where(
+            LegalDocument.issuing_agency.icontains(issuing_agency, autoescape=True)
+        )
     return statement
 
 
@@ -168,6 +297,8 @@ def get_document(
 @router.get("/{document_id}/chunks", response_model=list[ChunkSummary])
 def list_document_chunks(
     document_id: uuid.UUID,
+    limit: int = Query(default=200, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
     session: Session = Depends(get_db_session),
 ) -> list[ChunkSummary]:
     document = session.get(LegalDocument, document_id)
@@ -178,7 +309,13 @@ def list_document_chunks(
         select(DocumentChunk)
         .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
         .where(DocumentVersion.document_id == document.id)
-        .order_by(DocumentVersion.issue_date.desc(), DocumentChunk.article_number)
+        .order_by(
+            DocumentVersion.issue_date.desc(),
+            DocumentChunk.article_number,
+            DocumentChunk.id,
+        )
+        .offset(offset)
+        .limit(limit)
     ).all()
     return [
         ChunkSummary(
@@ -201,6 +338,7 @@ def _document_summary(document: LegalDocument, source_name: str | None = None) -
         document_number=document.document_number,
         title=document.title,
         document_type=document.document_type,
+        kind=document_kind(document.document_type),
         issuing_agency=document.issuing_agency,
         source_name=source_name,
     )
@@ -222,6 +360,22 @@ def _source_names_by_document(
         if document_id not in source_names:
             source_names[document_id] = source_name
     return source_names
+
+
+def _latest_versions_by_document(
+    session: Session, document_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, DocumentVersion]:
+    if not document_ids:
+        return {}
+    versions = session.scalars(
+        select(DocumentVersion)
+        .where(DocumentVersion.document_id.in_(document_ids))
+        .order_by(DocumentVersion.issue_date.desc().nulls_last(), DocumentVersion.created_at.desc())
+    ).all()
+    latest: dict[uuid.UUID, DocumentVersion] = {}
+    for version in versions:
+        latest.setdefault(version.document_id, version)
+    return latest
 
 
 def _processing_by_version(

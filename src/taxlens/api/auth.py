@@ -22,6 +22,12 @@ from taxlens.legal_data.models import UserAccount
 password_hasher = PasswordHasher()
 dependency = Depends()
 
+# The web proxy signs each request when it forwards it, and the API checks the signature
+# when it handles it. The gap includes any wait for a scaled-to-zero API to start, which
+# can exceed a minute, so a 60-second window rejected valid requests as "Expired identity".
+# Any request that can still complete within the 240-second ingress limit is accepted.
+IDENTITY_MAX_AGE_SECONDS = 300
+
 
 @dataclass(frozen=True)
 class AuthenticatedUser:
@@ -80,7 +86,7 @@ def require_authenticated_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid identity"
         ) from error
-    if abs(int(time.time()) - timestamp) > 60:
+    if abs(int(time.time()) - timestamp) > IDENTITY_MAX_AGE_SECONDS:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Expired identity")
     payload = f"{user_id}:{x_taxlens_username}:{x_taxlens_role}:{timestamp}".encode()
     expected = hmac.new(settings.auth_internal_token.encode(), payload, hashlib.sha256).hexdigest()
