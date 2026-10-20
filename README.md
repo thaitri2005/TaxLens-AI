@@ -1,82 +1,109 @@
+<p align="center"><img src="docs/assets/logo.svg" width="72" alt="TaxLens logo"></p>
+
 # TaxLens AI
 
-**Search Vietnamese tax regulations and get answers cited to the exact article.**
+**Search Vietnamese tax law and get answers cited to the exact article.**
 
-TaxLens collects official tax documents from Vietnamese government portals, splits
-them into article- and clause-level passages, and answers questions only from
-those passages. Every answer cites the document, article, clause, and page it
-relies on, quotes the source text, and says so when the indexed documents do not
-answer the question.
+TaxLens collects official tax documents from Vietnamese government sources back to 1990,
+splits them into article- and clause-level passages, and answers questions only from
+those passages. Every answer cites the document, article, clause, and page it relies on,
+quotes the source text, and says so when the indexed documents do not answer the
+question.
 
 **Live development deployment:**
 [taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io](https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io)
-(sign-in required)
+(sign-in required; the first page after idle takes up to a minute)
 
 ![Ask TaxLens: a cited answer to a Vietnamese question](docs/assets/pic3.png)
 
 ## Features
 
-- **Hybrid search**: keyword and semantic search over Vietnamese legal text that
-  tolerates missing diacritics (`hoa don` finds `hóa đơn`) and OCR errors.
-- **Cited answers**: answers in the language of the question, with confirmed facts
-  that are checked against the passages they cite and verbatim source excerpts.
+- **Hybrid search** over Vietnamese legal text that tolerates missing diacritics
+  (`hoa don` finds `hóa đơn`) and OCR errors.
+- **Cited answers** in the language of the question. Confirmed facts are checked against
+  the passages they cite, and citations carry verbatim source excerpts.
 - **Explicit refusals**: out-of-scope questions, missing evidence, superseded-only
-  evidence, and model failures each return a distinct status instead of a guess.
-- **Document library**: every indexed document with its versions, processing
-  status, and passages.
-- **Daily ingestion**: an Airflow pipeline discovers new tax documents, OCRs them,
-  indexes them, and evaluates retrieval quality.
-- **Accounts**: username/password sign-in with admin and user roles.
+  evidence, and model failures each return their own status instead of a guess.
+- **Document library**: corpus statistics at a glance, search by number or title,
+  filters by source, kind (law, decree, circular, …), and legal status, and paged
+  browsing of documents and their passages. English and Vietnamese throughout.
+- **Historical corpus**: about 1,700 tax documents (59,600 passages) from the government
+  portal and the Ministry of Finance database, including pre-Unicode Word files from the
+  1990s.
+- **Automated pipeline**: Airflow collects new documents daily, extracts or OCRs them,
+  indexes them, and evaluates retrieval; maintenance actions handle backfills and
+  repairs, with live progress in the task log.
+- **Accounts** with administrator and user roles.
 
-## How it works
+## Architecture
 
 ```mermaid
 flowchart LR
-    Portal[Government portals] --> Ingest[Discover tax documents<br/>+ download PDFs]
-    Ingest --> OCR[Native text or<br/>Tesseract OCR]
-    OCR --> Chunk[Split by article<br/>and clause]
-    Chunk --> Index[(PostgreSQL full-text<br/>+ pgvector embeddings)]
+    Browser --> Web["Web app<br/>Next.js + Auth.js"]
+    Web -- signed identity --> API["API<br/>FastAPI"]
+    API --> PG[("PostgreSQL<br/>full-text + pgvector")]
+    API --> Blob[(Blob Storage)]
+    API --> LLM[Hugging Face router]
+    Airflow -- "start job, poll progress" --> API
+    API -- "background jobs:<br/>collect · OCR · embed" --> Gov[Government portal]
+    Laptop["Laptop in Vietnam"] -- Ministry of Finance --> PG
+```
+
+- The **web app** is the only public service. It holds the session and signs every
+  request it forwards to the internal-only **API**.
+- The **API** serves search, answers, and the library, and runs long jobs (collection,
+  OCR, embedding) as background subprocesses that **Airflow** starts and polls.
+- **PostgreSQL** stores documents, passages, full-text vectors, and embeddings; **Blob
+  Storage** keeps the source files and extracted text.
+- The **Ministry of Finance** database accepts Vietnamese IPs only, so it is collected
+  from a laptop in Vietnam straight into the Azure database.
+
+Full component, data-model, and job-runner description: [docs/architecture.md](docs/architecture.md).
+
+## How answers are made
+
+```mermaid
+flowchart LR
+    Doc[Official file] --> Text[Word/RTF text,<br/>PDF text layer, or OCR]
+    Text --> Chunk[Split by article<br/>and clause]
+    Chunk --> Index[(Keyword + semantic index)]
     Question --> Search[Hybrid search]
     Index --> Search
-    Search --> Gate{Evidence<br/>gate}
+    Search --> Gate{Evidence gate}
     Gate -->|usable evidence| LLM[Language model]
     Gate -->|none| Refuse[Insufficient evidence]
     LLM --> Check[Validate citations<br/>and grounding]
     Check --> Answer[Cited answer]
 ```
 
-1. **Ingestion**: tax documents are collected from the Ministry of Finance database
-   (with legal status and effective dates) and the government portal's tax category,
-   back to the 1990s, preferring Word files whose text needs no OCR. See
-   [docs/sources.md](docs/sources.md).
-2. **Processing**: text is extracted natively or with Vietnamese Tesseract OCR, then
-   split along the legal structure (*Điều* → *khoản*) into passages of at most
-   1,500 characters, each with article, clause, and page numbers.
-3. **Retrieval**: keyword search ranks passages by how many query terms they
-   contain, ignoring diacritics; semantic search uses `multilingual-e5-small`
-   embeddings; reciprocal rank fusion combines the two.
+1. **Collection**: tax documents from the government portal's tax category and the
+   Ministry of Finance database (with legal status and effective dates), preferring Word
+   files, whose text needs no OCR. See [docs/sources.md](docs/sources.md).
+2. **Processing**: text is read natively (including legacy TCVN3 and Windows Vietnamese
+   encodings) or with Vietnamese Tesseract OCR, then split along the legal structure
+   (*Điều* → *khoản*, or *Phần* / numbered sections in older documents) into passages of
+   at most 1,500 characters with article, clause, and page.
+3. **Retrieval**: diacritic-insensitive keyword ranking and `multilingual-e5-small`
+   semantic search, combined by reciprocal rank fusion.
 4. **Evidence gate**: superseded and unlocated passages are set aside, and clearly
    unrelated questions are refused before any model call.
-5. **Answer**: the model answers from the numbered passages or reports that they do
-   not answer the question; facts not contained in their cited passage are removed.
+5. **Answer**: the model answers from numbered passages or says they do not answer the
+   question; facts not supported by their cited passage are removed.
 
-The full method, thresholds, and measured results are in
-[docs/retrieval.md](docs/retrieval.md). On an article-labelled set of 18 Vietnamese
-questions, hybrid retrieval puts the correct article first for 83% of questions and
-in the top five for all of them.
+Method, thresholds, and measured results: [docs/retrieval.md](docs/retrieval.md).
 
 ## Tech stack
 
 | Area | Technology |
 | --- | --- |
-| Web | Next.js, TypeScript, Auth.js |
-| API | FastAPI, Python 3.12, SQLAlchemy, Alembic |
+| Web | Next.js 15, TypeScript, Auth.js |
+| API | FastAPI, Python 3.12, SQLAlchemy 2, Alembic |
 | Search | PostgreSQL full-text search, pgvector |
 | Embeddings | `intfloat/multilingual-e5-small` on CPU, baked into the API image |
 | Answers | Hugging Face Inference Providers (OpenAI-compatible), LangGraph |
-| OCR | Tesseract (`vie` + `eng`) |
-| Pipelines | Apache Airflow, MLflow (optional) |
-| Cloud | Azure Container Apps, PostgreSQL Flexible Server, Blob Storage, Key Vault, Container Registry |
+| Documents | Tesseract (`vie` + `eng`), pypdf and pypdfium2, olefile (Word 97), RTF and DOCX parsers |
+| Pipelines | Apache Airflow 2.10, MLflow (optional) |
+| Cloud | Azure Container Apps, PostgreSQL Flexible Server, Blob Storage, Key Vault, Container Registry, Log Analytics |
 | Delivery | Terraform, GitHub Actions with Azure OIDC |
 
 ## Run locally
@@ -84,27 +111,22 @@ in the top five for all of them.
 Requires Python 3.12 and Docker Desktop.
 
 ```powershell
-Copy-Item .env.example .env          # then set HF_TOKEN and AUTH_INITIAL_ADMIN_PASSWORD
+Copy-Item .env.example .env          # set AUTH_INITIAL_ADMIN_PASSWORD, and HF_TOKEN for answers
 docker compose up -d postgres api web
 docker compose exec -T api alembic upgrade head
 docker compose exec -T api python scripts/seed.py
 ```
 
-| Service | URL |
-| --- | --- |
-| Web app | http://localhost:3000 |
-| API docs | http://localhost:8000/docs |
-| Airflow (optional) | http://localhost:8080 |
-| MLflow (optional) | http://localhost:5000 |
+Open <http://localhost:3000>; the API's OpenAPI page is at <http://localhost:8000/docs>.
+To build a real corpus, collect, process, and embed a batch:
 
-Start Airflow and MLflow with
-`docker compose --profile airflow --profile llmops up -d`. See
-[docs/local-development.md](docs/local-development.md) for ingesting official
-documents, processing, and embedding.
+```powershell
+docker compose exec -T api python scripts/collect_sources.py --since-days 60 --limit 20
+docker compose exec -T api python scripts/process_corpus.py
+docker compose exec -T api python scripts/embed_corpus.py
+```
 
-### Checks
-
-These are the checks CI runs:
+The checks CI runs:
 
 ```powershell
 python -m ruff check src tests scripts
@@ -112,44 +134,55 @@ python -m mypy src
 python -m pytest
 ```
 
-## Deploy to Azure
+More in [docs/local-development.md](docs/local-development.md).
 
-1. Run **Publish release images** on `main`. It builds the API, web, and Airflow
-   images tagged with the commit SHA.
-2. Run **Plan or deploy Azure infrastructure** with that tag. It shows the
-   Terraform plan and applies it after approval in the `azure-deploy` environment.
-   The API applies database migrations when it starts.
-3. Trigger the `tax_regulation_discovery_daily` DAG in Airflow when chunking has
-   changed; it re-chunks older documents from their stored text and re-embeds them.
+## Deploy and operate
 
-Answers need a Hugging Face token with inference credits. Without them, every
-question returns `PROVIDER_UNAVAILABLE`, and the API logs the provider's error.
-See [docs/deployment.md](docs/deployment.md) and [docs/ci-cd.md](docs/ci-cd.md).
+1. Push to `main`; **CI** runs backend checks, the web build, and Terraform validation.
+2. Run **Publish release images**, which tags the API, web, and Airflow images with the
+   commit SHA.
+3. Run **Plan or deploy Azure infrastructure** with that tag. The API applies database
+   migrations when it starts.
+
+Do not deploy while an Airflow run is in progress; a deploy restarts the API and its jobs.
+Backfills, the Ministry of Finance laptop run, logs, and troubleshooting are in
+[docs/operations.md](docs/operations.md).
+
+Answers need a Hugging Face token with inference credits. Without them, every question
+returns `PROVIDER_UNAVAILABLE`; search and the library still work.
 
 ## Documentation
 
 | Document | Contents |
 | --- | --- |
-| [sources.md](docs/sources.md) | Official sources, what is collected, cost, and backfill |
-| [retrieval.md](docs/retrieval.md) | Chunking, search, evidence gate, answer validation, evaluation results |
-| [local-development.md](docs/local-development.md) | Local API, ingestion, and processing workflow |
-| [authentication.md](docs/authentication.md) | Sign-in, roles, and the web-to-API security contract |
-| [airflow-local.md](docs/airflow-local.md) | The ingestion and maintenance DAGs and how they run API jobs |
-| [llmops-local.md](docs/llmops-local.md) | Evaluation and MLflow tracking |
-| [deployment.md](docs/deployment.md) | Azure topology and operations |
-| [ci-cd.md](docs/ci-cd.md) | GitHub Actions, OIDC, and Terraform state |
+| [architecture.md](docs/architecture.md) | Components, data model, request path, document library, background jobs |
+| [sources.md](docs/sources.md) | Official sources, what is collected, cost |
+| [retrieval.md](docs/retrieval.md) | Extraction, chunking, search, evidence gate, answer validation, results |
+| [evaluation.md](docs/evaluation.md) | Retrieval and answer evaluation, MLflow |
+| [airflow.md](docs/airflow.md) | The daily and maintenance DAGs, reading their logs |
+| [operations.md](docs/operations.md) | Release, backfills, laptop collection, logs, troubleshooting |
+| [deployment.md](docs/deployment.md) | Azure resources, images, configuration, networking |
+| [authentication.md](docs/authentication.md) | Sign-in, roles, and the web-to-API identity contract |
+| [local-development.md](docs/local-development.md) | Local stack, checks, scripts, API overview |
+| [ci-cd.md](docs/ci-cd.md) | GitHub Actions, OIDC, Terraform state |
 | [adr/](docs/adr/) | Architecture decisions |
+| [archive/](docs/archive/) | The original product concept and implementation plan |
 
 ## Limitations
 
 TaxLens is a development-stage research tool, **not legal or tax advice**.
 
-- Answers can only be as complete as the indexed corpus.
-- Most government PDFs are scans, so OCR errors can affect search and quotations.
-- Newly discovered documents are marked `DISCOVERED` until their legal status is
-  recorded; answers flag this.
-- The deployment uses development-scale Azure resources that scale to zero, so the
-  first request after idle is slow.
+- Answers are only as complete as the corpus. Official letters (*công văn*) and
+  provincial documents are not collected.
+- Most government PDFs are scans, so OCR errors affect search and quotations.
+- Government-portal documents have no recorded legal status (`DISCOVERED`) unless the
+  Ministry of Finance record exists; answers flag this.
+- About a third of passages exceed the embedding model's 512-token input, so their
+  semantic vector covers only the start; keyword search sees the full text.
+- New Ministry of Finance documents need a manual laptop run; the government portal is
+  collected daily.
+- Development-scale Azure resources scale to zero, so the first request after idle is
+  slow.
 
 ## Screenshots
 

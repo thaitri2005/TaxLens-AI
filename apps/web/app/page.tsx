@@ -419,7 +419,7 @@ export default function Home() {
 
   return <>
     <header className="topbar">
-      <a className="brand" href="#search"><span className="brand-mark">TL</span><span><strong>TaxLens</strong><small>{copy.brandTagline}</small></span></a>
+      <a className="brand" href="#search"><img className="brand-mark" src="/logo.svg" alt="" width={34} height={34} /><span><strong>TaxLens</strong><small>{copy.brandTagline}</small></span></a>
       <div className="topbar-actions">
         <div className="language-toggle" aria-label="Language">
           <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>

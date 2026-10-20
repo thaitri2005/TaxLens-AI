@@ -6,11 +6,11 @@ Vietnamese questions (four typed without diacritics) labelled with the document
 and article that answers them, plus two out-of-corpus questions that are skipped
 by the ranking metrics. Its labels were checked against the article headings of
 the five curated tax documents; see `docs/retrieval.md` for measured results.
-`tax_retrieval_current.json` is an eight-case current-corpus smoke set whose
-document targets were checked against the live indexed metadata. It is not a
-human- or legal-reviewed quality benchmark. The file is used by scheduled
-evaluation. `tax_retrieval.json` is retained as a historical
-coverage regression set whose expected documents are not currently indexed.
+`tax_retrieval_current.json` (eight cases) and `tax_retrieval.json` (four cases) are
+older document-level smoke sets, kept for regression; they are not reviewed benchmarks.
+`qa.json` holds five questions for `scripts/evaluate_qa.py`. The labels were made when the
+corpus held a handful of documents; relabelling against the full corpus is the next step
+(`docs/evaluation.md`).
 
 A retrieval case should contain:
 
@@ -36,13 +36,11 @@ Before treating a score as a ranking result, inspect the report's
 embedded expected documents is `not_evaluable`, even when the search returns
 other documents.
 
-Run the default current-corpus multi-K retrieval evaluation with:
+Run the default evaluation with:
 
 ```powershell
 python scripts/evaluate_tax_retrieval.py
 ```
-
-Use `--k 5` for the legacy single-K behavior.
 
 Evaluate a retrieval baseline explicitly with `--mode keyword`, `--mode
 semantic`, or `--mode hybrid`. Run the same dataset and corpus snapshot for

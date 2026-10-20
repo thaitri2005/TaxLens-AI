@@ -1,188 +1,88 @@
-# Azure deployment and operations
+# Azure deployment
 
-The Azure development deployment runs the existing separated services without
-changing the domain or retrieval contracts. The rollout was deliberately
-phased: foundation, database, secrets, Container Apps, Airflow, and protected
-CI/CD were validated independently before image promotion.
+The development environment runs in resource group `taxlens-dev-rg` (East Asia), managed
+by Terraform in `infra/terraform`. How the parts fit together is in
+[architecture.md](architecture.md); day-to-day procedures are in
+[operations.md](operations.md).
 
-## Target topology
+## Resources
 
-```text
-Azure Container Registry
-        │
-        ├── TaxLens web Container App
-        ├── TaxLens API Container App
-        └── Airflow scheduler/webserver Container Apps
+| Resource | Name | Size and scaling |
+| --- | --- | --- |
+| Web Container App | `taxlens-dev-web` | 0.25 vCPU, 0–1 replicas, public HTTPS |
+| API Container App | `taxlens-dev-api` | 1 vCPU / 2 GiB, 0–1 replicas, internal only |
+| Airflow scheduler | `taxlens-dev-airflow-scheduler` | 0.5 vCPU / 1 GiB, 1 replica |
+| Airflow webserver | `taxlens-dev-airflow-web` | 0.5 vCPU / 1 GiB, 0–1 replicas |
+| PostgreSQL Flexible Server | `taxlens-dev-pg` | `B_Standard_B1ms`, 32 GB, `vector` extension; databases `taxlens` and `airflow` |
+| Storage account | `taxlensdevartifacts` | Blob containers `raw-documents`, `normalized-text`, `terraform-state`; file share `airflow-logs` |
+| Container Registry | `taxlensdevacr` | Basic |
+| Key Vault | `taxlensdevkv` | Application secrets, read by a user-assigned managed identity |
+| Log Analytics | — | Console logs of all Container Apps |
 
-Azure Database for PostgreSQL Flexible Server + pgvector
-Azure Blob Storage (raw and normalized artifacts)
-Azure Key Vault / managed identity (secrets)
-Log Analytics (container logs)
-```
+Scale to zero keeps the environment cheap; the cost is a cold start of up to a minute
+for the first request after idle. Only the Airflow scheduler is always on.
 
-MLflow is used for evaluation and is not required in the normal production
-request path. Airflow remains a required scheduled-ingestion
-service; its metadata database must be durable and its DAG image must contain
-the DAG files rather than relying on a local volume mount.
+## Images
 
-## Storage contract
+All images are tagged with the commit SHA and never reused.
 
-The application uses `ObjectStorage`, implemented by:
+- **API** (`apps/api/Dockerfile`): Python 3.12, Tesseract with `vie` and `eng`, the pinned
+  `multilingual-e5-small` model (offline at runtime), the application, the job scripts,
+  and the evaluation datasets. Dependencies are installed from
+  `requirements/api-runtime.txt` before the source is copied, so a code change does not
+  reinstall PyTorch. `OMP_THREAD_LIMIT=1` keeps Tesseract from contending for the single
+  vCPU.
+- **Web** (`apps/web/Dockerfile`): the Next.js app, built with the API's internal
+  address (`http://taxlens-dev-api`).
+- **Airflow** (`airflow/Dockerfile`): Airflow 2.10 with the DAG files baked in.
 
-- `LocalObjectStorage` for local Compose and tests;
-- `AzureBlobStorage` when `OBJECT_STORAGE_BACKEND=azure_blob`.
+Build and publish them with the **Publish release images** workflow
+([ci-cd.md](ci-cd.md)), not by hand.
 
-Production configuration requires `AZURE_STORAGE_ACCOUNT_URL` with managed
-identity. The raw and normalized prefixes map to the Terraform-created
-`raw-documents` and `normalized-text` containers. Raw PDFs and normalized text
-must not remain on the API container filesystem.
+## Startup and migrations
 
-The development PostgreSQL server uses Azure's `0.0.0.0` firewall sentinel so
-Azure-hosted Container Apps can reach it without creating one firewall rule per
-rotating ACA egress IP. This is a development compromise; production should
-use private networking or a controlled network boundary.
+The API runs as a single replica and applies pending Alembic migrations itself, in a
+background thread after uvicorn starts: `/health` answers the liveness probe at once and
+`/ready` returns 503 until the schema is current. A failed migration keeps the revision
+unready and logs `migrations_failed`.
 
-## Image contract
+## Configuration
 
-The API image always contains Tesseract with `eng` and `vie` language data, the
-pinned `multilingual-e5-small` model, the FastAPI application with bounded job
-scripts, and the versioned evaluation datasets under `data/evaluation`. The
-last item is required because Airflow invokes retrieval evaluation inside the
-API image rather than mounting the repository at runtime.
+Secrets come from Key Vault through the managed identity; everything else is a plain
+environment variable set by Terraform.
 
-The API Dockerfile installs the cached runtime dependency manifest from
-`requirements/api-runtime.txt` before copying application source. This keeps
-source edits from reinstalling PyTorch, Azure SDKs, or the embedding stack.
-Build the production image with:
+| Setting | Purpose |
+| --- | --- |
+| `DATABASE_*`, `DATABASE_SSL_MODE=require` | PostgreSQL connection |
+| `OBJECT_STORAGE_BACKEND=azure_blob`, `AZURE_STORAGE_ACCOUNT_URL`, `AZURE_STORAGE_CONTAINER`, `AZURE_STORAGE_NORMALIZED_CONTAINER` | Blob Storage through the managed identity |
+| `HF_TOKEN` (secret), `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, `HF_CHAT_ROUTING_POLICY` | Answer model. Any OpenAI-compatible endpoint works; set an empty routing policy for non-Hugging Face endpoints. |
+| `AUTH_INTERNAL_TOKEN` (secret), `NEXTAUTH_SECRET` (secret) | Web-to-API identity signing and Auth.js sessions |
+| `AIRFLOW_INTERNAL_TOKEN` (secret) | Airflow-to-API job calls |
+| `TAXLENS_DAILY_SOURCE_LIMIT`, `TAXLENS_PROCESS_BATCH_SIZE`, `TAXLENS_PROCESS_MAX_BATCHES` | Daily DAG volumes |
+| `OCR_*`, `EMBEDDING_*`, `QA_*` | Processing and retrieval settings; defaults in `src/taxlens/config.py` |
 
-```powershell
-docker build -f apps/api/Dockerfile -t taxlens-api:cloud .
-```
+The Hugging Face router returns HTTP 402 when the account has no inference credits; every
+answer is then `PROVIDER_UNAVAILABLE`, and the API logs
+`chat_provider_error status=402`.
 
-The local Compose build keeps `PIP_EXTRAS=dev` by default.
+Terraform variables that hold secrets (`postgres_admin_password`, `hf_token`,
+`auth_internal_token`, `nextauth_secret`, `airflow_admin_password`,
+`airflow_internal_token`) come from GitHub secrets in the deploy workflow, or from an
+ignored `terraform.tfvars` locally. See [infra/terraform/README.md](../infra/terraform/README.md).
 
-## Image preparation and release
+## Networking
 
-Container Apps pulls immutable image tags from the Basic ACR. Use the protected
-GitHub Actions release workflow rather than manually building production
-images:
+The API has internal ingress only; the web app reaches it over the private Container
+Apps network, and only the web app is public. PostgreSQL is public-network enabled with
+Azure's `0.0.0.0` "Azure services" rule, because Container Apps egress IPs rotate, plus an
+optional developer IP (`postgres_allowed_ip`) for laptop runs. This is a development
+compromise.
 
-1. Run `release-images.yml` on `main`.
-2. Copy the commit-SHA image tag from the workflow summary.
-3. Run `deploy.yml` with `apply=false` and review the plan.
-4. Run it again with `apply=true` only after approval.
+## Before production
 
-The web image keeps `http://api:8000` as its local default and uses the
-Container Apps internal API name on ingress port 80 in the cloud image. The
-API app is internal-only, so insecure HTTP is limited to the private
-Container Apps environment; public traffic still reaches the web app over
-HTTPS.
-
-## Required deployment jobs
-
-1. Deploy or update API and web revisions. The API applies pending Alembic
-   migrations in a background thread after it starts (single replica): `/health`
-   answers the liveness probe at once, and `/ready` returns 503 until the schema is
-   current, so there is no separate migration step. A failed migration keeps the
-   revision unready and logs `migrations_failed`.
-2. Trigger the `tax_regulation_discovery_daily` DAG once so documents processed
-   by an older chunker version are re-chunked and re-embedded.
-3. Run `/health` and `/ready` smoke checks.
-4. Verify Blob round-trip, search, and Q&A citations.
-5. Verify the separately deployed Airflow scheduler and webserver.
-
-## M6.4 operational hardening
-
-The core cloud slice remains intentionally low-cost: both Container Apps use
-scale-to-zero with a maximum of one replica, while PostgreSQL and Blob Storage
-hold durable state. Container Apps send application logs to the shared Log
-Analytics workspace. API request and Airflow job logs include request/job IDs,
-status, duration, and failure events without logging passwords, tokens, query
-contents, or document text.
-
-For each release, verify:
-
-```powershell
-$web = "https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io"
-Invoke-WebRequest "$web/health" -UseBasicParsing
-Invoke-WebRequest "$web/login" -UseBasicParsing
-Invoke-WebRequest "$web/api/auth/session" -UseBasicParsing
-```
-
-Then authenticate through the web UI and verify one search, one question, one
-document detail view, and one administrator action. Use the Container Apps log
-stream or Log Analytics to confirm `request_completed`, `job_started`, and
-`job_completed` events when an internal job is run.
-
-The current PostgreSQL firewall allows Azure services and an optional local
-developer IP. This is acceptable for the student development environment but
-is not the final production network boundary. Private networking is deferred
-until a dedicated VNet/private endpoint budget is approved; removing the local
-rule and the Azure-services sentinel is a required production checklist item.
-
-Use immutable image tags (for example, a Git SHA) for production releases.
-Development revisions use immutable commit-SHA tags. Do not reuse a tag for
-different image contents; publish a new tag for every release.
-
-## M7 Airflow deployment
-
-Airflow is a separately scaled deployment. It uses a dedicated
-`airflow` database on the existing PostgreSQL Flexible Server, a scheduler
-Container App with one replica, and a webserver Container App that can scale to
-zero. The scheduler is the component that must remain running for daily runs;
-the webserver can be started only when the UI is needed. The DAG image contains
-the DAG files, so cloud deployment does not depend on a local volume mount.
-
-Before enabling it, add these ignored Terraform variables to
-`infra/terraform/terraform.tfvars`:
-
-```hcl
-airflow_enabled              = true
-airflow_web_external_enabled = true
-airflow_admin_password       = "<strong-local-only-password>"
-airflow_internal_token       = "<strong-random-local-only-token>"
-airflow_image                = "taxlensdevacr.azurecr.io/taxlens-airflow:<immutable-tag>"
-```
-
-The API receives the same internal token through Key Vault, while the DAG
-receives it through a separate secret reference. Airflow never receives the HF
-token and does not access PostgreSQL application tables directly; it calls the
-allowlisted internal API job endpoints in sequence. `airflow_enabled` remains
-false by default in the Terraform module, but it is explicitly enabled in the
-current development environment. The deployed DAG is paused by default; run
-it manually from the Airflow UI only after reviewing the smoke-run plan.
-
-## Cloud corpus bootstrap
-
-Use the API image as a one-off worker for migrations, ingestion, processing, and
-embedding. For long OCR jobs, run the worker locally with Azure PostgreSQL and
-Blob credentials rather than holding an ACA exec websocket open. The workflow
-is idempotent and stores all durable output in Azure.
-
-After the first official import, run `scripts/repair_document_metadata.py`
-against the curated manifest so document titles, issuing agencies, issue dates,
-and official portal links are not lost when a source requires a direct PDF URL.
-
-Q&A depends on the Hugging Face router accepting the configured token. Provider
-failures are logged as `chat_provider_error status=<code> body=<message>`; a
-`402` means the account has no inference credits, and every answer then returns
-`PROVIDER_UNAVAILABLE`. Any OpenAI-compatible endpoint can be used instead by
-setting `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, and an empty
-`HF_CHAT_ROUTING_POLICY`.
-
-Internal jobs run in the background on the API, and Airflow polls their status,
-so no HTTP request approaches the 240-second Container Apps ingress limit even
-when OCR of one scan takes many minutes (see `docs/airflow-local.md`). OCR shares
-the API's single vCPU with user requests, so a large re-OCR slows the app while it
-runs; move processing to a Container Apps Job if that becomes a problem.
-
-Failed document versions are excluded from later scheduled runs. After fixing the
-cause, run the `taxlens_corpus_maintenance` DAG with `retry_failed_documents`.
-
-## Required production settings
-
-Production must provide non-default values for database credentials,
-`HF_TOKEN`, `DATABASE_SSL_MODE=require`, `AIRFLOW_INTERNAL_TOKEN`, storage
-configuration, and web/API service URLs. Container Apps should inject the
-Key Vault secrets through the managed identity; local `.env` defaults must not
-be used as production secrets.
+- Private networking (VNet integration, private endpoints for PostgreSQL and Storage);
+  remove the Azure-services and developer firewall rules.
+- More than one API replica, which needs a shared rate limiter (the current one is in
+  memory) and moving jobs out of the API process.
+- Processing in a Container Apps Job so OCR never shares CPU with requests.
+- A paid inference endpoint with credits and monitoring.

@@ -1,208 +1,107 @@
-# Local Development
+# Local development
 
 ## Prerequisites
 
 - Python 3.12
 - Docker Desktop with Docker Compose
+- Node.js 20, only to run the web app outside Docker
 
-## Start the application
-
-1. Copy `.env.example` to `.env`.
-2. Run `docker compose up --build`.
-3. Run `docker compose exec api alembic upgrade head`.
-4. Open `http://localhost:8000/health`.
-
-## Run quality checks locally
-
-Install the project with `python -m pip install -e ".[dev]"`, then run:
+## Start the stack
 
 ```powershell
-$env:PYTHONPATH = "src"
-pytest
-ruff check .
-mypy src
+Copy-Item .env.example .env       # set AUTH_INITIAL_ADMIN_PASSWORD; HF_TOKEN for answers
+docker compose up -d postgres api web
+docker compose exec -T api alembic upgrade head
+docker compose exec -T api python scripts/seed.py
 ```
 
-The default Compose profile runs PostgreSQL/pgvector, the API, and the web
-service. Airflow is a required scheduled-ingestion component and runs through
-the separate `airflow` profile. MLflow and RAGAS remain evaluation-only
-services, while monitoring and additional workers are later operational
-additions. Airflow calls authenticated allowlisted API jobs and does not need
-access to the Docker socket.
+`seed.py` loads the sample documents in `data/seed` and creates the administrator from
+`AUTH_INITIAL_ADMIN_*`. It is safe to run again.
 
-The optional `llmops` profile starts MLflow on `http://localhost:5000`; it is
-only needed when recording evaluation experiments.
+| Service | URL |
+| --- | --- |
+| Web app | <http://localhost:3000> |
+| API and its OpenAPI docs | <http://localhost:8000/docs> |
+| Airflow (profile `airflow`) | <http://localhost:8080> |
+| MLflow (profile `llmops`) | <http://localhost:5000> |
 
-## Run scheduled ingestion locally
+Locally, documents and extracted text are stored under `data/local`
+(`OBJECT_STORAGE_BACKEND=local`). The API container includes Tesseract and the embedding
+model; a host Python environment usually has neither, which is why the commands below run
+inside the container.
+
+## Checks
+
+The checks CI runs:
+
+```powershell
+python -m pip install -e ".[dev]"
+python -m ruff check src tests scripts
+python -m mypy src
+python -m pytest
+cd apps/web; npm ci; npm run build
+```
+
+CI type-checks against the newest SQLAlchemy 2.x (2.1 at the time of writing), whose
+`Select` typing differs from 2.0. Type annotations on SQLAlchemy statements that must
+satisfy both are written as `Select[Any]`.
+
+## Build a corpus
+
+Collect, process, and embed a small batch from the government portal:
+
+```powershell
+docker compose exec -T api python scripts/collect_sources.py --since-days 60 --limit 20
+docker compose exec -T api python scripts/process_corpus.py
+docker compose exec -T api python scripts/embed_corpus.py
+```
+
+Each step skips work already done, so the commands can be rerun at any time.
+
+## Scripts
+
+| Script | Purpose |
+| --- | --- |
+| `collect_sources.py` | Lists tax documents from `--source government` (default), `mof`, or `all`, and downloads new ones. `--since-days` or `--from-year` sets the window, `--limit` caps downloads, `--dry-run` only counts. See [sources.md](sources.md). |
+| `process_corpus.py` | Extracts text (native or OCR) and chunks pending versions. `--rechunk-outdated` re-chunks from stored text after a chunker change; `--retry-failed` retries failed versions; `--reocr` OCRs again; `--all` reprocesses everything. |
+| `embed_corpus.py` | Embeds every passage without a current embedding, 500 at a time, printing progress. |
+| `evaluate_tax_retrieval.py` | Runs the labelled retrieval evaluation and stores the report ([evaluation.md](evaluation.md)). |
+| `evaluate_retrieval.py` | Prints ranked results for one ad hoc `--query`. |
+| `evaluate_qa.py` | Runs the cheap, no-judge Q&A evaluation. |
+| `benchmark_ocr.py` | Word error rate of OCR settings against a born-digital PDF. |
+| `prune_non_tax_documents.py` | Lists, or with `--apply` deletes, documents whose titles are not about tax. |
+| `seed.py` | Sample documents and the initial administrator. |
+| `ingest_manifest.py`, `repair_document_metadata.py` | Ingest or repair the hand-picked documents in `data/corpus/tax_documents.json`. |
+| `ingest_sources.py`, `discover_sources.py` | Earlier single-page connectors, kept for ingesting one explicit official URL. `collect_sources.py` replaces them for collection. |
+
+## Airflow and MLflow
 
 ```powershell
 docker compose --profile airflow up -d airflow-postgres airflow-init airflow-scheduler airflow-webserver
+docker compose --profile llmops up -d mlflow
 ```
 
-Open `http://localhost:8080` and sign in with the Airflow credentials from
-`.env`. The DAG is `tax_regulation_discovery_daily`; it discovers sources,
-processes pending documents, and embeds pending chunks in that order.
+The DAGs call the local API's internal job endpoints exactly as in Azure; see
+[airflow.md](airflow.md).
 
-## Seed, process, and search the sample corpus
+## Answers
 
-```powershell
-docker compose exec -T api alembic upgrade head
-docker compose exec -T api python scripts/seed.py
-docker compose exec -T api python scripts/process_corpus.py
-docker compose exec -T api python scripts/embed_corpus.py
-Invoke-RestMethod 'http://localhost:8000/search?q=invoice&legal_status=EFFECTIVE' |
-  ConvertTo-Json -Depth 5
-```
+Q&A needs `HF_TOKEN` with Hugging Face inference credits, or any OpenAI-compatible
+endpoint through `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, and an empty
+`HF_CHAT_ROUTING_POLICY`. Without one, search and the library work and every question
+returns `PROVIDER_UNAVAILABLE`.
 
-After changing the chunker, re-chunk processed documents from their stored text
-(no OCR) with `python scripts/process_corpus.py --rechunk-outdated`, then run
-`python scripts/embed_corpus.py`.
+## API overview
 
-The search endpoint supports `document_number`, `document_type`, `legal_status`,
-`issuing_agency`, `effective_from`, `effective_to`, and `limit` filters.
+All endpoints except `/health`, `/ready`, and the internal ones require the signed
+identity the web proxy adds ([authentication.md](authentication.md)); use the web app,
+or the OpenAPI page with a test identity, to call them.
 
-# Hugging Face inference
-
-For the intelligence-workflow milestone, set `HF_TOKEN=hf_...` in your local `.env` file. Do not commit it or place it in `.env.example`. `HF_CHAT_MODEL` and `HF_CHAT_ROUTING_POLICY` select the model and routed provider policy independently, so changing either never requires a code change.
-
-The next cited-Q&A endpoint will call the chat provider only when query planning and evidence-sufficiency checks pass. Queries with no evidence, conflicting document statuses, or missing structural locators return an evidence-only/unsupported response instead.
-
-## Discover official sources
-
-Discovery is read-only and does not download or ingest documents:
-
-```powershell
-python scripts/discover_sources.py --source mof
-python scripts/discover_sources.py --source government
-```
-
-To persist a bounded batch of discovered official PDFs, use an explicit limit
-and catalog-page budget:
-
-```powershell
-python scripts/ingest_sources.py --source government --limit 100 --pages 10 --download
-python scripts/process_corpus.py
-python scripts/embed_corpus.py
-```
-
-The command is read-only unless `--download` is provided. Downloaded PDFs are
-stored under local object storage and remain idempotent by content hash. The
-connector follows bounded pagination links when a source exposes them; keep the
-page budget and document limit explicit so a daily run cannot accidentally crawl
-an entire national catalog. The Ministry of Finance portal currently renders
-its catalog dynamically, so its connector is retained for safe official URL
-fetching while catalog discovery may still need a portal-specific endpoint or
-export in a later iteration.
-
-For a repeatable development corpus, ingest a small Government Portal batch:
-
-```powershell
-docker compose exec -T api python scripts/ingest_sources.py --source government --limit 4 --download
-docker compose exec -T api python scripts/process_corpus.py
-docker compose exec -T api python scripts/embed_corpus.py
-```
-
-This command creates a bounded development corpus. It is not a full catalog
-crawl.
-
-Some official PDFs are image-only scans. The processor does not create empty
-search chunks for these files. The API first tries native PDF extraction and
-then uses local Tesseract with Vietnamese and English language data when the
-native text is empty or unusable. If Tesseract is unavailable or still finds
-no usable text, it records an `OCR_REQUIRED` processing failure.
-
-The curated tax manifest is the preferred development workflow:
-
-```powershell
-docker compose exec -T api python scripts/ingest_manifest.py --download
-docker compose exec -T api python scripts/process_corpus.py
-docker compose exec -T api python scripts/embed_corpus.py
-```
-
-Edit `data/corpus/tax_documents.json` to add or remove explicitly selected
-official tax documents. Keep the manifest small and topical during development.
-
-For a portal with dynamic catalog rendering, ingest an explicitly selected
-official PDF instead:
-
-```powershell
-docker compose exec -T api python scripts/ingest_sources.py --source mof `
-  --url https://vbpq.mof.gov.vn/DKC.FileManagement/FileStorage/File/247067 `
-  --document-number 11/2024/TT-BTC `
-  --title "Quy định mức thu, chế độ thu, nộp, quản lý và sử dụng phí khai thác và sử dụng tài liệu địa chất, khoáng sản" `
-  --issue-date 2024-02-05 --download
-```
-
-The explicit URL path is also bounded and idempotent.
-
-Processing now extracts basic document type, issuing agency, and issue date
-when the official catalog exposes them. PDF chunks retain page start/end
-metadata, and extraction failures are recorded on the processing job so one
-bad document does not terminate the whole batch.
-
-After processing, generate embeddings and run retrieval smoke checks:
-
-```powershell
-python scripts/embed_corpus.py
-python scripts/evaluate_retrieval.py --query "thuế suất giá trị gia tăng"
-python scripts/evaluate_tax_retrieval.py
-```
-
-The evaluation output includes fused ranking scores and stored official source
-URLs so retrieval quality and provenance can be inspected together.
-Document-level evaluation de-duplicates chunks from the same document while
-preserving their first-ranked order.
-
-The retrieval report is also persisted to the configured object store. The
-latest report is available through the authenticated API endpoint
-`GET /evaluation/retrieval/latest`, while historical reports are retained under
-`evaluation/retrieval/runs/`.
-
-The default current-corpus smoke set contains eight title-verified candidate
-queries covering documents currently indexed. The cases are not human- or
-legal-reviewed benchmarks. The original four-query file remains as a historical
-coverage regression set. The runner reports `Hit@K`, Precision@K,
-Recall@K, MRR, and nDCG@K at K=1, 3, 5, and 10. Each case is marked as fully
-covered, partially covered, or not
-covered based on whether its expected documents are embedded. The report also
-has an explicit `evaluation_status`, dataset hash, corpus fingerprint, and a
-coverage-adjusted summary for fully covered cases. A run with no covered
-expected document is `not_evaluable`, so missing corpus documents are not
-confused with ranking failures.
-
-Treat these numbers as a regression baseline. Expand the evaluation set and
-corpus before using the results to assess ranking quality. See
-`data/evaluation/README.md` for the label contract.
-
-Search accepts `source_name`, `document_type`, `legal_status`, and
-`issuing_agency` filters. The document library accepts the same source,
-document-type, and agency filters, and returns the stored source name with each
-document summary.
-
-The web search view presents a deterministic, query-focused preview capped at
-260 characters instead of rendering the full indexed passage. Full passage
-text is available in the document view, while official source links remain the
-preferred way to read the complete regulation.
-Each result also shows the stored document title and article heading. The
-snippet is not generated by an LLM: it selects the most query-relevant sentence
-from the indexed passage to keep latency and inference cost predictable.
-
-## Web workspace
-
-The web client runs as a separate Next.js container and proxies
-browser requests to the API. Start it with:
-
-```powershell
-docker compose up --build -d web
-```
-
-Open `http://localhost:3000`. The workspace includes search, cited Q&A, and
-document browsing. The web container can
-be rebuilt independently of the slower API image.
-
-Selecting a document opens its indexed detail view, including stored versions,
-article headings, passage text, and page ranges when available.
-Each version also reports its latest processing status, error code when
-available, and indexed chunk count. `OCR_REQUIRED` indicates that native
-extraction and the local Tesseract fallback both failed or that OCR is disabled.
-```
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /search?q=…&mode=hybrid` | Ranked passages. Filters: `document_number`, `document_type`, `source_name`, `legal_status`, `issuing_agency`, `effective_from`, `effective_to`. |
+| `POST /questions` | Cited answer to `{"question": "…"}`. |
+| `GET /documents/overview`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/chunks` | Document library ([architecture.md](architecture.md#document-library)). |
+| `GET /evaluation/retrieval/latest` | The latest retrieval evaluation report. |
+| `/admin/*` | Account management (administrators). |
+| `/internal/airflow/*` | Background jobs for Airflow, with `X-TaxLens-Internal-Token`. |

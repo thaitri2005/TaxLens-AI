@@ -1,6 +1,6 @@
 # Retrieval and cited answers
 
-This document describes how TaxLens turns official PDFs into passages, how it finds
+This document describes how TaxLens turns official documents into passages, how it finds
 the passages for a question, and how it decides whether an answer can be given and
 cited. Every step is deterministic except the language model call, and every threshold
 named here is a setting.
@@ -100,7 +100,7 @@ passages, so chunking follows the legal structure:
    inside. Word and text documents have no page numbers, so the section heading is
    their locator.
 
-`CHUNKER_VERSION` is recorded in the processing job's stage (`CHUNKED:v2`). When the
+`CHUNKER_VERSION` (currently 3) is recorded in the processing job's stage (`CHUNKED:v3`). When the
 chunker changes, the version is bumped and the daily DAG re-chunks every older version
 from its stored normalized text (no repeated OCR).
 
@@ -131,7 +131,8 @@ For a query:
 ## 4. Semantic retrieval and fusion
 
 Passages are embedded with `intfloat/multilingual-e5-small` (pinned revision, CPU, baked
-into the API image) using the `passage:` / `query:` prefixes. Hybrid search takes 50
+into the API image) using the `passage:` / `query:` prefixes. The embedding job pages
+through passages 500 at a time and embeds only those whose text hash changed. Hybrid search takes 50
 candidates from each method and combines them with reciprocal rank fusion (k = 60), which
 uses ranks only, so the two score scales never need calibrating. If the embedding model
 cannot be loaded, search and Q&A fall back to keyword retrieval instead of failing.
@@ -207,8 +208,11 @@ The scheduled evaluation job (`scripts/evaluate_tax_retrieval.py`) reports
   articles, and lost diacritics reduce exact-match ranking.
 - Discovered documents have status `DISCOVERED` until someone records whether they are in
   force; answers say so.
-- The government portal's pagination is an ASP.NET post-back, so discovery reads the
-  newest 50 listings per run. That covers daily publication, but older documents must be
-  added through the curated manifest.
+- The embedding model reads at most 512 tokens. Dense Vietnamese passages near the
+  1,500-character cap and OCR'd tables exceed it (about a third of passages), so their
+  vector covers only the beginning; keyword search still sees the whole passage. Lowering
+  the cap would need re-chunking and re-embedding the corpus.
+- The evaluation results above predate the full corpus; with about 1,700 documents
+  competing, they should be measured again ([evaluation.md](evaluation.md)).
 - Grounding is lexical: a fact that reuses the passage's words in a misleading order would
   pass. The excerpts let a reader check the source directly.

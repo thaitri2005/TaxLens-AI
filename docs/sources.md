@@ -18,6 +18,11 @@ As of October 2026 the ministry selection returns 928 in-force normative tax doc
 (858 circulars, 62 joint circulars, plus decrees, a law, and consolidated texts): 484 Word
 files and 444 PDFs. The portal's tax category holds about 1,500 documents from 1988.
 
+**Corpus in October 2026**: about 1,700 documents and 59,600 passages, all embedded:
+about 790 from the ministry database and the rest from the portal's tax category, from
+1990 onwards. The portal backfill had 18 documents left to collect, plus 3 whose files
+the portal no longer serves.
+
 ## What is collected
 
 - **Normative documents only.** From the ministry database: circulars, joint circulars,
@@ -74,8 +79,7 @@ In Azure:
 - The `taxlens_corpus_maintenance` DAG has `backfill_dry_run` and `backfill_corpus`
   actions (`from_year`, `limit`, `include_expired`). `backfill_corpus` collects up to
   `limit` documents, then processes and embeds them; run it until the dry run reports
-  nothing remaining. Listing the full ministry selection takes about ten minutes because
-  its API is slow with large pages.
+  nothing remaining. Listing the portal from 1990 takes five to seven minutes.
 - A portal year whose search keeps timing out (three attempts) is skipped with a warning
   and listed again by the next run; only a run where every year fails stops collection.
 - The task log shows the job's progress lines as they are written (every 20 seconds),
@@ -89,38 +93,25 @@ and the government portal is reachable from Azure. The site appears to accept Vi
 IP addresses only, and Azure has no region in Vietnam. Airflow therefore collects from
 the government portal only (daily and `backfill_corpus`).
 
-Ministry collection runs from a machine in Vietnam against the Azure database and Blob
-Storage; it only lists and downloads, so it needs no OCR or embedding model:
+Ministry collection therefore runs from a machine in Vietnam, writing straight to the
+Azure database and Blob Storage; it only lists and downloads, so it needs no OCR or
+embedding model. The `process_and_embed` maintenance action then does the rest in Azure.
+The step-by-step procedure (firewall rule, settings, commands) is in
+[operations.md](operations.md#ministry-of-finance-from-a-laptop-in-vietnam), and the
+decision in [ADR 0003](adr/0003-ministry-relay.md).
 
-```powershell
-pip install -e ".[cloud]"
-$env:DATABASE_HOST = "taxlens-dev-pg.postgres.database.azure.com"
-$env:DATABASE_USER = "taxlensadmin"
-$env:DATABASE_PASSWORD = "<PostgreSQL admin password>"
-$env:DATABASE_SSL_MODE = "require"
-$env:OBJECT_STORAGE_BACKEND = "azure_blob"
-$env:AZURE_STORAGE_CONNECTION_STRING = "<artifacts storage connection string>"
-python scripts/collect_sources.py --source mof --from-year 1990 --dry-run
-python scripts/collect_sources.py --source mof --from-year 1990 --limit 300
-```
-
-The run prints timestamped progress, so a quiet console never means "maybe stuck":
+`collect_sources.py` prints timestamped progress, so a quiet console never means "maybe
+stuck":
 
 ```text
 13:44:15 Ministry of Finance tax department: page 1/4 (100 of 335 records)
 13:54:02 Ministry of Finance: kept 928 of 2700 records (normative documents not expired ...)
 13:54:03 412 new document(s) to collect; 516 already in the corpus
 13:54:05 [1/300] 111/2013/TT-BTC | NEW_DOCUMENT | msword 152 KB | 14m10s left
-13:54:07 Ministry of Finance request failed (ConnectTimeout); attempt 1/4, retrying in 2s
 ```
 
-Listing the full ministry selection takes about ten minutes (its API is slow), and each
-download takes a few seconds.
-
-The PostgreSQL firewall must allow the machine's public IP (`postgres_allowed_ip` in
-Terraform). Then run the `taxlens_corpus_maintenance` DAG with `process_and_embed` so OCR
-and embedding happen in Azure. For unattended collection, the alternative is a small
-proxy hosted in Vietnam.
+Listing the full ministry selection takes about ten minutes (its API is slow with large
+pages) and is cached for 24 hours; each download takes a second or two.
 
 ## Not used
 

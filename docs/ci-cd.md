@@ -7,7 +7,8 @@ Azure image releases.
 
 `.github/workflows/ci.yml` runs on pull requests and pushes to `main`:
 
-- Ruff, MyPy, and Pytest for the backend;
+- Ruff, MyPy, and Pytest for the backend (MyPy resolves the newest SQLAlchemy 2.x, so
+  statement types must satisfy both 2.0 and 2.1);
 - a production Next.js build;
 - Terraform provider initialization, formatting, and validation without a
   backend or cloud mutation.
@@ -17,7 +18,7 @@ They never contain production authentication or inference secrets.
 
 ## Image releases
 
-`.github/workflows/release-images.yml` is manually triggered and protected by
+`.github/workflows/release-images.yml` (**Publish release images**) is manually triggered and protected by
 the `azure-release` GitHub environment. It uses Azure OIDC and requires these
 repository/environment secrets:
 
@@ -31,13 +32,10 @@ the reviewed Terraform update.
 
 ## Infrastructure apply boundary
 
-Terraform state now uses the private Azure Blob backend configured in
-`infra/terraform/versions.tf`. The one-time migration must be completed from a
-local authenticated shell with `terraform init -migrate-state`; answer `yes`
-when Terraform asks to copy the existing local state. Do not delete the local
-state until the remote state can be listed and a read-only plan succeeds.
+Terraform state is in the private Azure Blob backend configured in
+`infra/terraform/versions.tf`.
 
-`.github/workflows/deploy.yml` accepts an already-published image tag, creates
+`.github/workflows/deploy.yml` (**Plan or deploy Azure infrastructure**) accepts an already-published image tag, creates
 temporary Terraform variables from GitHub secrets, initializes the remote
 backend, and produces a reviewable plan artifact. Set `apply` to `true` only
 when the plan is approved; the apply job is protected by the `azure-deploy`

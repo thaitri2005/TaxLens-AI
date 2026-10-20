@@ -1,83 +1,51 @@
 # TaxLens Azure infrastructure
 
-This directory contains the applied M6/M7 Terraform infrastructure for a low-cost
-development environment. It currently manages:
+Terraform for the development environment in `taxlens-dev-rg`. What it creates and how
+it is configured is described in [docs/deployment.md](../../docs/deployment.md).
 
-- resource group;
-- Log Analytics workspace;
-- private Blob Storage containers for raw and normalized artifacts;
-- Basic Azure Container Registry;
-- PostgreSQL Flexible Server with the `vector` extension;
-- Key Vault, managed identity, and scoped RBAC assignments.
+| File | Contents |
+| --- | --- |
+| `main.tf` | Resource group, Log Analytics, storage (Blob containers, Airflow log share), Container Registry, PostgreSQL with `vector`, Key Vault and secrets, managed identity and RBAC, API and web Container Apps |
+| `airflow.tf` | Airflow metadata database, scheduler and webserver Container Apps (when `airflow_enabled`) |
+| `variables.tf`, `outputs.tf`, `versions.tf` | Inputs, outputs, providers, and the remote state backend |
 
-The API and web Container Apps are applied in this development environment.
-Airflow remains a separate follow-up deployment because its scheduler,
-webserver, metadata database, and persistence need independent cost decisions.
+## Normal use
 
-## Prerequisites
+Deployments run through GitHub Actions (**Plan or deploy Azure infrastructure**), which
+supplies the image tags and secrets; see [docs/ci-cd.md](../../docs/ci-cd.md). Run
+Terraform locally only to inspect or recover.
 
-- Terraform 1.8+;
-- Azure CLI;
-- an Azure subscription and permission to create resources.
+## Local use
 
-Authenticate with Azure CLI, then provide a subscription ID through a local
-`terraform.tfvars` file or `ARM_SUBSCRIPTION_ID`. Do not commit that file.
+Requires Terraform 1.8+ and the Azure CLI. State is in the private `terraform-state`
+container of `taxlensdevartifacts`, authenticated with Azure AD; your identity needs
+`Storage Blob Data Contributor` on that account.
 
 ```powershell
 az login
 terraform init
-terraform fmt -check
-terraform validate
-terraform plan -var="subscription_id=<subscription-id>"
+terraform plan
 ```
 
-Do not run `terraform apply` until the region, naming prefix, budget, and
-the proposed resource changes have been explicitly reviewed.
+Put inputs in an ignored `terraform.tfvars` (never commit it):
 
-Phase 3 adds Key Vault, a user-assigned application identity, and RBAC for
-secrets, Blob Storage, and ACR pull access. The Hugging Face token is supplied
-through the ignored `terraform.tfvars` file and becomes a Key Vault secret.
-Terraform state contains sensitive secret resource values. It is stored in the
-private `terraform-state` Blob container through the Azure AD-authenticated
-`azurerm` backend.
-
-After the one-time local migration, initialize with:
-
-```powershell
-az login
-terraform init
+```hcl
+subscription_id         = "<subscription id>"
+postgres_admin_password = "<password>"
+postgres_allowed_ip     = ""            # your public IP for laptop runs, or empty
+hf_token                = "<Hugging Face token>"
+auth_internal_token     = "<random secret>"
+nextauth_secret         = "<random secret>"
+api_image               = "taxlensdevacr.azurecr.io/taxlens-api:<commit sha>"
+web_image               = "taxlensdevacr.azurecr.io/taxlens-web:<commit sha>"
+airflow_enabled         = true
+airflow_image           = "taxlensdevacr.azurecr.io/taxlens-airflow:<commit sha>"
+airflow_admin_password  = "<password>"
+airflow_internal_token  = "<random secret>"
 ```
 
-The identity running Terraform needs `Storage Blob Data Contributor` on the
-`taxlensdevartifacts` storage account. GitHub Actions uses the same role with
-its OIDC deployment identity.
+Review every plan before `terraform apply`. State contains secret values, which is why it
+is kept only in the private backend.
 
-Before applying Phase 4, push the image tags configured by `api_image` and
-`web_image` to the Basic ACR. The web image must be built with the API's
-private Container Apps FQDN, not the container app name. Retrieve it with:
-
-```powershell
-$apiOrigin = "http://taxlens-dev-api"
-Set-Location ../..
-docker build -f apps/web/Dockerfile --build-arg API_ORIGIN=$apiOrigin -t taxlensdevacr.azurecr.io/taxlens-web:phase4 .
-docker push taxlensdevacr.azurecr.io/taxlens-web:phase4
-```
-
-The URL uses HTTP over the private Container Apps service network. Container
-Apps forwards that request to the API container's port 8000, and the API
-remains unreachable from the public internet.
-
-## Phase 2 database inputs
-
-Phase 2 adds a small PostgreSQL Flexible Server (`B_Standard_B1ms`) with the
-`vector` extension enabled. Supply the administrator password and, optionally,
-your current public IPv4 address without committing them:
-
-```powershell
-$env:TF_VAR_postgres_admin_password = "<local-only-password>"
-$env:TF_VAR_postgres_allowed_ip = "<your-public-ip>"
-```
-
-Leaving `TF_VAR_postgres_allowed_ip` empty creates no firewall rule. The
-development server is intentionally public-network enabled for this first
-increment; production networking and secret management are later phases.
+For a laptop collection run, prefer a temporary firewall rule with the Azure CLI
+([docs/operations.md](../../docs/operations.md)) over changing `postgres_allowed_ip`.
