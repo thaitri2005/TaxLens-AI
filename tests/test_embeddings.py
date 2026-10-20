@@ -1,5 +1,6 @@
 from datetime import date
 
+import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
@@ -10,6 +11,7 @@ from taxlens.legal_data.models import (
     DocumentVersion,
     LegalDocument,
 )
+from taxlens.retrieval import embeddings
 from taxlens.retrieval.embeddings import EmbeddingBatch, embed_pending_chunks
 
 
@@ -112,3 +114,56 @@ def test_embedding_backfill_respects_the_batch_limit() -> None:
 
     assert (first.embedded, first.remaining) == (2, 1)
     assert (second.embedded, second.unchanged, second.remaining) == (1, 2, 0)
+
+
+def test_embedding_backfill_pages_through_chunks_and_refreshes_stale_vectors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = create_engine(
+        "sqlite+pysqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    LegalDocument.metadata.create_all(engine)
+    monkeypatch.setattr(embeddings, "SCAN_PAGE_SIZE", 2)
+    with Session(engine) as session:
+        document = LegalDocument(
+            document_number="05/2025/TT-BTC", title="Pages", document_type="CIRCULAR"
+        )
+        session.add(document)
+        session.flush()
+        version = DocumentVersion(
+            document_id=document.id,
+            legal_status="EFFECTIVE",
+            raw_content_hash="e" * 64,
+            raw_artifact_key="raw/pages.txt",
+        )
+        session.add(version)
+        session.flush()
+        for index in range(5):
+            session.add(
+                DocumentChunk(
+                    document_version_id=version.id,
+                    article_number=str(index + 1),
+                    content=f"Chunk {index}",
+                    token_count=2,
+                )
+            )
+        session.commit()
+        provider = FakeEmbeddingProvider()
+        pages: list[int] = []
+
+        first = embed_pending_chunks(
+            session, provider, batch_size=2, on_progress=lambda _, checked: pages.append(checked)
+        )
+        changed = session.scalars(select(DocumentChunk)).first()
+        assert changed is not None
+        changed.content = "Chunk changed"
+        session.commit()
+        second = embed_pending_chunks(session, provider, batch_size=2)
+        stored = session.scalars(select(DocumentEmbedding)).all()
+
+    assert pages == [2, 4, 5]
+    assert (first.embedded, first.unchanged) == (5, 0)
+    assert (second.embedded, second.unchanged) == (1, 4)
+    assert len(stored) == 5

@@ -1,10 +1,12 @@
 import hashlib
 import logging
+import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Protocol
 
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, update
 from sqlalchemy.orm import Session
 
 from taxlens.config import Settings, get_settings
@@ -13,6 +15,7 @@ from taxlens.legal_data.models import DocumentChunk, DocumentEmbedding
 logger = logging.getLogger(__name__)
 QUERY_PREFIX = "query: "
 PASSAGE_PREFIX = "passage: "
+SCAN_PAGE_SIZE = 500
 
 
 @dataclass(frozen=True)
@@ -94,64 +97,97 @@ def embed_pending_chunks(
     provider: EmbeddingProvider,
     batch_size: int,
     limit: int | None = None,
+    on_progress: Callable[[EmbeddingBackfillResult, int], None] | None = None,
 ) -> EmbeddingBackfillResult:
-    """Embed chunks without a current embedding; ``limit`` bounds one call's work."""
+    """Embed chunks without a current embedding; ``limit`` bounds one call's work.
 
-    rows = session.execute(
-        select(DocumentChunk, DocumentEmbedding)
-        .outerjoin(
-            DocumentEmbedding,
-            and_(
-                DocumentEmbedding.document_chunk_id == DocumentChunk.id,
-                DocumentEmbedding.model_id == provider.model_id,
-                DocumentEmbedding.model_revision == provider.model_revision,
-            ),
+    Chunks are scanned a page at a time, reading only their text and the stored hash,
+    never the stored vectors. Loading every chunk with its embedding at once needed
+    more memory than the API container has once the corpus passed 40,000 chunks, and
+    the kernel killed the job. ``on_progress`` receives the running totals and the
+    number of chunks checked after each page.
+    """
+
+    embedded = unchanged = truncated_inputs = remaining = checked = 0
+    last_id: uuid.UUID | None = None
+    while True:
+        query = (
+            select(
+                DocumentChunk.id,
+                DocumentChunk.heading,
+                DocumentChunk.content,
+                DocumentEmbedding.id,
+                DocumentEmbedding.content_hash,
+            )
+            .outerjoin(
+                DocumentEmbedding,
+                and_(
+                    DocumentEmbedding.document_chunk_id == DocumentChunk.id,
+                    DocumentEmbedding.model_id == provider.model_id,
+                    DocumentEmbedding.model_revision == provider.model_revision,
+                ),
+            )
+            .order_by(DocumentChunk.id)
+            .limit(SCAN_PAGE_SIZE)
         )
-        .order_by(DocumentChunk.created_at, DocumentChunk.id)
-    ).all()
-    pending: list[tuple[DocumentChunk, DocumentEmbedding | None, str]] = []
-    unchanged = 0
+        if last_id is not None:
+            query = query.where(DocumentChunk.id > last_id)
+        rows = session.execute(query).all()
+        if not rows:
+            break
+        last_id = rows[-1][0]
+        checked += len(rows)
 
-    for chunk, existing in rows:
-        content_hash = chunk_content_hash(chunk)
-        if existing is not None and existing.content_hash == content_hash:
-            unchanged += 1
-            continue
-        pending.append((chunk, existing, content_hash))
-    remaining = 0
-    if limit is not None and len(pending) > limit:
-        remaining = len(pending) - limit
-        pending = pending[:limit]
-
-    embedded = 0
-    truncated_inputs = 0
-    for start in range(0, len(pending), batch_size):
-        batch = pending[start : start + batch_size]
-        embedding_batch = provider.embed_passages(
-            [chunk_text(chunk) for chunk, _, _ in batch]
-        )
-        truncated_inputs += embedding_batch.truncated_inputs
-        for (chunk, stored, content_hash), vector in zip(
-            batch, embedding_batch.vectors, strict=True
-        ):
-            if stored is None:
-                session.add(
-                    DocumentEmbedding(
-                        document_chunk_id=chunk.id,
-                        model_id=provider.model_id,
-                        model_revision=provider.model_revision,
-                        dimensions=provider.dimensions,
-                        content_hash=content_hash,
-                        embedding=vector,
-                    )
-                )
+        pending: list[tuple[uuid.UUID, uuid.UUID | None, str, str]] = []
+        for chunk_id, heading, content, embedding_id, stored_hash in rows:
+            text = passage_text(heading, content)
+            content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            if stored_hash == content_hash:
+                unchanged += 1
+            elif limit is not None and embedded + len(pending) >= limit:
+                remaining += 1
             else:
-                stored.dimensions = provider.dimensions
-                stored.content_hash = content_hash
-                stored.embedding = vector
-            embedded += 1
-        # Commit per batch so an interrupted backfill keeps the work already done.
-        session.commit()
+                pending.append((chunk_id, embedding_id, text, content_hash))
+
+        for start in range(0, len(pending), batch_size):
+            batch = pending[start : start + batch_size]
+            embedding_batch = provider.embed_passages([text for _, _, text, _ in batch])
+            truncated_inputs += embedding_batch.truncated_inputs
+            for (pending_chunk_id, stored_id, _, pending_hash), vector in zip(
+                batch, embedding_batch.vectors, strict=True
+            ):
+                if stored_id is None:
+                    session.add(
+                        DocumentEmbedding(
+                            document_chunk_id=pending_chunk_id,
+                            model_id=provider.model_id,
+                            model_revision=provider.model_revision,
+                            dimensions=provider.dimensions,
+                            content_hash=pending_hash,
+                            embedding=vector,
+                        )
+                    )
+                else:
+                    session.execute(
+                        update(DocumentEmbedding)
+                        .where(DocumentEmbedding.id == stored_id)
+                        .values(
+                            dimensions=provider.dimensions,
+                            content_hash=pending_hash,
+                            embedding=vector,
+                        )
+                    )
+            # Commit per batch so an interrupted backfill keeps the work already done,
+            # and drop the committed objects so memory stays flat.
+            session.commit()
+            session.expunge_all()
+            embedded += len(batch)
+
+        if on_progress is not None:
+            on_progress(
+                EmbeddingBackfillResult(embedded, unchanged, truncated_inputs, remaining),
+                checked,
+            )
 
     return EmbeddingBackfillResult(
         embedded=embedded,
@@ -166,7 +202,11 @@ def chunk_content_hash(chunk: DocumentChunk) -> str:
 
 
 def chunk_text(chunk: DocumentChunk) -> str:
-    return "\n".join(part for part in [chunk.heading, chunk.content] if part).strip()
+    return passage_text(chunk.heading, chunk.content)
+
+
+def passage_text(heading: str | None, content: str | None) -> str:
+    return "\n".join(part for part in [heading, content] if part).strip()
 
 
 @lru_cache
