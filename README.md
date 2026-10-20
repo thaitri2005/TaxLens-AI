@@ -78,7 +78,7 @@ flowchart LR
 
 1. **Collection**: tax documents from the government portal's tax category and the
    Ministry of Finance database (with legal status and effective dates), preferring Word
-   files, whose text needs no OCR. See [docs/sources.md](docs/sources.md).
+   files, whose text needs no OCR. See [docs/pipeline.md](docs/pipeline.md).
 2. **Processing**: text is read natively (including legacy TCVN3 and Windows Vietnamese
    encodings) or with Vietnamese Tesseract OCR, then split along the legal structure
    (*Điều* → *khoản*, or *Phần* / numbered sections in older documents) into passages of
@@ -134,7 +134,7 @@ python -m mypy src
 python -m pytest
 ```
 
-More in [docs/local-development.md](docs/local-development.md).
+More in [docs/operations.md](docs/operations.md#local-development).
 
 ## Deploy and operate
 
@@ -155,18 +155,10 @@ returns `PROVIDER_UNAVAILABLE`; search and the library still work.
 
 | Document | Contents |
 | --- | --- |
-| [architecture.md](docs/architecture.md) | Components, data model, request path, document library, background jobs |
-| [sources.md](docs/sources.md) | Official sources, what is collected, cost |
-| [retrieval.md](docs/retrieval.md) | Extraction, chunking, search, evidence gate, answer validation, results |
-| [evaluation.md](docs/evaluation.md) | Retrieval and answer evaluation, MLflow |
-| [airflow.md](docs/airflow.md) | The daily and maintenance DAGs, reading their logs |
-| [operations.md](docs/operations.md) | Release, backfills, laptop collection, logs, troubleshooting |
-| [deployment.md](docs/deployment.md) | Azure resources, images, configuration, networking |
-| [authentication.md](docs/authentication.md) | Sign-in, roles, and the web-to-API identity contract |
-| [local-development.md](docs/local-development.md) | Local stack, checks, scripts, API overview |
-| [ci-cd.md](docs/ci-cd.md) | GitHub Actions, OIDC, Terraform state |
-| [adr/](docs/adr/) | Architecture decisions |
-| [archive/](docs/archive/) | The original product concept and implementation plan |
+| [architecture.md](docs/architecture.md) | Components, data model, request path, document library, background jobs, authentication, Azure resources, design decisions |
+| [pipeline.md](docs/pipeline.md) | Official sources, what is collected, the daily and maintenance Airflow DAGs |
+| [retrieval.md](docs/retrieval.md) | Extraction, chunking, search, evidence gate, answer validation, evaluation |
+| [operations.md](docs/operations.md) | Local development, release, backfills, laptop collection, logs, troubleshooting |
 
 ## Limitations
 

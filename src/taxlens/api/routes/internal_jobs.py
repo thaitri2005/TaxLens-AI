@@ -62,7 +62,7 @@ def run_ingestion_job(
     """Daily collection: tax documents issued in the last 60 days.
 
     Only the government portal is used: the Ministry of Finance database refuses
-    connections from Azure and is collected from a machine in Vietnam (docs/sources.md).
+    connections from Azure and is collected from a machine in Vietnam (docs/operations.md).
     """
 
     _authorize(x_taxlens_internal_token)
