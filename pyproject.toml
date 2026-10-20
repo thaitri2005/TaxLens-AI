@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "taxlens-ai"
 version = "0.1.0"
 description = "Vietnamese tax regulatory intelligence platform"
-readme = "docs/local-development.md"
+readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.115,<1.0",
