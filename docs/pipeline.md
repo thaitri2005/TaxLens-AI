@@ -90,18 +90,13 @@ In Azure:
 
 ## Ministry of Finance access from Azure
 
-`vbpq.mof.gov.vn` does not accept connections from Azure (the East Asia region, Hong Kong):
-TCP connections time out, while the same API answers in seconds from a Vietnamese network
-and the government portal is reachable from Azure. The site appears to accept Vietnamese
-IP addresses only, and Azure has no region in Vietnam. Airflow therefore collects from
-the government portal only (daily and `backfill_corpus`).
-
-Ministry collection therefore runs from a machine in Vietnam, writing straight to the
-Azure database and Blob Storage; it only lists and downloads, so it needs no OCR or
-embedding model. The `process_and_embed` maintenance action then does the rest in Azure.
-The step-by-step procedure (firewall rule, settings, commands) is in
-[operations.md](operations.md#ministry-of-finance-from-a-laptop-in-vietnam), and the
-decision in [ADR 0003](architecture.md#collect-the-ministry-of-finance-database-from-a-machine-in-vietnam).
+`vbpq.mof.gov.vn` appears to accept Vietnamese IP addresses only, so Airflow collects from
+the government portal alone. Ministry collection runs from a machine in Vietnam, writing
+straight to the Azure database and Blob Storage; it only lists and downloads, and the
+`process_and_embed` maintenance action does the rest in Azure. The reasoning is in the
+[design decision](architecture.md#collect-the-ministry-of-finance-database-from-a-machine-in-vietnam)
+and the procedure in
+[operations.md](operations.md#ministry-of-finance-from-a-laptop-in-vietnam).
 
 `collect_sources.py` prints timestamped progress, so a quiet console never means "maybe
 stuck":

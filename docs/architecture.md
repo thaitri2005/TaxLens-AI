@@ -100,18 +100,14 @@ key. A file's hash never changes, so re-processing never re-downloads.
 ## Request path
 
 1. The browser calls `/api/<path>` on the web app.
-2. The proxy (`apps/web/app/api/[...path]/route.ts`) checks the Auth.js session, strips
-   any identity headers the browser sent, and adds a signed identity: user ID, username,
-   role, timestamp, and an HMAC-SHA256 signature with `AUTH_INTERNAL_TOKEN`. Only the
-   `documents`, `search`, `questions`, `evaluation`, and `admin` groups are forwarded.
-3. The API checks the signature, rejects identities older than **300 seconds**, and
-   confirms the account is still active. The window is longer than the 240-second ingress
-   timeout, so a request that waited for a sleeping API is still accepted.
+2. The proxy (`apps/web/app/api/[...path]/route.ts`) checks the Auth.js session and
+   forwards the request with a signed identity.
+3. The API verifies the identity and serves the request.
 4. The web client retries reads (not questions) on 502/503/504 while a scaled-to-zero API
    starts, shows a "starting up" note after four seconds, and returns to the login page
    when the session itself has expired.
 
-Details of sign-in and roles are in [Authentication](#authentication) below.
+How the identity is signed and verified is in [Authentication](#authentication) below.
 
 ## Document library
 
@@ -267,7 +263,6 @@ set; it is idempotent. Sign in at `http://localhost:3000/login`.
 `AUTH_INTERNAL_TOKEN` and `NEXTAUTH_SECRET` are Key Vault secrets created by Terraform
 and injected into the API and web containers through the managed identity.
 
-
 ## Azure deployment
 
 The development environment runs in resource group `taxlens-dev-rg` (East Asia), managed
@@ -356,12 +351,12 @@ compromise.
 - Processing in a Container Apps Job so OCR never shares CPU with requests.
 - A paid inference endpoint with credits and monitoring.
 
-
 ## Design decisions
 
-Also: PostgreSQL full-text search plus pgvector instead of a separate search service (one
-database to run for tens of thousands of passages), and scale to zero everywhere except the
-Airflow scheduler (development budget).
+Three decisions are recorded in full below. Two smaller ones: PostgreSQL full-text search
+plus pgvector instead of a separate search service (one database to run for tens of
+thousands of passages), and scale to zero everywhere except the Airflow scheduler
+(development budget).
 
 ### Start with a modular monolith
 

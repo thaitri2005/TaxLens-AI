@@ -112,7 +112,6 @@ or the OpenAPI page with a test identity, to call them.
 | `/admin/*` | Account management (administrators). |
 | `/internal/airflow/*` | Background jobs for Airflow, with `X-TaxLens-Internal-Token`. |
 
-
 ## Release
 
 1. Push to `main` and wait for **CI** to pass (backend checks, web build, Terraform
@@ -134,58 +133,24 @@ and can take a minute; the page says so.
 
 ### GitHub Actions
 
-TaxLens uses GitHub Actions for repeatable validation and manually controlled
-Azure image releases.
+| Workflow | Trigger | What it does |
+| --- | --- | --- |
+| **CI** (`ci.yml`) | Pull requests and pushes to `main` | Ruff, MyPy, and Pytest; a production Next.js build with test-only placeholder secrets; Terraform init, format, and validate without a backend. |
+| **Publish release images** (`release-images.yml`) | Manual, `azure-release` environment | Builds the API, web, and Airflow images, tags them with the commit SHA, and prints the three image references. |
+| **Plan or deploy Azure infrastructure** (`deploy.yml`) | Manual, apply job behind the `azure-deploy` environment | Takes a published image tag, writes temporary Terraform variables from GitHub secrets, and produces a reviewable plan; applies it only with `apply=true`. |
 
-#### Continuous integration
+Both Azure workflows sign in with OIDC and need these secrets:
 
-`.github/workflows/ci.yml` runs on pull requests and pushes to `main`:
+- `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
+- for deploys: `TF_VAR_POSTGRES_ADMIN_PASSWORD`, `TF_VAR_HF_TOKEN`,
+  `TF_VAR_AUTH_INTERNAL_TOKEN`, `TF_VAR_NEXTAUTH_SECRET`, `TF_VAR_AIRFLOW_ADMIN_PASSWORD`,
+  `TF_VAR_AIRFLOW_INTERNAL_TOKEN`, and optionally `TF_VAR_POSTGRES_ALLOWED_IP` to keep the
+  developer PostgreSQL firewall rule.
 
-- Ruff, MyPy, and Pytest for the backend (MyPy resolves the newest SQLAlchemy 2.x, so
-  statement types must satisfy both 2.0 and 2.1);
-- a production Next.js build;
-- Terraform provider initialization, formatting, and validation without a
-  backend or cloud mutation.
-
-The CI credentials used for the frontend build are test-only placeholders.
-They never contain production authentication or inference secrets.
-
-#### Image releases
-
-`.github/workflows/release-images.yml` (**Publish release images**) is manually triggered and protected by
-the `azure-release` GitHub environment. It uses Azure OIDC and requires these
-repository/environment secrets:
-
-- `AZURE_CLIENT_ID`
-- `AZURE_TENANT_ID`
-- `AZURE_SUBSCRIPTION_ID`
-
-The workflow publishes API, web, and Airflow images under an immutable commit
-SHA tag by default. A release summary prints the three image references for
-the reviewed Terraform update.
-
-#### Infrastructure apply boundary
-
-Terraform state is in the private Azure Blob backend configured in
-`infra/terraform/versions.tf`.
-
-`.github/workflows/deploy.yml` (**Plan or deploy Azure infrastructure**) accepts an already-published image tag, creates
-temporary Terraform variables from GitHub secrets, initializes the remote
-backend, and produces a reviewable plan artifact. Set `apply` to `true` only
-when the plan is approved; the apply job is protected by the `azure-deploy`
-GitHub environment.
-
-Configure these additional GitHub secrets before using the deployment workflow:
-`TF_VAR_POSTGRES_ADMIN_PASSWORD`, `TF_VAR_HF_TOKEN`,
-`TF_VAR_AUTH_INTERNAL_TOKEN`, `TF_VAR_NEXTAUTH_SECRET`,
-`TF_VAR_AIRFLOW_ADMIN_PASSWORD`, `TF_VAR_AIRFLOW_INTERNAL_TOKEN`, and
-optionally `TF_VAR_POSTGRES_ALLOWED_IP` to preserve the development PostgreSQL
-firewall rule.
-The GitHub OIDC principal also needs `Storage Blob Data Contributor` on the
-Terraform state storage account, `Contributor` and `User Access Administrator`
-on `taxlens-dev-rg`, and `Key Vault Secrets Officer` on `taxlensdevkv` so the
-workflow can plan/apply the Terraform-managed stack. Local developer access is
-kept separately for emergency recovery.
+The OIDC principal needs `Storage Blob Data Contributor` on the Terraform state storage
+account, `Contributor` and `User Access Administrator` on `taxlens-dev-rg`, and
+`Key Vault Secrets Officer` on `taxlensdevkv`. Developer access is kept separately for
+emergency recovery.
 
 ### Terraform
 
@@ -237,7 +202,7 @@ Review every plan before `terraform apply`. State contains secret values, which 
 is kept only in the private backend.
 
 For a laptop collection run, prefer a temporary firewall rule with the Azure CLI
-([docs/operations.md](operations.md)) over changing `postgres_allowed_ip`.
+([below](#ministry-of-finance-from-a-laptop-in-vietnam)) over changing `postgres_allowed_ip`.
 
 ## Growing the corpus
 
@@ -248,7 +213,7 @@ are missing, then `backfill_corpus` until none remain. Each run collects up to 3
 
 ### Ministry of Finance (from a laptop in Vietnam)
 
-The Ministry's site rejects connections from Azure ([ADR 0003](architecture.md#collect-the-ministry-of-finance-database-from-a-machine-in-vietnam)).
+The Ministry's site rejects connections from Azure ([design decision](architecture.md#collect-the-ministry-of-finance-database-from-a-machine-in-vietnam)).
 
 1. Allow your public IP on the PostgreSQL server:
 
@@ -335,7 +300,7 @@ curl -s "https://taxlensdevartifacts.file.core.windows.net/airflow-logs/dag_id=t
 | A job fails with exit code -9 earlier | Out of memory in the 2 GiB API container | Check that no other long job was running at the same time; rerun. |
 | Every answer is `PROVIDER_UNAVAILABLE` | The Hugging Face token has no inference credits (HTTP 402 in the API log as `chat_provider_error`) | Add credits or point `HF_CHAT_BASE_URL` at another OpenAI-compatible endpoint. |
 | Collection logs "Government portal unavailable" | The portal timed out | A slow year is skipped after three attempts; the next run lists it again. |
-| Ministry collection: `ConnectTimeout` | Run from outside Vietnam | Run it from a Vietnamese network ([ADR 0003](architecture.md#collect-the-ministry-of-finance-database-from-a-machine-in-vietnam)). |
+| Ministry collection: `ConnectTimeout` | Run from outside Vietnam | Run it from a Vietnamese network ([design decision](architecture.md#collect-the-ministry-of-finance-database-from-a-machine-in-vietnam)). |
 | Laptop run: "Cannot reach the database" | Settings not set in this terminal, or IP not allowed | Set the variables in the same window and add the firewall rule. |
 | Laptop run: "Cannot use azure_blob storage" | The Azure SDK is missing | `pip install -e ".[cloud]"`. |
 | A document stays `FAILED` | Extraction failed (broken file, unusable scan) | Run `retry_failed_documents` after fixing the cause; the error code is shown on the document page. |

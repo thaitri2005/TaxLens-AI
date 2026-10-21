@@ -54,7 +54,8 @@ against a born-digital PDF. On three pages of 301/2026/NĐ-CP:
 | 300 | 4 | 30.1% | 21.7% | 2.4 |
 
 The error rates include differences in reading order between the text layer and OCR
-(headers, signature blocks), so they overstate true recognition errors. New documents use the current settings; existing ones are re-OCR'd only on request
+(headers, signature blocks), so they overstate true recognition errors. New documents use
+the current settings; existing ones are re-OCR'd only on request
 (`reocr_scanned_documents`).
 
 Remaining OCR errors include lost diacritics (`hóa don`), stray punctuation before
@@ -158,6 +159,16 @@ Exclusions are reported to the user as uncertainties rather than silently applie
 
 ## 6. Answer generation and validation (`intelligence/qa.py`)
 
+The answer path is a LangGraph state graph:
+
+```text
+plan query → retrieve evidence → assess evidence → generate answer → validate
+```
+
+Out-of-scope questions and insufficient evidence end before the model is called. The
+model is reached through a provider-neutral `ChatProvider` interface, wrapped by
+`LangChainChatAdapter`, so another provider needs no change to retrieval or the API.
+
 The model receives the numbered passages with document, legal status, article, clause,
 pages, and article title. It must answer in the language of the question, return
 `answerable: false` when the passages do not answer it, and give at most three
@@ -181,10 +192,9 @@ The response is then checked:
 
 ## 7. Measured effect
 
-`data/evaluation/tax_article_retrieval.json` holds 18 answerable Vietnamese questions
-(four typed without diacritics) labelled with the document **and article** that answers
-them, plus two out-of-corpus questions. On the five curated tax documents plus four
-unrelated decrees (October 2026 OCR text):
+Measured with the article-level dataset ([Datasets](#datasets)) on the five curated tax
+documents plus four unrelated decrees (October 2026 OCR text), before the corpus grew to
+about 1,700 documents:
 
 | Mode | Metric | Before | After |
 | --- | --- | --- | --- |
@@ -198,9 +208,6 @@ chunker produced passages of up to 80,953 characters (average 4,241) of which th
 model saw only the first 2,500. Those figures flatter the old pipeline: an 80,000-character
 "article" counted as a hit even though the answer was usually outside the part the model
 saw.
-
-The scheduled evaluation job (`scripts/evaluate_tax_retrieval.py`) reports
-`mean_article_hit_at_k` and `mean_article_reciprocal_rank` for this dataset.
 
 ## Known limitations
 
@@ -224,10 +231,8 @@ no judge model. Datasets are versioned in `data/evaluation`.
 
 ### Retrieval
 
-`scripts/evaluate_tax_retrieval.py` runs the default dataset,
-`tax_article_retrieval.json`: 18 answerable Vietnamese questions (four typed without
-diacritics), each labelled with the document **and article** that answers it, plus two
-out-of-corpus questions that the ranking metrics skip.
+`scripts/evaluate_tax_retrieval.py` runs the default dataset, `tax_article_retrieval.json`
+([Datasets](#datasets)):
 
 ```powershell
 docker compose exec -T api python scripts/evaluate_tax_retrieval.py
@@ -236,21 +241,22 @@ docker compose exec -T api python scripts/evaluate_tax_retrieval.py --mode keywo
 
 It reports, at K = 1, 3, 5, and 10: hit rate, precision, recall, mean reciprocal rank,
 nDCG, and the article-level `mean_article_hit_at_k` and `mean_article_reciprocal_rank`.
-`--mode` compares `keyword`, `semantic`, and `hybrid` on the same corpus.
+`--mode` (`keyword`, `semantic`, `hybrid`) compares methods; use the same dataset and
+corpus snapshot for each.
 
 Each report records the dataset hash, a corpus fingerprint, and whether the labelled
 documents are embedded. A case whose expected document is missing is reported as not
 covered rather than as a ranking failure, and a run with no covered case is
-`not_evaluable`.
+`not_evaluable`, even when search returns other documents. Check the report's
+`evaluation_status`, `quality_gate`, and `corpus_snapshot` before treating a score as a
+ranking result.
 
 Reports are written to object storage under `evaluation/retrieval/runs/`, with the latest
 also at `evaluation/retrieval/latest.json` and served by `GET /evaluation/retrieval/latest`.
 The daily DAG runs this evaluation after embedding.
 
-Measured results are in [section 7](#7-measured-effect). They were
-measured on the five curated documents plus four unrelated decrees, before the corpus grew
-to about 1,700 documents; with many more competing passages, ranks will differ, so rerun
-the evaluation before quoting them.
+The results in [section 7](#7-measured-effect) predate the full corpus; with many more
+competing passages, ranks will differ, so rerun the evaluation before quoting them.
 
 ### Answers
 
@@ -277,41 +283,20 @@ metrics (experiment `MLFLOW_EXPERIMENT_NAME`). Start a local server with
 `docker compose --profile llmops up -d mlflow`. The API image logs through a small REST
 client when the MLflow package is not installed. MLflow is never on the request path.
 
-### Q&A pipeline
-
-The answer path is a LangGraph state graph:
-
-```text
-plan query → retrieve evidence → assess evidence → generate answer → validate
-```
-
-Out-of-scope questions and insufficient evidence end before the model is called. The
-model is reached through a provider-neutral `ChatProvider` interface, wrapped by
-`LangChainChatAdapter`, so another provider needs no change to retrieval or the API.
-
-### Next steps
-
-1. Relabel and grow the article dataset against the full corpus (at least 50 cases:
-   direct lookups, dates, amendments, comparisons, multi-document questions, unanswerable
-   questions, text without diacritics, and hard negatives).
-2. Add reviewed answer and citation labels, and an optional bounded judge-model check.
-3. Add regression thresholds that fail the daily run, and trend views in MLflow.
-
 ### Datasets
 
-These files are versioned labels, not automatically generated search examples.
-`tax_article_retrieval.json` is the default scheduled dataset: 18 answerable
-Vietnamese questions (four typed without diacritics) labelled with the document
-and article that answers them, plus two out-of-corpus questions that are skipped
-by the ranking metrics. Its labels were checked against the article headings of
-the five curated tax documents; see section 7 for measured results.
-`tax_retrieval_current.json` (eight cases) and `tax_retrieval.json` (four cases) are
-older document-level smoke sets, kept for regression; they are not reviewed benchmarks.
-`qa.json` holds five questions for `scripts/evaluate_qa.py`. The labels were made when the
-corpus held a handful of documents; relabelling against the full corpus is the next step
-(above).
+Versioned, hand-made labels in `data/evaluation`:
 
-A retrieval case should contain:
+| File | Contents |
+| --- | --- |
+| `tax_article_retrieval.json` | Default scheduled dataset. 18 answerable Vietnamese questions (four typed without diacritics), each labelled with the document **and article** that answers it, checked against the article headings of the five curated tax documents; plus two out-of-corpus questions that the ranking metrics skip. |
+| `tax_retrieval_current.json`, `tax_retrieval.json` | Older document-level smoke sets (eight and four cases), kept for regression; not reviewed benchmarks. |
+| `qa.json` | Five questions for `scripts/evaluate_qa.py`. |
+
+All labels were made when the corpus held a handful of documents; relabelling against the
+full corpus is the first of the [next steps](#next-steps).
+
+A retrieval case looks like:
 
 ```json
 {
@@ -325,22 +310,15 @@ A retrieval case should contain:
 }
 ```
 
-Only `case_id`, `query`, and `relevant_document_numbers` are currently required
-by the runner. Article labels and the other fields are the expansion path for
-article-level and answer-quality evaluation. Record the official source and
-label-provenance notes in the dataset change when adding or changing a label.
+Only `case_id`, `query`, and `relevant_document_numbers` are required by the runner;
+`relevant_articles` enables the article-level metrics, and the other fields are for
+future answer-quality evaluation. When adding or changing a label, record the official
+source and how the label was checked in the same change.
 
-Before treating a score as a ranking result, inspect the report's
-`evaluation_status`, `quality_gate`, and `corpus_snapshot`. A run with no
-embedded expected documents is `not_evaluable`, even when the search returns
-other documents.
+### Next steps
 
-Run the default evaluation with:
-
-```powershell
-python scripts/evaluate_tax_retrieval.py
-```
-
-Evaluate a retrieval baseline explicitly with `--mode keyword`, `--mode
-semantic`, or `--mode hybrid`. Run the same dataset and corpus snapshot for
-each mode when comparing baselines.
+1. Relabel and grow the article dataset against the full corpus (at least 50 cases:
+   direct lookups, dates, amendments, comparisons, multi-document questions, unanswerable
+   questions, text without diacritics, and hard negatives).
+2. Add reviewed answer and citation labels, and an optional bounded judge-model check.
+3. Add regression thresholds that fail the daily run, and trend views in MLflow.
