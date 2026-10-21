@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from taxlens.storage.local import LocalObjectStorage
 
 
@@ -16,9 +18,5 @@ def test_local_storage_round_trip(tmp_path: Path) -> None:
 def test_local_storage_rejects_path_traversal(tmp_path: Path) -> None:
     storage = LocalObjectStorage(tmp_path)
 
-    try:
+    with pytest.raises(ValueError, match="within the configured storage root"):
         storage.put_bytes("../outside.txt", b"unsafe")
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("Expected path traversal to be rejected")
