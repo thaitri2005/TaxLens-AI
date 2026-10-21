@@ -94,8 +94,8 @@ erDiagram
   and model revision, with the hash of the text it was computed from.
 
 Raw files and extracted text live in Blob Storage under
-`source=<source>/year=<year>/document=<number>/<sha256>.<ext>`; the database stores the
-key. A file's hash never changes, so re-processing never re-downloads.
+`source=<source>/year=<year>/document=<number slug>/<sha256>.<ext>` (for example
+`document=41-2017-tt-btc`); the database stores the key. A file's hash never changes, so re-processing never re-downloads.
 
 ## Request path
 

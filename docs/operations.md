@@ -10,7 +10,7 @@ PowerShell unless shown otherwise.
 
 - Python 3.12
 - Docker Desktop with Docker Compose
-- Node.js 20, only to run the web app outside Docker
+- Node.js 22, only to run the web app outside Docker
 
 ### Start the stack
 
@@ -112,9 +112,26 @@ or the OpenAPI page with a test identity, to call them.
 | `/admin/*` | Account management (administrators). |
 | `/internal/airflow/*` | Background jobs for Airflow, with `X-TaxLens-Internal-Token`. |
 
+## Contributing
+
+`main` is protected by a ruleset: changes arrive through a pull request, the **Backend
+checks**, **Frontend build**, and **Terraform validation** jobs must pass, and the branch
+must be up to date with `main`. Force pushes and deleting `main` are blocked. The
+repository owner is on the bypass list and may push directly; run the checks below
+before doing so, because a direct push skips the pull-request gate.
+
+```powershell
+git switch main; git pull                     # always start from the latest main
+git switch -c fix/short-description
+# ...change, then run the checks in "Local development"...
+git push -u origin fix/short-description      # open the pull request from the link printed
+```
+
+Keep pull requests small and focused, and delete the branch after merging.
+
 ## Release
 
-1. Push to `main` and wait for **CI** to pass (backend checks, web build, Terraform
+1. Merge to `main` and wait for **CI** to pass (backend checks, web build, Terraform
    validation).
 2. Run **Publish release images** on `main`. It builds the API, web, and Airflow images
    tagged with the commit SHA.
@@ -244,6 +261,19 @@ The Ministry's site rejects connections from Azure ([design decision](architectu
 4. Remove the firewall rule:
    `az postgres flexible-server firewall-rule delete -g taxlens-dev-rg --server-name taxlens-dev-pg --name laptop --yes`.
 
+### Stopping Airflow to save cost
+
+The Airflow scheduler is the only always-on Container App. When no collection is needed,
+stop both Airflow apps; the site keeps working, but **the daily DAG does not run** while the
+scheduler is stopped, and a stopped app stays stopped until started again:
+
+```powershell
+az containerapp stop  -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler
+az containerapp stop  -g taxlens-dev-rg -n taxlens-dev-airflow-web
+az containerapp start -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler   # and -web for the UI
+az containerapp show  -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler --query properties.runningStatus -o tsv
+```
+
 ### During long backfills
 
 Pause the daily DAG while a long backfill runs, so its processing and embedding do not
@@ -294,6 +324,7 @@ curl -s "https://taxlensdevartifacts.file.core.windows.net/airflow-logs/dag_id=t
 
 | Symptom | Cause | Action |
 | --- | --- | --- |
+| No new documents for days | The Airflow scheduler is stopped (`runningStatus` is `Stopped`) or the daily DAG is paused | Start the scheduler ([Stopping Airflow](#stopping-airflow-to-save-cost)) and unpause the DAG. |
 | Pages are slow for a minute, then fine | The API was scaled to zero | None; the web client retries while it starts. |
 | "Expired identity" | An API image from before October 2026 accepted identities for only 60 s, less than a cold start | Deploy a current release. |
 | A job fails with exit code -9 after about 21,600 s | Six-hour job limit | Rerun the action; finished work is kept. |

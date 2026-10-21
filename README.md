@@ -138,7 +138,9 @@ More in [docs/operations.md](docs/operations.md#local-development).
 
 ## Deploy and operate
 
-1. Push to `main`; **CI** runs backend checks, the web build, and Terraform validation.
+1. Merge a pull request into `main` (protected; see
+   [contributing](docs/operations.md#contributing)); **CI** runs backend checks, the web
+   build, and Terraform validation.
 2. Run **Publish release images**, which tags the API, web, and Airflow images with the
    commit SHA.
 3. Run **Plan or deploy Azure infrastructure** with that tag. The API applies database
@@ -158,7 +160,7 @@ returns `PROVIDER_UNAVAILABLE`; search and the library still work.
 | [architecture.md](docs/architecture.md) | Components, data model, request path, document library, background jobs, authentication, Azure resources, design decisions |
 | [pipeline.md](docs/pipeline.md) | Official sources, what is collected, the daily and maintenance Airflow DAGs |
 | [retrieval.md](docs/retrieval.md) | Extraction, chunking, search, evidence gate, answer validation, evaluation |
-| [operations.md](docs/operations.md) | Local development, release, backfills, laptop collection, logs, troubleshooting |
+| [operations.md](docs/operations.md) | Local development, contributing, release, backfills, laptop collection, logs, troubleshooting |
 
 ## Limitations
 
