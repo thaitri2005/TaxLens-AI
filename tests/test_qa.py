@@ -1,5 +1,6 @@
 from datetime import date
 
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
@@ -178,12 +179,8 @@ def test_answer_question_recovers_complete_answer_from_truncated_json() -> None:
 
 
 def test_parse_generated_answer_rejects_truncated_json() -> None:
-    try:
+    with pytest.raises(ValueError, match="JSON"):
         parse_generated_answer('{"answer":"Incomplete', citation_count=1)
-    except ValueError as error:
-        assert "JSON" in str(error)
-    else:
-        raise AssertionError("Expected truncated JSON to be rejected")
 
 
 def _create_engine_with_evidence():
