@@ -21,10 +21,12 @@ As of October 2026 the ministry selection returns 928 in-force normative tax doc
 (858 circulars, 62 joint circulars, plus decrees, a law, and consolidated texts): 484 Word
 files and 444 PDFs. The portal's tax category holds about 1,500 documents from 1988.
 
-**Corpus in October 2026**: about 1,700 documents and 59,600 passages, all embedded:
-about 790 from the ministry database and the rest from the portal's tax category, from
-1990 onwards. The portal backfill had 18 documents left to collect, plus 3 whose files
-the portal no longer serves.
+**Corpus in October 2026**: 2,013 documents and 59,598 passages, all embedded and
+searchable except 8 documents whose processing failed. 785 come from the ministry
+database and 1,229 from the portal's tax category (one document is held from both),
+from 1990 onwards. 771 are recorded as in force; the 1,228 portal documents have no
+recorded status. The portal backfill had 18 documents left to collect, plus 3 whose
+files the portal no longer serves.
 
 ## What is collected
 

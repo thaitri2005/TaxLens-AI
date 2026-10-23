@@ -194,7 +194,7 @@ The response is then checked:
 
 Measured with the article-level dataset ([Datasets](#datasets)) on the five curated tax
 documents plus four unrelated decrees (October 2026 OCR text), before the corpus grew to
-about 1,700 documents:
+about 2,000 documents:
 
 | Mode | Metric | Before | After |
 | --- | --- | --- | --- |
@@ -219,7 +219,7 @@ saw.
   1,500-character cap and OCR'd tables exceed it (about a third of passages), so their
   vector covers only the beginning; keyword search still sees the whole passage. Lowering
   the cap would need re-chunking and re-embedding the corpus.
-- The evaluation results above predate the full corpus; with about 1,700 documents
+- The evaluation results above predate the full corpus; with about 2,000 documents
   competing, they should be measured again ([Evaluation](#evaluation)).
 - Grounding is lexical: a fact that reuses the passage's words in a misleading order would
   pass. The excerpts let a reader check the source directly.

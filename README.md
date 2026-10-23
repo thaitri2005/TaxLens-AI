@@ -27,7 +27,7 @@ question.
 - **Document library**: corpus statistics at a glance, search by number or title,
   filters by source, kind (law, decree, circular, …), and legal status, and paged
   browsing of documents and their passages. English and Vietnamese throughout.
-- **Historical corpus**: about 1,700 tax documents (59,600 passages) from the government
+- **Historical corpus**: about 2,000 tax documents (59,598 passages) from the government
   portal and the Ministry of Finance database, including pre-Unicode Word files from the
   1990s.
 - **Automated pipeline**: Airflow collects new documents daily, extracts or OCRs them,
