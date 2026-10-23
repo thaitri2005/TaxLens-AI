@@ -292,18 +292,17 @@ Versioned, hand-made labels in `data/evaluation`:
 | `tax_article_retrieval.json` | Default scheduled dataset. 18 answerable Vietnamese questions (four typed without diacritics), each labelled with the document **and article** that answers it, checked against the article headings of the five curated tax documents; plus two out-of-corpus questions that the ranking metrics skip. |
 | `tax_retrieval_current.json`, `tax_retrieval.json` | Older document-level smoke sets (eight and four cases), kept for regression; not reviewed benchmarks. |
 | `qa.json` | Five questions for `scripts/evaluate_qa.py`. |
+| `gold_set_v1.csv` | The annotated gold set (below): taxpayer situations taken from tax-authority letters, labelled to the clause. |
 
-All labels were made when the corpus held a handful of documents; relabelling against the
-full corpus is the first of the [next steps](#next-steps).
-
-A retrieval case looks like:
+The JSON labels were made when the corpus held a handful of documents; the gold set is
+their replacement as it grows. A JSON retrieval case looks like:
 
 ```json
 {
   "case_id": "tax-retrieval-001",
   "query": "...",
-  "relevant_document_numbers": ["..."],
-  "relevant_articles": ["..."],
+  "relevant_document_numbers": ["31/2025/TT-BTC"],
+  "relevant_articles": {"31/2025/TT-BTC": ["9"]},
   "answerable": true,
   "category": "direct_lookup",
   "difficulty": "medium"
@@ -315,10 +314,49 @@ Only `case_id`, `query`, and `relevant_document_numbers` are required by the run
 future answer-quality evaluation. When adding or changing a label, record the official
 source and how the label was checked in the same change.
 
+### Gold set
+
+`gold_set_v1.csv` is written by annotators following the
+[annotation guideline](annotation-guideline.md): each case is one taxpayer situation, a
+date (`as_of_date`), and every provision needed to answer it, labelled essential (E) or
+supporting (S). It is a spreadsheet for people; the evaluator reads it directly, so there
+is no second copy to keep in sync:
+
+```powershell
+docker compose exec -T api python scripts/evaluate_tax_retrieval.py --dataset data/evaluation/gold_set_v1.csv
+docker compose exec -T api python scripts/evaluate_tax_retrieval.py --dataset data/evaluation/gold_set_v1.csv --verified-only
+```
+
+`taxlens/evaluation/gold_set.py` turns each `gold_provisions` item
+(`E: VAT Law 48/2024 Art 5(1), as amended by Law 149/2025`) into a document, article, and
+clause:
+
+- Only **E** provisions score, as the guideline requires; S documents are listed in the
+  report as `supporting_document_numbers`.
+- The cited provision is the first one in the item; amendments and notes after `, ` or
+  ` (` are ignored, so an amended provision and its amendment count once.
+- A short number (`48/2024`, `Decree 181`) is completed from the corpus (`48/2024/QH15`),
+  or from an earlier item of the same case. Items the parser cannot read (a law named
+  without its number, such as `Livestock Law`) are listed as `unparsed_provisions`
+  instead of failing the run; write the number to have them scored.
+- Besides the document and article metrics, the report gives `mean_clause_hit_at_k` and
+  `mean_clause_reciprocal_rank`, the guideline's *exact* match. A passage without a
+  clause number holds the whole article, so it counts as a clause hit.
+- Conditional and false-premise cases (no E provisions) are skipped by the ranking
+  metrics. `--verified-only` also skips cases marked `uncertain` or without a verified
+  source, which the guideline keeps out of the final benchmark.
+- `as_of_date` is recorded in each case's report but not applied to search: most portal
+  documents have no recorded effective date, so filtering by date would drop them. Cases
+  dated before a law changed (L2, L3) therefore test whether the older version is in the
+  corpus and ranked, not whether search chooses by date.
+
+The scheduled daily evaluation still uses `tax_article_retrieval.json`, since both runs
+would write the same `latest.json` report.
+
 ### Next steps
 
-1. Relabel and grow the article dataset against the full corpus (at least 50 cases:
-   direct lookups, dates, amendments, comparisons, multi-document questions, unanswerable
-   questions, text without diacritics, and hard negatives).
+1. Grow the gold set to at least 50 cases against the full corpus (direct lookups, dates,
+   amendments, comparisons, multi-document questions, unanswerable questions, text
+   without diacritics, and hard negatives), then make it the scheduled dataset.
 2. Add reviewed answer and citation labels, and an optional bounded judge-model check.
 3. Add regression thresholds that fail the daily run, and trend views in MLflow.

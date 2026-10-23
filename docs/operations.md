@@ -71,7 +71,7 @@ Each step skips work already done, so the commands can be rerun at any time.
 | `collect_sources.py` | Lists tax documents from `--source government` (default), `mof`, or `all`, and downloads new ones. `--since-days` or `--from-year` sets the window, `--limit` caps downloads, `--dry-run` only counts. See [pipeline.md](pipeline.md). |
 | `process_corpus.py` | Extracts text (native or OCR) and chunks pending versions. `--rechunk-outdated` re-chunks from stored text after a chunker change; `--retry-failed` retries failed versions; `--reocr` OCRs again; `--all` reprocesses everything. |
 | `embed_corpus.py` | Embeds every passage without a current embedding, 500 at a time, printing progress. |
-| `evaluate_tax_retrieval.py` | Runs the labelled retrieval evaluation and stores the report ([retrieval.md](retrieval.md#evaluation)). |
+| `evaluate_tax_retrieval.py` | Runs the labelled retrieval evaluation and stores the report ([retrieval.md](retrieval.md#evaluation)). `--dataset data/evaluation/gold_set_v1.csv` runs the [gold set](retrieval.md#gold-set). |
 | `evaluate_retrieval.py` | Prints ranked results for one ad hoc `--query`. |
 | `evaluate_qa.py` | Runs the cheap, no-judge Q&A evaluation. |
 | `benchmark_ocr.py` | Word error rate of OCR settings against a born-digital PDF. |

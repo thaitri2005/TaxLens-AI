@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal
+from taxlens.evaluation.gold_set import load_gold_set
 from taxlens.evaluation.metrics import evaluate_retrieval
 from taxlens.evaluation.reports import persist_retrieval_report
 from taxlens.evaluation.retrieval_runner import (
@@ -39,6 +40,12 @@ def main() -> None:
         "--dataset",
         type=Path,
         default=Path("data/evaluation/tax_article_retrieval.json"),
+        help="A JSON dataset, or an annotated gold-set CSV such as gold_set_v1.csv",
+    )
+    parser.add_argument(
+        "--verified-only",
+        action="store_true",
+        help="Gold set only: skip cases marked uncertain or without a verified source",
     )
     parser.add_argument(
         "--k",
@@ -66,7 +73,10 @@ def main() -> None:
 
     dataset_bytes = arguments.dataset.read_bytes()
     dataset_hash = hashlib.sha256(dataset_bytes).hexdigest()
-    raw_dataset = json.loads(dataset_bytes.decode("utf-8"))
+    if arguments.dataset.suffix.lower() == ".csv":
+        raw_dataset = _gold_set_cases(arguments.dataset, arguments.verified_only)
+    else:
+        raw_dataset = json.loads(dataset_bytes.decode("utf-8"))
     if not isinstance(raw_dataset, list) or not raw_dataset:
         parser.error("Evaluation dataset must contain at least one case")
     dataset: list[dict[str, Any]] = []
@@ -101,6 +111,10 @@ def main() -> None:
                 "query": query,
                 "relevant_document_numbers": relevant_documents,
                 "relevant_articles": case.get("relevant_articles") or {},
+                "relevant_clauses": case.get("relevant_clauses") or {},
+                "gold_set_fields": {
+                    key: case[key] for key in _GOLD_SET_REPORT_FIELDS if key in case
+                },
             }
         )
     mode: SearchMode = arguments.mode
@@ -150,21 +164,27 @@ def main() -> None:
                     "ndcg_at_k": metrics.ndcg_at_k,
                 }
             if case["relevant_articles"]:
-                article_hits = [
-                    str(result.chunk.article_number)
-                    in case["relevant_articles"].get(result.document.document_number, [])
-                    for result in results
-                ]
-                first_article_rank = next(
-                    (rank for rank, hit in enumerate(article_hits, start=1) if hit), None
+                _add_locator_metrics(
+                    metrics_by_k,
+                    "article",
+                    [
+                        str(result.chunk.article_number)
+                        in case["relevant_articles"].get(result.document.document_number, [])
+                        for result in results
+                    ],
                 )
-                for k in ks:
-                    metrics_by_k[str(k)]["article_hit_at_k"] = any(article_hits[:k])
-                    metrics_by_k[str(k)]["article_reciprocal_rank"] = (
-                        1 / first_article_rank
-                        if first_article_rank and first_article_rank <= k
-                        else 0.0
-                    )
+            if case["relevant_clauses"]:
+                _add_locator_metrics(
+                    metrics_by_k,
+                    "clause",
+                    [
+                        _clause_hit(
+                            result,
+                            case["relevant_clauses"].get(result.document.document_number, []),
+                        )
+                        for result in results
+                    ],
+                )
             primary_metrics = metrics_by_k[str(primary_k)]
             reports.append(
                 {
@@ -177,6 +197,7 @@ def main() -> None:
                     "coverage_status": coverage_status,
                     "covered_relevant_document_numbers": sorted(covered_documents),
                     "missing_relevant_document_numbers": sorted(missing_documents),
+                    **case["gold_set_fields"],
                 }
             )
 
@@ -187,18 +208,22 @@ def main() -> None:
     coverage_summary = _coverage_summary(reports, corpus_coverage)
     status = evaluation_status(corpus_coverage)
     metrics_by_k = {str(k): metrics_summary(reports, k) for k in ks}
-    article_reports = [
-        report for report in reports if "article_hit_at_k" in report["metrics_by_k"][str(ks[0])]
-    ]
-    for k in ks:
-        if article_reports:
-            article_metrics = [report["metrics_by_k"][str(k)] for report in article_reports]
-            metrics_by_k[str(k)]["mean_article_hit_at_k"] = sum(
-                bool(item["article_hit_at_k"]) for item in article_metrics
-            ) / len(article_metrics)
-            metrics_by_k[str(k)]["mean_article_reciprocal_rank"] = sum(
-                float(item["article_reciprocal_rank"]) for item in article_metrics
-            ) / len(article_metrics)
+    for level in ("article", "clause"):
+        level_reports = [
+            report
+            for report in reports
+            if f"{level}_hit_at_k" in report["metrics_by_k"][str(ks[0])]
+        ]
+        if not level_reports:
+            continue
+        for k in ks:
+            level_metrics = [report["metrics_by_k"][str(k)] for report in level_reports]
+            metrics_by_k[str(k)][f"mean_{level}_hit_at_k"] = sum(
+                bool(item[f"{level}_hit_at_k"]) for item in level_metrics
+            ) / len(level_metrics)
+            metrics_by_k[str(k)][f"mean_{level}_reciprocal_rank"] = sum(
+                float(item[f"{level}_reciprocal_rank"]) for item in level_metrics
+            ) / len(level_metrics)
     fully_covered_metrics_by_k = {
         str(k): metrics_summary(fully_covered_reports, k) for k in ks
     }
@@ -305,6 +330,57 @@ def main() -> None:
             )
         tracker.log_metrics(tracking_metrics)
     print(json.dumps(persisted, ensure_ascii=False, indent=2))
+
+
+_GOLD_SET_REPORT_FIELDS = (
+    "case_type",
+    "as_of_date",
+    "uncertain",
+    "source_verified",
+    "relevant_clauses",
+    "supporting_document_numbers",
+    "unparsed_provisions",
+)
+
+
+def _gold_set_cases(path: Path, verified_only: bool) -> list[dict[str, Any]]:
+    """Gold-set cases in the JSON dataset format, with short numbers completed from the corpus."""
+
+    with SessionLocal() as session:
+        corpus_document_numbers = list(session.scalars(select(LegalDocument.document_number)))
+    cases = []
+    for gold_case in load_gold_set(path):
+        if verified_only and (gold_case.uncertain or not gold_case.source_verified):
+            continue
+        case = gold_case.to_evaluation_case(corpus_document_numbers)
+        # Conditional and false-premise cases have no essential provisions; they test
+        # answers, not ranking.
+        case["answerable"] = gold_case.answerable
+        cases.append(case)
+    return cases
+
+
+def _add_locator_metrics(
+    metrics_by_k: dict[str, dict[str, Any]], level: str, hits: list[bool]
+) -> None:
+    first_rank = next((rank for rank, hit in enumerate(hits, start=1) if hit), None)
+    for k, metrics in metrics_by_k.items():
+        metrics[f"{level}_hit_at_k"] = any(hits[: int(k)])
+        metrics[f"{level}_reciprocal_rank"] = (
+            1 / first_rank if first_rank and first_rank <= int(k) else 0.0
+        )
+
+
+def _clause_hit(result: SearchResult, clauses: list[list[str | None]]) -> bool:
+    # A chunk without a clause number holds a whole article (or its introduction), so it
+    # contains any clause of that article; a label without a clause needs only the article.
+    article = str(result.chunk.article_number)
+    clause = result.chunk.clause_number
+    return any(
+        article == label_article
+        and (label_clause is None or clause is None or clause == label_clause)
+        for label_article, label_clause in clauses
+    )
 
 
 def _coverage_summary(
