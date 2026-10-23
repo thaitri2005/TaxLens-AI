@@ -161,6 +161,7 @@ returns `PROVIDER_UNAVAILABLE`; search and the library still work.
 | [pipeline.md](docs/pipeline.md) | Official sources, what is collected, the daily and maintenance Airflow DAGs |
 | [retrieval.md](docs/retrieval.md) | Extraction, chunking, search, evidence gate, answer validation, evaluation |
 | [operations.md](docs/operations.md) | Local development, contributing, release, backfills, laptop collection, logs, troubleshooting |
+| [annotation-guideline.md](docs/annotation-guideline.md) | How to label cases for the evaluation gold set |
 
 ## Limitations
 
