@@ -24,3 +24,4 @@ infra/terraform/*.tfvars
 .terraform/
 infra/terraform/.terraform-local/
 .DS_Store
+.vscode/

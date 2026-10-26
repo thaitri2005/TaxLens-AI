@@ -148,6 +148,78 @@ def test_document_endpoints_return_persisted_documents() -> None:
     assert [chunk["content"] for chunk in chunks] == ["Điều 1"]
 
 
+def test_document_list_previews_the_opening_of_the_first_article() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    LegalDocument.metadata.create_all(engine)
+    with Session(engine) as session:
+        with_text = LegalDocument(
+            document_number="219/2013/TT-BTC", title="Thuế giá trị gia tăng", document_type="TT-BTC"
+        )
+        without_text = LegalDocument(
+            document_number="01/2025/TT-BTC", title="Chưa xử lý", document_type="TT-BTC"
+        )
+        session.add_all([with_text, without_text])
+        session.flush()
+        version = DocumentVersion(
+            document_id=with_text.id,
+            issue_date=date(2013, 12, 31),
+            legal_status="EFFECTIVE",
+            raw_content_hash="c" * 64,
+            raw_artifact_key="raw/219.doc",
+        )
+        session.add_all(
+            [
+                version,
+                DocumentVersion(
+                    document_id=without_text.id,
+                    issue_date=date(2025, 1, 1),
+                    legal_status="EFFECTIVE",
+                    raw_content_hash="d" * 64,
+                    raw_artifact_key="raw/01.doc",
+                ),
+            ]
+        )
+        session.flush()
+        for article_number, content in (
+            (None, "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM. Căn cứ Luật Thuế giá trị gia tăng."),
+            ("10", "Điều 10. Thuế suất 10%."),
+            ("1", "Điều 1. Phạm vi điều chỉnh.\n\nThông tư này hướng dẫn   thuế giá trị gia tăng."),
+        ):
+            session.add(
+                DocumentChunk(
+                    document_version_id=version.id,
+                    article_number=article_number,
+                    content=content,
+                    token_count=len(content.split()),
+                )
+            )
+        session.commit()
+
+    app = create_app()
+
+    def override_session():
+        with Session(engine) as session:
+            yield session
+
+    app.dependency_overrides[get_db_session] = override_session
+    app.dependency_overrides[require_authenticated_user] = lambda: AuthenticatedUser(
+        id=uuid4(), username="test-user", role="user"
+    )
+    items = TestClient(app).get("/documents").json()["items"]
+
+    previews = {item["document_number"]: item["preview"] for item in items}
+    assert previews == {
+        "219/2013/TT-BTC": (
+            "Điều 1. Phạm vi điều chỉnh. Thông tư này hướng dẫn thuế giá trị gia tăng."
+        ),
+        "01/2025/TT-BTC": None,
+    }
+
+
 def test_recorded_document_types_are_grouped_into_kinds() -> None:
     assert [
         document_kind(value)

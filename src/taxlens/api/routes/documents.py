@@ -21,6 +21,7 @@ from taxlens.legal_data.models import (
     ProcessingJob,
     SourceRecord,
 )
+from taxlens.retrieval.snippets import build_excerpt
 
 router = APIRouter(
     prefix="/documents", tags=["documents"], dependencies=[Depends(require_authenticated_user)]
@@ -47,6 +48,10 @@ EXPORT_COLUMNS = (
     "embedded_passages",
     "collected_at",
 )
+# A document preview is as long as a passage snippet in search results; a little more of
+# the passage is read so the preview can end on a sentence boundary.
+PREVIEW_CHARACTERS = 260
+PREVIEW_SOURCE_CHARACTERS = 800
 
 
 class DocumentSummary(BaseModel):
@@ -62,6 +67,7 @@ class DocumentSummary(BaseModel):
 class DocumentListItem(DocumentSummary):
     legal_status: str | None
     issue_date: date | None
+    preview: str | None = None
 
 
 class DocumentPage(BaseModel):
@@ -165,6 +171,7 @@ def list_documents(
     document_ids = [document.id for document in documents]
     source_names = _source_names_by_document(session, document_ids)
     latest_versions = _latest_versions_by_document(session, document_ids)
+    previews = _previews_by_version(session, [version.id for version in latest_versions.values()])
     items = []
     for document in documents:
         version = latest_versions.get(document.id)
@@ -173,6 +180,7 @@ def list_documents(
                 **_document_summary(document, source_names.get(document.id)).model_dump(),
                 legal_status=version.legal_status if version is not None else None,
                 issue_date=version.issue_date if version is not None else None,
+                preview=previews.get(version.id) if version is not None else None,
             )
         )
     return DocumentPage(total=int(total), items=items)
@@ -402,6 +410,57 @@ def _latest_versions_by_document(
     return latest
 
 
+def _previews_by_version(session: Session, version_ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """The opening words of each version's first article, or of its preamble if it has none.
+
+    The preamble is mostly the national motto, issuing body and legal bases, so the first
+    article (usually the scope) says more about what the document covers. One query with
+    one row per version, and only the start of each passage is read.
+    """
+
+    if not version_ids:
+        return {}
+    first_passage = (
+        select(
+            DocumentChunk.document_version_id,
+            func.substr(DocumentChunk.content, 1, PREVIEW_SOURCE_CHARACTERS).label("opening"),
+            func.row_number()
+            .over(
+                partition_by=DocumentChunk.document_version_id,
+                order_by=(
+                    DocumentChunk.article_number.is_(None),
+                    DocumentChunk.page_start.asc().nulls_last(),
+                    func.length(DocumentChunk.article_number),
+                    DocumentChunk.article_number,
+                    # The article's introduction (no clause) first, then clauses in
+                    # numeric order: by length before value, so "2" precedes "10".
+                    DocumentChunk.clause_number.is_not(None),
+                    func.length(DocumentChunk.clause_number),
+                    DocumentChunk.clause_number,
+                    DocumentChunk.id,
+                ),
+            )
+            .label("position"),
+        )
+        .where(DocumentChunk.document_version_id.in_(version_ids))
+        .subquery()
+    )
+    rows = session.execute(
+        select(first_passage.c.document_version_id, first_passage.c.opening).where(
+            first_passage.c.position == 1
+        )
+    ).all()
+    previews: dict[uuid.UUID, str] = {}
+    for version_id, opening in rows:
+        # Subquery columns are untyped to the type checker; convert explicitly.
+        text = str(opening or "")
+        if text.strip():
+            previews[uuid.UUID(str(version_id))] = build_excerpt(
+                text, "", maximum_length=PREVIEW_CHARACTERS
+            )
+    return previews
+
+
 def _processing_by_version(
     session: Session, version_ids: list[uuid.UUID]
 ) -> dict[uuid.UUID, tuple[str, str | None]]:
@@ -477,20 +536,22 @@ def export_document_list(session: Session = Depends(get_db_session)) -> Response
         .order_by(ProcessingJob.updated_at.desc(), ProcessingJob.created_at.desc())
     ).all():
         processing.setdefault(version_id, (job_status, error_code))
-    passages = dict(
-        session.execute(
+    passages: dict[uuid.UUID, int] = {
+        version_id: int(count)
+        for version_id, count in session.execute(
             select(DocumentChunk.document_version_id, func.count(DocumentChunk.id)).group_by(
                 DocumentChunk.document_version_id
             )
         ).all()
-    )
-    embedded = dict(
-        session.execute(
+    }
+    embedded: dict[uuid.UUID, int] = {
+        version_id: int(count)
+        for version_id, count in session.execute(
             select(DocumentChunk.document_version_id, func.count(func.distinct(DocumentChunk.id)))
             .join(DocumentEmbedding, DocumentEmbedding.document_chunk_id == DocumentChunk.id)
             .group_by(DocumentChunk.document_version_id)
         ).all()
-    )
+    }
 
     buffer = io.StringIO()
     writer = csv.writer(buffer)

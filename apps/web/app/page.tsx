@@ -18,7 +18,7 @@ type Citation = {
 };
 type SearchHit = { chunk_id: string; snippet: string; content: string; fused_score: number; citation: Citation };
 type Document = { id: string; document_number: string; title: string; document_type: string; kind: string; issuing_agency: string | null; source_name: string | null };
-type DocumentListItem = Document & { legal_status: string | null; issue_date: string | null };
+type DocumentListItem = Document & { legal_status: string | null; issue_date: string | null; preview: string | null };
 type DocumentPage = { total: number; items: DocumentListItem[] };
 type CountByValue = { value: string; count: number };
 type DocumentOverview = {
@@ -500,6 +500,7 @@ export default function Home() {
               <span className="tag">{labelFor(copy.kinds, document.kind)}</span>
               {document.legal_status && <StatusTag status={document.legal_status} copy={copy} />}
             </span>
+            {document.preview && <span className="document-row-preview">{document.preview}</span>}
           </button>)}</div>
           {searchDocuments.total > searchDocuments.items.length && <button className="link-button" type="button" onClick={() => showDocumentsFor(searchedQuery)}>{copy.showAllDocuments(numberFormat.format(searchDocuments.total))} →</button>}
         </div>}
@@ -577,6 +578,7 @@ export default function Home() {
                   {document.legal_status && <StatusTag status={document.legal_status} copy={copy} />}
                   <span className="document-row-date">{document.issue_date ? formatDate(document.issue_date) : "—"}</span>
                 </span>
+                {document.preview && <span className="document-row-preview">{document.preview}</span>}
               </button>)}
             </div>}
           {documentPage && documentPage.total > 0 && <Pager
