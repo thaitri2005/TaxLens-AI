@@ -141,10 +141,9 @@ More in [docs/operations.md](docs/operations.md#local-development).
 1. Merge a pull request into `main` (protected; see
    [contributing](docs/operations.md#contributing)); **CI** runs backend checks, the web
    build, and Terraform validation.
-2. Run **Publish release images**, which tags the API, web, and Airflow images with the
-   commit SHA.
-3. Run **Plan or deploy Azure infrastructure** with that tag. The API applies database
-   migrations when it starts.
+2. Run **Release and deploy** on `main`. It builds the API, web, and Airflow images tagged
+   with the commit SHA, then plans and applies the Terraform update with them. The API
+   applies database migrations when it starts.
 
 Do not deploy while an Airflow run is in progress; a deploy restarts the API and its jobs.
 Backfills, the Ministry of Finance laptop run, logs, and troubleshooting are in

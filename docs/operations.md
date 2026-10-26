@@ -133,10 +133,11 @@ Keep pull requests small and focused, and delete the branch after merging.
 
 1. Merge to `main` and wait for **CI** to pass (backend checks, web build, Terraform
    validation).
-2. Run **Publish release images** on `main`. It builds the API, web, and Airflow images
-   tagged with the commit SHA.
-3. Run **Plan or deploy Azure infrastructure** with that tag and `apply=true`; approve the
-   `azure-deploy` environment. The API applies database migrations itself after it starts.
+2. Run **Release and deploy** on `main`. It builds the API, web, and Airflow images tagged
+   with the commit SHA, then plans and applies the Terraform update with those images (the
+   plan is in the run summary). If the `azure-deploy` environment requires a reviewer,
+   approve it when the run pauses. The API applies database migrations itself after it
+   starts. Untick `deploy` to only build and publish the images.
 
 Before deploying, check that no Airflow run is in progress: a deploy restarts the API and
 kills its jobs. Check which image is live with:
@@ -153,8 +154,8 @@ and can take a minute; the page says so.
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
 | **CI** (`ci.yml`) | Pull requests and pushes to `main` | Ruff, MyPy, and Pytest; a production Next.js build with test-only placeholder secrets; Terraform init, format, and validate without a backend. |
-| **Publish release images** (`release-images.yml`) | Manual, `azure-release` environment | Builds the API, web, and Airflow images, tags them with the commit SHA, and prints the three image references. |
-| **Plan or deploy Azure infrastructure** (`deploy.yml`) | Manual, apply job behind the `azure-deploy` environment | Takes a published image tag, writes temporary Terraform variables from GitHub secrets, and produces a reviewable plan; applies it only with `apply=true`. |
+| **Release and deploy** (`release-images.yml`) | Manual, `azure-release` environment | Builds the API, web, and Airflow images, tags them with the commit SHA, then runs the deploy workflow below with `apply=true` (skipped when `deploy` is unticked). |
+| **Plan or deploy Azure infrastructure** (`deploy.yml`) | Called by the release, or manual; apply job behind the `azure-deploy` environment | Takes a published image tag, writes temporary Terraform variables from GitHub secrets, and produces a reviewable plan; applies it only with `apply=true`. Run it alone to redeploy an existing tag or to review a plan. |
 
 Both Azure workflows sign in with OIDC and need these secrets:
 
@@ -182,7 +183,7 @@ Terraform for the development environment in `taxlens-dev-rg`. What it creates i
 
 #### Normal use
 
-Deployments run through GitHub Actions (**Plan or deploy Azure infrastructure**), which
+Deployments run through GitHub Actions (**Release and deploy**), which
 supplies the image tags and secrets; see [Release](#release). Run
 Terraform locally only to inspect or recover.
 

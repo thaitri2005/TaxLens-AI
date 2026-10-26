@@ -1,6 +1,7 @@
 name: Plan or deploy Azure infrastructure
 
 on:
+  # Run on its own to redeploy an existing tag or to review a plan without applying.
   workflow_dispatch:
     inputs:
       image_tag:
@@ -11,6 +12,15 @@ on:
         description: Apply after the plan; requires the protected environment
         required: true
         default: false
+        type: boolean
+  # Called by "Release and deploy" right after the images are published.
+  workflow_call:
+    inputs:
+      image_tag:
+        required: true
+        type: string
+      apply:
+        required: true
         type: boolean
 
 permissions:

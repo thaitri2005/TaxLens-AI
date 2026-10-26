@@ -301,7 +301,7 @@ All images are tagged with the commit SHA and never reused.
   address (`http://taxlens-dev-api`).
 - **Airflow** (`airflow/Dockerfile`): Airflow 2.10 with the DAG files baked in.
 
-Build and publish them with the **Publish release images** workflow
+Build, publish, and deploy them with the **Release and deploy** workflow
 ([operations.md](operations.md#release)), not by hand.
 
 ### Startup and migrations

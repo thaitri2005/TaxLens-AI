@@ -1,4 +1,4 @@
-name: Publish release images
+name: Release and deploy
 
 on:
   workflow_dispatch:
@@ -7,6 +7,11 @@ on:
         description: Immutable image tag; defaults to the commit SHA
         required: false
         type: string
+      deploy:
+        description: Deploy the images right after publishing them
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -54,3 +59,15 @@ jobs:
           echo "API_IMAGE=$ACR_LOGIN_SERVER/taxlens-api:$IMAGE_TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "WEB_IMAGE=$ACR_LOGIN_SERVER/taxlens-web:$IMAGE_TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "AIRFLOW_IMAGE=$ACR_LOGIN_SERVER/taxlens-airflow:$IMAGE_TAG" >> "$GITHUB_STEP_SUMMARY"
+
+  # The same plan-and-apply as the standalone deploy workflow, run in one go with the
+  # images just published. The azure-deploy environment still guards the apply.
+  deploy:
+    name: Deploy
+    needs: publish
+    if: ${{ inputs.deploy }}
+    uses: ./.github/workflows/deploy.yml
+    with:
+      image_tag: ${{ inputs.image_tag || github.sha }}
+      apply: true
+    secrets: inherit
