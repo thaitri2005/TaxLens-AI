@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     hf_chat_model: str = "Qwen/Qwen3-4B-Instruct-2507"
     hf_chat_routing_policy: str = "cheapest"
     hf_chat_timeout_seconds: float = 30.0
-    hf_chat_max_output_tokens: int = 1400
+    hf_chat_max_output_tokens: int = 2000
     hf_chat_temperature: float = 0.1
     qa_min_semantic_score: float = 0.80
     qa_min_fact_support: float = 0.5

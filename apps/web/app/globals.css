@@ -100,3 +100,4 @@ footer { display:flex; justify-content:space-between; width:min(100% - 48px,1080
 .pager button:hover:not(:disabled) { border-color:var(--teal); }
 .pager button:disabled { opacity:.4; cursor:default; }
 @media (max-width:700px) { .stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.stat-card strong { font-size:23px; }.facet-row { flex-direction:column; gap:6px; }.facet-label { flex:none; }.document-row { grid-template-columns:1fr; gap:5px; }.document-row-meta { justify-content:flex-start; flex-wrap:wrap; }.document-row-date { min-width:0; text-align:left; } }
+.search-documents { margin:0 0 26px; }.search-documents .document-table { margin:8px 0 10px; }.result-list.is-busy { opacity:.55; transition:opacity .15s; }.practical-advice { margin:18px 0; padding:14px 18px; background:#f1f8f6; border-left:3px solid var(--teal); border-radius:8px; }.practical-advice ul { margin:6px 0 0; padding-left:20px; }.practical-advice li { margin:4px 0; }

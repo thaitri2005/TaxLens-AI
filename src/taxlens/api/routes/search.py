@@ -63,8 +63,16 @@ def search(
     effective_to: date | None = None,
     mode: Literal["keyword", "semantic", "hybrid"] = "hybrid",
     limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0, le=200),
     session: Session = Depends(get_db_session),
 ) -> list[SearchHit]:
+    """Ranked passages; ``offset`` pages through them (``limit`` per page).
+
+    Ranking is computed for the first ``offset + limit`` passages and the page is sliced
+    from that list, so pages stay consistent with each other.
+    """
+
+    window = offset + limit
     filters = SearchFilters(
         document_number=document_number,
         document_type=document_type,
@@ -75,7 +83,7 @@ def search(
         effective_to=effective_to,
     )
     if mode == "keyword":
-        results = keyword_search_chunks(session, q, filters, limit)
+        results = keyword_search_chunks(session, q, filters, window)
     else:
         provider = (
             get_available_embedding_provider()
@@ -89,12 +97,14 @@ def search(
                 query_embedding.vectors[0],
                 provider,
                 filters,
-                limit,
+                window,
             )
         elif mode == "semantic":
             results = []
         else:
-            results = hybrid_search_chunks(session, q, provider, filters, limit)
+            results = hybrid_search_chunks(
+                session, q, provider, filters, window, candidate_limit=max(50, window)
+            )
     return [
         SearchHit(
             chunk_id=result.chunk.id,
@@ -105,7 +115,7 @@ def search(
             content=result.chunk.content,
             citation=to_search_citation(build_citation(result)),
         )
-        for result in results
+        for result in results[offset:window]
     ]
 
 

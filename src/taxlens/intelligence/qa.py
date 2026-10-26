@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import lru_cache
 from typing import Any, TypedDict
@@ -23,6 +23,7 @@ from taxlens.retrieval.snippets import lexical_support
 
 logger = logging.getLogger(__name__)
 EVIDENCE_CLAIM_MAX_LENGTH = 240
+MAX_PRACTICAL_ADVICE = 4
 
 
 class AnswerStatus(StrEnum):
@@ -48,6 +49,7 @@ class GeneratedAnswer:
     review_actions: list[str]
     omitted_fact_count: int = 0
     answerable: bool = True
+    practical_advice: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -62,6 +64,7 @@ class QuestionAnswer:
     citations: list[Citation]
     review_actions: list[str]
     disclaimer: str
+    practical_advice: list[str] = field(default_factory=list)
 
 
 def answer_question(
@@ -250,6 +253,7 @@ def _generate_answer_node(state: QuestionGraphState) -> dict[str, object]:
             citations=citations,
             review_actions=generated.review_actions,
             disclaimer=_disclaimer(),
+            practical_advice=generated.practical_advice,
         )
     }
 
@@ -283,6 +287,7 @@ def parse_generated_answer(content: str, citation_count: int) -> GeneratedAnswer
         review_actions=_text_list(payload.get("review_actions")),
         omitted_fact_count=omitted_fact_count,
         answerable=answerable,
+        practical_advice=_text_list(payload.get("practical_advice"))[:MAX_PRACTICAL_ADVICE],
     )
 
 
@@ -311,17 +316,25 @@ def _build_messages(
         for index, (result, citation) in enumerate(zip(results, citations, strict=True), start=1)
     )
     system_prompt = (
-        "You are a Vietnamese tax-regulation research assistant. Use only the numbered "
-        "evidence passages; they are OCR text of official documents and may contain "
-        "recognition errors. Answer in the language of the question (a Vietnamese question "
-        "gets a Vietnamese answer). If the passages do not answer the question, set "
-        "answerable to false and explain what is missing in uncertainties instead of "
-        "guessing. Keep the answer under 120 words and name the document and article it "
-        "relies on. Give up to 3 confirmed facts; each must restate what its cited passage "
-        "says, reusing the passage wording, and cite only passages that contain it. Do not "
-        "invent legal facts or give definitive professional advice. Return valid JSON only "
-        "with: answerable (boolean), answer (string), confirmed_facts (array of objects with "
-        "text and citation_numbers), interpretation (string or null), uncertainties (array of "
+        "You are a Vietnamese tax-regulation assistant for accountants and tax advisers. "
+        "Base every legal rule, rate, deadline, and condition on the numbered evidence "
+        "passages; they are OCR text of official documents and may contain recognition "
+        "errors. Answer in the language of the question (a Vietnamese question gets a "
+        "Vietnamese answer). If the passages do not answer the question, set answerable to "
+        "false and explain what is missing in uncertainties instead of guessing.\n\n"
+        "Write a helpful answer of up to about 250 words: state the rule and the document "
+        "and article it comes from, then explain in plain language what it means for the "
+        "situation asked about, including the conditions, exceptions, rates, and deadlines "
+        "the passages give. Give up to 5 confirmed facts; each must restate what its cited "
+        "passage says, reusing the passage wording, and cite only passages that contain it.\n\n"
+        "In practical_advice, give 1 to 4 short, concrete next steps a practitioner could "
+        "take under these rules, such as documents or invoices to prepare, conditions to "
+        "check, deadlines to note, or when to confirm with the tax authority. Advice must "
+        "follow from the passages: do not introduce rules, rates, or deadlines they do not "
+        "contain, and say when the right step depends on facts the question does not give.\n\n"
+        "Return valid JSON only with: answerable (boolean), answer (string), "
+        "confirmed_facts (array of objects with text and citation_numbers), interpretation "
+        "(string or null), uncertainties (array of strings), practical_advice (array of "
         "strings), and review_actions (array of strings)."
     )
     user_prompt = PromptTemplate.from_template(

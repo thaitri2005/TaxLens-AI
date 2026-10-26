@@ -55,11 +55,16 @@ type Answer = {
   citations: Citation[];
   confirmed_facts: Claim[];
   review_actions: string[];
+  practical_advice?: string[];
   disclaimer: string;
 };
 type SearchDocumentGroup = { document_number: string; title: string; hits: SearchHit[] };
 
 const DOCUMENT_PAGE_SIZE = 20;
+const SEARCH_PAGE_SIZE = 10;
+// The search API ranks at most 200 passages ahead of a page.
+const SEARCH_MAX_OFFSET = 200;
+const SEARCH_DOCUMENT_MATCHES = 5;
 const CHUNK_PAGE_SIZE = 50;
 const NO_FILTERS: DocumentFilters = { q: "", source: "", kind: "", status: "" };
 // A scaled-to-zero API answers 502-504 while it starts; reads are retried instead of failing.
@@ -72,11 +77,11 @@ const COPY = {
     heroEyebrow: "Vietnamese tax intelligence", heroTitleOne: "Find the rule.", heroTitleTwo: "See the evidence.",
     heroCopy: "Search official regulations and ask grounded questions with article-level citations.",
     retrievalEyebrow: "Retrieval workspace", searchTitle: "Search regulations", hybrid: "Hybrid search", searchButton: "Search",
-    searchPlaceholder: "Try: thời điểm lập hóa đơn", mode: "Mode", modes: { hybrid: "Hybrid", keyword: "Keyword", semantic: "Semantic" },
+    searchPlaceholder: "Try: 219/2013, hóa đơn điện tử, or thời điểm lập hóa đơn", mode: "Mode", modes: { hybrid: "Hybrid", keyword: "Keyword", semantic: "Semantic" },
     askEyebrow: "Evidence-grounded answers", askTitle: "Ask TaxLens", citedResponse: "Cited response",
     askPlaceholder: "Ask a question about Vietnamese tax regulations…", askButton: "Ask question", pressEnter: "Press Enter to ask",
     askEmptyTitle: "Ask a focused question", askEmptyText: "TaxLens will show its evidence status, uncertainties, and citations.",
-    confirmedFacts: "Confirmed facts", uncertainties: "Uncertainties", reviewActions: "Review actions", sources: "Sources",
+    confirmedFacts: "Confirmed facts", uncertainties: "Uncertainties", reviewActions: "Review actions", practicalAdvice: "Practical advice", sources: "Sources",
     statusMessages: {
       ANSWERED: "",
       UNSUPPORTED: "This request is outside the supported regulatory-question scope.",
@@ -109,8 +114,10 @@ const COPY = {
     } as Record<string, string>,
     sourceNames: { "government-portal": "Government portal", "mof-vbpq": "Ministry of Finance" } as Record<string, string>,
     working: "Working…", evidencePassage: "evidence passage", evidencePassages: "evidence passages", relevantPassage: "Relevant passage",
-    noResults: "No matching passages", broaden: "Try a broader Vietnamese or English query.", loadMore: "Load more results",
-    searchCorpus: "Search the corpus", searchHelp: "Each document appears once with its strongest evidence passages.",
+    noResults: "No matching passages", broaden: "Try a broader Vietnamese or English query.",
+    matchingDocuments: "Matching documents", matchingPassages: "Matching passages",
+    showAllDocuments: (count: string) => `Show all ${count} in Documents`, searchPage: (page: number) => `Page ${page}`,
+    searchCorpus: "Search the corpus", searchHelp: "Search by document number, title, or content. Each document appears once with its strongest passages.",
     article: "Article", clause: "clause", page: "p.", sourcePassage: "Source passage", officialSource: "Official source ↗",
     back: "Back to documents", readingDocument: "Reading versions and indexed passages.",
     indexedSource: "Indexed source", sourceUnavailable: "Source unavailable", agencyUnavailable: "Issuing agency not recorded",
@@ -124,11 +131,11 @@ const COPY = {
     heroEyebrow: "Trợ lý tra cứu thuế Việt Nam", heroTitleOne: "Tìm đúng quy định.", heroTitleTwo: "Nắm rõ thông tin.",
     heroCopy: "Tra cứu và hỏi đáp văn bản pháp luật với trích dẫn đến từng điều, khoản.",
     retrievalEyebrow: "Tra cứu văn bản", searchTitle: "Tìm kiếm quy định", hybrid: "Tìm kiếm kết hợp", searchButton: "Tìm kiếm",
-    searchPlaceholder: "Ví dụ: thời điểm lập hóa đơn", mode: "Chế độ", modes: { hybrid: "Kết hợp", keyword: "Từ khóa", semantic: "Ngữ nghĩa" },
+    searchPlaceholder: "Ví dụ: 219/2013, hóa đơn điện tử hoặc thời điểm lập hóa đơn", mode: "Chế độ", modes: { hybrid: "Kết hợp", keyword: "Từ khóa", semantic: "Ngữ nghĩa" },
     askEyebrow: "Hỏi đáp có trích dẫn", askTitle: "Hỏi TaxLens", citedResponse: "Câu trả lời có dẫn nguồn",
     askPlaceholder: "Đặt câu hỏi về quy định thuế Việt Nam…", askButton: "Gửi câu hỏi", pressEnter: "Nhấn Enter để gửi câu hỏi",
     askEmptyTitle: "Đặt câu hỏi về văn bản pháp luật", askEmptyText: "TaxLens sẽ hiển thị câu trả lời, nguồn trích dẫn và những điểm cần kiểm tra.",
-    confirmedFacts: "Thông tin đã xác nhận", uncertainties: "Điểm cần lưu ý", reviewActions: "Đề xuất kiểm tra", sources: "Nguồn dẫn",
+    confirmedFacts: "Thông tin đã xác nhận", uncertainties: "Điểm cần lưu ý", reviewActions: "Đề xuất kiểm tra", practicalAdvice: "Gợi ý thực hiện", sources: "Nguồn dẫn",
     statusMessages: {
       ANSWERED: "",
       UNSUPPORTED: "Yêu cầu nằm ngoài phạm vi hỏi đáp về quy định pháp luật.",
@@ -161,8 +168,10 @@ const COPY = {
     } as Record<string, string>,
     sourceNames: { "government-portal": "Cổng TTĐT Chính phủ", "mof-vbpq": "Bộ Tài chính" } as Record<string, string>,
     working: "Đang xử lý…", evidencePassage: "đoạn trích", evidencePassages: "đoạn trích", relevantPassage: "Đoạn trích liên quan",
-    noResults: "Không tìm thấy đoạn phù hợp", broaden: "Hãy thử câu hỏi rộng hơn bằng tiếng Việt hoặc tiếng Anh.", loadMore: "Tải thêm kết quả",
-    searchCorpus: "Tìm kiếm trong kho văn bản", searchHelp: "Các văn bản phù hợp kèm đoạn trích liên quan.",
+    noResults: "Không tìm thấy đoạn phù hợp", broaden: "Hãy thử câu hỏi rộng hơn bằng tiếng Việt hoặc tiếng Anh.",
+    matchingDocuments: "Văn bản phù hợp", matchingPassages: "Đoạn trích phù hợp",
+    showAllDocuments: (count: string) => `Xem tất cả ${count} văn bản`, searchPage: (page: number) => `Trang ${page}`,
+    searchCorpus: "Tìm kiếm trong kho văn bản", searchHelp: "Tìm theo số hiệu, tên hoặc nội dung văn bản. Mỗi văn bản hiển thị một lần kèm các đoạn trích liên quan nhất.",
     article: "Điều", clause: "khoản", page: "tr.", sourcePassage: "Đoạn trích nguồn", officialSource: "Nguồn chính thức ↗",
     back: "Quay lại danh sách", readingDocument: "Đang đọc thông tin văn bản và các đoạn trích.",
     indexedSource: "Văn bản đã xử lý", sourceUnavailable: "Nguồn chưa được ghi nhận", agencyUnavailable: "Cơ quan ban hành chưa được ghi nhận",
@@ -258,8 +267,10 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMode, setSearchMode] = useState("hybrid");
   const [searchResults, setSearchResults] = useState<SearchHit[] | null>(null);
-  const [searchLimit, setSearchLimit] = useState(10);
+  const [searchedQuery, setSearchedQuery] = useState("");
+  const [searchPageIndex, setSearchPageIndex] = useState(0);
   const [searchHasMore, setSearchHasMore] = useState(false);
+  const [searchDocuments, setSearchDocuments] = useState<DocumentPage | null>(null);
   const [searchBusy, setSearchBusy] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [question, setQuestion] = useState("");
@@ -284,6 +295,7 @@ export default function Home() {
   const loadedListQuery = useRef("");
   const latestListRequest = useRef(0);
   const listTop = useRef<HTMLDivElement>(null);
+  const searchTop = useRef<HTMLDivElement>(null);
   const copy = COPY[language];
   const numberFormat = new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US");
   const listQuery = documentListQuery(documentFilters, documentPageIndex);
@@ -372,14 +384,27 @@ export default function Home() {
     }
   }
 
-  async function runSearch(limit: number) {
+  // One page of passages at a time. The first page also looks up documents whose number or
+  // title matches, the same lookup as the Documents tab, so "219/2013" finds the circular
+  // itself and not only passages that mention it.
+  async function runSearch(query: string, pageIndex: number) {
     setSearchBusy(true); setSearchError("");
+    const offset = pageIndex * SEARCH_PAGE_SIZE;
     try {
-      const params = new URLSearchParams({ q: searchQuery, mode: searchMode, limit: String(limit + 1) });
-      const results = await request<SearchHit[]>(`/search?${params}`);
-      setSearchLimit(limit);
-      setSearchHasMore(results.length > limit);
-      setSearchResults(results.slice(0, limit));
+      const params = new URLSearchParams({ q: query, mode: searchMode, limit: String(SEARCH_PAGE_SIZE + 1), offset: String(offset) });
+      const documentParams = new URLSearchParams({ q: query, limit: String(SEARCH_DOCUMENT_MATCHES) });
+      const [results, documents] = await Promise.all([
+        request<SearchHit[]>(`/search?${params}`),
+        pageIndex === 0
+          ? request<DocumentPage>(`/documents?${documentParams}`).catch(() => null)
+          : Promise.resolve(undefined),
+      ]);
+      setSearchedQuery(query);
+      setSearchPageIndex(pageIndex);
+      setSearchHasMore(results.length > SEARCH_PAGE_SIZE && offset + SEARCH_PAGE_SIZE < SEARCH_MAX_OFFSET);
+      setSearchResults(results.slice(0, SEARCH_PAGE_SIZE));
+      if (documents !== undefined) setSearchDocuments(documents);
+      if (pageIndex > 0) searchTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       setSearchError((error as Error).message);
     } finally {
@@ -389,7 +414,19 @@ export default function Home() {
 
   async function search(event: FormEvent) {
     event.preventDefault();
-    await runSearch(10);
+    await runSearch(searchQuery.trim(), 0);
+  }
+
+  function openFromSearch(document: Document) {
+    setView("documents");
+    void openDocument(document);
+  }
+
+  function showDocumentsFor(query: string) {
+    setDocumentQueryInput(query);
+    updateDocumentFilters({ ...NO_FILTERS, q: query });
+    setSelectedDocument(null);
+    setView("documents");
   }
 
   async function ask(event: FormEvent) {
@@ -454,7 +491,21 @@ export default function Home() {
           </div>
         </form>
         <ResultState error={searchError} hasResults={searchResults !== null} emptyTitle={copy.searchCorpus} emptyText={copy.searchHelp} />
-        {searchResults && <div className="result-list">
+        {searchPageIndex === 0 && searchDocuments && searchDocuments.items.length > 0 && <div className="search-documents">
+          <p className="eyebrow">{copy.matchingDocuments}</p>
+          <div className="document-table">{searchDocuments.items.map(document => <button className="document-row" type="button" key={document.id} onClick={() => openFromSearch(document)}>
+            <span className="document-row-number">{document.document_number}</span>
+            <span className="document-row-title">{document.title}</span>
+            <span className="document-row-meta">
+              <span className="tag">{labelFor(copy.kinds, document.kind)}</span>
+              {document.legal_status && <StatusTag status={document.legal_status} copy={copy} />}
+            </span>
+          </button>)}</div>
+          {searchDocuments.total > searchDocuments.items.length && <button className="link-button" type="button" onClick={() => showDocumentsFor(searchedQuery)}>{copy.showAllDocuments(numberFormat.format(searchDocuments.total))} →</button>}
+        </div>}
+        <div ref={searchTop} className="list-anchor" />
+        {searchResults && searchResults.length > 0 && <p className="eyebrow">{copy.matchingPassages}</p>}
+        {searchResults && <div className={`result-list ${searchBusy ? "is-busy" : ""}`}>
           {searchResults.length ? groupSearchResults(searchResults).map(group => <article className="result-card" key={group.document_number}>
             <div className="result-top"><span className="result-number">{group.document_number}</span><span className="score">{group.hits.length} {group.hits.length === 1 ? copy.evidencePassage : copy.evidencePassages}</span></div>
             <h3 className="result-title">{group.title}</h3>
@@ -465,7 +516,11 @@ export default function Home() {
             </div>)}</div>
           </article>) : <Empty title={copy.noResults} text={copy.broaden} />}
         </div>}
-        {searchHasMore && <button className="load-more" type="button" onClick={() => runSearch(searchLimit + 10)} disabled={searchBusy}>{searchBusy ? "…" : copy.loadMore}</button>}
+        {searchResults && (searchPageIndex > 0 || searchHasMore) && <nav className="pager" aria-label={copy.searchPage(searchPageIndex + 1)}>
+          <button type="button" disabled={searchBusy || searchPageIndex === 0} onClick={() => runSearch(searchedQuery, searchPageIndex - 1)}>{copy.previous}</button>
+          <span>{copy.searchPage(searchPageIndex + 1)}</span>
+          <button type="button" disabled={searchBusy || !searchHasMore} onClick={() => runSearch(searchedQuery, searchPageIndex + 1)}>{copy.next}</button>
+        </nav>}
       </section>}
 
       {view === "ask" && <section className="view">
@@ -629,6 +684,10 @@ function AnswerCard({ answer, copy }: { answer: Answer; copy: Copy }) {
     {answer.uncertainties.length > 0 && <div className="uncertainties">
       <strong>{copy.uncertainties}</strong><br />
       {answer.uncertainties.map(item => <span key={item}>{item}<br /></span>)}
+    </div>}
+    {(answer.practical_advice?.length ?? 0) > 0 && <div className="practical-advice">
+      <strong>{copy.practicalAdvice}</strong>
+      <ul>{answer.practical_advice?.map(item => <li key={item}>{item}</li>)}</ul>
     </div>}
     {answer.review_actions.length > 0 && <div className="review-actions">
       <strong>{copy.reviewActions}</strong>

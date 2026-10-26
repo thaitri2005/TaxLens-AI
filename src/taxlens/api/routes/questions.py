@@ -39,6 +39,7 @@ class QuestionResponse(BaseModel):
     uncertainties: list[str]
     citations: list[SearchCitation]
     review_actions: list[str]
+    practical_advice: list[str]
     disclaimer: str
 
 
@@ -78,5 +79,6 @@ def _to_response(result: QuestionAnswer) -> QuestionResponse:
         uncertainties=result.uncertainties,
         citations=[to_search_citation(citation) for citation in result.citations],
         review_actions=result.review_actions,
+        practical_advice=result.practical_advice,
         disclaimer=result.disclaimer,
     )

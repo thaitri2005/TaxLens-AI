@@ -105,7 +105,7 @@ or the OpenAPI page with a test identity, to call them.
 
 | Endpoint | Purpose |
 | --- | --- |
-| `GET /search?q=…&mode=hybrid` | Ranked passages. Filters: `document_number`, `document_type`, `source_name`, `legal_status`, `issuing_agency`, `effective_from`, `effective_to`. |
+| `GET /search?q=…&mode=hybrid&limit=10&offset=0` | Ranked passages, a page at a time (`offset` up to 200). The Search tab also calls `GET /documents?q=…` to list documents whose number or title matches. Filters: `document_number`, `document_type`, `source_name`, `legal_status`, `issuing_agency`, `effective_from`, `effective_to`. |
 | `POST /questions` | Cited answer to `{"question": "…"}`. |
 | `GET /documents/overview`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/chunks` | Document library ([architecture.md](architecture.md#document-library)). |
 | `GET /evaluation/retrieval/latest` | The latest retrieval evaluation report. |

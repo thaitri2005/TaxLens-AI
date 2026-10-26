@@ -223,3 +223,16 @@ def _create_engine_with_evidence():
         )
         session.commit()
     return engine
+
+
+def test_parse_generated_answer_keeps_bounded_practical_advice() -> None:
+    content = (
+        '{"answer":"Áp dụng thuế suất 10%.","practical_advice":'
+        '["Kiểm tra hàm lượng đường trên nhãn.","Lưu hóa đơn.","Ghi chú hạn nộp.",'
+        '"Hỏi cơ quan thuế nếu chưa rõ.","Bước thứ năm"]}'
+    )
+
+    answer = parse_generated_answer(content, citation_count=1)
+
+    assert answer.practical_advice[0] == "Kiểm tra hàm lượng đường trên nhãn."
+    assert len(answer.practical_advice) == 4

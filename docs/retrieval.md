@@ -171,8 +171,13 @@ model is reached through a provider-neutral `ChatProvider` interface, wrapped by
 
 The model receives the numbered passages with document, legal status, article, clause,
 pages, and article title. It must answer in the language of the question, return
-`answerable: false` when the passages do not answer it, and give at most three
-confirmed facts that restate their cited passage.
+`answerable: false` when the passages do not answer it, and give at most five
+confirmed facts that restate their cited passage. The answer (up to about 250 words)
+explains the rule in plain language for the situation asked about, and
+`practical_advice` lists one to four concrete next steps: documents to prepare,
+conditions to check, deadlines, or when to ask the tax authority. Advice may not add
+rules, rates, or deadlines the passages do not contain; it is shown as guidance, while
+only confirmed facts pass the grounding check below.
 
 The response is then checked:
 
