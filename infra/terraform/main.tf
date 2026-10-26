@@ -398,6 +398,12 @@ resource "azurerm_container_app" "web" {
         name        = "NEXTAUTH_SECRET"
         secret_name = "nextauth-secret"
       }
+      # Auth.js builds absolute redirect URLs from this; without it, sign-out and sign-in
+      # redirects pointed at localhost.
+      env {
+        name  = "NEXTAUTH_URL"
+        value = "https://${var.name_prefix}-web.${azurerm_container_app_environment.this.default_domain}"
+      }
     }
   }
 

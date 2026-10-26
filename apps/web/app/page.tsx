@@ -426,7 +426,7 @@ export default function Home() {
           <button className={language === "vi" ? "active" : ""} onClick={() => setLanguage("vi")}>VI</button>
         </div>
         {session?.user.role === "admin" && <a className="topbar-link" href="/admin">{copy.admin}</a>}
-        <button className="sign-out-button" type="button" onClick={() => signOut({ callbackUrl: "/login" })}>{copy.signOut}</button>
+        <button className="sign-out-button" type="button" onClick={() => signOut({ redirect: false }).then(() => window.location.assign("/login"))}>{copy.signOut}</button>
       </div>
     </header>
     <main className={`shell ${language === "vi" ? "language-vi" : ""}`}>
