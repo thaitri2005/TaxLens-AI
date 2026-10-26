@@ -247,9 +247,8 @@ resource "azurerm_container_app" "api" {
   }
 
   template {
-    revision_suffix = "m64ops1"
-    min_replicas    = 0
-    max_replicas    = 1
+    min_replicas = 0
+    max_replicas = 1
 
     container {
       name   = "api"
@@ -380,9 +379,8 @@ resource "azurerm_container_app" "web" {
   }
 
   template {
-    revision_suffix = "m63auth1"
-    min_replicas    = 0
-    max_replicas    = 1
+    min_replicas = 0
+    max_replicas = 1
 
     container {
       name   = "web"

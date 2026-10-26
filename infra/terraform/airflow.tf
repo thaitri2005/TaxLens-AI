@@ -94,9 +94,8 @@ resource "azurerm_container_app" "airflow_scheduler" {
   }
 
   template {
-    revision_suffix = "m7airflow1"
-    min_replicas    = 1
-    max_replicas    = 1
+    min_replicas = 1
+    max_replicas = 1
 
     volume {
       name         = "airflow-logs"
@@ -199,9 +198,8 @@ resource "azurerm_container_app" "airflow_webserver" {
   }
 
   template {
-    revision_suffix = "m7airflow1"
-    min_replicas    = 0
-    max_replicas    = 1
+    min_replicas = 0
+    max_replicas = 1
 
     volume {
       name         = "airflow-logs"
