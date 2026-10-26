@@ -199,3 +199,25 @@ def test_search_api_pages_with_offset() -> None:
     assert len(everything) >= 2
     assert ids(limit=1, offset=0) + ids(limit=1, offset=1) == everything[:2]
     assert ids(limit=1, offset=len(everything)) == []
+
+
+def test_search_api_filters_by_document_kind() -> None:
+    engine = _create_engine_with_search_data()
+    app = create_app()
+
+    def override_session():
+        with Session(engine) as session:
+            yield session
+
+    app.dependency_overrides[get_db_session] = override_session
+    app.dependency_overrides[require_authenticated_user] = lambda: AuthenticatedUser(
+        id=uuid4(), username="test-user", role="user"
+    )
+    client = TestClient(app)
+
+    def count(kind: str) -> int:
+        params = {"q": "VAT", "mode": "keyword", "kind": kind}
+        return len(client.get("/search", params=params).json())
+
+    assert count("circular") >= 1
+    assert count("decree") == 0

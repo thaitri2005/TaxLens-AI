@@ -48,6 +48,8 @@ class SearchFilters:
     issuing_agency: str | None = None
     effective_from: date | None = None
     effective_to: date | None = None
+    # Any of these recorded types (a document kind); an empty tuple matches nothing.
+    document_types: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -313,6 +315,8 @@ def _apply_filters(statement: Select[Any], filters: SearchFilters) -> Select[Any
         )
     if filters.document_type is not None:
         statement = statement.where(LegalDocument.document_type == filters.document_type)
+    if filters.document_types is not None:
+        statement = statement.where(LegalDocument.document_type.in_(filters.document_types))
     if filters.source_name is not None:
         statement = statement.where(SourceRecord.source_name == filters.source_name)
     if filters.legal_status is not None:

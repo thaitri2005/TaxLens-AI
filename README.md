@@ -18,15 +18,16 @@ question.
 
 ## Features
 
-- **Search** by document number, title, or content: matching documents with a preview of
-  their opening, then passages ranked by hybrid search, ten per page. Content search
+- **Search** by document number, title, or content, filtered by source, kind, and legal
+  status: matching documents with a preview of their opening, then passages ranked by
+  hybrid search, ten per page. Content search
   tolerates missing diacritics (`hoa don` finds `hóa đơn`) and OCR errors.
 - **Cited answers** in the language of the question, explained in plain language with
   practical next steps. Confirmed facts are checked against the passages they cite, and
   citations carry verbatim source excerpts.
 - **Explicit refusals**: out-of-scope questions, missing evidence, superseded-only
   evidence, and model failures each return their own status instead of a guess.
-- **Document library**: corpus statistics at a glance, search by number or title,
+- **Document library** (administrators): corpus statistics at a glance, search by number or title,
   filters by source, kind (law, decree, circular, …), and legal status, and paged
   browsing of documents and their passages. English and Vietnamese throughout.
 - **Historical corpus**: about 2,000 tax documents (59,598 passages) from the government

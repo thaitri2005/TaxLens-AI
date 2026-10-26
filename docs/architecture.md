@@ -111,7 +111,10 @@ How the identity is signed and verified is in [Authentication](#authentication) 
 
 ## Document library
 
-The Documents tab never loads the whole corpus:
+The Documents tab is shown to administrators only; other users open a document from the
+Search tab, and its detail page returns them to their search results. The endpoints
+below stay available to every signed-in user because the Search tab uses them. The tab
+never loads the whole corpus:
 
 | Endpoint | Returns |
 | --- | --- |
@@ -126,12 +129,15 @@ labels, kinds, statuses, and source names are translated into Vietnamese.
 
 ## Search tab
 
-A search runs two lookups in parallel:
+Below the search box are the same source, kind, and legal-status chips as the library
+(counts from `GET /documents/overview`); choosing one reruns the search from its first
+page, and the filters apply to both lookups. A search runs two lookups in parallel:
 
 - **Matching documents**: `GET /documents?q=…&limit=5`, the same number-or-title match
   as the library, shown with previews. A link opens all matches in the Documents tab.
   This match is case-insensitive but, unlike passage search, not accent-insensitive.
-- **Matching passages**: `GET /search?q=…&limit=11&offset=…`, ten per page with Previous
+- **Matching passages**: `GET /search?q=…&limit=11&offset=…` (plus `source_name`, `kind`,
+  `legal_status`), ten per page with Previous
   and Next (the eleventh result only tells whether a next page exists), grouped by
   document. Ranking covers the top 200 passages.
 

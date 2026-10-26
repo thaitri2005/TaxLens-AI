@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from taxlens.api.auth import require_admin, require_authenticated_user
 from taxlens.db import get_db_session
-from taxlens.legal_data.document_kinds import document_kind
+from taxlens.legal_data.document_kinds import document_kind, document_types_of_kind
 from taxlens.legal_data.models import (
     DocumentChunk,
     DocumentEmbedding,
@@ -138,8 +138,7 @@ def list_documents(
 
     document_types: list[str] | None = None
     if kind is not None:
-        recorded = session.scalars(select(LegalDocument.document_type).distinct()).all()
-        document_types = [value for value in recorded if document_kind(value) == kind]
+        document_types = document_types_of_kind(session, kind)
     if document_type is not None:
         document_types = [
             value for value in (document_types or [document_type]) if value == document_type

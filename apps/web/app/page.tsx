@@ -67,6 +67,8 @@ const SEARCH_MAX_OFFSET = 200;
 const SEARCH_DOCUMENT_MATCHES = 5;
 const CHUNK_PAGE_SIZE = 50;
 const NO_FILTERS: DocumentFilters = { q: "", source: "", kind: "", status: "" };
+type FacetFilters = Omit<DocumentFilters, "q">;
+const NO_FACETS: FacetFilters = { source: "", kind: "", status: "" };
 // A scaled-to-zero API answers 502-504 while it starts; reads are retried instead of failing.
 const RETRY_DELAYS_MS = [3000, 8000];
 const SLOW_REQUEST_MS = 4000;
@@ -119,7 +121,7 @@ const COPY = {
     showAllDocuments: (count: string) => `Show all ${count} in Documents`, searchPage: (page: number) => `Page ${page}`,
     searchCorpus: "Search the corpus", searchHelp: "Search by document number, title, or content. Each document appears once with its strongest passages.",
     article: "Article", clause: "clause", page: "p.", sourcePassage: "Source passage", officialSource: "Official source ↗",
-    back: "Back to documents", readingDocument: "Reading versions and indexed passages.",
+    back: "Back to documents", backToSearch: "Back to search results", readingDocument: "Reading versions and indexed passages.",
     indexedSource: "Indexed source", sourceUnavailable: "Source unavailable", agencyUnavailable: "Issuing agency not recorded",
     version: "Version", dateUnavailable: "date unavailable", effective: "Effective: ", notRecorded: "not recorded", chunks: "passages",
     indexedPassages: "Indexed passages", documentPassage: "Document passage", pageLabel: "Page", pageUnavailable: "Page unavailable",
@@ -173,7 +175,7 @@ const COPY = {
     showAllDocuments: (count: string) => `Xem tất cả ${count} văn bản`, searchPage: (page: number) => `Trang ${page}`,
     searchCorpus: "Tìm kiếm trong kho văn bản", searchHelp: "Tìm theo số hiệu, tên hoặc nội dung văn bản. Mỗi văn bản hiển thị một lần kèm các đoạn trích liên quan nhất.",
     article: "Điều", clause: "khoản", page: "tr.", sourcePassage: "Đoạn trích nguồn", officialSource: "Nguồn chính thức ↗",
-    back: "Quay lại danh sách", readingDocument: "Đang đọc thông tin văn bản và các đoạn trích.",
+    back: "Quay lại danh sách", backToSearch: "Quay lại kết quả tìm kiếm", readingDocument: "Đang đọc thông tin văn bản và các đoạn trích.",
     indexedSource: "Văn bản đã xử lý", sourceUnavailable: "Nguồn chưa được ghi nhận", agencyUnavailable: "Cơ quan ban hành chưa được ghi nhận",
     version: "Ngày ban hành", dateUnavailable: "chưa ghi nhận", effective: "Hiệu lực: ", notRecorded: "chưa ghi nhận", chunks: "đoạn trích",
     indexedPassages: "Các đoạn trích đã xử lý", documentPassage: "Đoạn trích văn bản", pageLabel: "Trang", pageUnavailable: "Chưa ghi nhận số trang",
@@ -262,6 +264,7 @@ function CitationLine({ citation, copy, number }: { citation: Citation; copy: Co
 
 export default function Home() {
   const { data: session } = useSession();
+  const isAdmin = session?.user.role === "admin";
   const [view, setView] = useState<View>("search");
   const [language, setLanguage] = useState<Language>("en");
   const [searchQuery, setSearchQuery] = useState("");
@@ -271,6 +274,7 @@ export default function Home() {
   const [searchPageIndex, setSearchPageIndex] = useState(0);
   const [searchHasMore, setSearchHasMore] = useState(false);
   const [searchDocuments, setSearchDocuments] = useState<DocumentPage | null>(null);
+  const [searchFilters, setSearchFilters] = useState<FacetFilters>(NO_FACETS);
   const [searchBusy, setSearchBusy] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [question, setQuestion] = useState("");
@@ -331,13 +335,24 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (view === "documents" && overview === null && !overviewError) void loadOverview();
+    // The overview supplies the filter chips on both the Search and Documents tabs.
+    if ((view === "search" || view === "documents") && overview === null && !overviewError) void loadOverview();
   }, [view, overview, overviewError]);
 
   useEffect(() => {
     // Returning to the tab keeps the page already shown; only a new page or filter loads.
-    if (view === "documents" && listQuery !== loadedListQuery.current) void loadDocumentPage(listQuery);
-  }, [view, listQuery]);
+    if (view === "documents" && isAdmin && listQuery !== loadedListQuery.current) void loadDocumentPage(listQuery);
+  }, [view, isAdmin, listQuery]);
+
+  useEffect(() => {
+    // The library is for administrators; other users only see a document opened from search.
+    if (view === "documents" && !isAdmin && !selectedDocument) setView("search");
+  }, [view, isAdmin, selectedDocument]);
+
+  useEffect(() => {
+    // A changed filter reruns the current search from its first page.
+    if (searchedQuery) void runSearch(searchedQuery, 0);
+  }, [searchFilters]);
 
   function updateDocumentFilters(change: Partial<DocumentFilters>) {
     setDocumentFilters(previous => ({ ...previous, ...change }));
@@ -393,6 +408,11 @@ export default function Home() {
     try {
       const params = new URLSearchParams({ q: query, mode: searchMode, limit: String(SEARCH_PAGE_SIZE + 1), offset: String(offset) });
       const documentParams = new URLSearchParams({ q: query, limit: String(SEARCH_DOCUMENT_MATCHES) });
+      for (const target of [params, documentParams]) {
+        if (searchFilters.source) target.set("source_name", searchFilters.source);
+        if (searchFilters.kind) target.set("kind", searchFilters.kind);
+        if (searchFilters.status) target.set("legal_status", searchFilters.status);
+      }
       const [results, documents] = await Promise.all([
         request<SearchHit[]>(`/search?${params}`),
         pageIndex === 0
@@ -422,9 +442,19 @@ export default function Home() {
     void openDocument(document);
   }
 
+  function updateSearchFilters(change: Partial<FacetFilters>) {
+    setSearchFilters(previous => ({ ...previous, ...change }));
+  }
+
+  function closeDocument() {
+    setSelectedDocument(null);
+    // Without the library, a document opened from search returns to the search results.
+    if (!isAdmin) setView("search");
+  }
+
   function showDocumentsFor(query: string) {
     setDocumentQueryInput(query);
-    updateDocumentFilters({ ...NO_FILTERS, q: query });
+    updateDocumentFilters({ ...searchFilters, q: query });
     setSelectedDocument(null);
     setView("documents");
   }
@@ -445,7 +475,7 @@ export default function Home() {
     updateDocumentFilters({ q: documentQueryInput.trim() });
   }
 
-  const tabs: [View, string][] = [["search", copy.search], ["ask", copy.ask], ["documents", copy.documents]];
+  const tabs: [View, string][] = [["search", copy.search], ["ask", copy.ask], ...(isAdmin ? [["documents", copy.documents] as [View, string]] : [])];
   const activeFilters: [keyof DocumentFilters, string][] = [
     ["q", documentFilters.q ? `“${documentFilters.q}”` : ""],
     ["source", documentFilters.source && labelFor(copy.sourceNames, documentFilters.source)],
@@ -490,6 +520,10 @@ export default function Home() {
             </label>
           </div>
         </form>
+        {overview && <FacetGroups overview={overview} filters={searchFilters} copy={copy} numberFormat={numberFormat} onFilter={updateSearchFilters} />}
+        {(searchFilters.source || searchFilters.kind || searchFilters.status) && <div className="active-filters">
+          <button className="link-button" type="button" onClick={() => setSearchFilters(NO_FACETS)}>{copy.clearFilters}</button>
+        </div>}
         <ResultState error={searchError} hasResults={searchResults !== null} emptyTitle={copy.searchCorpus} emptyText={copy.searchHelp} />
         {searchPageIndex === 0 && searchDocuments && searchDocuments.items.length > 0 && <div className="search-documents">
           <p className="eyebrow">{copy.matchingDocuments}</p>
@@ -502,7 +536,7 @@ export default function Home() {
             </span>
             {document.preview && <span className="document-row-preview">{document.preview}</span>}
           </button>)}</div>
-          {searchDocuments.total > searchDocuments.items.length && <button className="link-button" type="button" onClick={() => showDocumentsFor(searchedQuery)}>{copy.showAllDocuments(numberFormat.format(searchDocuments.total))} →</button>}
+          {isAdmin && searchDocuments.total > searchDocuments.items.length && <button className="link-button" type="button" onClick={() => showDocumentsFor(searchedQuery)}>{copy.showAllDocuments(numberFormat.format(searchDocuments.total))} →</button>}
         </div>}
         <div ref={searchTop} className="list-anchor" />
         {searchResults && searchResults.length > 0 && <p className="eyebrow">{copy.matchingPassages}</p>}
@@ -540,7 +574,7 @@ export default function Home() {
 
       {view === "documents" && <section className="view">
         {selectedDocument ? <>
-          <button className="back-button" onClick={() => setSelectedDocument(null)}>← {copy.back}</button>
+          <button className="back-button" onClick={closeDocument}>← {isAdmin ? copy.back : copy.backToSearch}</button>
           {documentBusy ? <Empty title={copy.working} text={copy.readingDocument} />
             : documentError ? <div className="error-state">{documentError}</div>
             : documentDetail && <DocumentDetailView detail={documentDetail} chunks={documentChunks} copy={copy} numberFormat={numberFormat} onLoadMore={loadMoreChunks} loadingMore={chunksBusy} />}
@@ -617,12 +651,23 @@ function OverviewPanel({ overview, filters, copy, numberFormat, onFilter }: {
       <StatCard label={copy.statPassages} value={format(overview.passages)} note={`${percent(overview.embedded_passages, overview.passages)} ${copy.statEmbedded}`} />
       <StatCard label={copy.statAttention} value={format(overview.failed_versions)} note={copy.statAttentionNote} warn={overview.failed_versions > 0} />
     </div>
-    <div className="facet-groups">
-      <FacetRow label={copy.bySource} items={overview.by_source} active={filters.source} labels={copy.sourceNames} format={format} onSelect={source => onFilter({ source })} />
-      <FacetRow label={copy.byKind} items={overview.by_kind} active={filters.kind} labels={copy.kinds} format={format} onSelect={kind => onFilter({ kind })} />
-      <FacetRow label={copy.byStatus} items={overview.by_status} active={filters.status} labels={copy.legalStatuses} format={format} onSelect={status => onFilter({ status })} />
-    </div>
+    <FacetGroups overview={overview} filters={filters} copy={copy} numberFormat={numberFormat} onFilter={onFilter} />
   </>;
+}
+
+function FacetGroups({ overview, filters, copy, numberFormat, onFilter }: {
+  overview: DocumentOverview;
+  filters: FacetFilters;
+  copy: Copy;
+  numberFormat: Intl.NumberFormat;
+  onFilter: (change: Partial<FacetFilters>) => void;
+}) {
+  const format = (value: number) => numberFormat.format(value);
+  return <div className="facet-groups">
+    <FacetRow label={copy.bySource} items={overview.by_source} active={filters.source} labels={copy.sourceNames} format={format} onSelect={source => onFilter({ source })} />
+    <FacetRow label={copy.byKind} items={overview.by_kind} active={filters.kind} labels={copy.kinds} format={format} onSelect={kind => onFilter({ kind })} />
+    <FacetRow label={copy.byStatus} items={overview.by_status} active={filters.status} labels={copy.legalStatuses} format={format} onSelect={status => onFilter({ status })} />
+  </div>;
 }
 
 function StatCard({ label, value, note, warn = false }: { label: string; value: string; note: string; warn?: boolean }) {

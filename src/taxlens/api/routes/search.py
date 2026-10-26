@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from taxlens.api.auth import require_authenticated_user
 from taxlens.db import get_db_session
+from taxlens.legal_data.document_kinds import document_types_of_kind
 from taxlens.retrieval.citations import Citation, build_citation
 from taxlens.retrieval.embeddings import get_available_embedding_provider
 from taxlens.retrieval.search import (
@@ -56,6 +57,7 @@ def search(
     q: str = Query(min_length=1, max_length=500),
     document_number: str | None = Query(default=None, max_length=100),
     document_type: str | None = Query(default=None, max_length=50),
+    kind: str | None = Query(default=None, max_length=30),
     source_name: str | None = Query(default=None, max_length=120),
     legal_status: str | None = Query(default=None, max_length=50),
     issuing_agency: str | None = Query(default=None, max_length=255),
@@ -81,6 +83,9 @@ def search(
         issuing_agency=issuing_agency,
         effective_from=effective_from,
         effective_to=effective_to,
+        document_types=(
+            tuple(document_types_of_kind(session, kind)) if kind is not None else None
+        ),
     )
     if mode == "keyword":
         results = keyword_search_chunks(session, q, filters, window)

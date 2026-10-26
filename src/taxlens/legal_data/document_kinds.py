@@ -8,6 +8,11 @@ them so a reader can filter by "circular" once instead of by every spelling.
 
 import unicodedata
 
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from taxlens.legal_data.models import LegalDocument
+
 # Checked in order: more specific kinds first ("TTLT" before "TT", "NQ" before "QH").
 _KIND_MARKERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("consolidated", ("VBHN", "VĂN BẢN HỢP NHẤT", "CONSOLIDATED")),
@@ -29,3 +34,10 @@ def document_kind(document_type: str) -> str:
         if value.startswith(markers):
             return kind
     return "other"
+
+
+def document_types_of_kind(session: Session, kind: str) -> list[str]:
+    """The recorded document types that are grouped under ``kind``."""
+
+    recorded = session.scalars(select(LegalDocument.document_type).distinct()).all()
+    return [value for value in recorded if document_kind(value) == kind]
