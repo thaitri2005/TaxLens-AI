@@ -44,6 +44,7 @@ footer { display:flex; justify-content:space-between; width:min(100% - 48px,1080
 .admin-view h1 { margin: 0; font: 600 42px/1.1 Georgia,serif; letter-spacing: -.04em; }
 .admin-intro { margin: 10px 0 28px; color: var(--muted); }
 .admin-create-form { max-width: 620px; grid-template-columns: 1fr 1fr auto; align-items:end; padding: 22px; border: 1px solid var(--line); background: #fff; border-radius: 12px; }
+.admin-export { display:flex; align-items:center; justify-content:space-between; gap:16px; max-width:620px; margin:0 0 18px; padding:18px 22px; border:1px solid var(--line); background:#fff; border-radius:12px; }.admin-export strong { display:block; margin-bottom:3px; }.admin-export span { color:var(--muted); font-size:13px; }.admin-export-button { flex:none; padding:11px 16px; color:#fff; background:var(--teal); border-radius:8px; font-size:13px; font-weight:800; text-decoration:none; }.admin-export-button:hover { background:var(--teal-dark); }
 .admin-create-form button { height: 43px; padding: 0 17px; border: 0; border-radius: 8px; color: #fff; background: var(--teal); font-weight: 800; }
 .user-card { display:flex; align-items:center; justify-content:space-between; gap:20px; }
 .user-card-info { display:grid; gap:4px; }.user-card-info span { color:var(--muted); font-size:12px; }
@@ -51,7 +52,7 @@ footer { display:flex; justify-content:space-between; width:min(100% - 48px,1080
 .user-actions button { padding:8px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; font-size:12px; font-weight:800; }
 .button-secondary { color:var(--teal-dark); }.button-warning { color:#86652d; border-color:#ead9ae !important; background:#fffaf0 !important; }.button-danger { color:#a14941; border-color:#ebc5bf !important; background:#fff8f6 !important; }
 .user-actions button:hover { transform: translateY(-1px); box-shadow:0 4px 12px rgba(27,48,46,.08); }
-@media (max-width:700px) { .admin-create-form { grid-template-columns:1fr; }.user-card { align-items:flex-start; flex-direction:column; }.user-actions { justify-content:flex-start; }.topbar-actions { gap:8px; }.topbar-link { font-size:11px; } }
+@media (max-width:700px) { .admin-create-form { grid-template-columns:1fr; }.admin-export { flex-direction:column; align-items:flex-start; }.user-card { align-items:flex-start; flex-direction:column; }.user-actions { justify-content:flex-start; }.topbar-actions { gap:8px; }.topbar-link { font-size:11px; } }
 .source-number { color:var(--teal-dark); font-weight:800; }.answer-note { margin:0 0 16px; color:#765c2f; font-size:14px; }
 /* Documents library: summary first, then one page of documents at a time. */
 .stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:14px; }

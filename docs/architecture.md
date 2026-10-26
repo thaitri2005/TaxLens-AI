@@ -241,7 +241,8 @@ rejected those requests as `Expired identity`.
 ### Roles and administration
 
 Accounts are `admin` or `user`; there is no public sign-up. Administrators create,
-disable, delete, and reset accounts at `/admin`. Questions are rate-limited per user
+disable, delete, and reset accounts at `/admin`, and download the list of collected
+documents as a spreadsheet (metadata only, no document text). Questions are rate-limited per user
 (`AUTH_RATE_LIMIT_PER_MINUTE`), in memory, which holds while the API runs as one replica.
 
 ### Local setup

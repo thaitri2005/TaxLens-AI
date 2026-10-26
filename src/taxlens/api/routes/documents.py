@@ -1,14 +1,16 @@
+import csv
+import io
 import uuid
 from collections.abc import Callable, Iterable
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel
 from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import Session
 
-from taxlens.api.auth import require_authenticated_user
+from taxlens.api.auth import require_admin, require_authenticated_user
 from taxlens.db import get_db_session
 from taxlens.legal_data.document_kinds import document_kind
 from taxlens.legal_data.models import (
@@ -22,6 +24,28 @@ from taxlens.legal_data.models import (
 
 router = APIRouter(
     prefix="/documents", tags=["documents"], dependencies=[Depends(require_authenticated_user)]
+)
+admin_export_router = APIRouter(
+    prefix="/admin/documents", tags=["administration"], dependencies=[Depends(require_admin)]
+)
+
+EXPORT_COLUMNS = (
+    "document_number",
+    "title",
+    "kind",
+    "document_type",
+    "issuing_agency",
+    "source",
+    "source_document_id",
+    "source_url",
+    "issue_date",
+    "effective_date",
+    "legal_status",
+    "processing_status",
+    "processing_error",
+    "passages",
+    "embedded_passages",
+    "collected_at",
 )
 
 
@@ -417,3 +441,99 @@ def _chunk_counts_by_version(
         .group_by(DocumentChunk.document_version_id)
     ).all()
     return {version_id: int(count) for version_id, count in rows}
+
+
+@admin_export_router.get("/export")
+def export_document_list(session: Session = Depends(get_db_session)) -> Response:
+    """A spreadsheet (CSV) of every collected file: metadata only, no document text.
+
+    One row per document version, so a document collected from two sources appears
+    twice. A handful of whole-table queries, so the cost does not grow per document.
+    """
+
+    versions = session.execute(
+        select(
+            DocumentVersion.id,
+            LegalDocument.document_number,
+            LegalDocument.title,
+            LegalDocument.document_type,
+            LegalDocument.issuing_agency,
+            SourceRecord.source_name,
+            SourceRecord.source_document_id,
+            SourceRecord.source_url,
+            DocumentVersion.issue_date,
+            DocumentVersion.effective_date,
+            DocumentVersion.legal_status,
+            DocumentVersion.created_at,
+        )
+        .join(LegalDocument, DocumentVersion.document_id == LegalDocument.id)
+        .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
+        .order_by(LegalDocument.document_number, DocumentVersion.created_at)
+    ).all()
+
+    processing: dict[uuid.UUID, tuple[str, str | None]] = {}
+    for version_id, job_status, error_code in session.execute(
+        select(ProcessingJob.document_version_id, ProcessingJob.status, ProcessingJob.error_code)
+        .order_by(ProcessingJob.updated_at.desc(), ProcessingJob.created_at.desc())
+    ).all():
+        processing.setdefault(version_id, (job_status, error_code))
+    passages = dict(
+        session.execute(
+            select(DocumentChunk.document_version_id, func.count(DocumentChunk.id)).group_by(
+                DocumentChunk.document_version_id
+            )
+        ).all()
+    )
+    embedded = dict(
+        session.execute(
+            select(DocumentChunk.document_version_id, func.count(func.distinct(DocumentChunk.id)))
+            .join(DocumentEmbedding, DocumentEmbedding.document_chunk_id == DocumentChunk.id)
+            .group_by(DocumentChunk.document_version_id)
+        ).all()
+    )
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(EXPORT_COLUMNS)
+    for row in versions:
+        job_status, error_code = processing.get(row.id, ("NOT_PROCESSED", None))
+        writer.writerow(
+            [
+                _spreadsheet_safe(value)
+                for value in (
+                    row.document_number,
+                    row.title,
+                    document_kind(row.document_type),
+                    row.document_type,
+                    row.issuing_agency,
+                    row.source_name,
+                    row.source_document_id,
+                    row.source_url,
+                    row.issue_date,
+                    row.effective_date,
+                    row.legal_status,
+                    job_status,
+                    error_code,
+                    int(passages.get(row.id, 0)),
+                    int(embedded.get(row.id, 0)),
+                    row.created_at.date() if row.created_at else None,
+                )
+            ]
+        )
+    filename = f"taxlens-documents-{datetime.now(UTC):%Y-%m-%d}.csv"
+    # The byte-order mark makes Excel read the file as UTF-8, so Vietnamese shows correctly.
+    return Response(
+        content="\ufeff" + buffer.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+def _spreadsheet_safe(value: object) -> object:
+    """Keep spreadsheet programs from running a cell that starts like a formula."""
+
+    if value is None:
+        return ""
+    if isinstance(value, str) and value[:1] in ("=", "+", "@", "\t", "\r"):
+        return "'" + value
+    return value

@@ -14,6 +14,7 @@ from taxlens.api.migrations import (
 )
 from taxlens.api.routes.auth import admin_router
 from taxlens.api.routes.auth import router as auth_router
+from taxlens.api.routes.documents import admin_export_router
 from taxlens.api.routes.documents import router as documents_router
 from taxlens.api.routes.evaluation import router as evaluation_router
 from taxlens.api.routes.internal_jobs import router as internal_jobs_router
@@ -44,6 +45,7 @@ def create_app() -> FastAPI:
     app.include_router(evaluation_router)
     app.include_router(auth_router)
     app.include_router(admin_router)
+    app.include_router(admin_export_router)
     app.include_router(questions_router)
     app.include_router(search_router)
     app.include_router(internal_jobs_router)

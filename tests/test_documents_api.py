@@ -1,3 +1,5 @@
+import csv
+import io
 from datetime import UTC, date, datetime
 from uuid import uuid4
 
@@ -179,3 +181,83 @@ def test_recorded_document_types_are_grouped_into_kinds() -> None:
         "consolidated",
         "other",
     ]
+
+
+def test_admin_can_export_the_document_list_without_document_text() -> None:
+    engine = create_engine(
+        "sqlite+pysqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    LegalDocument.metadata.create_all(engine)
+    with Session(engine) as session:
+        document = LegalDocument(
+            document_number="219/2013/TT-BTC",
+            title="=Hướng dẫn thuế giá trị gia tăng",
+            document_type="TT-BTC",
+            issuing_agency="Bộ Tài chính",
+        )
+        source = SourceRecord(
+            source_name="mof-vbpq",
+            source_url="https://example.test/219",
+            source_document_id="219",
+        )
+        session.add_all([document, source])
+        session.flush()
+        version = DocumentVersion(
+            document_id=document.id,
+            source_record_id=source.id,
+            issue_date=date(2013, 12, 31),
+            legal_status="EFFECTIVE",
+            raw_content_hash="b" * 64,
+            raw_artifact_key="raw/219.doc",
+        )
+        session.add(version)
+        session.flush()
+        session.add(
+            ProcessingJob(
+                document_version_id=version.id, status="COMPLETED", stage="CHUNKED:v3"
+            )
+        )
+        session.add(
+            DocumentChunk(
+                document_version_id=version.id,
+                article_number="1",
+                content="Secret passage text",
+                token_count=3,
+            )
+        )
+        session.commit()
+
+    app = create_app()
+
+    def override_session():
+        with Session(engine) as session:
+            yield session
+
+    role = {"value": "user"}
+    app.dependency_overrides[get_db_session] = override_session
+    app.dependency_overrides[require_authenticated_user] = lambda: AuthenticatedUser(
+        id=uuid4(), username="someone", role=role["value"]
+    )
+    client = TestClient(app)
+
+    assert client.get("/admin/documents/export").status_code == 403
+    role["value"] = "admin"
+    response = client.get("/admin/documents/export")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/csv")
+    assert "attachment" in response.headers["content-disposition"]
+    assert response.content.startswith(b"\xef\xbb\xbf")
+    rows = list(csv.DictReader(io.StringIO(response.content.decode("utf-8-sig"))))
+    assert len(rows) == 1
+    assert rows[0]["document_number"] == "219/2013/TT-BTC"
+    assert rows[0]["title"] == "'=Hướng dẫn thuế giá trị gia tăng"
+    assert rows[0]["kind"] == "circular"
+    assert rows[0]["source"] == "mof-vbpq"
+    assert rows[0]["issue_date"] == "2013-12-31"
+    assert rows[0]["processing_status"] == "COMPLETED"
+    assert rows[0]["passages"] == "1"
+    assert rows[0]["embedded_passages"] == "0"
+    assert "Secret passage text" not in response.text

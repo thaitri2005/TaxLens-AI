@@ -109,7 +109,7 @@ or the OpenAPI page with a test identity, to call them.
 | `POST /questions` | Cited answer to `{"question": "…"}`. |
 | `GET /documents/overview`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/chunks` | Document library ([architecture.md](architecture.md#document-library)). |
 | `GET /evaluation/retrieval/latest` | The latest retrieval evaluation report. |
-| `/admin/*` | Account management (administrators). |
+| `/admin/*` | Account management, and `GET /admin/documents/export`: a CSV of every collected document's metadata (administrators). |
 | `/internal/airflow/*` | Background jobs for Airflow, with `X-TaxLens-Internal-Token`. |
 
 ## Contributing
