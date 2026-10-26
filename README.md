@@ -18,10 +18,12 @@ question.
 
 ## Features
 
-- **Hybrid search** over Vietnamese legal text that tolerates missing diacritics
-  (`hoa don` finds `hóa đơn`) and OCR errors.
-- **Cited answers** in the language of the question. Confirmed facts are checked against
-  the passages they cite, and citations carry verbatim source excerpts.
+- **Search** by document number, title, or content: matching documents with a preview of
+  their opening, then passages ranked by hybrid search, ten per page. Content search
+  tolerates missing diacritics (`hoa don` finds `hóa đơn`) and OCR errors.
+- **Cited answers** in the language of the question, explained in plain language with
+  practical next steps. Confirmed facts are checked against the passages they cite, and
+  citations carry verbatim source excerpts.
 - **Explicit refusals**: out-of-scope questions, missing evidence, superseded-only
   evidence, and model failures each return their own status instead of a guess.
 - **Document library**: corpus statistics at a glance, search by number or title,
@@ -33,7 +35,8 @@ question.
 - **Automated pipeline**: Airflow collects new documents daily, extracts or OCRs them,
   indexes them, and evaluates retrieval; maintenance actions handle backfills and
   repairs, with live progress in the task log.
-- **Accounts** with administrator and user roles.
+- **Accounts** with administrator and user roles; administrators can also download the
+  list of collected documents as a spreadsheet.
 
 ## Architecture
 

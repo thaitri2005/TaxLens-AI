@@ -116,13 +116,28 @@ The Documents tab never loads the whole corpus:
 | Endpoint | Returns |
 | --- | --- |
 | `GET /documents/overview` | Totals (documents, searchable documents, passages, embedded passages, failed versions) and counts by source, kind, and legal status, in a handful of aggregate queries. |
-| `GET /documents?limit=20&offset=…` | One page plus the total matching. Filters: `q` (number or title), `source_name`, `kind`, `document_type`, `legal_status`, `issuing_agency`. Newest issue date first. |
+| `GET /documents?limit=20&offset=…` | One page plus the total matching. Filters: `q` (number or title), `source_name`, `kind`, `document_type`, `legal_status`, `issuing_agency`. Newest issue date first. Each row carries a preview: the opening of the document's first article, or of its preamble when it has no articles, read in one query per page. |
 | `GET /documents/{id}` | Versions with status, processing result, and passage count. |
 | `GET /documents/{id}/chunks?limit=50&offset=…` | Passages a page at a time. |
 
 The page loads the overview and the first page in parallel, turns each count into a
 filter chip, and keeps the current page and filters when returning from a document. All
 labels, kinds, statuses, and source names are translated into Vietnamese.
+
+## Search tab
+
+A search runs two lookups in parallel:
+
+- **Matching documents**: `GET /documents?q=…&limit=5`, the same number-or-title match
+  as the library, shown with previews. A link opens all matches in the Documents tab.
+  This match is case-insensitive but, unlike passage search, not accent-insensitive.
+- **Matching passages**: `GET /search?q=…&limit=11&offset=…`, ten per page with Previous
+  and Next (the eleventh result only tells whether a next page exists), grouped by
+  document. Ranking covers the top 200 passages.
+
+Administrators also have `GET /admin/documents/export`, a CSV of every collected file's
+metadata (number, title, source and link, dates, status, processing result, passage
+counts), never document text.
 
 ## Background jobs
 
@@ -320,15 +335,16 @@ environment variable set by Terraform.
 | --- | --- |
 | `DATABASE_*`, `DATABASE_SSL_MODE=require` | PostgreSQL connection |
 | `OBJECT_STORAGE_BACKEND=azure_blob`, `AZURE_STORAGE_ACCOUNT_URL`, `AZURE_STORAGE_CONTAINER`, `AZURE_STORAGE_NORMALIZED_CONTAINER` | Blob Storage through the managed identity |
-| `HF_TOKEN` (secret), `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, `HF_CHAT_ROUTING_POLICY` | Answer model. Any OpenAI-compatible endpoint works; set an empty routing policy for non-Hugging Face endpoints. |
+| `HF_TOKEN` (secret), `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, `HF_CHAT_ROUTING_POLICY`, `HF_CHAT_TIMEOUT_SECONDS`, `HF_CHAT_MAX_OUTPUT_TOKENS` | Answer model: by default `Qwen/Qwen3-4B-Instruct-2507` through the Hugging Face router's `fastest` provider, 90-second timeout, up to 2,000 output tokens. Any OpenAI-compatible endpoint works; set an empty routing policy for non-Hugging Face endpoints. |
 | `AUTH_INTERNAL_TOKEN` (secret), `NEXTAUTH_SECRET` (secret) | Web-to-API identity signing and Auth.js sessions |
+| `NEXTAUTH_URL` | The web app's public address, which Auth.js uses for sign-in and sign-out redirects; set by Terraform from the Container Apps domain |
 | `AIRFLOW_INTERNAL_TOKEN` (secret) | Airflow-to-API job calls |
 | `TAXLENS_DAILY_SOURCE_LIMIT`, `TAXLENS_PROCESS_BATCH_SIZE`, `TAXLENS_PROCESS_MAX_BATCHES` | Daily DAG volumes |
 | `OCR_*`, `EMBEDDING_*`, `QA_*` | Processing and retrieval settings; defaults in `src/taxlens/config.py` |
 
-The Hugging Face router returns HTTP 402 when the account has no inference credits; every
-answer is then `PROVIDER_UNAVAILABLE`, and the API logs
-`chat_provider_error status=402`.
+A failed model call makes the answer `PROVIDER_UNAVAILABLE` and is logged as
+`chat_provider_error`, with `status=402` when the account is out of credits or
+`transport=ReadTimeout` when the provider took longer than the timeout.
 
 Terraform variables that hold secrets (`postgres_admin_password`, `hf_token`,
 `auth_internal_token`, `nextauth_secret`, `airflow_admin_password`,

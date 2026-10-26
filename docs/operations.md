@@ -137,7 +137,13 @@ Keep pull requests small and focused, and delete the branch after merging.
    with the commit SHA, then plans and applies the Terraform update with those images (the
    plan is in the run summary). If the `azure-deploy` environment requires a reviewer,
    approve it when the run pauses. The API applies database migrations itself after it
-   starts. Untick `deploy` to only build and publish the images.
+   starts.
+
+The same workflow has two options:
+
+- **Roll back or redeploy**: untick `build` and enter an existing `image_tag` (a commit
+  SHA that was released before).
+- **Preview only**: untick `apply` to see the Terraform plan without changing anything.
 
 Before deploying, check that no Airflow run is in progress: a deploy restarts the API and
 kills its jobs. Check which image is live with:
@@ -154,10 +160,9 @@ and can take a minute; the page says so.
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
 | **CI** (`ci.yml`) | Pull requests and pushes to `main` | Ruff, MyPy, and Pytest; a production Next.js build with test-only placeholder secrets; Terraform init, format, and validate without a backend. |
-| **Release and deploy** (`release-images.yml`) | Manual, `azure-release` environment | Builds the API, web, and Airflow images, tags them with the commit SHA, then runs the deploy workflow below with `apply=true` (skipped when `deploy` is unticked). |
-| **Plan or deploy Azure infrastructure** (`deploy.yml`) | Called by the release, or manual; apply job behind the `azure-deploy` environment | Takes a published image tag, writes temporary Terraform variables from GitHub secrets, and produces a reviewable plan; applies it only with `apply=true`. Run it alone to redeploy an existing tag or to review a plan. |
+| **Release and deploy** (`release.yml`) | Manual | Three jobs: build and push the images (`azure-release` environment); Terraform plan with temporary variables from GitHub secrets, shown in the run summary; apply the plan (`azure-deploy` environment). Options: `build`, `apply`, `image_tag`. |
 
-Both Azure workflows sign in with OIDC and need these secrets:
+The release signs in to Azure with OIDC and needs these secrets:
 
 - `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
 - for deploys: `TF_VAR_POSTGRES_ADMIN_PASSWORD`, `TF_VAR_HF_TOKEN`,
@@ -330,7 +335,9 @@ curl -s "https://taxlensdevartifacts.file.core.windows.net/airflow-logs/dag_id=t
 | "Expired identity" | An API image from before October 2026 accepted identities for only 60 s, less than a cold start | Deploy a current release. |
 | A job fails with exit code -9 after about 21,600 s | Six-hour job limit | Rerun the action; finished work is kept. |
 | A job fails with exit code -9 earlier | Out of memory in the 2 GiB API container | Check that no other long job was running at the same time; rerun. |
-| Every answer is `PROVIDER_UNAVAILABLE` | The Hugging Face token has no inference credits (HTTP 402 in the API log as `chat_provider_error`) | Add credits or point `HF_CHAT_BASE_URL` at another OpenAI-compatible endpoint. |
+| Every answer is `PROVIDER_UNAVAILABLE` | The Hugging Face account has no inference credits (`chat_provider_error status=402` in the API log) | Add credits, or point `HF_CHAT_BASE_URL` at another OpenAI-compatible endpoint. |
+| An occasional answer is `PROVIDER_UNAVAILABLE` | The provider took longer than `HF_CHAT_TIMEOUT_SECONDS` (90 s; `transport=ReadTimeout` in the log) | Ask again; if frequent, raise the timeout (it must stay under the 240-second ingress limit). |
+| Signing out opens `localhost` | The web app has no `NEXTAUTH_URL` (an image or Terraform state from before October 2026) | Deploy a current release. |
 | Collection logs "Government portal unavailable" | The portal timed out | A slow year is skipped after three attempts; the next run lists it again. |
 | Ministry collection: `ConnectTimeout` | Run from outside Vietnam | Run it from a Vietnamese network ([design decision](architecture.md#collect-the-ministry-of-finance-database-from-a-machine-in-vietnam)). |
 | Laptop run: "Cannot reach the database" | Settings not set in this terminal, or IP not allowed | Set the variables in the same window and add the firewall rule. |

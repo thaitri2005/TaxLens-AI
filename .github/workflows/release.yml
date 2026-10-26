@@ -1,26 +1,24 @@
-name: Plan or deploy Azure infrastructure
+name: Release and deploy
 
+# One run from main to Azure: build and push the images, plan the Terraform update with
+# them, and apply it. To roll back, untick build and give an existing image tag; to only
+# preview, untick apply.
 on:
-  # Run on its own to redeploy an existing tag or to review a plan without applying.
   workflow_dispatch:
     inputs:
       image_tag:
-        description: Immutable image tag already published to ACR
-        required: true
+        description: Image tag; defaults to the commit SHA. Required when build is unticked.
+        required: false
         type: string
-      apply:
-        description: Apply after the plan; requires the protected environment
+      build:
+        description: Build and push new images (untick to redeploy an existing tag)
         required: true
-        default: false
+        default: true
         type: boolean
-  # Called by "Release and deploy" right after the images are published.
-  workflow_call:
-    inputs:
-      image_tag:
-        required: true
-        type: string
       apply:
+        description: Apply the plan (untick to only preview it)
         required: true
+        default: true
         type: boolean
 
 permissions:
@@ -28,15 +26,52 @@ permissions:
   id-token: write
 
 env:
+  IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+  ACR_LOGIN_SERVER: taxlensdevacr.azurecr.io
   TF_IN_AUTOMATION: true
   TF_INPUT: false
 
 jobs:
+  build:
+    name: Build and push images
+    if: ${{ inputs.build }}
+    runs-on: ubuntu-latest
+    environment: azure-release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Sign in to Azure Container Registry
+        run: az acr login --name taxlensdevacr
+      - name: Build and push API image
+        run: |
+          docker build -f apps/api/Dockerfile -t "$ACR_LOGIN_SERVER/taxlens-api:$IMAGE_TAG" .
+          docker push "$ACR_LOGIN_SERVER/taxlens-api:$IMAGE_TAG"
+      - name: Build and push web image
+        run: |
+          docker build -f apps/web/Dockerfile --build-arg API_ORIGIN=http://taxlens-dev-api -t "$ACR_LOGIN_SERVER/taxlens-web:$IMAGE_TAG" .
+          docker push "$ACR_LOGIN_SERVER/taxlens-web:$IMAGE_TAG"
+      - name: Build and push Airflow image
+        run: |
+          docker build -f airflow/Dockerfile -t "$ACR_LOGIN_SERVER/taxlens-airflow:$IMAGE_TAG" .
+          docker push "$ACR_LOGIN_SERVER/taxlens-airflow:$IMAGE_TAG"
+      - name: Summarize images
+        run: |
+          {
+            echo "API_IMAGE=$ACR_LOGIN_SERVER/taxlens-api:$IMAGE_TAG"
+            echo "WEB_IMAGE=$ACR_LOGIN_SERVER/taxlens-web:$IMAGE_TAG"
+            echo "AIRFLOW_IMAGE=$ACR_LOGIN_SERVER/taxlens-airflow:$IMAGE_TAG"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   plan:
     name: Terraform plan
+    needs: build
+    # Runs after a successful build, or straight away when build is unticked.
+    if: ${{ !cancelled() && (needs.build.result == 'success' || (needs.build.result == 'skipped' && inputs.image_tag != '')) }}
     runs-on: ubuntu-latest
-    env:
-      IMAGE_TAG: ${{ inputs.image_tag }}
     steps:
       - uses: actions/checkout@v4
       - uses: azure/login@v2
@@ -53,9 +88,9 @@ jobs:
           postgres_allowed_ip = "${{ secrets.TF_VAR_POSTGRES_ALLOWED_IP }}"
           airflow_enabled = true
           airflow_web_external_enabled = true
-          api_image = "taxlensdevacr.azurecr.io/taxlens-api:$IMAGE_TAG"
-          web_image = "taxlensdevacr.azurecr.io/taxlens-web:$IMAGE_TAG"
-          airflow_image = "taxlensdevacr.azurecr.io/taxlens-airflow:$IMAGE_TAG"
+          api_image = "$ACR_LOGIN_SERVER/taxlens-api:$IMAGE_TAG"
+          web_image = "$ACR_LOGIN_SERVER/taxlens-web:$IMAGE_TAG"
+          airflow_image = "$ACR_LOGIN_SERVER/taxlens-airflow:$IMAGE_TAG"
           EOF
           terraform fmt ci.auto.tfvars
       - name: Initialize remote backend
@@ -84,7 +119,7 @@ jobs:
           terraform validate
           terraform plan -out=tfplan
           terraform show -no-color tfplan >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload reviewed plan
+      - name: Upload plan
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan-${{ github.run_id }}
@@ -92,9 +127,9 @@ jobs:
           retention-days: 1
 
   apply:
-    name: Apply approved Terraform plan
+    name: Apply Terraform plan
     needs: plan
-    if: ${{ inputs.apply }}
+    if: ${{ !cancelled() && needs.plan.result == 'success' && inputs.apply }}
     runs-on: ubuntu-latest
     environment: azure-deploy
     steps:
@@ -117,7 +152,7 @@ jobs:
         with:
           name: terraform-plan-${{ github.run_id }}
           path: infra/terraform
-      - name: Apply reviewed plan
+      - name: Apply plan
         working-directory: infra/terraform
         env:
           ARM_USE_OIDC: true
