@@ -399,9 +399,15 @@ frozen gold set:
    python scripts/collect_sources.py --cited-by data/evaluation/gold_set_v1.csv
    ```
 
-   Documents already in the corpus are skipped. Ministry of Finance circulars that the
-   portal does not carry (80/2021/TT-BTC, 25/2018/TT-BTC) come from
-   `--source mof`. Then process and embed the new documents.
+   Documents already in the corpus are skipped. A ministry circular the portal does not
+   carry can be collected with `--source mof --include-expired --only <number>`, which
+   searches every field of the ministry database. Two cited circulars,
+   80/2021/TT-BTC and 25/2018/TT-BTC, are in neither source (checked 31/10/2026: the
+   ministry database has no record of either). Save their official PDFs as
+   `data/local/supplement/80-2021-TT-BTC.pdf` and `25-2018-TT-BTC.pdf`, put the page
+   address in `data/corpus/gold_supplement.json`, and load them with
+   `python scripts/seed.py --manifest data/corpus/gold_supplement.json`. Until then they
+   are corpus gaps (A4, A7, L2). Then process and embed the new documents.
 2. Record the corpus:
 
    ```powershell
