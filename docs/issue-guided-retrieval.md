@@ -70,6 +70,55 @@ decomposition; identified but ranked below K.
 - The 512-token embedding truncation affects both methods equally.
 - Effective dates are per document, and repealed law is not removed by `--as-of`.
 
+## First results (31/10/2026)
+
+`corpus-v1` (fingerprint `317f5a0d`), `gold-v1.0 --verified-only`: 12 scored cases (9
+letters, L2–L4); 4 essential provisions are corpus gaps (Circulars 80/2021 and
+25/2018, in no official source we collect). Reports: `data/evaluation/runs/`.
+
+Essential recall over provisions held in the corpus:
+
+| Run | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| keyword | 0.00 | 0.00 | 0.00 |
+| semantic | 0.09 | 0.11 | 0.11 |
+| hybrid | 0.09 | 0.09 | 0.20 |
+| hybrid, `--as-of case` | 0.09 | 0.14 | 0.20 |
+| issue-guided | 0.00 | 0.20 | 0.23 |
+| issue-guided, `--as-of case` | 0.16 | 0.23 | 0.23 |
+
+Full coverage is 0 for every run at every K: no case had all its essential provisions
+retrieved.
+
+Paired, both with `--as-of case`: issue-guided wins 2, loses 0, ties 10 at K = 5 and
+K = 10 (sign test p = 0.5); wins 2, loses 1 at K = 20. The direction favours the
+method, but 12 cases cannot show a difference.
+
+Error analysis at K = 10 (`diagnosis-*-k10.json`), 27 missed provisions for hybrid and
+24 for issue-guided:
+
+| Cause | Hybrid | Issue-guided |
+| --- | --- | --- |
+| Not in the top 200 | 13 | 12 |
+| Ranked below K (in the top 200) | 9 | 7 |
+| Not in corpus | 4 | 4 |
+| No passage (Decree 181 Art 4(1): OCR lost the clause numbers) | 1 | 1 |
+| Excluded by date | 0 | 0 |
+| Truncated by the 512-token limit | 0 | 0 |
+
+The misses are ranking failures, not corpus or chunking failures: the passages exist
+and hold the right text. In 11 of 12 cases an older VAT circular (219/2013, 26/2015,
+130/2016 …) is among the top three documents, and in 8 the top document predates 2020.
+Those circulars no longer apply from 1/7/2025, but nothing in the corpus says when a
+document stopped applying, so `--as-of` cannot remove them. The laws themselves rank
+worst: VAT Law 48/2024 and Tax Administration Law 38/2019 provisions are missed in
+almost every case that needs them.
+
+What this suggests, to test next: (1) use the ministry's legal status and replacement
+links to drop replaced documents before a case date; (2) rank laws and decrees above
+the circulars that implement them when both match; (3) more cases, since 12 cannot
+separate the methods.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that

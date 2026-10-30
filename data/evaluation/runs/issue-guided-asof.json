@@ -7,7 +7,7 @@
     "sha256": "c80f9a9a5de005a8bbd47c15ab6e5d60f62b310b98b5f05758ed481675f94738"
   },
   "as_of_filter": "case",
-  "code_version": "20142ff93b156cceb337d70b5b0fe1d32de6dc46",
+  "code_version": "a4de17cae72098259e8fa56bdaa107eb415ed16d",
   "dataset": "data/evaluation/gold_set_v1.csv",
   "dataset_hash": "2f3bef82721ca91a9fe9a456c148dd1d9422efd3b7eb9c938233cab4f55a12a4",
   "ks": [
@@ -200,11 +200,11 @@
     },
     "10": {
       "case_count": 12,
-      "mean_hit_at_k": 0.5,
-      "mean_precision_at_k": 0.05833333333333334,
-      "mean_recall_at_k": 0.25,
-      "mean_reciprocal_rank": 0.22232142857142856,
-      "mean_ndcg_at_k": 0.1787915166159931,
+      "mean_hit_at_k": 0.5833333333333334,
+      "mean_precision_at_k": 0.06666666666666667,
+      "mean_recall_at_k": 0.27777777777777773,
+      "mean_reciprocal_rank": 0.23621031746031748,
+      "mean_ndcg_at_k": 0.19272155452984327,
       "mean_article_hit_at_k": 0.5,
       "mean_article_reciprocal_rank": 0.21746031746031746,
       "mean_clause_hit_at_k": 0.4166666666666667,
@@ -223,11 +223,11 @@
     },
     "20": {
       "case_count": 12,
-      "mean_hit_at_k": 0.5833333333333334,
-      "mean_precision_at_k": 0.0375,
-      "mean_recall_at_k": 0.3333333333333333,
-      "mean_reciprocal_rank": 0.22787698412698412,
-      "mean_ndcg_at_k": 0.20406598255763495,
+      "mean_hit_at_k": 0.6666666666666666,
+      "mean_precision_at_k": 0.041666666666666664,
+      "mean_recall_at_k": 0.3611111111111111,
+      "mean_reciprocal_rank": 0.24176587301587302,
+      "mean_ndcg_at_k": 0.21799602047148514,
       "mean_article_hit_at_k": 0.5,
       "mean_article_reciprocal_rank": 0.21746031746031746,
       "mean_clause_hit_at_k": 0.4166666666666667,
@@ -463,6 +463,8 @@
       ],
       "case_type": "answerable",
       "as_of_date": "2026-03-15",
+      "filing_date": null,
+      "search_date": "2026-03-15",
       "uncertain": false,
       "source_verified": true,
       "relevant_clauses": {
@@ -741,6 +743,8 @@
       ],
       "case_type": "answerable",
       "as_of_date": "2026-03-15",
+      "filing_date": null,
+      "search_date": "2026-03-15",
       "uncertain": false,
       "source_verified": true,
       "relevant_clauses": {
@@ -1041,6 +1045,8 @@
       ],
       "case_type": "answerable",
       "as_of_date": "2026-03-15",
+      "filing_date": null,
+      "search_date": "2026-03-15",
       "uncertain": false,
       "source_verified": true,
       "relevant_clauses": {
@@ -1331,6 +1337,8 @@
       ],
       "case_type": "answerable",
       "as_of_date": "2026-02-15",
+      "filing_date": null,
+      "search_date": "2026-02-15",
       "uncertain": false,
       "source_verified": true,
       "relevant_clauses": {
@@ -1592,6 +1600,8 @@
       ],
       "case_type": "answerable",
       "as_of_date": "2026-05-15",
+      "filing_date": null,
+      "search_date": "2026-05-15",
       "uncertain": false,
       "source_verified": true,
       "relevant_clauses": {
@@ -1832,6 +1842,8 @@
       ],
       "case_type": "answerable",
       "as_of_date": "2026-03-15",
+      "filing_date": null,
+      "search_date": "2026-03-15",
       "uncertain": false,
       "source_verified": true,
       "relevant_clauses": {
@@ -1900,15 +1912,16 @@
       "case_id": "A7",
       "query": "Công ty tôi nhập khẩu hàng hóa rồi xuất khẩu sang nước khác; thuế GTGT đầu vào phát sinh tháng 3/2024. Tháng 9/2025 công ty mới nộp hồ sơ hoàn thuế. Có được hoàn không, và áp dụng quy định nào?",
       "ranked_documents": [
-        "130/2016/TT-BTC",
+        "48/2024/QH15",
         "94/2010/TT-BTC",
         "134/2014/TT-BTC",
         "194/2010/TT-BTC",
         "219/2013/TT-BTC",
+        "181/2025/NĐ-CP",
         "26/2015/TT-BTC",
+        "130/2016/TT-BTC",
         "156/2013/TT-BTC",
-        "59/2007/TT-BTC",
-        "52/2020/TT-BTC"
+        "59/2007/TT-BTC"
       ],
       "relevant_document_numbers": [
         "25/2018/TT-BTC",
@@ -1983,11 +1996,11 @@
           "supporting_full_coverage_at_k": false
         },
         "10": {
-          "hit_at_k": false,
-          "precision_at_k": 0.0,
-          "recall_at_k": 0.0,
-          "reciprocal_rank": 0.0,
-          "ndcg_at_k": 0.0,
+          "hit_at_k": true,
+          "precision_at_k": 0.1,
+          "recall_at_k": 0.3333333333333333,
+          "reciprocal_rank": 0.16666666666666666,
+          "ndcg_at_k": 0.16716045496620227,
           "article_hit_at_k": false,
           "article_reciprocal_rank": 0.0,
           "clause_hit_at_k": false,
@@ -2000,11 +2013,11 @@
           "supporting_full_coverage_at_k": false
         },
         "20": {
-          "hit_at_k": false,
-          "precision_at_k": 0.0,
-          "recall_at_k": 0.0,
-          "reciprocal_rank": 0.0,
-          "ndcg_at_k": 0.0,
+          "hit_at_k": true,
+          "precision_at_k": 0.05,
+          "recall_at_k": 0.3333333333333333,
+          "reciprocal_rank": 0.16666666666666666,
+          "ndcg_at_k": 0.16716045496620227,
           "article_hit_at_k": false,
           "article_reciprocal_rank": 0.0,
           "clause_hit_at_k": false,
@@ -2075,6 +2088,8 @@
       ],
       "case_type": "answerable",
       "as_of_date": "2024-03-15",
+      "filing_date": "2025-09-15",
+      "search_date": "2025-09-15",
       "uncertain": false,
       "source_verified": true,
       "relevant_clauses": {
@@ -2319,6 +2334,8 @@
       ],
       "case_type": "answerable",
       "as_of_date": "2026-03-15",
+      "filing_date": null,
+      "search_date": "2026-03-15",
       "uncertain": false,
       "source_verified": true,
       "relevant_clauses": {
@@ -2587,6 +2604,8 @@
       ],
       "case_type": "answerable",
       "as_of_date": "2024-03-15",
+      "filing_date": null,
+      "search_date": "2024-03-15",
       "uncertain": false,
       "source_verified": true,
       "relevant_clauses": {
@@ -2807,6 +2826,8 @@
       ],
       "case_type": "leakage-free",
       "as_of_date": "2023-06-15",
+      "filing_date": null,
+      "search_date": "2023-06-15",
       "uncertain": false,
       "source_verified": null,
       "relevant_clauses": {
@@ -2983,6 +3004,8 @@
       ],
       "case_type": "leakage-free",
       "as_of_date": "2025-08-15",
+      "filing_date": null,
+      "search_date": "2025-08-15",
       "uncertain": false,
       "source_verified": null,
       "relevant_clauses": {
@@ -3165,6 +3188,8 @@
       ],
       "case_type": "leakage-free",
       "as_of_date": "2026-05-15",
+      "filing_date": null,
+      "search_date": "2026-05-15",
       "uncertain": false,
       "source_verified": null,
       "relevant_clauses": {
@@ -3202,7 +3227,7 @@
       "unparsed_provisions": []
     }
   ],
-  "report_id": "20261030T193028Z-44e6209a3209",
-  "generated_at": "2026-10-30T19:30:28.223431+00:00",
-  "artifact_key": "evaluation/retrieval/runs/20261030T193028Z-44e6209a3209.json"
+  "report_id": "20261030T194344Z-a6287e0e55a5",
+  "generated_at": "2026-10-30T19:43:44.083635+00:00",
+  "artifact_key": "evaluation/retrieval/runs/20261030T194344Z-a6287e0e55a5.json"
 }

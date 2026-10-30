@@ -1,0 +1,371 @@
+{
+  "report": "data/evaluation/runs/hybrid-asof.json",
+  "retrieval_mode": "hybrid",
+  "k": 10,
+  "missed": 27,
+  "causes": {
+    "not_retrieved": 13,
+    "ranked_below_k": 9,
+    "no_passage": 1,
+    "not_in_corpus": 4
+  },
+  "truncated": 0,
+  "provisions": [
+    {
+      "case_id": "A1",
+      "provision": [
+        [
+          "48/2024/QH15",
+          "9",
+          "3"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A1",
+      "provision": [
+        [
+          "66/2025/QH15",
+          "2",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "ranked_below_k",
+      "rank": 79
+    },
+    {
+      "case_id": "A1",
+      "provision": [
+        [
+          "174/2025/NĐ-CP",
+          "1",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A2",
+      "provision": [
+        [
+          "48/2024/QH15",
+          "5",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A2",
+      "provision": [
+        [
+          "181/2025/NĐ-CP",
+          "4",
+          "1"
+        ]
+      ],
+      "cause": "no_passage"
+    },
+    {
+      "case_id": "A2",
+      "provision": [
+        [
+          "181/2025/NĐ-CP",
+          "4",
+          "1b"
+        ],
+        [
+          "359/2025/NĐ-CP",
+          "1",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "ranked_below_k",
+      "rank": 34
+    },
+    {
+      "case_id": "A2",
+      "provision": [
+        [
+          "84/2025/TT-BNNMT",
+          "20",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A3",
+      "provision": [
+        [
+          "38/2019/QH14",
+          "44",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A4",
+      "provision": [
+        [
+          "38/2019/QH14",
+          "47",
+          null
+        ],
+        [
+          "56/2024/QH15",
+          "6",
+          "6"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A4",
+      "provision": [
+        [
+          "80/2021/TT-BTC",
+          "40",
+          "3"
+        ]
+      ],
+      "cause": "not_in_corpus"
+    },
+    {
+      "case_id": "A4",
+      "provision": [
+        [
+          "38/2019/QH14",
+          "59",
+          null
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A4",
+      "provision": [
+        [
+          "80/2021/TT-BTC",
+          "21",
+          null
+        ]
+      ],
+      "cause": "not_in_corpus"
+    },
+    {
+      "case_id": "A5",
+      "provision": [
+        [
+          "48/2024/QH15",
+          "14",
+          "2"
+        ]
+      ],
+      "truncated": false,
+      "cause": "ranked_below_k",
+      "rank": 94
+    },
+    {
+      "case_id": "A5",
+      "provision": [
+        [
+          "181/2025/NĐ-CP",
+          "26",
+          null
+        ]
+      ],
+      "truncated": false,
+      "cause": "ranked_below_k",
+      "rank": 15
+    },
+    {
+      "case_id": "A6",
+      "provision": [
+        [
+          "48/2024/QH15",
+          "5",
+          "1"
+        ],
+        [
+          "149/2025/QH15",
+          "1",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "ranked_below_k",
+      "rank": 87
+    },
+    {
+      "case_id": "A6",
+      "provision": [
+        [
+          "32/2018/QH14",
+          "2",
+          "2"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A6",
+      "provision": [
+        [
+          "31/2018/QH14",
+          "2",
+          "2"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A7",
+      "provision": [
+        [
+          "25/2018/TT-BTC",
+          "2",
+          null
+        ]
+      ],
+      "cause": "not_in_corpus"
+    },
+    {
+      "case_id": "A7",
+      "provision": [
+        [
+          "64/2025/QH15",
+          "58",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A7",
+      "provision": [
+        [
+          "181/2025/NĐ-CP",
+          "38",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A8",
+      "provision": [
+        [
+          "48/2024/QH15",
+          "15",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "ranked_below_k",
+      "rank": 9
+    },
+    {
+      "case_id": "A9",
+      "provision": [
+        [
+          "38/2019/QH14",
+          "16",
+          "11"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "A9",
+      "provision": [
+        [
+          "125/2020/NĐ-CP",
+          "9",
+          "2"
+        ]
+      ],
+      "truncated": false,
+      "cause": "not_retrieved",
+      "rank": null
+    },
+    {
+      "case_id": "L2",
+      "provision": [
+        [
+          "25/2018/TT-BTC",
+          "2",
+          null
+        ]
+      ],
+      "cause": "not_in_corpus"
+    },
+    {
+      "case_id": "L3",
+      "provision": [
+        [
+          "48/2024/QH15",
+          "15",
+          "1"
+        ]
+      ],
+      "truncated": false,
+      "cause": "ranked_below_k",
+      "rank": 7
+    },
+    {
+      "case_id": "L4",
+      "provision": [
+        [
+          "48/2024/QH15",
+          "14",
+          "2"
+        ]
+      ],
+      "truncated": false,
+      "cause": "ranked_below_k",
+      "rank": 128
+    },
+    {
+      "case_id": "L4",
+      "provision": [
+        [
+          "181/2025/NĐ-CP",
+          "26",
+          "2"
+        ]
+      ],
+      "truncated": false,
+      "cause": "ranked_below_k",
+      "rank": 81
+    }
+  ]
+}

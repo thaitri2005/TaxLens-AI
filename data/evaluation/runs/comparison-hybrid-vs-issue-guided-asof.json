@@ -1,0 +1,381 @@
+{
+  "baseline": "hybrid",
+  "method": "issue-guided",
+  "by_k": [
+    {
+      "k": 5,
+      "case_count": 12,
+      "wins": 2,
+      "losses": 0,
+      "ties": 10,
+      "sign_test_p": 0.5,
+      "baseline_full_coverage": 0.0,
+      "method_full_coverage": 0.0,
+      "cases": [
+        {
+          "case_id": "A1",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A2",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 4,
+          "gained": [
+            "[['181/2025/NĐ-CP', '4', '1b'], ['359/2025/NĐ-CP', '1', '1']]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "A3",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [
+            "[['181/2025/NĐ-CP', '16', '2']]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "A4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A5",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A6",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A7",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A8",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A9",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L2",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 0,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        }
+      ]
+    },
+    {
+      "k": 10,
+      "case_count": 12,
+      "wins": 2,
+      "losses": 0,
+      "ties": 10,
+      "sign_test_p": 0.5,
+      "baseline_full_coverage": 0.0,
+      "method_full_coverage": 0.0,
+      "cases": [
+        {
+          "case_id": "A1",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A2",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 2,
+          "in_corpus": 4,
+          "gained": [
+            "[['181/2025/NĐ-CP', '4', '1b'], ['359/2025/NĐ-CP', '1', '1']]",
+            "[['48/2024/QH15', '5', '1']]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "A3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A5",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A6",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A7",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A8",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A9",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L2",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 0,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L4",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [
+            "[['181/2025/NĐ-CP', '26', '2']]"
+          ],
+          "lost": []
+        }
+      ]
+    },
+    {
+      "k": 20,
+      "case_count": 12,
+      "wins": 2,
+      "losses": 1,
+      "ties": 9,
+      "sign_test_p": 1.0,
+      "baseline_full_coverage": 0.0,
+      "method_full_coverage": 0.0,
+      "cases": [
+        {
+          "case_id": "A1",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A2",
+          "outcome": "win",
+          "baseline_found": 1,
+          "method_found": 2,
+          "in_corpus": 4,
+          "gained": [
+            "[['48/2024/QH15', '5', '1']]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "A3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A5",
+          "outcome": "loss",
+          "baseline_found": 1,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": [
+            "[['181/2025/NĐ-CP', '26', None]]"
+          ]
+        },
+        {
+          "case_id": "A6",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A7",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A8",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A9",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L2",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 0,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L4",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [
+            "[['181/2025/NĐ-CP', '26', '2']]"
+          ],
+          "lost": []
+        }
+      ]
+    }
+  ]
+}
