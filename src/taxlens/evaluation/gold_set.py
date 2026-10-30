@@ -60,6 +60,9 @@ class GoldCase:
     uncertain: bool
     provisions: tuple[Provision, ...]
     unparsed: tuple[str, ...]
+    # When a procedure happens later than the facts (a refund filed after a law change),
+    # the law in force on that date applies to it.
+    filing_date: date | None = None
 
     @property
     def essential(self) -> tuple[Provision, ...]:
@@ -96,6 +99,8 @@ class GoldCase:
             "supporting_document_numbers": sorted(supporting - set(articles)),
             "case_type": self.case_type,
             "as_of_date": self.as_of_date.isoformat(),
+            "filing_date": self.filing_date.isoformat() if self.filing_date else None,
+            "search_date": max(self.as_of_date, self.filing_date or self.as_of_date).isoformat(),
             "uncertain": self.uncertain,
             "source_verified": self.source_verified,
             "unparsed_provisions": list(self.unparsed),
@@ -174,12 +179,18 @@ def _case(row: dict[str, str]) -> GoldCase:
         case_type=row["case_type"].strip(),
         derived_from=row.get("derived_from", "").strip() or None,
         question=row["question"].strip(),
-        as_of_date=datetime.strptime(row["as_of_date"].strip(), "%d/%m/%Y").date(),
+        as_of_date=_date(row["as_of_date"]) or date.min,
+        filing_date=_date(row.get("filing_date", "")),
         source_verified=_verified(row["source_verified"]),
         uncertain=row["uncertain"].strip().upper().startswith("Y"),
         provisions=provisions,
         unparsed=unparsed,
     )
+
+
+def _date(value: str) -> date | None:
+    value = value.strip()
+    return datetime.strptime(value, "%d/%m/%Y").date() if value else None
 
 
 def _verified(value: str) -> bool | None:

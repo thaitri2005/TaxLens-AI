@@ -4,7 +4,7 @@
   "retrieval_mode": "hybrid",
   "issues": null,
   "as_of_filter": "case",
-  "code_version": "83a64f602f7b8fdc82437ef346d25e97921eb545",
+  "code_version": "20142ff93b156cceb337d70b5b0fe1d32de6dc46",
   "dataset": "data/evaluation/gold_set_v1.csv",
   "dataset_hash": "2f3bef82721ca91a9fe9a456c148dd1d9422efd3b7eb9c938233cab4f55a12a4",
   "ks": [
@@ -151,11 +151,11 @@
     },
     "3": {
       "case_count": 12,
-      "mean_hit_at_k": 0.25,
-      "mean_precision_at_k": 0.08333333333333333,
-      "mean_recall_at_k": 0.1111111111111111,
-      "mean_reciprocal_rank": 0.20833333333333334,
-      "mean_ndcg_at_k": 0.12686469137473183,
+      "mean_hit_at_k": 0.16666666666666666,
+      "mean_precision_at_k": 0.05555555555555555,
+      "mean_recall_at_k": 0.08333333333333333,
+      "mean_reciprocal_rank": 0.16666666666666666,
+      "mean_ndcg_at_k": 0.10219119879424306,
       "mean_article_hit_at_k": 0.16666666666666666,
       "mean_article_reciprocal_rank": 0.16666666666666666,
       "mean_clause_hit_at_k": 0.16666666666666666,
@@ -174,11 +174,11 @@
     },
     "5": {
       "case_count": 12,
-      "mean_hit_at_k": 0.3333333333333333,
-      "mean_precision_at_k": 0.06666666666666667,
-      "mean_recall_at_k": 0.15277777777777776,
-      "mean_reciprocal_rank": 0.225,
-      "mean_ndcg_at_k": 0.14663116743883983,
+      "mean_hit_at_k": 0.25,
+      "mean_precision_at_k": 0.05000000000000001,
+      "mean_recall_at_k": 0.125,
+      "mean_reciprocal_rank": 0.18333333333333335,
+      "mean_ndcg_at_k": 0.12195767485835107,
       "mean_article_hit_at_k": 0.16666666666666666,
       "mean_article_reciprocal_rank": 0.16666666666666666,
       "mean_clause_hit_at_k": 0.16666666666666666,
@@ -197,38 +197,38 @@
     },
     "10": {
       "case_count": 12,
-      "mean_hit_at_k": 0.5,
-      "mean_precision_at_k": 0.05000000000000001,
-      "mean_recall_at_k": 0.23611111111111113,
-      "mean_reciprocal_rank": 0.2488095238095238,
-      "mean_ndcg_at_k": 0.18069490037025418,
-      "mean_article_hit_at_k": 0.16666666666666666,
-      "mean_article_reciprocal_rank": 0.16666666666666666,
-      "mean_clause_hit_at_k": 0.16666666666666666,
-      "mean_clause_reciprocal_rank": 0.16666666666666666,
+      "mean_hit_at_k": 0.4166666666666667,
+      "mean_precision_at_k": 0.041666666666666664,
+      "mean_recall_at_k": 0.20833333333333334,
+      "mean_reciprocal_rank": 0.20912698412698413,
+      "mean_ndcg_at_k": 0.15719016105890526,
+      "mean_article_hit_at_k": 0.25,
+      "mean_article_reciprocal_rank": 0.17500000000000002,
+      "mean_clause_hit_at_k": 0.25,
+      "mean_clause_reciprocal_rank": 0.17500000000000002,
       "essential_case_count": 12,
-      "mean_essential_recall_at_k": 0.08333333333333333,
+      "mean_essential_recall_at_k": 0.125,
       "essential_full_coverage_rate": 0.0,
       "essential_in_corpus_case_count": 11,
-      "mean_essential_in_corpus_recall_at_k": 0.09090909090909091,
+      "mean_essential_in_corpus_recall_at_k": 0.13636363636363635,
       "essential_in_corpus_full_coverage_rate": 0.0,
       "supporting_case_count": 9,
-      "mean_supporting_recall_at_k": 0.0,
+      "mean_supporting_recall_at_k": 0.027777777777777776,
       "supporting_in_corpus_case_count": 6,
-      "mean_supporting_in_corpus_recall_at_k": 0.0,
+      "mean_supporting_in_corpus_recall_at_k": 0.08333333333333333,
       "essential_not_in_corpus_count": 4
     },
     "20": {
       "case_count": 12,
-      "mean_hit_at_k": 0.5833333333333334,
-      "mean_precision_at_k": 0.02916666666666667,
-      "mean_recall_at_k": 0.2777777777777778,
-      "mean_reciprocal_rank": 0.2563852813852814,
-      "mean_ndcg_at_k": 0.19494765737589737,
+      "mean_hit_at_k": 0.5,
+      "mean_precision_at_k": 0.025000000000000005,
+      "mean_recall_at_k": 0.25,
+      "mean_reciprocal_rank": 0.2167027417027417,
+      "mean_ndcg_at_k": 0.17144291806454845,
       "mean_article_hit_at_k": 0.4166666666666667,
-      "mean_article_reciprocal_rank": 0.18458077010708587,
+      "mean_article_reciprocal_rank": 0.1869617224880383,
       "mean_clause_hit_at_k": 0.3333333333333333,
-      "mean_clause_reciprocal_rank": 0.1801948051948052,
+      "mean_clause_reciprocal_rank": 0.18257575757575759,
       "essential_case_count": 12,
       "mean_essential_recall_at_k": 0.1875,
       "essential_full_coverage_rate": 0.0,
@@ -272,23 +272,23 @@
       "mean_hit_at_k": 0.5555555555555556,
       "mean_precision_at_k": 0.05555555555555555,
       "mean_recall_at_k": 0.2777777777777778,
-      "mean_reciprocal_rank": 0.2761904761904762,
-      "mean_ndcg_at_k": 0.20802854371968726
+      "mean_reciprocal_rank": 0.2788359788359788,
+      "mean_ndcg_at_k": 0.20958688141187368
     },
     "20": {
       "case_count": 9,
       "mean_hit_at_k": 0.6666666666666666,
       "mean_precision_at_k": 0.03333333333333334,
       "mean_recall_at_k": 0.3333333333333333,
-      "mean_reciprocal_rank": 0.28629148629148626,
-      "mean_ndcg_at_k": 0.2270322197272115
+      "mean_reciprocal_rank": 0.28893698893698894,
+      "mean_ndcg_at_k": 0.22859055741939793
     }
   },
-  "mean_hit_at_k": 0.3333333333333333,
-  "mean_precision_at_k": 0.06666666666666667,
-  "mean_recall_at_k": 0.15277777777777776,
-  "mean_reciprocal_rank": 0.225,
-  "mean_ndcg_at_k": 0.14663116743883983,
+  "mean_hit_at_k": 0.25,
+  "mean_precision_at_k": 0.05000000000000001,
+  "mean_recall_at_k": 0.125,
+  "mean_reciprocal_rank": 0.18333333333333335,
+  "mean_ndcg_at_k": 0.12195767485835107,
   "fully_covered_case_count": 9,
   "fully_covered_mean_hit_at_k": 0.3333333333333333,
   "fully_covered_mean_precision_at_k": 0.06666666666666668,
@@ -313,17 +313,16 @@
         "152/2015/TT-BTC",
         "219/2013/TT-BTC",
         "108/2025/NĐ-CP",
-        "151/2026/TT-BTC",
-        "122/2000/TT-BTC",
         "316/2016/TT-BTC",
-        "360/2025/NĐ-CP",
-        "145/2026/TT-BTC",
+        "122/2000/TT-BTC",
         "98/2025/TT-BTC",
         "69/2013/QĐ-TTG",
-        "85/2009/TT-BTC",
+        "360/2025/NĐ-CP",
         "54/2003/TTLT-BTC-BTM",
-        "120/2003/TT-BTC",
-        "181/2025/NĐ-CP"
+        "181/2025/NĐ-CP",
+        "85/2009/TT-BTC",
+        "18/VBHN-BTC",
+        "120/2003/TT-BTC"
       ],
       "relevant_document_numbers": [
         "48/2024/QH15",
@@ -519,11 +518,12 @@
       "ranked_documents": [
         "219/2013/TT-BTC",
         "26/2015/TT-BTC",
+        "130/2016/TT-BTC",
+        "156/2013/TT-BTC",
         "180/2024/NĐ-CP",
         "191/2010/TT-BTC",
         "359/2025/NĐ-CP",
         "119/2014/TT-BTC",
-        "130/2016/TT-BTC",
         "47/2011/TT-BTC",
         "72/2024/NĐ-CP"
       ],
@@ -689,7 +689,7 @@
               "1"
             ]
           ],
-          "rank": 13,
+          "rank": 16,
           "in_corpus": true
         },
         {
@@ -832,7 +832,6 @@
       "case_id": "A3",
       "query": "Tháng 3/2026, công ty tôi có nhà máy thủy điện nhỏ bán điện trên thị trường điện theo hợp đồng mua bán điện. Thời điểm xác định thuế GTGT và thời điểm khai thuế là khi nào?",
       "ranked_documents": [
-        "89/2026/TT-BTC",
         "156/2013/TT-BTC",
         "45/2009/TT-BTC",
         "45/2009/TT- BTC",
@@ -841,7 +840,7 @@
         "181/2025/NĐ-CP",
         "72/2025/NĐ-CP",
         "57/2014/TT-BCT",
-        "252/2026/NĐ-CP"
+        "101/2011/NĐ-CP"
       ],
       "relevant_document_numbers": [
         "181/2025/NĐ-CP",
@@ -926,31 +925,31 @@
           "hit_at_k": true,
           "precision_at_k": 0.1,
           "recall_at_k": 0.5,
-          "reciprocal_rank": 0.14285714285714285,
-          "ndcg_at_k": 0.20438239758848611,
-          "article_hit_at_k": false,
-          "article_reciprocal_rank": 0.0,
-          "clause_hit_at_k": false,
-          "clause_reciprocal_rank": 0.0,
-          "essential_recall_at_k": 0.0,
+          "reciprocal_rank": 0.16666666666666666,
+          "ndcg_at_k": 0.21840743681816419,
+          "article_hit_at_k": true,
+          "article_reciprocal_rank": 0.1,
+          "clause_hit_at_k": true,
+          "clause_reciprocal_rank": 0.1,
+          "essential_recall_at_k": 0.5,
           "essential_full_coverage_at_k": false,
-          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_recall_at_k": 0.5,
           "essential_in_corpus_full_coverage_at_k": false,
-          "supporting_recall_at_k": 0.0,
+          "supporting_recall_at_k": 0.25,
           "supporting_full_coverage_at_k": false,
-          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_recall_at_k": 0.5,
           "supporting_in_corpus_full_coverage_at_k": false
         },
         "20": {
           "hit_at_k": true,
           "precision_at_k": 0.05,
           "recall_at_k": 0.5,
-          "reciprocal_rank": 0.14285714285714285,
-          "ndcg_at_k": 0.20438239758848611,
+          "reciprocal_rank": 0.16666666666666666,
+          "ndcg_at_k": 0.21840743681816419,
           "article_hit_at_k": true,
-          "article_reciprocal_rank": 0.07142857142857142,
+          "article_reciprocal_rank": 0.1,
           "clause_hit_at_k": true,
-          "clause_reciprocal_rank": 0.07142857142857142,
+          "clause_reciprocal_rank": 0.1,
           "essential_recall_at_k": 0.5,
           "essential_full_coverage_at_k": false,
           "essential_in_corpus_recall_at_k": 0.5,
@@ -976,7 +975,7 @@
               "2"
             ]
           ],
-          "rank": 14,
+          "rank": 10,
           "in_corpus": true
         },
         {
@@ -1000,7 +999,7 @@
               "2"
             ]
           ],
-          "rank": 14,
+          "rank": 10,
           "in_corpus": true
         },
         {
@@ -1119,9 +1118,7 @@
         "47/2011/TT-BTC",
         "29/VBHN-BTC (2019)",
         "219/2013/TT-BTC",
-        "54/2003/TTLT-BTC-BTM",
-        "89/2026/TT-BTC",
-        "181/2025/NĐ-CP"
+        "54/2003/TTLT-BTC-BTM"
       ],
       "relevant_document_numbers": [
         "38/2019/QH14",
@@ -1637,13 +1634,13 @@
       "ranked_documents": [
         "219/2013/TT-BTC",
         "26/2015/TT-BTC",
-        "30/1998/NĐ-CP",
-        "148/2026/TT-BTC",
-        "320/2025/NĐ-CP",
-        "89/2026/TT-BTC",
-        "99/98/TT/BTC",
         "96/1999/TT-BTC",
-        "111/2013/TT-BTC"
+        "30/1998/NĐ-CP",
+        "99/98/TT/BTC",
+        "320/2025/NĐ-CP",
+        "286/2016/TT-BTC",
+        "111/2013/TT-BTC",
+        "96/CP"
       ],
       "relevant_document_numbers": [
         "48/2024/QH15",
@@ -1894,33 +1891,31 @@
       "case_id": "A7",
       "query": "Công ty tôi nhập khẩu hàng hóa rồi xuất khẩu sang nước khác; thuế GTGT đầu vào phát sinh tháng 3/2024. Tháng 9/2025 công ty mới nộp hồ sơ hoàn thuế. Có được hoàn không, và áp dụng quy định nào?",
       "ranked_documents": [
-        "48/2024/QH15",
-        "181/2025/NĐ-CP",
         "130/2016/TT-BTC",
-        "134/2014/TT-BTC",
         "194/2010/TT-BTC",
+        "134/2014/TT-BTC",
         "52/2020/TT-BTC",
-        "59/2007/TT-BTC",
         "94/2010/TT-BTC",
+        "59/2007/TT-BTC",
         "13/2014/TT-BTC",
         "84/2013/TTLT-BTC-BCT-BGTVT",
-        "168/2011/TT-BTC",
         "219/2013/TT-BTC",
         "26/2015/TT-BTC",
-        "90/2026/TT-BTC",
+        "168/2011/TT-BTC",
         "06/2000/TT-TCHQ",
-        "86/2026/TT-BTC"
+        "90/2019/TT-BTC",
+        "07/2019/TT-BTC"
       ],
       "relevant_document_numbers": [
         "25/2018/TT-BTC",
         "64/2025/QH15",
         "181/2025/NĐ-CP"
       ],
-      "hit_at_k": true,
-      "precision_at_k": 0.2,
-      "recall_at_k": 0.3333333333333333,
-      "reciprocal_rank": 0.5,
-      "ndcg_at_k": 0.2960819109658652,
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
       "article_hit_at_k": false,
       "article_reciprocal_rank": 0.0,
       "clause_hit_at_k": false,
@@ -1950,11 +1945,11 @@
           "supporting_full_coverage_at_k": false
         },
         "3": {
-          "hit_at_k": true,
-          "precision_at_k": 0.3333333333333333,
-          "recall_at_k": 0.3333333333333333,
-          "reciprocal_rank": 0.5,
-          "ndcg_at_k": 0.2960819109658652,
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
           "article_hit_at_k": false,
           "article_reciprocal_rank": 0.0,
           "clause_hit_at_k": false,
@@ -1967,11 +1962,11 @@
           "supporting_full_coverage_at_k": false
         },
         "5": {
-          "hit_at_k": true,
-          "precision_at_k": 0.2,
-          "recall_at_k": 0.3333333333333333,
-          "reciprocal_rank": 0.5,
-          "ndcg_at_k": 0.2960819109658652,
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
           "article_hit_at_k": false,
           "article_reciprocal_rank": 0.0,
           "clause_hit_at_k": false,
@@ -1984,11 +1979,11 @@
           "supporting_full_coverage_at_k": false
         },
         "10": {
-          "hit_at_k": true,
-          "precision_at_k": 0.1,
-          "recall_at_k": 0.3333333333333333,
-          "reciprocal_rank": 0.5,
-          "ndcg_at_k": 0.2960819109658652,
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
           "article_hit_at_k": false,
           "article_reciprocal_rank": 0.0,
           "clause_hit_at_k": false,
@@ -2001,11 +1996,11 @@
           "supporting_full_coverage_at_k": false
         },
         "20": {
-          "hit_at_k": true,
-          "precision_at_k": 0.05,
-          "recall_at_k": 0.3333333333333333,
-          "reciprocal_rank": 0.5,
-          "ndcg_at_k": 0.2960819109658652,
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
           "article_hit_at_k": false,
           "article_reciprocal_rank": 0.0,
           "clause_hit_at_k": false,
@@ -2672,7 +2667,6 @@
       "case_id": "L2",
       "query": "Tháng 6/2023, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
       "ranked_documents": [
-        "181/2025/NĐ-CP",
         "06/2000/TT-TCHQ",
         "219/2013/TT-BTC",
         "18/2001/TT-BTC",
@@ -2686,6 +2680,7 @@
         "126/2020/NĐ-CP",
         "52/2020/TT-BTC",
         "46/2006/TT-BTC",
+        "26/2015/TT-BTC",
         "59/2007/TT-BTC"
       ],
       "relevant_document_numbers": [
@@ -3207,7 +3202,7 @@
       "unparsed_provisions": []
     }
   ],
-  "report_id": "20261030T191221Z-edff38fc73bf",
-  "generated_at": "2026-10-30T19:12:21.698455+00:00",
-  "artifact_key": "evaluation/retrieval/runs/20261030T191221Z-edff38fc73bf.json"
+  "report_id": "20261030T192623Z-d41aedb199a1",
+  "generated_at": "2026-10-30T19:26:23.920568+00:00",
+  "artifact_key": "evaluation/retrieval/runs/20261030T192623Z-d41aedb199a1.json"
 }

@@ -7,7 +7,7 @@
     "sha256": "c80f9a9a5de005a8bbd47c15ab6e5d60f62b310b98b5f05758ed481675f94738"
   },
   "as_of_filter": "case",
-  "code_version": "83a64f602f7b8fdc82437ef346d25e97921eb545",
+  "code_version": "20142ff93b156cceb337d70b5b0fe1d32de6dc46",
   "dataset": "data/evaluation/gold_set_v1.csv",
   "dataset_hash": "2f3bef82721ca91a9fe9a456c148dd1d9422efd3b7eb9c938233cab4f55a12a4",
   "ks": [
@@ -200,11 +200,11 @@
     },
     "10": {
       "case_count": 12,
-      "mean_hit_at_k": 0.5833333333333334,
-      "mean_precision_at_k": 0.06666666666666667,
-      "mean_recall_at_k": 0.27777777777777773,
-      "mean_reciprocal_rank": 0.23769841269841271,
-      "mean_ndcg_at_k": 0.19342032840689768,
+      "mean_hit_at_k": 0.5,
+      "mean_precision_at_k": 0.05833333333333334,
+      "mean_recall_at_k": 0.25,
+      "mean_reciprocal_rank": 0.22232142857142856,
+      "mean_ndcg_at_k": 0.1787915166159931,
       "mean_article_hit_at_k": 0.5,
       "mean_article_reciprocal_rank": 0.21746031746031746,
       "mean_clause_hit_at_k": 0.4166666666666667,
@@ -223,11 +223,11 @@
     },
     "20": {
       "case_count": 12,
-      "mean_hit_at_k": 0.6666666666666666,
+      "mean_hit_at_k": 0.5833333333333334,
       "mean_precision_at_k": 0.0375,
-      "mean_recall_at_k": 0.3194444444444444,
-      "mean_reciprocal_rank": 0.2441086691086691,
-      "mean_ndcg_at_k": 0.20684056383099836,
+      "mean_recall_at_k": 0.3333333333333333,
+      "mean_reciprocal_rank": 0.22787698412698412,
+      "mean_ndcg_at_k": 0.20406598255763495,
       "mean_article_hit_at_k": 0.5,
       "mean_article_reciprocal_rank": 0.21746031746031746,
       "mean_clause_hit_at_k": 0.4166666666666667,
@@ -275,16 +275,16 @@
       "mean_hit_at_k": 0.6666666666666666,
       "mean_precision_at_k": 0.07777777777777778,
       "mean_recall_at_k": 0.3333333333333333,
-      "mean_reciprocal_rank": 0.29841269841269846,
-      "mean_ndcg_at_k": 0.2393203873240633
+      "mean_reciprocal_rank": 0.29642857142857143,
+      "mean_ndcg_at_k": 0.23838868882132414
     },
     "20": {
       "case_count": 9,
       "mean_hit_at_k": 0.7777777777777778,
-      "mean_precision_at_k": 0.044444444444444446,
-      "mean_recall_at_k": 0.3888888888888889,
-      "mean_reciprocal_rank": 0.306959706959707,
-      "mean_ndcg_at_k": 0.2572140345561975
+      "mean_precision_at_k": 0.05,
+      "mean_recall_at_k": 0.4444444444444444,
+      "mean_reciprocal_rank": 0.30383597883597885,
+      "mean_ndcg_at_k": 0.27208797674351326
     }
   },
   "mean_hit_at_k": 0.3333333333333333,
@@ -317,8 +317,8 @@
         "26/2015/TT-BTC",
         "152/2015/TT-BTC",
         "103/2014/TT-BTC",
-        "48/2024/QH15",
         "212/2014/TT-BTC",
+        "48/2024/QH15",
         "105/2010/TT-BTC",
         "195/2015/TT-BTC",
         "26/2006/TT-BTC",
@@ -392,8 +392,8 @@
           "hit_at_k": true,
           "precision_at_k": 0.1,
           "recall_at_k": 0.3333333333333333,
-          "reciprocal_rank": 0.14285714285714285,
-          "ndcg_at_k": 0.15642624200758548,
+          "reciprocal_rank": 0.125,
+          "ndcg_at_k": 0.1480409554829326,
           "article_hit_at_k": true,
           "article_reciprocal_rank": 0.1,
           "clause_hit_at_k": false,
@@ -407,8 +407,8 @@
           "hit_at_k": true,
           "precision_at_k": 0.05,
           "recall_at_k": 0.3333333333333333,
-          "reciprocal_rank": 0.14285714285714285,
-          "ndcg_at_k": 0.15642624200758548,
+          "reciprocal_rank": 0.125,
+          "ndcg_at_k": 0.1480409554829326,
           "article_hit_at_k": true,
           "article_reciprocal_rank": 0.1,
           "clause_hit_at_k": false,
@@ -524,9 +524,8 @@
         "320/2025/NĐ-CP",
         "46/1999/TTLT/BTC-BTM-BCA-TCHQ",
         "48/2024/QH15",
-        "90/2002/TT-BTC",
-        "180/2024/NĐ-CP",
-        "156/2005/NĐ-CP"
+        "130/2016/TT-BTC",
+        "90/2002/TT-BTC"
       ],
       "relevant_document_numbers": [
         "48/2024/QH15",
@@ -833,18 +832,17 @@
       "case_id": "A3",
       "query": "Tháng 3/2026, công ty tôi có nhà máy thủy điện nhỏ bán điện trên thị trường điện theo hợp đồng mua bán điện. Thời điểm xác định thuế GTGT và thời điểm khai thuế là khi nào?",
       "ranked_documents": [
-        "89/2026/TT-BTC",
+        "156/2013/TT-BTC",
         "219/2013/TT-BTC",
         "151/2014/TT-BTC",
-        "156/2013/TT-BTC",
-        "181/2025/NĐ-CP",
         "45/2009/TT-BTC",
-        "254/2026/NĐ-CP",
+        "181/2025/NĐ-CP",
         "45/2009/TT- BTC",
         "18/VBHN-BTC",
         "119/2014/TT-BTC",
         "47/2011/TT-BTC",
         "68/2019/TT-BTC",
+        "16/2013/TT-BTC",
         "86/2024/TT-BTC"
       ],
       "relevant_document_numbers": [
@@ -1125,11 +1123,10 @@
         "149/2005/NĐ-CP",
         "123/2012/TT-BTC",
         "57/2010/QH12",
+        "59/2007/TT-BTC",
         "124/2008/NĐ-CP",
         "152/2011/TT-BTC",
-        "59/2007/TT-BTC",
-        "252/2026/NĐ-CP",
-        "26/VBHN-BTC (2019)",
+        "126/2020/NĐ-CP",
         "195/2015/TT-BTC"
       ],
       "relevant_document_numbers": [
@@ -1646,16 +1643,13 @@
         "219/2013/TT-BTC",
         "99/98/TT/BTC",
         "181/2025/NĐ-CP",
-        "143/2026/NĐ-CP",
+        "68/2023/NĐ-CP",
         "236/2025/NĐ-CP",
         "26/2015/TT-BTC",
-        "245/2026/NĐ-CP",
-        "30/1998/NĐ-CP",
-        "99/1998/TT",
         "156/2013/TT-BTC",
-        "34/2026/NQ-CP",
-        "148/2026/TT-BTC",
-        "96/1999/TT-BTC"
+        "68/2026/NĐ-CP",
+        "96/1999/TT-BTC",
+        "99/1998/TT"
       ],
       "relevant_document_numbers": [
         "48/2024/QH15",
@@ -1906,16 +1900,15 @@
       "case_id": "A7",
       "query": "Công ty tôi nhập khẩu hàng hóa rồi xuất khẩu sang nước khác; thuế GTGT đầu vào phát sinh tháng 3/2024. Tháng 9/2025 công ty mới nộp hồ sơ hoàn thuế. Có được hoàn không, và áp dụng quy định nào?",
       "ranked_documents": [
-        "48/2024/QH15",
+        "130/2016/TT-BTC",
         "94/2010/TT-BTC",
         "134/2014/TT-BTC",
         "194/2010/TT-BTC",
         "219/2013/TT-BTC",
-        "181/2025/NĐ-CP",
         "26/2015/TT-BTC",
-        "130/2016/TT-BTC",
         "156/2013/TT-BTC",
-        "59/2007/TT-BTC"
+        "59/2007/TT-BTC",
+        "52/2020/TT-BTC"
       ],
       "relevant_document_numbers": [
         "25/2018/TT-BTC",
@@ -1990,11 +1983,11 @@
           "supporting_full_coverage_at_k": false
         },
         "10": {
-          "hit_at_k": true,
-          "precision_at_k": 0.1,
-          "recall_at_k": 0.3333333333333333,
-          "reciprocal_rank": 0.16666666666666666,
-          "ndcg_at_k": 0.16716045496620227,
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
           "article_hit_at_k": false,
           "article_reciprocal_rank": 0.0,
           "clause_hit_at_k": false,
@@ -2007,11 +2000,11 @@
           "supporting_full_coverage_at_k": false
         },
         "20": {
-          "hit_at_k": true,
-          "precision_at_k": 0.05,
-          "recall_at_k": 0.3333333333333333,
-          "reciprocal_rank": 0.16666666666666666,
-          "ndcg_at_k": 0.16716045496620227,
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
           "article_hit_at_k": false,
           "article_reciprocal_rank": 0.0,
           "clause_hit_at_k": false,
@@ -2154,7 +2147,7 @@
         "72/2014/TT-BTC",
         "59/2007/TT-BTC",
         "18/2001/TT-BTC",
-        "05/2012/QĐ-TTG",
+        "58/2012/TT-BTC",
         "149/2005/NĐ-CP",
         "26/2015/TT-BTC"
       ],
@@ -2381,19 +2374,23 @@
       "ranked_documents": [
         "24/2007/NĐ-CP",
         "219/2013/TT-BTC",
-        "89/2026/TT-BTC",
+        "69/2002/TT-BTC",
+        "130/2016/TT-BTC",
         "14/2021/TT-BTC",
         "60/2012/TT-BTC",
-        "69/2002/TT-BTC",
+        "120/2003/TT-BTC",
+        "156/2013/TT-BTC",
         "10/2024/TT-BTC",
         "151/2014/TT-BTC",
         "166/2013/TT-BTC",
         "83/2012/TT-BTC",
         "32/VBHN-BTC (2019)",
-        "130/2016/TT-BTC",
+        "89/98/TT/BTC",
+        "38/2019/QH14",
         "125/2020/NĐ-CP",
         "90/2002/TT-BTC",
-        "156/2013/TT-BTC"
+        "61/2007/TT-BTC",
+        "100/2016/NĐ-CP"
       ],
       "relevant_document_numbers": [
         "38/2019/QH14",
@@ -2485,10 +2482,10 @@
         },
         "20": {
           "hit_at_k": true,
-          "precision_at_k": 0.05,
-          "recall_at_k": 0.5,
-          "reciprocal_rank": 0.07692307692307693,
-          "ndcg_at_k": 0.16104282508920814,
+          "precision_at_k": 0.1,
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.06666666666666667,
+          "ndcg_at_k": 0.3032935912997024,
           "article_hit_at_k": false,
           "article_reciprocal_rank": 0.0,
           "clause_hit_at_k": false,
@@ -2672,16 +2669,15 @@
       "case_id": "L2",
       "query": "Tháng 6/2023, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
       "ranked_documents": [
-        "181/2025/NĐ-CP",
+        "06/2000/TT-TCHQ",
         "99/2016/TT-BTC",
         "194/2010/TT-BTC",
         "219/2013/TT-BTC",
         "94/2010/TT-BTC",
-        "06/2000/TT-TCHQ",
         "72/2014/TT-BTC",
         "59/2007/TT-BTC",
         "18/2001/TT-BTC",
-        "05/2012/QĐ-TTG",
+        "28/1998/NĐ-CP",
         "149/2005/NĐ-CP",
         "26/2015/TT-BTC"
       ],
@@ -2857,7 +2853,7 @@
         "72/2014/TT-BTC",
         "59/2007/TT-BTC",
         "18/2001/TT-BTC",
-        "05/2012/QĐ-TTG",
+        "58/2012/TT-BTC",
         "149/2005/NĐ-CP",
         "26/2015/TT-BTC"
       ],
@@ -3030,19 +3026,18 @@
         "31/2013/QH13",
         "219/2013/TT-BTC",
         "144/2026/NĐ-CP",
-        "254/2026/NĐ-CP",
+        "111/2013/TT-BTC",
         "26/2015/TT-BTC",
         "123/2008/NĐ-CP",
         "181/2025/NĐ-CP",
-        "111/2013/TT-BTC",
+        "96/2015/TT-BTC",
         "72/2014/TT-BTC",
         "121/2011/NĐ-CP",
-        "96/2015/TT-BTC",
-        "151/2014/TT-BTC",
         "20/2026/TT-BTC",
+        "151/2014/TT-BTC",
         "320/2025/NĐ-CP",
-        "18/VBHN-BTC",
-        "195/2015/TT-BTC"
+        "123/2020/NĐ-CP",
+        "18/VBHN-BTC"
       ],
       "relevant_document_numbers": [
         "48/2024/QH15",
@@ -3207,7 +3202,7 @@
       "unparsed_provisions": []
     }
   ],
-  "report_id": "20261030T191922Z-cdafc1c6f7df",
-  "generated_at": "2026-10-30T19:19:22.775918+00:00",
-  "artifact_key": "evaluation/retrieval/runs/20261030T191922Z-cdafc1c6f7df.json"
+  "report_id": "20261030T193028Z-44e6209a3209",
+  "generated_at": "2026-10-30T19:30:28.223431+00:00",
+  "artifact_key": "evaluation/retrieval/runs/20261030T193028Z-44e6209a3209.json"
 }

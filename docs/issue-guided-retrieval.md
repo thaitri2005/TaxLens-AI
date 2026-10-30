@@ -79,3 +79,7 @@ decomposition; identified but ranked below K.
   first runs, before any comparison was made): portal documents record no effective
   date, so cases dated 2023 and 2024 still retrieved the 2024 VAT Law and Decree
   181/2025. The filter is shared by both methods; every run was repeated.
+- `--as-of case` uses the later of `as_of_date` and `filing_date` (found by the error
+  analysis, before the comparison was reported): A7's refund was filed on 15/09/2025,
+  and the law in force then is what the letter applies, but the filter dropped it as
+  later than the 2024 facts. Only A7 has a filing date.

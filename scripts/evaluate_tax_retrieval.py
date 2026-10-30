@@ -158,6 +158,7 @@ def main() -> None:
                 "essential_provisions": case.get("essential_provisions") or [],
                 "supporting_provisions": case.get("supporting_provisions") or [],
                 "as_of_date": case.get("as_of_date"),
+                "search_date": case.get("search_date") or case.get("as_of_date"),
                 "gold_set_fields": {
                     key: case[key] for key in _GOLD_SET_REPORT_FIELDS if key in case
                 },
@@ -219,8 +220,8 @@ def main() -> None:
                 else "not_covered"
             )
             filters = SearchFilters(
-                as_of=date.fromisoformat(case["as_of_date"])
-                if arguments.as_of == "case" and case["as_of_date"]
+                as_of=date.fromisoformat(case["search_date"])
+                if arguments.as_of == "case" and case["search_date"]
                 else None
             )
             if mode == "issue-guided":
@@ -451,6 +452,8 @@ def main() -> None:
 _GOLD_SET_REPORT_FIELDS = (
     "case_type",
     "as_of_date",
+    "filing_date",
+    "search_date",
     "uncertain",
     "source_verified",
     "relevant_clauses",

@@ -65,6 +65,7 @@ def test_gold_set_cases_score_only_essential_provisions(tmp_path: Path) -> None:
     case = answerable.to_evaluation_case(["48/2024/QH15", "181/2025/NĐ-CP"])
 
     assert answerable.as_of_date == date(2026, 3, 15)
+    assert case["search_date"] == "2026-03-15"
     assert not conditional.answerable
     assert case["relevant_document_numbers"] == ["48/2024/QH15"]
     assert case["relevant_articles"] == {"48/2024/QH15": ["9"]}
