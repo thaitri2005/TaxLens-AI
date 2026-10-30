@@ -75,3 +75,7 @@ decomposition; identified but ranked below K.
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that
   repeated the situation's amounts and dates, so keyword search kept only their first
   terms and the issues barely differed from the question.
+- `--as-of` falls back to the issue date when a version has no effective date (after the
+  first runs, before any comparison was made): portal documents record no effective
+  date, so cases dated 2023 and 2024 still retrieved the 2024 VAT Law and Decree
+  181/2025. The filter is shared by both methods; every run was repeated.

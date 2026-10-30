@@ -373,10 +373,10 @@ clause:
   verified (`N`), which the guideline keeps out of the final benchmark. Derived cases
   (`-`, such as the leakage-free ones) have no source letter and are kept.
 - `--as-of case` leaves out document versions that take effect after each case's
-  `as_of_date`; `--as-of none` (the default) searches everything. Versions without a
-  recorded effective date (most portal documents) are always kept, and nothing records
-  when a document stopped applying, so the filter removes later law but cannot remove
-  repealed law.
+  `as_of_date`; `--as-of none` (the default) searches everything. Without a recorded
+  effective date (most portal documents) the issue date stands in; versions with
+  neither are kept. Nothing records when a document stopped applying, so the filter
+  removes later law but cannot remove repealed law.
 
 The scheduled daily evaluation still uses `tax_article_retrieval.json`, since both runs
 would write the same `latest.json` report. Use `--output` to keep a gold-set run's report

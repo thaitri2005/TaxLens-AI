@@ -35,19 +35,27 @@ def test_search_returns_matching_article_chunk_with_filters() -> None:
     assert results[0].score == 1.0
 
 
-def test_search_as_of_leaves_out_later_versions_but_keeps_undated_ones() -> None:
+def test_search_as_of_leaves_out_later_versions_by_effective_or_issue_date() -> None:
     engine = _create_engine_with_search_data()
+    as_of = SearchFilters(as_of=date(2025, 1, 1))
     with Session(engine) as session:
-        before = search_chunks(session, "VAT", SearchFilters(as_of=date(2025, 1, 1)))
+        before = search_chunks(session, "VAT", as_of)
         later = session.scalars(
             select(DocumentVersion).where(DocumentVersion.effective_date == date(2025, 7, 1))
         ).one()
-        later.effective_date = None
+        later.effective_date = None  # issued 2025-06-01: still after the date
         session.flush()
-        undated = search_chunks(session, "VAT", SearchFilters(as_of=date(2025, 1, 1)))
+        issued_later = search_chunks(session, "VAT", as_of)
+        later.issue_date = None
+        session.flush()
+        undated = search_chunks(session, "VAT", as_of)
 
-    assert {result.document.document_number for result in before} == {"02/2024/TT-BTC"}
-    assert "31/2025/TT-BTC" in {result.document.document_number for result in undated}
+    def numbers(results: list) -> set[str]:
+        return {result.document.document_number for result in results}
+
+    assert numbers(before) == {"02/2024/TT-BTC"}
+    assert numbers(issued_later) == {"02/2024/TT-BTC"}
+    assert "31/2025/TT-BTC" in numbers(undated)
 
 
 def test_search_api_returns_citation_ready_results() -> None:

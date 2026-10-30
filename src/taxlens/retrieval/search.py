@@ -48,8 +48,9 @@ class SearchFilters:
     issuing_agency: str | None = None
     effective_from: date | None = None
     effective_to: date | None = None
-    # Leaves out versions that take effect after this date; unlike effective_to, keeps
-    # versions with no recorded effective date.
+    # Leaves out versions that take effect after this date. Without a recorded effective
+    # date the issue date stands in (nothing applies before it is issued); versions with
+    # neither date are kept.
     as_of: date | None = None
     # Any of these recorded types (a document kind); an empty tuple matches nothing.
     document_types: tuple[str, ...] | None = None
@@ -333,12 +334,8 @@ def _apply_filters(statement: Select[Any], filters: SearchFilters) -> Select[Any
     if filters.effective_to is not None:
         statement = statement.where(DocumentVersion.effective_date <= filters.effective_to)
     if filters.as_of is not None:
-        statement = statement.where(
-            or_(
-                DocumentVersion.effective_date.is_(None),
-                DocumentVersion.effective_date <= filters.as_of,
-            )
-        )
+        known_start = func.coalesce(DocumentVersion.effective_date, DocumentVersion.issue_date)
+        statement = statement.where(or_(known_start.is_(None), known_start <= filters.as_of))
     return statement
 
 

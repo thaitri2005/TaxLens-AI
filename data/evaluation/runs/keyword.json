@@ -4,16 +4,18 @@
   "retrieval_mode": "keyword",
   "issues": null,
   "as_of_filter": "none",
-  "code_version": "597c96bc655455aeee5cbcea49bcb8b6bcfa7ad7",
+  "code_version": "83a64f602f7b8fdc82437ef346d25e97921eb545",
   "dataset": "data/evaluation/gold_set_v1.csv",
   "dataset_hash": "2f3bef82721ca91a9fe9a456c148dd1d9422efd3b7eb9c938233cab4f55a12a4",
   "ks": [
+    1,
+    3,
     5,
     10,
     20
   ],
   "k": 5,
-  "case_count": 9,
+  "case_count": 12,
   "evaluation_status": "partial_coverage",
   "quality_gate": {
     "status": "partial_coverage",
@@ -124,28 +126,146 @@
     "fingerprint": "317f5a0de13d50097466698cdda61885d8f66666ccbe47d3e1e4b744ab7cff8c"
   },
   "metrics_by_k": {
+    "1": {
+      "case_count": 12,
+      "mean_hit_at_k": 0.0,
+      "mean_precision_at_k": 0.0,
+      "mean_recall_at_k": 0.0,
+      "mean_reciprocal_rank": 0.0,
+      "mean_ndcg_at_k": 0.0,
+      "mean_article_hit_at_k": 0.0,
+      "mean_article_reciprocal_rank": 0.0,
+      "mean_clause_hit_at_k": 0.0,
+      "mean_clause_reciprocal_rank": 0.0,
+      "essential_case_count": 12,
+      "mean_essential_recall_at_k": 0.0,
+      "essential_full_coverage_rate": 0.0,
+      "essential_in_corpus_case_count": 11,
+      "mean_essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_rate": 0.0,
+      "supporting_case_count": 9,
+      "mean_supporting_recall_at_k": 0.0,
+      "supporting_in_corpus_case_count": 6,
+      "mean_supporting_in_corpus_recall_at_k": 0.0,
+      "essential_not_in_corpus_count": 4
+    },
+    "3": {
+      "case_count": 12,
+      "mean_hit_at_k": 0.08333333333333333,
+      "mean_precision_at_k": 0.027777777777777776,
+      "mean_recall_at_k": 0.041666666666666664,
+      "mean_reciprocal_rank": 0.027777777777777776,
+      "mean_ndcg_at_k": 0.025547799698560764,
+      "mean_article_hit_at_k": 0.0,
+      "mean_article_reciprocal_rank": 0.0,
+      "mean_clause_hit_at_k": 0.0,
+      "mean_clause_reciprocal_rank": 0.0,
+      "essential_case_count": 12,
+      "mean_essential_recall_at_k": 0.0,
+      "essential_full_coverage_rate": 0.0,
+      "essential_in_corpus_case_count": 11,
+      "mean_essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_rate": 0.0,
+      "supporting_case_count": 9,
+      "mean_supporting_recall_at_k": 0.0,
+      "supporting_in_corpus_case_count": 6,
+      "mean_supporting_in_corpus_recall_at_k": 0.0,
+      "essential_not_in_corpus_count": 4
+    },
+    "5": {
+      "case_count": 12,
+      "mean_hit_at_k": 0.08333333333333333,
+      "mean_precision_at_k": 0.016666666666666666,
+      "mean_recall_at_k": 0.041666666666666664,
+      "mean_reciprocal_rank": 0.027777777777777776,
+      "mean_ndcg_at_k": 0.025547799698560764,
+      "mean_article_hit_at_k": 0.0,
+      "mean_article_reciprocal_rank": 0.0,
+      "mean_clause_hit_at_k": 0.0,
+      "mean_clause_reciprocal_rank": 0.0,
+      "essential_case_count": 12,
+      "mean_essential_recall_at_k": 0.0,
+      "essential_full_coverage_rate": 0.0,
+      "essential_in_corpus_case_count": 11,
+      "mean_essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_rate": 0.0,
+      "supporting_case_count": 9,
+      "mean_supporting_recall_at_k": 0.0,
+      "supporting_in_corpus_case_count": 6,
+      "mean_supporting_in_corpus_recall_at_k": 0.0,
+      "essential_not_in_corpus_count": 4
+    },
+    "10": {
+      "case_count": 12,
+      "mean_hit_at_k": 0.16666666666666666,
+      "mean_precision_at_k": 0.016666666666666666,
+      "mean_recall_at_k": 0.08333333333333333,
+      "mean_reciprocal_rank": 0.03819444444444444,
+      "mean_ndcg_at_k": 0.041666666666666664,
+      "mean_article_hit_at_k": 0.0,
+      "mean_article_reciprocal_rank": 0.0,
+      "mean_clause_hit_at_k": 0.0,
+      "mean_clause_reciprocal_rank": 0.0,
+      "essential_case_count": 12,
+      "mean_essential_recall_at_k": 0.0,
+      "essential_full_coverage_rate": 0.0,
+      "essential_in_corpus_case_count": 11,
+      "mean_essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_rate": 0.0,
+      "supporting_case_count": 9,
+      "mean_supporting_recall_at_k": 0.0,
+      "supporting_in_corpus_case_count": 6,
+      "mean_supporting_in_corpus_recall_at_k": 0.0,
+      "essential_not_in_corpus_count": 4
+    },
+    "20": {
+      "case_count": 12,
+      "mean_hit_at_k": 0.4166666666666667,
+      "mean_precision_at_k": 0.02916666666666667,
+      "mean_recall_at_k": 0.2777777777777778,
+      "mean_reciprocal_rank": 0.055001167133520074,
+      "mean_ndcg_at_k": 0.10084638177360965,
+      "mean_article_hit_at_k": 0.0,
+      "mean_article_reciprocal_rank": 0.0,
+      "mean_clause_hit_at_k": 0.0,
+      "mean_clause_reciprocal_rank": 0.0,
+      "essential_case_count": 12,
+      "mean_essential_recall_at_k": 0.0,
+      "essential_full_coverage_rate": 0.0,
+      "essential_in_corpus_case_count": 11,
+      "mean_essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_rate": 0.0,
+      "supporting_case_count": 9,
+      "mean_supporting_recall_at_k": 0.0,
+      "supporting_in_corpus_case_count": 6,
+      "mean_supporting_in_corpus_recall_at_k": 0.0,
+      "essential_not_in_corpus_count": 4
+    }
+  },
+  "fully_covered_metrics_by_k": {
+    "1": {
+      "case_count": 9,
+      "mean_hit_at_k": 0.0,
+      "mean_precision_at_k": 0.0,
+      "mean_recall_at_k": 0.0,
+      "mean_reciprocal_rank": 0.0,
+      "mean_ndcg_at_k": 0.0
+    },
+    "3": {
+      "case_count": 9,
+      "mean_hit_at_k": 0.1111111111111111,
+      "mean_precision_at_k": 0.037037037037037035,
+      "mean_recall_at_k": 0.05555555555555555,
+      "mean_reciprocal_rank": 0.037037037037037035,
+      "mean_ndcg_at_k": 0.034063732931414355
+    },
     "5": {
       "case_count": 9,
       "mean_hit_at_k": 0.1111111111111111,
       "mean_precision_at_k": 0.022222222222222223,
       "mean_recall_at_k": 0.05555555555555555,
       "mean_reciprocal_rank": 0.037037037037037035,
-      "mean_ndcg_at_k": 0.034063732931414355,
-      "mean_article_hit_at_k": 0.0,
-      "mean_article_reciprocal_rank": 0.0,
-      "mean_clause_hit_at_k": 0.0,
-      "mean_clause_reciprocal_rank": 0.0,
-      "essential_case_count": 9,
-      "mean_essential_recall_at_k": 0.0,
-      "essential_full_coverage_rate": 0.0,
-      "essential_in_corpus_case_count": 9,
-      "mean_essential_in_corpus_recall_at_k": 0.0,
-      "essential_in_corpus_full_coverage_rate": 0.0,
-      "supporting_case_count": 8,
-      "mean_supporting_recall_at_k": 0.0,
-      "supporting_in_corpus_case_count": 6,
-      "mean_supporting_in_corpus_recall_at_k": 0.0,
-      "essential_not_in_corpus_count": 3
+      "mean_ndcg_at_k": 0.034063732931414355
     },
     "10": {
       "case_count": 9,
@@ -153,91 +273,35 @@
       "mean_precision_at_k": 0.022222222222222223,
       "mean_recall_at_k": 0.1111111111111111,
       "mean_reciprocal_rank": 0.05092592592592592,
-      "mean_ndcg_at_k": 0.05555555555555555,
-      "mean_article_hit_at_k": 0.0,
-      "mean_article_reciprocal_rank": 0.0,
-      "mean_clause_hit_at_k": 0.0,
-      "mean_clause_reciprocal_rank": 0.0,
-      "essential_case_count": 9,
-      "mean_essential_recall_at_k": 0.0,
-      "essential_full_coverage_rate": 0.0,
-      "essential_in_corpus_case_count": 9,
-      "mean_essential_in_corpus_recall_at_k": 0.0,
-      "essential_in_corpus_full_coverage_rate": 0.0,
-      "supporting_case_count": 8,
-      "mean_supporting_recall_at_k": 0.0,
-      "supporting_in_corpus_case_count": 6,
-      "mean_supporting_in_corpus_recall_at_k": 0.0,
-      "essential_not_in_corpus_count": 3
+      "mean_ndcg_at_k": 0.05555555555555555
     },
     "20": {
       "case_count": 9,
       "mean_hit_at_k": 0.4444444444444444,
-      "mean_precision_at_k": 0.027777777777777776,
-      "mean_recall_at_k": 0.2592592592592593,
-      "mean_reciprocal_rank": 0.06539838157485217,
-      "mean_ndcg_at_k": 0.1012608594488213,
-      "mean_article_hit_at_k": 0.0,
-      "mean_article_reciprocal_rank": 0.0,
-      "mean_clause_hit_at_k": 0.0,
-      "mean_clause_reciprocal_rank": 0.0,
-      "essential_case_count": 9,
-      "mean_essential_recall_at_k": 0.0,
-      "essential_full_coverage_rate": 0.0,
-      "essential_in_corpus_case_count": 9,
-      "mean_essential_in_corpus_recall_at_k": 0.0,
-      "essential_in_corpus_full_coverage_rate": 0.0,
-      "supporting_case_count": 8,
-      "mean_supporting_recall_at_k": 0.0,
-      "supporting_in_corpus_case_count": 6,
-      "mean_supporting_in_corpus_recall_at_k": 0.0,
-      "essential_not_in_corpus_count": 3
+      "mean_precision_at_k": 0.03333333333333334,
+      "mean_recall_at_k": 0.3333333333333333,
+      "mean_reciprocal_rank": 0.0667989417989418,
+      "mean_ndcg_at_k": 0.12195752138753867
     }
   },
-  "fully_covered_metrics_by_k": {
-    "5": {
-      "case_count": 7,
-      "mean_hit_at_k": 0.14285714285714285,
-      "mean_precision_at_k": 0.028571428571428574,
-      "mean_recall_at_k": 0.07142857142857142,
-      "mean_reciprocal_rank": 0.047619047619047616,
-      "mean_ndcg_at_k": 0.0437962280546756
-    },
-    "10": {
-      "case_count": 7,
-      "mean_hit_at_k": 0.2857142857142857,
-      "mean_precision_at_k": 0.028571428571428574,
-      "mean_recall_at_k": 0.14285714285714285,
-      "mean_reciprocal_rank": 0.06547619047619048,
-      "mean_ndcg_at_k": 0.07142857142857142
-    },
-    "20": {
-      "case_count": 7,
-      "mean_hit_at_k": 0.42857142857142855,
-      "mean_precision_at_k": 0.028571428571428574,
-      "mean_recall_at_k": 0.2857142857142857,
-      "mean_reciprocal_rank": 0.07568027210884354,
-      "mean_ndcg_at_k": 0.11411554946341772
-    }
-  },
-  "mean_hit_at_k": 0.1111111111111111,
-  "mean_precision_at_k": 0.022222222222222223,
-  "mean_recall_at_k": 0.05555555555555555,
-  "mean_reciprocal_rank": 0.037037037037037035,
-  "mean_ndcg_at_k": 0.034063732931414355,
-  "fully_covered_case_count": 7,
-  "fully_covered_mean_hit_at_k": 0.14285714285714285,
-  "fully_covered_mean_precision_at_k": 0.028571428571428574,
-  "fully_covered_mean_recall_at_k": 0.07142857142857142,
-  "fully_covered_mean_reciprocal_rank": 0.047619047619047616,
-  "fully_covered_mean_ndcg_at_k": 0.0437962280546756,
+  "mean_hit_at_k": 0.08333333333333333,
+  "mean_precision_at_k": 0.016666666666666666,
+  "mean_recall_at_k": 0.041666666666666664,
+  "mean_reciprocal_rank": 0.027777777777777776,
+  "mean_ndcg_at_k": 0.025547799698560764,
+  "fully_covered_case_count": 9,
+  "fully_covered_mean_hit_at_k": 0.1111111111111111,
+  "fully_covered_mean_precision_at_k": 0.022222222222222223,
+  "fully_covered_mean_recall_at_k": 0.05555555555555555,
+  "fully_covered_mean_reciprocal_rank": 0.037037037037037035,
+  "fully_covered_mean_ndcg_at_k": 0.034063732931414355,
   "coverage_summary": {
     "expected_document_count": 12,
     "embedded_document_count": 10,
     "document_coverage_rate": 0.8333333333333334,
-    "fully_covered_case_count": 7,
+    "fully_covered_case_count": 9,
     "partially_covered_case_count": 2,
-    "not_covered_case_count": 0
+    "not_covered_case_count": 1
   },
   "cases": [
     {
@@ -281,6 +345,36 @@
       "essential_in_corpus_recall_at_k": 0.0,
       "essential_in_corpus_full_coverage_at_k": false,
       "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
         "5": {
           "hit_at_k": false,
           "precision_at_k": 0.0,
@@ -463,6 +557,44 @@
       "supporting_in_corpus_recall_at_k": 0.0,
       "supporting_in_corpus_full_coverage_at_k": false,
       "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
         "5": {
           "hit_at_k": false,
           "precision_at_k": 0.0,
@@ -742,6 +874,44 @@
       "supporting_in_corpus_recall_at_k": 0.0,
       "supporting_in_corpus_full_coverage_at_k": false,
       "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
         "5": {
           "hit_at_k": false,
           "precision_at_k": 0.0,
@@ -988,6 +1158,44 @@
       "supporting_in_corpus_recall_at_k": 0.0,
       "supporting_in_corpus_full_coverage_at_k": false,
       "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
         "5": {
           "hit_at_k": false,
           "precision_at_k": 0.0,
@@ -1253,6 +1461,44 @@
       "supporting_in_corpus_recall_at_k": 0.0,
       "supporting_in_corpus_full_coverage_at_k": false,
       "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
         "5": {
           "hit_at_k": false,
           "precision_at_k": 0.0,
@@ -1436,6 +1682,44 @@
       "supporting_in_corpus_recall_at_k": 0.0,
       "supporting_in_corpus_full_coverage_at_k": false,
       "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
         "5": {
           "hit_at_k": false,
           "precision_at_k": 0.0,
@@ -1665,6 +1949,40 @@
       "supporting_recall_at_k": 0.0,
       "supporting_full_coverage_at_k": false,
       "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
         "5": {
           "hit_at_k": false,
           "precision_at_k": 0.0,
@@ -1880,6 +2198,44 @@
       "supporting_in_corpus_recall_at_k": 0.0,
       "supporting_in_corpus_full_coverage_at_k": false,
       "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
         "5": {
           "hit_at_k": false,
           "precision_at_k": 0.0,
@@ -2082,6 +2438,40 @@
       "supporting_recall_at_k": 0.0,
       "supporting_full_coverage_at_k": false,
       "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": true,
+          "precision_at_k": 0.3333333333333333,
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg_at_k": 0.3065735963827292,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
         "5": {
           "hit_at_k": true,
           "precision_at_k": 0.2,
@@ -2300,9 +2690,561 @@
         "26/2015/TT-BTC"
       ],
       "unparsed_provisions": []
+    },
+    {
+      "case_id": "L2",
+      "query": "Tháng 6/2023, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
+      "ranked_documents": [
+        "06/2000/TT-TCHQ",
+        "18/2001/TT-BTC",
+        "54/2003/TTLT-BTC-BTM",
+        "47/2011/TT-BTC",
+        "39/2016/TT-BCT",
+        "13/2014/TT-BTC",
+        "126/2020/NĐ-CP",
+        "52/2020/TT-BTC",
+        "46/2006/TT-BTC",
+        "59/2007/TT-BTC",
+        "86/2026/TT-BTC",
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP",
+        "181/2025/NĐ-CP",
+        "18/VBHN-BTC (2026)",
+        "191/2015/TT-BTC",
+        "194/2010/TT-BTC",
+        "69/2016/TT-BTC",
+        "48/2024/QH15"
+      ],
+      "relevant_document_numbers": [
+        "25/2018/TT-BTC"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "supporting_recall_at_k": 0.0,
+      "supporting_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "not_covered",
+      "covered_relevant_document_numbers": [],
+      "missing_relevant_document_numbers": [
+        "25/2018/TT-BTC"
+      ],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "25/2018/TT-BTC",
+              "2",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        }
+      ],
+      "supporting_provision_ranks": [
+        {
+          "provision": [
+            [
+              "146/2017/NĐ-CP",
+              "1",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        }
+      ],
+      "case_type": "leakage-free",
+      "as_of_date": "2023-06-15",
+      "uncertain": false,
+      "source_verified": null,
+      "relevant_clauses": {
+        "25/2018/TT-BTC": [
+          [
+            "2",
+            null
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "25/2018/TT-BTC",
+            "2",
+            null
+          ]
+        ]
+      ],
+      "supporting_provisions": [
+        [
+          [
+            "146/2017/NĐ-CP",
+            "1",
+            "2"
+          ]
+        ]
+      ],
+      "supporting_document_numbers": [
+        "146/2017/NĐ-CP"
+      ],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "L3",
+      "query": "Tháng 8/2025, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
+      "ranked_documents": [
+        "06/2000/TT-TCHQ",
+        "18/2001/TT-BTC",
+        "54/2003/TTLT-BTC-BTM",
+        "47/2011/TT-BTC",
+        "39/2016/TT-BCT",
+        "13/2014/TT-BTC",
+        "126/2020/NĐ-CP",
+        "52/2020/TT-BTC",
+        "46/2006/TT-BTC",
+        "59/2007/TT-BTC",
+        "86/2026/TT-BTC",
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP",
+        "181/2025/NĐ-CP",
+        "18/VBHN-BTC (2026)",
+        "191/2015/TT-BTC",
+        "194/2010/TT-BTC",
+        "69/2016/TT-BTC",
+        "48/2024/QH15"
+      ],
+      "relevant_document_numbers": [
+        "48/2024/QH15",
+        "181/2025/NĐ-CP"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": true,
+          "precision_at_k": 0.1,
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.07142857142857142,
+          "ndcg_at_k": 0.29880884624392406,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "fully_covered",
+      "covered_relevant_document_numbers": [
+        "181/2025/NĐ-CP",
+        "48/2024/QH15"
+      ],
+      "missing_relevant_document_numbers": [],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "15",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "29",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "case_type": "leakage-free",
+      "as_of_date": "2025-08-15",
+      "uncertain": false,
+      "source_verified": null,
+      "relevant_clauses": {
+        "48/2024/QH15": [
+          [
+            "15",
+            "1"
+          ]
+        ],
+        "181/2025/NĐ-CP": [
+          [
+            "29",
+            "1"
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "15",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "29",
+            "1"
+          ]
+        ]
+      ],
+      "supporting_provisions": [],
+      "supporting_document_numbers": [],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "L4",
+      "query": "Tháng 5/2026, công ty tôi mua hàng hóa trị giá 3 triệu đồng (đã gồm thuế) theo hình thức trả góp và trả bằng tiền mặt. Thuế GTGT đầu vào có được khấu trừ không?",
+      "ranked_documents": [
+        "72/2014/TT-BTC",
+        "18/VBHN-BTC",
+        "31/2013/QH13",
+        "219/2013/TT-BTC",
+        "54/2003/TTLT-BTC-BTM",
+        "120/2003/TT-BTC",
+        "122/2000/TT-BTC",
+        "156/2013/TT-BTC",
+        "100/2016/NĐ-CP",
+        "68/2019/TT-BTC",
+        "106/2016/QH13",
+        "26/2015/TT-BTC",
+        "180/2024/NĐ-CP",
+        "16/2013/TT-BTC",
+        "26/VBHN-BTC (2019)",
+        "89/2026/TT-BTC"
+      ],
+      "relevant_document_numbers": [
+        "48/2024/QH15",
+        "181/2025/NĐ-CP"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "1": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "3": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "fully_covered",
+      "covered_relevant_document_numbers": [
+        "181/2025/NĐ-CP",
+        "48/2024/QH15"
+      ],
+      "missing_relevant_document_numbers": [],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "14",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "26",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "case_type": "leakage-free",
+      "as_of_date": "2026-05-15",
+      "uncertain": false,
+      "source_verified": null,
+      "relevant_clauses": {
+        "48/2024/QH15": [
+          [
+            "14",
+            "2"
+          ]
+        ],
+        "181/2025/NĐ-CP": [
+          [
+            "26",
+            "2"
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "14",
+            "2"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "26",
+            "2"
+          ]
+        ]
+      ],
+      "supporting_provisions": [],
+      "supporting_document_numbers": [],
+      "unparsed_provisions": []
     }
   ],
-  "report_id": "20261030T190151Z-4c5ab26132db",
-  "generated_at": "2026-10-30T19:01:51.230120+00:00",
-  "artifact_key": "evaluation/retrieval/runs/20261030T190151Z-4c5ab26132db.json"
+  "report_id": "20261030T190904Z-3bbadb35a375",
+  "generated_at": "2026-10-30T19:09:04.200317+00:00",
+  "artifact_key": "evaluation/retrieval/runs/20261030T190904Z-3bbadb35a375.json"
 }
