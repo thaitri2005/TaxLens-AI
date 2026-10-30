@@ -44,6 +44,7 @@ from taxlens.ingestion.connectors import ConnectorError, GovernmentPortalSearch,
 from taxlens.ingestion.mof import SOURCE_NAME as MOF_SOURCE
 from taxlens.ingestion.mof import MofLegalDocumentConnector, MofSearchOptions
 from taxlens.ingestion.seed import ingest_source_document
+from taxlens.legal_data.document_numbers import canonical_document_number
 from taxlens.legal_data.models import DocumentVersion, LegalDocument, SourceRecord
 from taxlens.storage.factory import get_object_storage
 
@@ -76,6 +77,16 @@ def main() -> None:
     candidates, unavailable = _list_sources(arguments.source, issued_from, arguments)
     if not candidates and unavailable:
         raise SystemExit(f"No source reachable: {', '.join(unavailable)}")
+    if arguments.only:
+        wanted = {canonical_document_number(number) for number in arguments.only}
+        candidates = [c for c in candidates if c.document.document_number in wanted]
+        found = {candidate.document.document_number for candidate in candidates}
+        logger.info(
+            "Listed %d of %d requested: missing %s",
+            len(found),
+            len(wanted),
+            sorted(wanted - found) or "none",
+        )
 
     with SessionLocal() as session:
         pending = _new_documents(session, candidates)
@@ -105,6 +116,13 @@ def _parse_arguments() -> argparse.Namespace:
         help="Only the documents this gold set cites, from any portal category",
     )
     parser.add_argument("--include-expired", action="store_true")
+    parser.add_argument(
+        "--only",
+        nargs="+",
+        metavar="NUMBER",
+        help="Collect only these document numbers from the listing (the ministry has no "
+        "search by number)",
+    )
     parser.add_argument("--limit", type=int, default=100, help="Maximum downloads per run")
     parser.add_argument("--dry-run", action="store_true", help="List and count only")
     parser.add_argument(
@@ -159,7 +177,10 @@ def _list_sources(
         started = time.monotonic()
         mof = MofLegalDocumentConnector()
         options = MofSearchOptions(
-            issued_from=issued_from, include_expired=arguments.include_expired
+            issued_from=issued_from,
+            include_expired=arguments.include_expired,
+            # Numbers asked for by --only may be filed outside the tax field.
+            any_field=bool(arguments.only),
         )
         try:
             found = _cached_mof_listing(mof, options, arguments.refresh_listing)
@@ -258,7 +279,8 @@ def _cached_mof_listing(
 
     cache = LISTING_CACHE_DIRECTORY / (
         f"mof-{options.issued_from or 'all'}-"
-        f"{'with-expired' if options.include_expired else 'current'}.json"
+        f"{'with-expired' if options.include_expired else 'current'}"
+        f"{'-any-field' if options.any_field else ''}.json"
     )
     if not refresh and cache.is_file() and time.time() - cache.stat().st_mtime < 86_400:
         documents = [

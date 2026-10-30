@@ -69,6 +69,9 @@ class MofSearchOptions:
     issued_from: date | None = None
     include_expired: bool = False
     include_all_document_types: bool = False
+    # Search every field, not just tax: the ministry files some tax circulars (on tax
+    # administration, on refunds) under other fields. Only sensible with a number filter.
+    any_field: bool = False
 
 
 class MofLegalDocumentConnector:
@@ -95,7 +98,8 @@ class MofLegalDocumentConnector:
 
         options = options or MofSearchOptions()
         records: dict[int, dict[str, Any]] = {}
-        for label, selection in TAX_SELECTIONS:
+        selections = (("all fields", {}),) if options.any_field else TAX_SELECTIONS
+        for label, selection in selections:
             for record in self._search(label, selection, options.issued_from):
                 records.setdefault(int(record["id"]), record)
         documents = [
