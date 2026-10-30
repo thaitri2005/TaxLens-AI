@@ -74,6 +74,8 @@ Each step skips work already done, so the commands can be rerun at any time.
 | `evaluate_tax_retrieval.py` | Runs the labelled retrieval evaluation and stores the report ([retrieval.md](retrieval.md#evaluation)). `--dataset data/evaluation/gold_set_v1.csv` runs the [gold set](retrieval.md#gold-set). |
 | `evaluate_retrieval.py` | Prints ranked results for one ad hoc `--query`. |
 | `evaluate_qa.py` | Runs the cheap, no-judge Q&A evaluation. |
+| `freeze_corpus.py` | Records the corpus for an experiment (`--output`) or checks it is unchanged (`--check`) ([retrieval.md](retrieval.md#controlled-experiments)). |
+| `annotation_agreement.py` | Cohen's kappa between two annotators' gold-set CSVs ([guideline](annotation-guideline.md#process)). |
 | `benchmark_ocr.py` | Word error rate of OCR settings against a born-digital PDF. |
 | `prune_non_tax_documents.py` | Lists, or with `--apply` deletes, documents whose titles are not about tax. |
 | `seed.py` | Sample documents and the initial administrator. |

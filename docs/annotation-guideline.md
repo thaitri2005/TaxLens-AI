@@ -61,5 +61,5 @@ An amended provision and its amending provision count as **one** gold item, writ
 
 ## Process
 
-- Two people annotate at least 50 cases independently → report Cohen's kappa on E labels.
+- Two people annotate at least 50 cases independently → report Cohen's kappa on E labels. The second annotator fills a copy of the CSV with the same columns (only their cases) without looking at the first; `python scripts/annotation_agreement.py <first.csv> <second.csv>` reports kappa over the E / S / not-listed label of every provision either listed, how often the E sets match exactly, and each disagreement to discuss.
 - Log `minutes_spent`; if the average exceeds 30 minutes per case, simplify before scaling up.
