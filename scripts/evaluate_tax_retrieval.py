@@ -58,7 +58,7 @@ def main() -> None:
     parser.add_argument(
         "--verified-only",
         action="store_true",
-        help="Gold set only: skip cases marked uncertain or without a verified source",
+        help="Gold set only: skip cases marked uncertain or whose source is not verified (N)",
     )
     parser.add_argument(
         "--k",
@@ -468,7 +468,9 @@ def _gold_set_cases(path: Path, verified_only: bool) -> list[dict[str, Any]]:
         corpus_document_numbers = list(session.scalars(select(LegalDocument.document_number)))
     cases = []
     for gold_case in load_gold_set(path):
-        if verified_only and (gold_case.uncertain or not gold_case.source_verified):
+        # A derived case (source_verified None) has no letter to verify; only an
+        # explicit N or an uncertain label keeps a case out.
+        if verified_only and (gold_case.uncertain or gold_case.source_verified is False):
             continue
         case = gold_case.to_evaluation_case(corpus_document_numbers)
         # Conditional and false-premise cases have no essential provisions; they test

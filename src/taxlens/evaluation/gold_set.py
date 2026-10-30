@@ -55,7 +55,8 @@ class GoldCase:
     derived_from: str | None
     question: str
     as_of_date: date
-    source_verified: bool
+    # None for a derived case ("-"): there is no source letter to verify against.
+    source_verified: bool | None
     uncertain: bool
     provisions: tuple[Provision, ...]
     unparsed: tuple[str, ...]
@@ -174,11 +175,16 @@ def _case(row: dict[str, str]) -> GoldCase:
         derived_from=row.get("derived_from", "").strip() or None,
         question=row["question"].strip(),
         as_of_date=datetime.strptime(row["as_of_date"].strip(), "%d/%m/%Y").date(),
-        source_verified=row["source_verified"].strip().upper().startswith("Y"),
+        source_verified=_verified(row["source_verified"]),
         uncertain=row["uncertain"].strip().upper().startswith("Y"),
         provisions=provisions,
         unparsed=unparsed,
     )
+
+
+def _verified(value: str) -> bool | None:
+    value = value.strip().upper()
+    return None if value in {"", "-"} else value.startswith("Y")
 
 
 def _provision(label: str, body: str, earlier: list[Provision]) -> Provision | None:

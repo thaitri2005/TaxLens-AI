@@ -1,0 +1,2308 @@
+{
+  "model": "intfloat/multilingual-e5-small",
+  "model_revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+  "retrieval_mode": "keyword",
+  "issues": null,
+  "as_of_filter": "none",
+  "code_version": "597c96bc655455aeee5cbcea49bcb8b6bcfa7ad7",
+  "dataset": "data/evaluation/gold_set_v1.csv",
+  "dataset_hash": "2f3bef82721ca91a9fe9a456c148dd1d9422efd3b7eb9c938233cab4f55a12a4",
+  "ks": [
+    5,
+    10,
+    20
+  ],
+  "k": 5,
+  "case_count": 9,
+  "evaluation_status": "partial_coverage",
+  "quality_gate": {
+    "status": "partial_coverage",
+    "ranking_metrics_usable": true,
+    "reason": "Only some expected evaluation documents are embedded"
+  },
+  "corpus_coverage": {
+    "expected_document_count": 12,
+    "present_document_count": 10,
+    "chunked_document_count": 10,
+    "embedded_document_count": 10,
+    "documents": [
+      {
+        "document_number": "125/2020/NĐ-CP",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 215,
+        "embedding_count": 215
+      },
+      {
+        "document_number": "174/2025/NĐ-CP",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 51,
+        "embedding_count": 51
+      },
+      {
+        "document_number": "181/2025/NĐ-CP",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 189,
+        "embedding_count": 189
+      },
+      {
+        "document_number": "25/2018/TT-BTC",
+        "present": false,
+        "version_count": 0,
+        "chunk_count": 0,
+        "embedding_count": 0
+      },
+      {
+        "document_number": "31/2018/QH14",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 156,
+        "embedding_count": 156
+      },
+      {
+        "document_number": "32/2018/QH14",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 181,
+        "embedding_count": 181
+      },
+      {
+        "document_number": "38/2019/QH14",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 402,
+        "embedding_count": 402
+      },
+      {
+        "document_number": "48/2024/QH15",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 86,
+        "embedding_count": 86
+      },
+      {
+        "document_number": "64/2025/QH15",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 166,
+        "embedding_count": 166
+      },
+      {
+        "document_number": "66/2025/QH15",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 28,
+        "embedding_count": 28
+      },
+      {
+        "document_number": "80/2021/TT-BTC",
+        "present": false,
+        "version_count": 0,
+        "chunk_count": 0,
+        "embedding_count": 0
+      },
+      {
+        "document_number": "84/2025/TT-BNNMT",
+        "present": true,
+        "version_count": 1,
+        "chunk_count": 135,
+        "embedding_count": 135
+      }
+    ]
+  },
+  "corpus_snapshot": {
+    "document_count": 2026,
+    "version_count": 2028,
+    "chunk_count": 61208,
+    "embedding_count": 61208,
+    "fingerprint": "1312671eee0a5043468b5440232717600010889e3bcfacb1a442fc36956a91d4"
+  },
+  "frozen_corpus": {
+    "label": "corpus-v1",
+    "fingerprint": "317f5a0de13d50097466698cdda61885d8f66666ccbe47d3e1e4b744ab7cff8c"
+  },
+  "metrics_by_k": {
+    "5": {
+      "case_count": 9,
+      "mean_hit_at_k": 0.1111111111111111,
+      "mean_precision_at_k": 0.022222222222222223,
+      "mean_recall_at_k": 0.05555555555555555,
+      "mean_reciprocal_rank": 0.037037037037037035,
+      "mean_ndcg_at_k": 0.034063732931414355,
+      "mean_article_hit_at_k": 0.0,
+      "mean_article_reciprocal_rank": 0.0,
+      "mean_clause_hit_at_k": 0.0,
+      "mean_clause_reciprocal_rank": 0.0,
+      "essential_case_count": 9,
+      "mean_essential_recall_at_k": 0.0,
+      "essential_full_coverage_rate": 0.0,
+      "essential_in_corpus_case_count": 9,
+      "mean_essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_rate": 0.0,
+      "supporting_case_count": 8,
+      "mean_supporting_recall_at_k": 0.0,
+      "supporting_in_corpus_case_count": 6,
+      "mean_supporting_in_corpus_recall_at_k": 0.0,
+      "essential_not_in_corpus_count": 3
+    },
+    "10": {
+      "case_count": 9,
+      "mean_hit_at_k": 0.2222222222222222,
+      "mean_precision_at_k": 0.022222222222222223,
+      "mean_recall_at_k": 0.1111111111111111,
+      "mean_reciprocal_rank": 0.05092592592592592,
+      "mean_ndcg_at_k": 0.05555555555555555,
+      "mean_article_hit_at_k": 0.0,
+      "mean_article_reciprocal_rank": 0.0,
+      "mean_clause_hit_at_k": 0.0,
+      "mean_clause_reciprocal_rank": 0.0,
+      "essential_case_count": 9,
+      "mean_essential_recall_at_k": 0.0,
+      "essential_full_coverage_rate": 0.0,
+      "essential_in_corpus_case_count": 9,
+      "mean_essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_rate": 0.0,
+      "supporting_case_count": 8,
+      "mean_supporting_recall_at_k": 0.0,
+      "supporting_in_corpus_case_count": 6,
+      "mean_supporting_in_corpus_recall_at_k": 0.0,
+      "essential_not_in_corpus_count": 3
+    },
+    "20": {
+      "case_count": 9,
+      "mean_hit_at_k": 0.4444444444444444,
+      "mean_precision_at_k": 0.027777777777777776,
+      "mean_recall_at_k": 0.2592592592592593,
+      "mean_reciprocal_rank": 0.06539838157485217,
+      "mean_ndcg_at_k": 0.1012608594488213,
+      "mean_article_hit_at_k": 0.0,
+      "mean_article_reciprocal_rank": 0.0,
+      "mean_clause_hit_at_k": 0.0,
+      "mean_clause_reciprocal_rank": 0.0,
+      "essential_case_count": 9,
+      "mean_essential_recall_at_k": 0.0,
+      "essential_full_coverage_rate": 0.0,
+      "essential_in_corpus_case_count": 9,
+      "mean_essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_rate": 0.0,
+      "supporting_case_count": 8,
+      "mean_supporting_recall_at_k": 0.0,
+      "supporting_in_corpus_case_count": 6,
+      "mean_supporting_in_corpus_recall_at_k": 0.0,
+      "essential_not_in_corpus_count": 3
+    }
+  },
+  "fully_covered_metrics_by_k": {
+    "5": {
+      "case_count": 7,
+      "mean_hit_at_k": 0.14285714285714285,
+      "mean_precision_at_k": 0.028571428571428574,
+      "mean_recall_at_k": 0.07142857142857142,
+      "mean_reciprocal_rank": 0.047619047619047616,
+      "mean_ndcg_at_k": 0.0437962280546756
+    },
+    "10": {
+      "case_count": 7,
+      "mean_hit_at_k": 0.2857142857142857,
+      "mean_precision_at_k": 0.028571428571428574,
+      "mean_recall_at_k": 0.14285714285714285,
+      "mean_reciprocal_rank": 0.06547619047619048,
+      "mean_ndcg_at_k": 0.07142857142857142
+    },
+    "20": {
+      "case_count": 7,
+      "mean_hit_at_k": 0.42857142857142855,
+      "mean_precision_at_k": 0.028571428571428574,
+      "mean_recall_at_k": 0.2857142857142857,
+      "mean_reciprocal_rank": 0.07568027210884354,
+      "mean_ndcg_at_k": 0.11411554946341772
+    }
+  },
+  "mean_hit_at_k": 0.1111111111111111,
+  "mean_precision_at_k": 0.022222222222222223,
+  "mean_recall_at_k": 0.05555555555555555,
+  "mean_reciprocal_rank": 0.037037037037037035,
+  "mean_ndcg_at_k": 0.034063732931414355,
+  "fully_covered_case_count": 7,
+  "fully_covered_mean_hit_at_k": 0.14285714285714285,
+  "fully_covered_mean_precision_at_k": 0.028571428571428574,
+  "fully_covered_mean_recall_at_k": 0.07142857142857142,
+  "fully_covered_mean_reciprocal_rank": 0.047619047619047616,
+  "fully_covered_mean_ndcg_at_k": 0.0437962280546756,
+  "coverage_summary": {
+    "expected_document_count": 12,
+    "embedded_document_count": 10,
+    "document_coverage_rate": 0.8333333333333334,
+    "fully_covered_case_count": 7,
+    "partially_covered_case_count": 2,
+    "not_covered_case_count": 0
+  },
+  "cases": [
+    {
+      "case_id": "A1",
+      "query": "Tháng 3/2026, công ty tôi bán nước ngọt đóng chai có hàm lượng đường khoảng 8g/100ml. Thuế suất thuế GTGT là bao nhiêu?",
+      "ranked_documents": [
+        "51/2022/NĐ-CP",
+        "152/2015/TT-BTC",
+        "108/2025/NĐ-CP",
+        "151/2026/TT-BTC",
+        "316/2016/TT-BTC",
+        "145/2026/TT-BTC",
+        "98/2025/TT-BTC",
+        "69/2013/QĐ-TTG",
+        "54/2003/TTLT-BTC-BTM",
+        "181/2025/NĐ-CP",
+        "148/2026/TT-BTC",
+        "18/VBHN-BTC",
+        "10/2024/TT-BTC",
+        "31/2023/TT-BTC",
+        "100/1999/TT-BTC",
+        "89/2026/TT-BTC",
+        "146/2026/TT-BTC"
+      ],
+      "relevant_document_numbers": [
+        "48/2024/QH15",
+        "66/2025/QH15",
+        "174/2025/NĐ-CP"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "fully_covered",
+      "covered_relevant_document_numbers": [
+        "174/2025/NĐ-CP",
+        "48/2024/QH15",
+        "66/2025/QH15"
+      ],
+      "missing_relevant_document_numbers": [],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "9",
+              "3"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "66/2025/QH15",
+              "2",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "174/2025/NĐ-CP",
+              "1",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "case_type": "answerable",
+      "as_of_date": "2026-03-15",
+      "uncertain": false,
+      "source_verified": true,
+      "relevant_clauses": {
+        "48/2024/QH15": [
+          [
+            "9",
+            "3"
+          ]
+        ],
+        "66/2025/QH15": [
+          [
+            "2",
+            "1"
+          ]
+        ],
+        "174/2025/NĐ-CP": [
+          [
+            "1",
+            "1"
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "9",
+            "3"
+          ]
+        ],
+        [
+          [
+            "66/2025/QH15",
+            "2",
+            "1"
+          ]
+        ],
+        [
+          [
+            "174/2025/NĐ-CP",
+            "1",
+            "1"
+          ]
+        ]
+      ],
+      "supporting_provisions": [],
+      "supporting_document_numbers": [],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "A2",
+      "query": "Tháng 3/2026, công ty tôi (nộp thuế GTGT theo phương pháp khấu trừ) mua gỗ keo rừng trồng chỉ qua sơ chế thông thường rồi bán lại cho một công ty khác. Công ty tôi có phải kê khai, nộp thuế GTGT không?",
+      "ranked_documents": [
+        "219/2013/TT-BTC",
+        "26/2015/TT-BTC",
+        "180/2024/NĐ-CP",
+        "191/2010/TT-BTC",
+        "119/2014/TT-BTC",
+        "47/2011/TT-BTC",
+        "72/2024/NĐ-CP",
+        "130/2016/TT-BTC",
+        "154/2011/TT-BTC",
+        "45/2009/TT-BTC",
+        "45/2009/TT- BTC",
+        "174/2025/NĐ-CP",
+        "89/2026/TT-BTC",
+        "175/2012/TT-BTC",
+        "16/2013/TT-BTC"
+      ],
+      "relevant_document_numbers": [
+        "48/2024/QH15",
+        "181/2025/NĐ-CP",
+        "84/2025/TT-BNNMT"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "supporting_recall_at_k": 0.0,
+      "supporting_full_coverage_at_k": false,
+      "supporting_in_corpus_recall_at_k": 0.0,
+      "supporting_in_corpus_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "fully_covered",
+      "covered_relevant_document_numbers": [
+        "181/2025/NĐ-CP",
+        "48/2024/QH15",
+        "84/2025/TT-BNNMT"
+      ],
+      "missing_relevant_document_numbers": [],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "5",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "4",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "4",
+              "1b"
+            ],
+            [
+              "359/2025/NĐ-CP",
+              "1",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "84/2025/TT-BNNMT",
+              "20",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "supporting_provision_ranks": [
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "9",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "9",
+              "3"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "19",
+              "3"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "case_type": "answerable",
+      "as_of_date": "2026-03-15",
+      "uncertain": false,
+      "source_verified": true,
+      "relevant_clauses": {
+        "48/2024/QH15": [
+          [
+            "5",
+            "1"
+          ]
+        ],
+        "181/2025/NĐ-CP": [
+          [
+            "4",
+            "1"
+          ],
+          [
+            "4",
+            "1b"
+          ]
+        ],
+        "84/2025/TT-BNNMT": [
+          [
+            "20",
+            "1"
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "5",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "4",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "4",
+            "1b"
+          ],
+          [
+            "359/2025/NĐ-CP",
+            "1",
+            "1"
+          ]
+        ],
+        [
+          [
+            "84/2025/TT-BNNMT",
+            "20",
+            "1"
+          ]
+        ]
+      ],
+      "supporting_provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "9",
+            "2"
+          ]
+        ],
+        [
+          [
+            "48/2024/QH15",
+            "9",
+            "3"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "19",
+            "3"
+          ]
+        ]
+      ],
+      "supporting_document_numbers": [],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "A3",
+      "query": "Tháng 3/2026, công ty tôi có nhà máy thủy điện nhỏ bán điện trên thị trường điện theo hợp đồng mua bán điện. Thời điểm xác định thuế GTGT và thời điểm khai thuế là khi nào?",
+      "ranked_documents": [
+        "89/2026/TT-BTC",
+        "16/2013/TT-BTC",
+        "72/2025/NĐ-CP",
+        "57/2014/TT-BCT",
+        "252/2026/NĐ-CP",
+        "101/2011/NĐ-CP",
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP",
+        "196/2016/TT-BTC",
+        "53-TC/TCT",
+        "29/2012/QH13",
+        "197/2014/TT-BTC"
+      ],
+      "relevant_document_numbers": [
+        "181/2025/NĐ-CP",
+        "38/2019/QH14"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "supporting_recall_at_k": 0.0,
+      "supporting_full_coverage_at_k": false,
+      "supporting_in_corpus_recall_at_k": 0.0,
+      "supporting_in_corpus_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": true,
+          "precision_at_k": 0.1,
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 0.125,
+          "ndcg_at_k": 0.19342640361727081,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": true,
+          "precision_at_k": 0.05,
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 0.125,
+          "ndcg_at_k": 0.19342640361727081,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "fully_covered",
+      "covered_relevant_document_numbers": [
+        "181/2025/NĐ-CP",
+        "38/2019/QH14"
+      ],
+      "missing_relevant_document_numbers": [],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "16",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "38/2019/QH14",
+              "44",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "supporting_provision_ranks": [
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "16",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "8",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "123/2020/NĐ-CP",
+              "9",
+              "4"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        },
+        {
+          "provision": [
+            [
+              "70/2025/NĐ-CP",
+              "1",
+              "6"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        }
+      ],
+      "case_type": "answerable",
+      "as_of_date": "2026-03-15",
+      "uncertain": false,
+      "source_verified": true,
+      "relevant_clauses": {
+        "181/2025/NĐ-CP": [
+          [
+            "16",
+            "2"
+          ]
+        ],
+        "38/2019/QH14": [
+          [
+            "44",
+            "1"
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "181/2025/NĐ-CP",
+            "16",
+            "2"
+          ]
+        ],
+        [
+          [
+            "38/2019/QH14",
+            "44",
+            "1"
+          ]
+        ]
+      ],
+      "supporting_provisions": [
+        [
+          [
+            "181/2025/NĐ-CP",
+            "16",
+            "2"
+          ]
+        ],
+        [
+          [
+            "48/2024/QH15",
+            "8",
+            "2"
+          ]
+        ],
+        [
+          [
+            "123/2020/NĐ-CP",
+            "9",
+            "4"
+          ]
+        ],
+        [
+          [
+            "70/2025/NĐ-CP",
+            "1",
+            "6"
+          ]
+        ]
+      ],
+      "supporting_document_numbers": [
+        "123/2020/NĐ-CP",
+        "48/2024/QH15",
+        "70/2025/NĐ-CP"
+      ],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "A4",
+      "query": "Tháng 2/2026, công ty tôi đã được hoàn thuế GTGT cho một lô hàng xuất khẩu, nhưng khách hàng nước ngoài trả lại lô hàng. Công ty phải xử lý về thuế thế nào?",
+      "ranked_documents": [
+        "26/VBHN-BTC (2019)",
+        "130/2016/TT-BTC",
+        "47/2011/TT-BTC",
+        "29/VBHN-BTC (2019)",
+        "219/2013/TT-BTC",
+        "54/2003/TTLT-BTC-BTM",
+        "89/2026/TT-BTC",
+        "81/2000/TT-BTC",
+        "13/2014/TT-BTC",
+        "24/2000/TT-BTC",
+        "194/2010/TT-BTC",
+        "26/2015/TT-BTC",
+        "58/2012/TT-BTC",
+        "92/2019/TT-BTC"
+      ],
+      "relevant_document_numbers": [
+        "38/2019/QH14",
+        "80/2021/TT-BTC"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "supporting_recall_at_k": 0.0,
+      "supporting_full_coverage_at_k": false,
+      "supporting_in_corpus_recall_at_k": 0.0,
+      "supporting_in_corpus_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "partially_covered",
+      "covered_relevant_document_numbers": [
+        "38/2019/QH14"
+      ],
+      "missing_relevant_document_numbers": [
+        "80/2021/TT-BTC"
+      ],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "38/2019/QH14",
+              "47",
+              null
+            ],
+            [
+              "56/2024/QH15",
+              "6",
+              "6"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "80/2021/TT-BTC",
+              "40",
+              "3"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        },
+        {
+          "provision": [
+            [
+              "38/2019/QH14",
+              "59",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "80/2021/TT-BTC",
+              "21",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        }
+      ],
+      "supporting_provision_ranks": [
+        {
+          "provision": [
+            [
+              "126/2020/NĐ-CP",
+              "7",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        },
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "23",
+              "6"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "case_type": "answerable",
+      "as_of_date": "2026-02-15",
+      "uncertain": false,
+      "source_verified": true,
+      "relevant_clauses": {
+        "38/2019/QH14": [
+          [
+            "47",
+            null
+          ],
+          [
+            "59",
+            null
+          ]
+        ],
+        "80/2021/TT-BTC": [
+          [
+            "40",
+            "3"
+          ],
+          [
+            "21",
+            null
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "38/2019/QH14",
+            "47",
+            null
+          ],
+          [
+            "56/2024/QH15",
+            "6",
+            "6"
+          ]
+        ],
+        [
+          [
+            "80/2021/TT-BTC",
+            "40",
+            "3"
+          ]
+        ],
+        [
+          [
+            "38/2019/QH14",
+            "59",
+            null
+          ]
+        ],
+        [
+          [
+            "80/2021/TT-BTC",
+            "21",
+            null
+          ]
+        ]
+      ],
+      "supporting_provisions": [
+        [
+          [
+            "126/2020/NĐ-CP",
+            "7",
+            null
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "23",
+            "6"
+          ]
+        ]
+      ],
+      "supporting_document_numbers": [
+        "126/2020/NĐ-CP",
+        "181/2025/NĐ-CP"
+      ],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "A5",
+      "query": "Tháng 5/2026, công ty tôi mua hàng hóa trị giá trên 5 triệu đồng theo hình thức trả góp. Đến hạn thanh toán trong hợp đồng mà chưa có chứng từ thanh toán không dùng tiền mặt. Thuế GTGT đầu vào đã khấu trừ xử lý thế nào? Nếu sau đó có chứng từ thì sao?",
+      "ranked_documents": [
+        "18/VBHN-BTC",
+        "180/2024/NĐ-CP",
+        "122/2000/TT-BTC",
+        "120/2003/TT-BTC",
+        "108/2025/NĐ-CP",
+        "72/2014/TT-BTC",
+        "219/2013/TT-BTC",
+        "26/VBHN-BTC (2019)",
+        "16/2013/TT-BTC",
+        "320/2025/NĐ-CP",
+        "89/98/TT/BTC",
+        "32/2025/TT-BTC",
+        "54/2003/TTLT-BTC-BTM",
+        "19/VBHN-BTC (2026)",
+        "80/2019/TT-BTC"
+      ],
+      "relevant_document_numbers": [
+        "48/2024/QH15",
+        "181/2025/NĐ-CP"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "supporting_recall_at_k": 0.0,
+      "supporting_full_coverage_at_k": false,
+      "supporting_in_corpus_recall_at_k": 0.0,
+      "supporting_in_corpus_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "fully_covered",
+      "covered_relevant_document_numbers": [
+        "181/2025/NĐ-CP",
+        "48/2024/QH15"
+      ],
+      "missing_relevant_document_numbers": [],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "14",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "26",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "supporting_provision_ranks": [
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "25",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "case_type": "answerable",
+      "as_of_date": "2026-05-15",
+      "uncertain": false,
+      "source_verified": true,
+      "relevant_clauses": {
+        "48/2024/QH15": [
+          [
+            "14",
+            "2"
+          ]
+        ],
+        "181/2025/NĐ-CP": [
+          [
+            "26",
+            null
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "14",
+            "2"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "26",
+            null
+          ]
+        ]
+      ],
+      "supporting_provisions": [
+        [
+          [
+            "181/2025/NĐ-CP",
+            "25",
+            null
+          ]
+        ]
+      ],
+      "supporting_document_numbers": [],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "A6",
+      "query": "Năm 2026, Công ty A ký hợp đồng trồng trọt, chăn nuôi cho Công ty B: A nhận tiền công từ B hoặc bán lại sản phẩm thu hoạch cho B. Các khoản này có chịu thuế GTGT không?",
+      "ranked_documents": [
+        "30/1998/NĐ-CP",
+        "148/2026/TT-BTC",
+        "219/2013/TT-BTC",
+        "99/98/TT/BTC",
+        "96/1999/TT-BTC",
+        "286/2016/TT-BTC",
+        "26/2015/TT-BTC",
+        "83/2014/TT-BTC"
+      ],
+      "relevant_document_numbers": [
+        "48/2024/QH15",
+        "32/2018/QH14",
+        "31/2018/QH14"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "supporting_recall_at_k": 0.0,
+      "supporting_full_coverage_at_k": false,
+      "supporting_in_corpus_recall_at_k": 0.0,
+      "supporting_in_corpus_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "fully_covered",
+      "covered_relevant_document_numbers": [
+        "31/2018/QH14",
+        "32/2018/QH14",
+        "48/2024/QH15"
+      ],
+      "missing_relevant_document_numbers": [],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "5",
+              "1"
+            ],
+            [
+              "149/2025/QH15",
+              "1",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "32/2018/QH14",
+              "2",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "31/2018/QH14",
+              "2",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "supporting_provision_ranks": [
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "4",
+              "1b"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "case_type": "answerable",
+      "as_of_date": "2026-03-15",
+      "uncertain": false,
+      "source_verified": true,
+      "relevant_clauses": {
+        "48/2024/QH15": [
+          [
+            "5",
+            "1"
+          ]
+        ],
+        "32/2018/QH14": [
+          [
+            "2",
+            "2"
+          ]
+        ],
+        "31/2018/QH14": [
+          [
+            "2",
+            "2"
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "5",
+            "1"
+          ],
+          [
+            "149/2025/QH15",
+            "1",
+            "1"
+          ]
+        ],
+        [
+          [
+            "32/2018/QH14",
+            "2",
+            "2"
+          ]
+        ],
+        [
+          [
+            "31/2018/QH14",
+            "2",
+            "2"
+          ]
+        ]
+      ],
+      "supporting_provisions": [
+        [
+          [
+            "181/2025/NĐ-CP",
+            "4",
+            "1b"
+          ]
+        ]
+      ],
+      "supporting_document_numbers": [
+        "181/2025/NĐ-CP"
+      ],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "A7",
+      "query": "Công ty tôi nhập khẩu hàng hóa rồi xuất khẩu sang nước khác; thuế GTGT đầu vào phát sinh tháng 3/2024. Tháng 9/2025 công ty mới nộp hồ sơ hoàn thuế. Có được hoàn không, và áp dụng quy định nào?",
+      "ranked_documents": [
+        "194/2010/TT-BTC",
+        "52/2020/TT-BTC",
+        "59/2007/TT-BTC",
+        "48/2024/QH15",
+        "13/2014/TT-BTC",
+        "84/2013/TTLT-BTC-BCT-BGTVT",
+        "168/2011/TT-BTC",
+        "90/2026/TT-BTC",
+        "06/2000/TT-TCHQ",
+        "86/2026/TT-BTC",
+        "320/2025/NĐ-CP",
+        "19/VBHN-BTC (2026)",
+        "67/2025/QH15",
+        "90/2019/TT-BTC",
+        "07/2020/NĐ-CP",
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP",
+        "109/2014/TT-BTC",
+        "195/2015/TT-BTC"
+      ],
+      "relevant_document_numbers": [
+        "25/2018/TT-BTC",
+        "64/2025/QH15",
+        "181/2025/NĐ-CP"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "supporting_recall_at_k": 0.0,
+      "supporting_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": true,
+          "precision_at_k": 0.05,
+          "recall_at_k": 0.3333333333333333,
+          "reciprocal_rank": 0.058823529411764705,
+          "ndcg_at_k": 0.1125388887954676,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "partially_covered",
+      "covered_relevant_document_numbers": [
+        "181/2025/NĐ-CP",
+        "64/2025/QH15"
+      ],
+      "missing_relevant_document_numbers": [
+        "25/2018/TT-BTC"
+      ],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "25/2018/TT-BTC",
+              "2",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        },
+        {
+          "provision": [
+            [
+              "64/2025/QH15",
+              "58",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "38",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "supporting_provision_ranks": [
+        {
+          "provision": [
+            [
+              "146/2017/NĐ-CP",
+              "1",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        }
+      ],
+      "case_type": "answerable",
+      "as_of_date": "2024-03-15",
+      "uncertain": false,
+      "source_verified": true,
+      "relevant_clauses": {
+        "25/2018/TT-BTC": [
+          [
+            "2",
+            null
+          ]
+        ],
+        "64/2025/QH15": [
+          [
+            "58",
+            "1"
+          ]
+        ],
+        "181/2025/NĐ-CP": [
+          [
+            "38",
+            "1"
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "25/2018/TT-BTC",
+            "2",
+            null
+          ]
+        ],
+        [
+          [
+            "64/2025/QH15",
+            "58",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "38",
+            "1"
+          ]
+        ]
+      ],
+      "supporting_provisions": [
+        [
+          [
+            "146/2017/NĐ-CP",
+            "1",
+            "2"
+          ]
+        ]
+      ],
+      "supporting_document_numbers": [
+        "146/2017/NĐ-CP"
+      ],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "A8",
+      "query": "Tháng 3/2026, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
+      "ranked_documents": [
+        "06/2000/TT-TCHQ",
+        "18/2001/TT-BTC",
+        "54/2003/TTLT-BTC-BTM",
+        "47/2011/TT-BTC",
+        "39/2016/TT-BCT",
+        "13/2014/TT-BTC",
+        "126/2020/NĐ-CP",
+        "52/2020/TT-BTC",
+        "46/2006/TT-BTC",
+        "59/2007/TT-BTC",
+        "86/2026/TT-BTC",
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP",
+        "181/2025/NĐ-CP",
+        "18/VBHN-BTC (2026)",
+        "191/2015/TT-BTC",
+        "194/2010/TT-BTC",
+        "69/2016/TT-BTC",
+        "48/2024/QH15"
+      ],
+      "relevant_document_numbers": [
+        "48/2024/QH15",
+        "181/2025/NĐ-CP"
+      ],
+      "hit_at_k": false,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "ndcg_at_k": 0.0,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "supporting_recall_at_k": 0.0,
+      "supporting_full_coverage_at_k": false,
+      "supporting_in_corpus_recall_at_k": 0.0,
+      "supporting_in_corpus_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "5": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": false,
+          "precision_at_k": 0.0,
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg_at_k": 0.0,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": true,
+          "precision_at_k": 0.1,
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.07142857142857142,
+          "ndcg_at_k": 0.29880884624392406,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false,
+          "supporting_in_corpus_recall_at_k": 0.0,
+          "supporting_in_corpus_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "fully_covered",
+      "covered_relevant_document_numbers": [
+        "181/2025/NĐ-CP",
+        "48/2024/QH15"
+      ],
+      "missing_relevant_document_numbers": [],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "15",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "181/2025/NĐ-CP",
+              "29",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "supporting_provision_ranks": [
+        {
+          "provision": [
+            [
+              "48/2024/QH15",
+              "9",
+              "1"
+            ],
+            [
+              "90/2025/QH15",
+              "4",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "case_type": "answerable",
+      "as_of_date": "2026-03-15",
+      "uncertain": false,
+      "source_verified": true,
+      "relevant_clauses": {
+        "48/2024/QH15": [
+          [
+            "15",
+            "1"
+          ]
+        ],
+        "181/2025/NĐ-CP": [
+          [
+            "29",
+            "1"
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "15",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "29",
+            "1"
+          ]
+        ]
+      ],
+      "supporting_provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "9",
+            "1"
+          ],
+          [
+            "90/2025/QH15",
+            "4",
+            null
+          ]
+        ]
+      ],
+      "supporting_document_numbers": [],
+      "unparsed_provisions": []
+    },
+    {
+      "case_id": "A9",
+      "query": "Năm 2024, công ty tôi làm theo văn bản hướng dẫn của cơ quan thuế, kê khai một sản phẩm từ quả dừa là hàng không chịu thuế GTGT. Nay cơ quan thuế xác định sản phẩm này chịu thuế 10% và truy thu. Truy thu từ khi nào, có bị phạt và tính tiền chậm nộp không?",
+      "ranked_documents": [
+        "14/2021/TT-BTC",
+        "10/2024/TT-BTC",
+        "125/2020/NĐ-CP",
+        "54/2003/TTLT-BTC-BTM",
+        "208/2015/TT-BTC",
+        "172/2010/TT-BTC",
+        "64/2017/TT-BTC",
+        "43/2019/TT-BTC",
+        "225/TT-BTC",
+        "15/2020/TT-BTC",
+        "217/2016/TT-BTC",
+        "111/2013/TT-BTC",
+        "72/2020/TT-BTC",
+        "41/2023/TT-BTC",
+        "219/2016/TT-BTC",
+        "42/2009/TT-BTC",
+        "112/2020/TT-BTC",
+        "70/2025/TT-BTC",
+        "253/2026/NĐ-CP",
+        "274/2016/TT-BTC"
+      ],
+      "relevant_document_numbers": [
+        "38/2019/QH14",
+        "125/2020/NĐ-CP"
+      ],
+      "hit_at_k": true,
+      "precision_at_k": 0.2,
+      "recall_at_k": 0.5,
+      "reciprocal_rank": 0.3333333333333333,
+      "ndcg_at_k": 0.3065735963827292,
+      "article_hit_at_k": false,
+      "article_reciprocal_rank": 0.0,
+      "clause_hit_at_k": false,
+      "clause_reciprocal_rank": 0.0,
+      "essential_recall_at_k": 0.0,
+      "essential_full_coverage_at_k": false,
+      "essential_in_corpus_recall_at_k": 0.0,
+      "essential_in_corpus_full_coverage_at_k": false,
+      "supporting_recall_at_k": 0.0,
+      "supporting_full_coverage_at_k": false,
+      "metrics_by_k": {
+        "5": {
+          "hit_at_k": true,
+          "precision_at_k": 0.2,
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg_at_k": 0.3065735963827292,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "10": {
+          "hit_at_k": true,
+          "precision_at_k": 0.1,
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg_at_k": 0.3065735963827292,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        },
+        "20": {
+          "hit_at_k": true,
+          "precision_at_k": 0.05,
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg_at_k": 0.3065735963827292,
+          "article_hit_at_k": false,
+          "article_reciprocal_rank": 0.0,
+          "clause_hit_at_k": false,
+          "clause_reciprocal_rank": 0.0,
+          "essential_recall_at_k": 0.0,
+          "essential_full_coverage_at_k": false,
+          "essential_in_corpus_recall_at_k": 0.0,
+          "essential_in_corpus_full_coverage_at_k": false,
+          "supporting_recall_at_k": 0.0,
+          "supporting_full_coverage_at_k": false
+        }
+      },
+      "coverage_status": "fully_covered",
+      "covered_relevant_document_numbers": [
+        "125/2020/NĐ-CP",
+        "38/2019/QH14"
+      ],
+      "missing_relevant_document_numbers": [],
+      "essential_provision_ranks": [
+        {
+          "provision": [
+            [
+              "38/2019/QH14",
+              "16",
+              "11"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        },
+        {
+          "provision": [
+            [
+              "125/2020/NĐ-CP",
+              "9",
+              "2"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": true
+        }
+      ],
+      "supporting_provision_ranks": [
+        {
+          "provision": [
+            [
+              "13/2008/QH12",
+              "8",
+              "3"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        },
+        {
+          "provision": [
+            [
+              "106/2016/QH13",
+              "1",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        },
+        {
+          "provision": [
+            [
+              "100/2016/NĐ-CP",
+              "1",
+              "1"
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        },
+        {
+          "provision": [
+            [
+              "26/2015/TT-BTC",
+              "1",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        },
+        {
+          "provision": [
+            [
+              "219/2013/TT-BTC",
+              "11",
+              null
+            ]
+          ],
+          "rank": null,
+          "in_corpus": false
+        }
+      ],
+      "case_type": "answerable",
+      "as_of_date": "2024-03-15",
+      "uncertain": false,
+      "source_verified": true,
+      "relevant_clauses": {
+        "38/2019/QH14": [
+          [
+            "16",
+            "11"
+          ]
+        ],
+        "125/2020/NĐ-CP": [
+          [
+            "9",
+            "2"
+          ]
+        ]
+      },
+      "essential_provisions": [
+        [
+          [
+            "38/2019/QH14",
+            "16",
+            "11"
+          ]
+        ],
+        [
+          [
+            "125/2020/NĐ-CP",
+            "9",
+            "2"
+          ]
+        ]
+      ],
+      "supporting_provisions": [
+        [
+          [
+            "13/2008/QH12",
+            "8",
+            "3"
+          ]
+        ],
+        [
+          [
+            "106/2016/QH13",
+            "1",
+            "1"
+          ]
+        ],
+        [
+          [
+            "100/2016/NĐ-CP",
+            "1",
+            "1"
+          ]
+        ],
+        [
+          [
+            "26/2015/TT-BTC",
+            "1",
+            null
+          ]
+        ],
+        [
+          [
+            "219/2013/TT-BTC",
+            "11",
+            null
+          ]
+        ]
+      ],
+      "supporting_document_numbers": [
+        "100/2016/NĐ-CP",
+        "106/2016/QH13",
+        "13/2008/QH12",
+        "219/2013/TT-BTC",
+        "26/2015/TT-BTC"
+      ],
+      "unparsed_provisions": []
+    }
+  ],
+  "report_id": "20261030T190151Z-4c5ab26132db",
+  "generated_at": "2026-10-30T19:01:51.230120+00:00",
+  "artifact_key": "evaluation/retrieval/runs/20261030T190151Z-4c5ab26132db.json"
+}

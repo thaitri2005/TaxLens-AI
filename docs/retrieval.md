@@ -369,8 +369,9 @@ clause:
   gaps with `collect_sources.py --cited-by` ([below](#controlled-experiments)) before
   freezing; report both figures.
 - Conditional and false-premise cases (no E provisions) are skipped by the ranking
-  metrics. `--verified-only` also skips cases marked `uncertain` or without a verified
-  source, which the guideline keeps out of the final benchmark.
+  metrics. `--verified-only` also skips cases marked `uncertain` or whose source is not
+  verified (`N`), which the guideline keeps out of the final benchmark. Derived cases
+  (`-`, such as the leakage-free ones) have no source letter and are kept.
 - `--as-of case` leaves out document versions that take effect after each case's
   `as_of_date`; `--as-of none` (the default) searches everything. Versions without a
   recorded effective date (most portal documents) are always kept, and nothing records
