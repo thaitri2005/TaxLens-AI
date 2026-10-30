@@ -35,6 +35,20 @@ def normalize_number_text(text: str) -> str:
     return text.translate(_LOOKALIKES)
 
 
+def canonical_document_number(number: str) -> str:
+    """A source's document number with its typing slips removed.
+
+    The Ministry of Finance database records numbers such as "219/2013/TT- BTC",
+    "183/2012/TT - BTC", "114 /2012/TT-BTC", and "201/2016TT-BTC"; matched against
+    citations ("219/2013/TT-BTC") they never agree. Spaces around "/" and "-" are dropped
+    and a missing slash after the year is restored; anything else is kept as written.
+    """
+
+    text = " ".join(normalize_number_text(number).split()).upper()
+    text = re.sub(r"\s*([/-])\s*", r"\1", text)
+    return re.sub(r"^(\d{1,4}/\d{4})(?=[A-ZĐ])", r"\1/", text)
+
+
 def find_document_numbers(text: str) -> tuple[str, ...]:
     """Return distinct document numbers in order of appearance, upper-cased."""
 

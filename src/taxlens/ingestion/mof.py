@@ -21,7 +21,10 @@ from urllib.parse import urlparse
 import httpx
 
 from taxlens.ingestion.connectors import ConnectorError, SourceDocument
-from taxlens.legal_data.document_numbers import issuing_agency_for, normalize_number_text
+from taxlens.legal_data.document_numbers import (
+    canonical_document_number,
+    issuing_agency_for,
+)
 
 logger = logging.getLogger(__name__)
 BASE_URL = "https://vbpq.mof.gov.vn"
@@ -201,7 +204,7 @@ def _is_wanted(record: dict[str, Any], options: MofSearchOptions) -> bool:
 
 def _to_source_document(record: dict[str, Any]) -> SourceDocument | None:
     attachment = _preferred_attachment(record.get("filePathCurrent") or [])
-    number = " ".join(normalize_number_text(str(record.get("no") or "")).split()).upper()
+    number = canonical_document_number(str(record.get("no") or ""))
     if attachment is None or not number:
         return None
     issue_date = _parse_date(record.get("legalPublishDate"))

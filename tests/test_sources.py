@@ -17,7 +17,7 @@ from taxlens.document_processing.process import build_article_chunks, find_secti
 from taxlens.ingestion.connectors import ConnectorError, GovernmentPortalSearch, SourceDocument
 from taxlens.ingestion.mof import MofLegalDocumentConnector, MofSearchOptions
 from taxlens.ingestion.seed import ingest_source_document, is_already_ingested
-from taxlens.legal_data.document_numbers import find_document_numbers
+from taxlens.legal_data.document_numbers import canonical_document_number, find_document_numbers
 from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
 from taxlens.retrieval.search import SearchResult, deduplicate_passages
 from taxlens.storage.local import LocalObjectStorage
@@ -88,6 +88,15 @@ def test_documents_without_articles_are_chunked_by_section() -> None:
 
 def test_cyrillic_lookalike_letters_in_document_numbers_are_normalized() -> None:
     assert find_document_numbers("255/2026/NĐ-CР") == ("255/2026/NĐ-CP",)
+
+
+def test_canonical_document_number_removes_typing_slips_only() -> None:
+    assert canonical_document_number("219/2013/TT- BTC") == "219/2013/TT-BTC"
+    assert canonical_document_number("183/2012/TT - BTC") == "183/2012/TT-BTC"
+    assert canonical_document_number("114 /2012/TT-BTC") == "114/2012/TT-BTC"
+    assert canonical_document_number("201/2016TT-BTC") == "201/2016/TT-BTC"
+    for kept in ("18/VBHN-BTC (2026)", "43/L/CTN", "67-TC/VI", "21/2010/TTLT/BTC-BGDĐT"):
+        assert canonical_document_number(kept) == kept
 
 
 def test_mof_connector_selects_tax_documents_with_status_and_preferred_files() -> None:
