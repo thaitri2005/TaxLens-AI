@@ -58,6 +58,24 @@ def test_provision_ranks_match_document_article_and_clause() -> None:
     assert ranks == [3, 2, 2, None, 1]
 
 
+def test_a_part_of_a_split_article_covers_only_the_clauses_it_holds() -> None:
+    passages = [
+        ("181/2025/NĐ-CP", "4", frozenset({"3", "4"})),  # a part holding clauses 3 and 4
+        ("181/2025/NĐ-CP", "4", frozenset()),  # a part with no visible clause number
+    ]
+
+    ranks = provision_ranks(
+        passages,
+        [
+            [["181/2025/NĐ-CP", "4", "1"]],
+            [["181/2025/NĐ-CP", "4", "4"]],
+            [["181/2025/NĐ-CP", "4", None]],  # the article: any part
+        ],
+    )
+
+    assert ranks == [None, 1, 1]
+
+
 def test_provision_coverage_needs_every_provision_within_k() -> None:
     assert provision_coverage([1, 3], k=3).full_coverage_at_k is True
     partial = provision_coverage([1, 3], k=2)

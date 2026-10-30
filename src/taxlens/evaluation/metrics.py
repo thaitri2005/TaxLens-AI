@@ -1,6 +1,7 @@
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any
 
 from taxlens.intelligence.qa import CitedClaim
 
@@ -65,16 +66,19 @@ class ProvisionCoverage:
 
 
 def provision_ranks(
-    passages: Sequence[Sequence[str | None]],
+    passages: Sequence[Sequence[Any]],
     provisions: Sequence[Sequence[Sequence[str | None]]],
 ) -> list[int | None]:
     """The first rank at which a passage covers each provision.
 
+    A passage is ``[document, article, clauses]``: ``clauses`` is one clause number, the
+    clause numbers a part of a split article holds, or None for a whole article.
+
     A provision is the ``[document, article, clause]`` places that hold its text: itself,
-    then any amending provision; covering one place is enough. A passage without a clause
-    number holds the whole article, so it covers any clause of that article; a place
-    without a clause needs only the article. Inserted clauses ("1b") sit inside the
-    passage of the clause they follow, since passages split on numbered clauses only.
+    then any amending provision; covering one place is enough. A whole article covers any
+    of its clauses; a place without a clause needs only the article, any part of it.
+    Inserted clauses ("1b") sit inside the passage of the clause they follow, since
+    passages split on numbered clauses only.
     """
 
     return [
@@ -101,14 +105,15 @@ def provision_coverage(ranks: Sequence[int | None], k: int) -> ProvisionCoverage
     )
 
 
-def _covers(passage: Sequence[str | None], provision: Sequence[str | None]) -> bool:
-    document, article, clause = passage
+def _covers(passage: Sequence[Any], provision: Sequence[str | None]) -> bool:
+    document, article, clauses = passage
     gold_document, gold_article, gold_clause = provision
     if document != gold_document or article != gold_article:
         return False
-    if gold_clause is None or clause is None:
+    if gold_clause is None or clauses is None:
         return True
-    return clause in {gold_clause, gold_clause.rstrip("abcdefghijklmnopqrstuvwxyz")}
+    held = {clauses} if isinstance(clauses, str) else set(clauses)
+    return bool(held & {gold_clause, gold_clause.rstrip("abcdefghijklmnopqrstuvwxyz")})
 
 
 def citation_completeness(claims: Sequence[CitedClaim], citation_count: int) -> float:

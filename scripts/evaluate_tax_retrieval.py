@@ -10,6 +10,7 @@ from sqlalchemy import func, select
 
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal
+from taxlens.document_processing.process import CLAUSE_PATTERN
 from taxlens.evaluation.corpus_manifest import (
     build_corpus_manifest,
     code_version,
@@ -205,6 +206,7 @@ def main() -> None:
             for item in corpus_coverage["documents"]
             if item["embedding_count"]
         }
+        article_part_counts: dict[tuple[Any, str], int] = {}
         for case in dataset:
             relevant_documents = set(case["relevant_document_numbers"])
             covered_documents = relevant_documents & embedded_document_numbers
@@ -266,7 +268,10 @@ def main() -> None:
                     ],
                 )
             provision_report = _add_provision_metrics(
-                metrics_by_k, results, case, embedded_document_numbers
+                metrics_by_k,
+                _passage_locators(session, results, article_part_counts),
+                case,
+                embedded_document_numbers,
             )
             primary_metrics = metrics_by_k[str(primary_k)]
             reports.append(
@@ -486,7 +491,7 @@ def _add_locator_metrics(
 
 def _add_provision_metrics(
     metrics_by_k: dict[str, dict[str, Any]],
-    results: list[SearchResult],
+    passages: list[tuple[str, str, Any]],
     case: dict[str, Any],
     embedded_document_numbers: set[str],
 ) -> dict[str, Any]:
@@ -497,14 +502,6 @@ def _add_provision_metrics(
     ``in_corpus`` metrics leave it out, so they measure ranking alone.
     """
 
-    passages = [
-        (
-            result.document.document_number,
-            str(result.chunk.article_number),
-            result.chunk.clause_number,
-        )
-        for result in results
-    ]
     report: dict[str, Any] = {}
     for label in ("essential", "supporting"):
         provisions = case[f"{label}_provisions"]
@@ -528,6 +525,39 @@ def _add_provision_metrics(
                 metrics[f"{prefix}_recall_at_k"] = coverage.recall_at_k
                 metrics[f"{prefix}_full_coverage_at_k"] = coverage.full_coverage_at_k
     return report
+
+
+def _passage_locators(
+    session, results: list[SearchResult], part_counts: dict[tuple[Any, str], int]
+) -> list[tuple[str, str, Any]]:
+    """``(document, article, clauses)`` of each passage, for provision matching.
+
+    A passage without a clause number is the whole article only when the article is one
+    passage. An article split by size alone (often an OCR'd one, whose clause numbers the
+    chunker could not see) has parts holding just some clauses: the clauses a part holds
+    are the numbers that start a line in its text.
+    """
+
+    locators = []
+    for result in results:
+        chunk = result.chunk
+        article = str(chunk.article_number)
+        clauses: Any = chunk.clause_number
+        if clauses is None and chunk.article_number is not None:
+            key = (chunk.document_version_id, chunk.article_number)
+            if key not in part_counts:
+                part_counts[key] = session.scalar(
+                    select(func.count(DocumentChunk.id)).where(
+                        DocumentChunk.document_version_id == chunk.document_version_id,
+                        DocumentChunk.article_number == chunk.article_number,
+                    )
+                ) or 0
+            if part_counts[key] > 1:
+                clauses = frozenset(
+                    match.group(1) for match in CLAUSE_PATTERN.finditer(chunk.content)
+                )
+        locators.append((result.document.document_number, article, clauses))
+    return locators
 
 
 def _provision_summary(reports: list[dict[str, Any]], k: int) -> dict[str, Any]:
