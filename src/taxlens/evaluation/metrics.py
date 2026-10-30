@@ -66,14 +66,15 @@ class ProvisionCoverage:
 
 def provision_ranks(
     passages: Sequence[Sequence[str | None]],
-    provisions: Sequence[Sequence[str | None]],
+    provisions: Sequence[Sequence[Sequence[str | None]]],
 ) -> list[int | None]:
-    """The first rank at which a passage covers each ``[document, article, clause]``.
+    """The first rank at which a passage covers each provision.
 
-    A passage without a clause number holds the whole article, so it covers any clause of
-    that article; a provision without a clause needs only the article. Inserted clauses
-    ("1b") sit inside the passage of the clause they follow, since passages split on
-    numbered clauses only.
+    A provision is the ``[document, article, clause]`` places that hold its text: itself,
+    then any amending provision; covering one place is enough. A passage without a clause
+    number holds the whole article, so it covers any clause of that article; a place
+    without a clause needs only the article. Inserted clauses ("1b") sit inside the
+    passage of the clause they follow, since passages split on numbered clauses only.
     """
 
     return [
@@ -81,11 +82,11 @@ def provision_ranks(
             (
                 rank
                 for rank, passage in enumerate(passages, start=1)
-                if _covers(passage, provision)
+                if any(_covers(passage, place) for place in places)
             ),
             None,
         )
-        for provision in provisions
+        for places in provisions
     ]
 
 

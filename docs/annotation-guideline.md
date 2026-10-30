@@ -39,7 +39,7 @@ Typical S: general articles the letter cites as background, procedure or invoice
 - **T4 Guidance** – if the law says "Chính phủ / Bộ … quy định chi tiết", add the decree or circular clause that details it.
 - **T5 Time** – keep only versions valid on `as_of_date` (Step 3).
 
-An amended provision and its amending provision count as **one** gold item, written as: *"Law 48/2024 Art 5(1), as amended by Law 149/2025 Art 1(1)(a)"*.
+An amended provision and its amending provision count as **one** gold item, written as: *"Law 48/2024 Art 5(1), as amended by Law 149/2025 Art 1(1)(a)"*. Write the amending provision's article and clause too (`added by Decree 359/2025 Art 1(1)`): until a consolidated text exists, an added or replaced clause is printed only in the amending document, and retrieving it there counts as finding the item. Without an article, only the amended document counts.
 
 ## Step 3 – Dates and versions
 

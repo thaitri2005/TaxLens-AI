@@ -243,7 +243,9 @@ def main() -> None:
                         for result in results
                     ],
                 )
-            provision_report = _add_provision_metrics(metrics_by_k, results, case)
+            provision_report = _add_provision_metrics(
+                metrics_by_k, results, case, embedded_document_numbers
+            )
             primary_metrics = metrics_by_k[str(primary_k)]
             reports.append(
                 {
@@ -384,6 +386,8 @@ def main() -> None:
         for key in (
             "mean_essential_recall_at_k",
             "essential_full_coverage_rate",
+            "mean_essential_in_corpus_recall_at_k",
+            "essential_in_corpus_full_coverage_rate",
             "mean_supporting_recall_at_k",
         ):
             if primary_metrics.get(key) is not None:
@@ -457,8 +461,14 @@ def _add_provision_metrics(
     metrics_by_k: dict[str, dict[str, Any]],
     results: list[SearchResult],
     case: dict[str, Any],
+    embedded_document_numbers: set[str],
 ) -> dict[str, Any]:
-    """Essential and supporting provision coverage within each passage budget K."""
+    """Essential and supporting provision coverage within each passage budget K.
+
+    A provision whose document is not embedded cannot be retrieved: the source may not
+    list it under tax, or may record it wrongly. The raw metrics count it as missed; the
+    ``in_corpus`` metrics leave it out, so they measure ranking alone.
+    """
 
     passages = [
         (
@@ -474,39 +484,51 @@ def _add_provision_metrics(
         if not provisions:
             continue
         ranks = provision_ranks(passages, provisions)
-        report[f"{label}_provision_ranks"] = [
-            {"provision": provision, "rank": rank}
-            for provision, rank in zip(provisions, ranks, strict=True)
+        in_corpus = [
+            any(place[0] in embedded_document_numbers for place in places)
+            for places in provisions
         ]
+        report[f"{label}_provision_ranks"] = [
+            {"provision": provision, "rank": rank, "in_corpus": present}
+            for provision, rank, present in zip(provisions, ranks, in_corpus, strict=True)
+        ]
+        in_corpus_ranks = [rank for rank, present in zip(ranks, in_corpus, strict=True) if present]
         for k, metrics in metrics_by_k.items():
-            coverage = provision_coverage(ranks, int(k))
-            metrics[f"{label}_recall_at_k"] = coverage.recall_at_k
-            if label == "essential":
-                metrics["essential_full_coverage_at_k"] = coverage.full_coverage_at_k
+            for prefix, selected in ((label, ranks), (f"{label}_in_corpus", in_corpus_ranks)):
+                if not selected:
+                    continue
+                coverage = provision_coverage(selected, int(k))
+                metrics[f"{prefix}_recall_at_k"] = coverage.recall_at_k
+                metrics[f"{prefix}_full_coverage_at_k"] = coverage.full_coverage_at_k
     return report
 
 
 def _provision_summary(reports: list[dict[str, Any]], k: int) -> dict[str, Any]:
     summary: dict[str, Any] = {}
-    for label in ("essential", "supporting"):
+    for prefix in ("essential", "essential_in_corpus", "supporting", "supporting_in_corpus"):
         metrics = [
             report["metrics_by_k"][str(k)]
             for report in reports
-            if f"{label}_recall_at_k" in report["metrics_by_k"][str(k)]
+            if f"{prefix}_recall_at_k" in report["metrics_by_k"][str(k)]
         ]
-        summary[f"{label}_case_count"] = len(metrics)
-        summary[f"mean_{label}_recall_at_k"] = (
-            sum(float(item[f"{label}_recall_at_k"]) for item in metrics) / len(metrics)
+        summary[f"{prefix}_case_count"] = len(metrics)
+        summary[f"mean_{prefix}_recall_at_k"] = (
+            sum(float(item[f"{prefix}_recall_at_k"]) for item in metrics) / len(metrics)
             if metrics
             else None
         )
-        if label == "essential":
-            summary["essential_full_coverage_rate"] = (
-                sum(bool(item["essential_full_coverage_at_k"]) for item in metrics)
+        if prefix.startswith("essential"):
+            summary[f"{prefix}_full_coverage_rate"] = (
+                sum(bool(item[f"{prefix}_full_coverage_at_k"]) for item in metrics)
                 / len(metrics)
                 if metrics
                 else None
             )
+    summary["essential_not_in_corpus_count"] = sum(
+        not item["in_corpus"]
+        for report in reports
+        for item in report.get("essential_provision_ranks", [])
+    )
     return summary
 
 

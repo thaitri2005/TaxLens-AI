@@ -21,6 +21,12 @@ _KINDS = (("circular", "Circular"), ("decree", "Decree"), ("law", "Law"))
 _DEFAULT_SUFFIXES = {"decree": "NĐ-CP", "circular": "TT-BTC", "law": "QH"}
 _SUFFIX_PREFIXES = {"decree": "NĐ-CP", "circular": "TT", "law": "QH"}
 
+# "..., added by Decree 359/2025 Art 1(1)": the amending provision that holds the text.
+# A note without an article ("as amended by Law 149/2025") names no place to look.
+_AMENDED_BY = re.compile(
+    r"\b(?:added|amended|inserted|replaced) by\s+"
+    r"(?P<reference>[^,;()]*?\bArt\s+\d+(?:\(\w+\))?)"
+)
 # "<title> [number] Art N[(clause)]" or "... Art N clause 1b"; the number may be
 # "181", "181/2025", or a full "84/2025/TT-BNNMT".
 _PROVISION = re.compile(
@@ -37,6 +43,9 @@ class Provision:
     number: str
     article: str
     clause: str | None
+    # Amending provisions that hold the same text (an inserted clause lives in the
+    # amending decree until a consolidated text exists); finding any of them counts.
+    amended_by: tuple["Provision", ...] = ()
 
 
 @dataclass(frozen=True)
@@ -93,20 +102,24 @@ class GoldCase:
 
     def _locators(
         self, label: str, corpus_document_numbers: Collection[str]
-    ) -> list[list[str | None]]:
-        """Distinct ``[document, article, clause]`` of the provisions with this label."""
+    ) -> list[list[list[str | None]]]:
+        """For each distinct provision with this label, the ``[document, article, clause]``
+        places that hold it: the provision itself, then any amending provision."""
 
-        locators: list[list[str | None]] = []
+        locators: list[list[list[str | None]]] = []
         for provision in self.provisions:
             if provision.label != label:
                 continue
-            locator = [
-                resolve_document_number(provision, corpus_document_numbers),
-                provision.article,
-                provision.clause,
+            places = [
+                [
+                    resolve_document_number(place, corpus_document_numbers),
+                    place.article,
+                    place.clause,
+                ]
+                for place in (provision, *provision.amended_by)
             ]
-            if locator not in locators:
-                locators.append(locator)
+            if places not in locators:
+                locators.append(places)
         return locators
 
 
@@ -172,7 +185,13 @@ def _provision(label: str, body: str, earlier: list[Provision]) -> Provision | N
     if label not in {"E", "S"}:
         return None
     # The cited provision comes first; amendments and notes follow in ", ..." or " (...)".
-    match = _PROVISION.match(re.split(r",\s| \(", body, maxsplit=1)[0])
+    cited, *notes = re.split(r",\s| \(", body, maxsplit=1)
+    amended_by = tuple(
+        amending
+        for reference in _AMENDED_BY.finditer("".join(notes))
+        if (amending := _provision(label, reference.group("reference").strip(), earlier))
+    )
+    match = _PROVISION.match(cited)
     if match is None:
         return None
     title = match.group("title").strip()
@@ -191,6 +210,7 @@ def _provision(label: str, body: str, earlier: list[Provision]) -> Provision | N
         number=number,
         article=match.group("article"),
         clause=match.group("clause") or match.group("clause_word"),
+        amended_by=amended_by,
     )
 
 

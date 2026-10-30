@@ -15,6 +15,11 @@ documents whose number is already in the corpus are skipped (the ministry record
     python scripts/collect_sources.py --source government --since-days 60     # daily
     python scripts/collect_sources.py --source mof --from-year 1990 --dry-run
     python scripts/collect_sources.py --source mof --from-year 1990 --limit 300
+    python scripts/collect_sources.py --cited-by data/evaluation/gold_set_v1.csv --dry-run
+
+``--cited-by`` collects the documents an evaluation gold set cites that the corpus lacks,
+looking each number up in every category of the government portal: rules a tax answer
+depends on are not always filed under tax.
 """
 
 import argparse
@@ -34,6 +39,7 @@ from sqlalchemy.orm import Session
 
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal, database_is_ready
+from taxlens.evaluation.gold_set import load_gold_set, resolve_document_number
 from taxlens.ingestion.connectors import ConnectorError, GovernmentPortalSearch, SourceDocument
 from taxlens.ingestion.mof import SOURCE_NAME as MOF_SOURCE
 from taxlens.ingestion.mof import MofLegalDocumentConnector, MofSearchOptions
@@ -93,6 +99,11 @@ def _parse_arguments() -> argparse.Namespace:
     window = parser.add_mutually_exclusive_group()
     window.add_argument("--since-days", type=int, help="Only documents issued recently")
     window.add_argument("--from-year", type=int, help="Backfill from this issue year")
+    window.add_argument(
+        "--cited-by",
+        type=Path,
+        help="Only the documents this gold set cites, from any portal category",
+    )
     parser.add_argument("--include-expired", action="store_true")
     parser.add_argument("--limit", type=int, default=100, help="Maximum downloads per run")
     parser.add_argument("--dry-run", action="store_true", help="List and count only")
@@ -137,6 +148,13 @@ def _list_sources(
 
     candidates: list[Candidate] = []
     unavailable: list[str] = []
+    if arguments.cited_by is not None:
+        government = GovernmentPortalSearch()
+        try:
+            found = _cited_documents(government, arguments.cited_by)
+        except (ConnectorError, httpx.HTTPError) as error:
+            return [], [f"government portal ({error})"]
+        return [Candidate(document, government.fetch_document) for document in found], []
     if source in ("mof", "all"):
         started = time.monotonic()
         mof = MofLegalDocumentConnector()
@@ -172,6 +190,34 @@ def _list_sources(
             )
             candidates.extend(Candidate(document, government.fetch_document) for document in found)
     return candidates, unavailable
+
+
+def _cited_documents(government: GovernmentPortalSearch, gold_set: Path) -> list[SourceDocument]:
+    """The portal record of every document the gold set cites, found by its number."""
+
+    provisions = {
+        (place.kind, place.number): place
+        for case in load_gold_set(gold_set)
+        for provision in case.provisions
+        for place in (provision, *provision.amended_by)
+    }
+    documents: dict[str, SourceDocument] = {}
+    for provision in provisions.values():
+        found = government.find(provision.number)
+        number = resolve_document_number(provision, [item.document_number for item in found])
+        match = next((item for item in found if item.document_number == number), None)
+        if match is None:
+            logger.warning(
+                "Not found on the government portal: %s %s", provision.title, provision.number
+            )
+            continue
+        documents.setdefault(match.document_number, match)
+    logger.info(
+        "Gold set cites %d document(s); %d found on the government portal",
+        len(provisions),
+        len(documents),
+    )
+    return list(documents.values())
 
 
 def _check_targets() -> None:

@@ -158,6 +158,27 @@ def test_government_search_splits_capped_years_by_issuer_and_drops_local_documen
     assert decree.content_type == "application/msword"
 
 
+def test_government_find_searches_every_category_by_keyword() -> None:
+    posts: list[dict[str, str]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.method == "GET":
+            return httpx.Response(200, text=_portal_form())
+        posts.append(dict(httpx.QueryParams(request.content.decode())))
+        return httpx.Response(200, text=f"<table>{_portal_row('31/2018/QH14', 'pdf')}</table>")
+
+    search = GovernmentPortalSearch(
+        client=httpx.Client(transport=httpx.MockTransport(handler)), delay_seconds=0
+    )
+
+    (document,) = search.find("31/2018/QH14")
+
+    assert document.document_number == "31/2018/QH14"
+    assert posts[0]["ctrl_191017_163$txtSearchKeyword"] == "31/2018/QH14"
+    assert posts[0]["ctrl_191017_163$drdDocCategory"] == "0"
+    assert posts[0]["ctrl_191017_163$drdDocYear"] == "0"
+
+
 def test_government_search_retries_a_slow_year_and_skips_one_that_keeps_failing() -> None:
     attempts: dict[str, int] = {}
 

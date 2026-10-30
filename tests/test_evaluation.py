@@ -46,14 +46,16 @@ def test_provision_ranks_match_document_article_and_clause() -> None:
     ranks = provision_ranks(
         passages,
         [
-            ["48/2024/QH15", "9", "3"],  # only the whole-article passage holds clause 3
-            ["181/2025/NĐ-CP", "4", "1b"],  # an inserted clause sits in clause 1's passage
-            ["181/2025/NĐ-CP", "4", None],
-            ["181/2025/NĐ-CP", "5", None],
+            [["48/2024/QH15", "9", "3"]],  # only the whole-article passage holds clause 3
+            [["181/2025/NĐ-CP", "4", "1b"]],  # an inserted clause sits in clause 1's passage
+            [["181/2025/NĐ-CP", "4", None]],
+            [["181/2025/NĐ-CP", "5", None]],
+            # an amended provision is found through its amending decree as well
+            [["181/2025/NĐ-CP", "5", None], ["48/2024/QH15", "9", "2"]],
         ],
     )
 
-    assert ranks == [3, 2, 2, None]
+    assert ranks == [3, 2, 2, None, 1]
 
 
 def test_provision_coverage_needs_every_provision_within_k() -> None:

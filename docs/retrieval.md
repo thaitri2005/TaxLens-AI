@@ -338,8 +338,11 @@ clause:
 
 - Only **E** provisions score, as the guideline requires; S documents are listed in the
   report as `supporting_document_numbers`.
-- The cited provision is the first one in the item; amendments and notes after `, ` or
-  ` (` are ignored, so an amended provision and its amendment count once.
+- The cited provision is the first one in the item, before the first comma or
+  parenthesis; the rest is a note. An amended provision and its amendment count once.
+  When the note names the amending provision with its article (`added by Decree
+  359/2025 Art 1(1)`), retrieving either place finds the item, because an inserted
+  clause is printed only in the amending document until a consolidated text exists.
 - A short number (`48/2024`, `Decree 181`) is completed from the corpus (`48/2024/QH15`),
   or from an earlier item of the same case. Items the parser cannot read (a law named
   without its number, such as `Livestock Law`) are listed as `unparsed_provisions`
@@ -356,6 +359,15 @@ clause:
   first rank at which each provision was found (`null` if not in the budget), for error
   analysis. An inserted clause such as `Art 4(1b)` is matched by its parent clause's
   passage, because passages split only on numbered clauses.
+- A provision whose document is not embedded is a **corpus gap**, not a retrieval miss:
+  the official source may not list the document under tax (a cultivation law, an
+  agriculture ministry circular) or may record it wrongly. Provision ranks mark it
+  `"in_corpus": false`; the raw metrics above count it as missed, and the
+  `essential_in_corpus_*` metrics (`mean_essential_in_corpus_recall_at_k`,
+  `essential_in_corpus_full_coverage_rate`) leave it out, so they compare ranking
+  alone. `essential_not_in_corpus_count` says how many provisions were left out. Close
+  gaps with `collect_sources.py --cited-by` ([below](#controlled-experiments)) before
+  freezing; report both figures.
 - Conditional and false-premise cases (no E provisions) are skipped by the ranking
   metrics. `--verified-only` also skips cases marked `uncertain` or without a verified
   source, which the guideline keeps out of the final benchmark.
@@ -374,8 +386,19 @@ as a local file as well.
 The daily DAG keeps changing the corpus, so comparing methods needs a frozen corpus and a
 frozen gold set:
 
-1. Finish collecting the documents the gold set cites, and pause the daily DAG
-   ([operations](operations.md)).
+1. Collect the documents the gold set cites, and pause the daily DAG
+   ([operations](operations.md)). The daily collection reads only the portal's tax
+   category, so laws a tax answer depends on (Cultivation Law 31/2018/QH14, Circular
+   84/2025/TT-BNNMT on forestry) are missing until collected by number:
+
+   ```powershell
+   python scripts/collect_sources.py --cited-by data/evaluation/gold_set_v1.csv --dry-run
+   python scripts/collect_sources.py --cited-by data/evaluation/gold_set_v1.csv
+   ```
+
+   Documents already in the corpus are skipped. Ministry of Finance circulars that the
+   portal does not carry (80/2021/TT-BTC, 25/2018/TT-BTC) come from
+   `--source mof`. Then process and embed the new documents.
 2. Record the corpus:
 
    ```powershell

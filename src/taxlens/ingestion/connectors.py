@@ -545,13 +545,28 @@ class GovernmentPortalSearch:
                 time.sleep(wait)
         raise AssertionError("unreachable")
 
+    def find(self, keyword: str) -> list[SourceDocument]:
+        """Documents of any category matching a keyword, such as a document number.
+
+        Documents a tax rule depends on are not always in the tax category (a cultivation
+        law, an agriculture ministry circular), so the yearly tax search never lists them.
+        """
+
+        return self._post(category="0", year="0", issuer="0", keyword=keyword)[0]
+
     def _search(self, year: int, issuer: str | None = None) -> tuple[list[SourceDocument], bool]:
+        return self._post(category=TAX_CATEGORY_ID, year=str(year), issuer=issuer or "0")
+
+    def _post(
+        self, category: str, year: str, issuer: str, keyword: str = ""
+    ) -> tuple[list[SourceDocument], bool]:
         form = dict(self._form())
         form.update(
             {
-                f"{_FORM_PREFIX}drdDocCategory": TAX_CATEGORY_ID,
-                f"{_FORM_PREFIX}drdDocYear": str(year),
-                f"{_FORM_PREFIX}drdDocOrg": issuer or "0",
+                f"{_FORM_PREFIX}drdDocCategory": category,
+                f"{_FORM_PREFIX}drdDocYear": year,
+                f"{_FORM_PREFIX}drdDocOrg": issuer,
+                f"{_FORM_PREFIX}txtSearchKeyword": keyword,
                 f"{_FORM_PREFIX}btnSearch": "Tìm kiếm",
             }
         )
