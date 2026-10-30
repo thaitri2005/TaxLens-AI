@@ -34,6 +34,10 @@ ENV HF_HUB_OFFLINE=1 \
     TRANSFORMERS_OFFLINE=1 \
     OMP_THREAD_LIMIT=1
 
+# The commit the image was built from; evaluation reports record it (no git in the image).
+ARG TAXLENS_CODE_VERSION=
+ENV TAXLENS_CODE_VERSION=${TAXLENS_CODE_VERSION}
+
 EXPOSE 8000
 
 # The API runs as a single replica, so it applies pending migrations itself. They run in a

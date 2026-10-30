@@ -1,6 +1,8 @@
 import argparse
 import hashlib
 import json
+import sys
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -8,8 +10,17 @@ from sqlalchemy import func, select
 
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal
+from taxlens.evaluation.corpus_manifest import (
+    build_corpus_manifest,
+    code_version,
+    compare_manifests,
+)
 from taxlens.evaluation.gold_set import load_gold_set
-from taxlens.evaluation.metrics import evaluate_retrieval
+from taxlens.evaluation.metrics import (
+    evaluate_retrieval,
+    provision_coverage,
+    provision_ranks,
+)
 from taxlens.evaluation.reports import persist_retrieval_report
 from taxlens.evaluation.retrieval_runner import (
     evaluation_status,
@@ -66,6 +77,27 @@ def main() -> None:
         default="hybrid",
         help="Retrieval baseline to evaluate (default: hybrid)",
     )
+    parser.add_argument(
+        "--as-of",
+        choices=["none", "case"],
+        default="none",
+        help=(
+            "case: leave out document versions that take effect after each case's "
+            "as_of_date (undated versions are kept); none: search the whole corpus"
+        ),
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Also write the report to this local JSON file",
+    )
+    parser.add_argument(
+        "--corpus-manifest",
+        type=Path,
+        default=None,
+        help="Stop unless the corpus still matches this frozen manifest (freeze_corpus.py)",
+    )
     arguments = parser.parse_args()
     ks = [arguments.k] if arguments.k is not None else sorted(set(arguments.ks))
     if any(k < 1 for k in ks):
@@ -112,6 +144,9 @@ def main() -> None:
                 "relevant_document_numbers": relevant_documents,
                 "relevant_articles": case.get("relevant_articles") or {},
                 "relevant_clauses": case.get("relevant_clauses") or {},
+                "essential_provisions": case.get("essential_provisions") or [],
+                "supporting_provisions": case.get("supporting_provisions") or [],
+                "as_of_date": case.get("as_of_date"),
                 "gold_set_fields": {
                     key: case[key] for key in _GOLD_SET_REPORT_FIELDS if key in case
                 },
@@ -119,7 +154,9 @@ def main() -> None:
         )
     mode: SearchMode = arguments.mode
     provider = get_embedding_provider() if mode != "keyword" else None
+    settings = get_settings()
     reports: list[dict[str, Any]] = []
+    frozen_corpus: dict[str, Any] | None = None
     primary_k = 5 if 5 in ks else max(ks)
     with SessionLocal() as session:
         expected_document_numbers = {
@@ -129,6 +166,21 @@ def main() -> None:
         }
         corpus_coverage = _corpus_coverage(session, expected_document_numbers)
         corpus_snapshot = _corpus_snapshot(session)
+        if arguments.corpus_manifest is not None:
+            frozen = json.loads(arguments.corpus_manifest.read_text(encoding="utf-8"))
+            difference = compare_manifests(
+                frozen,
+                build_corpus_manifest(
+                    session, settings.embedding_model_id, settings.embedding_model_revision
+                ),
+            )
+            if not difference["unchanged"]:
+                print(json.dumps(difference, ensure_ascii=False, indent=2), file=sys.stderr)
+                sys.exit(f"The corpus no longer matches {arguments.corpus_manifest}")
+            frozen_corpus = {
+                "label": frozen.get("label") or str(arguments.corpus_manifest),
+                "fingerprint": frozen["fingerprint"],
+            }
         embedded_document_numbers = {
             str(item["document_number"])
             for item in corpus_coverage["documents"]
@@ -145,11 +197,17 @@ def main() -> None:
                 if covered_documents
                 else "not_covered"
             )
+            filters = SearchFilters(
+                as_of=date.fromisoformat(case["as_of_date"])
+                if arguments.as_of == "case" and case["as_of_date"]
+                else None
+            )
             results = _search(
                 session,
                 case["query"],
                 provider,
                 mode,
+                filters,
                 max(ks),
             )
             ranked_documents = _unique_document_numbers(results)
@@ -185,6 +243,7 @@ def main() -> None:
                         for result in results
                     ],
                 )
+            provision_report = _add_provision_metrics(metrics_by_k, results, case)
             primary_metrics = metrics_by_k[str(primary_k)]
             reports.append(
                 {
@@ -197,6 +256,7 @@ def main() -> None:
                     "coverage_status": coverage_status,
                     "covered_relevant_document_numbers": sorted(covered_documents),
                     "missing_relevant_document_numbers": sorted(missing_documents),
+                    **provision_report,
                     **case["gold_set_fields"],
                 }
             )
@@ -224,15 +284,19 @@ def main() -> None:
             metrics_by_k[str(k)][f"mean_{level}_reciprocal_rank"] = sum(
                 float(item[f"{level}_reciprocal_rank"]) for item in level_metrics
             ) / len(level_metrics)
+    for k in ks:
+        metrics_by_k[str(k)].update(_provision_summary(reports, k))
     fully_covered_metrics_by_k = {
         str(k): metrics_summary(fully_covered_reports, k) for k in ks
     }
     primary_metrics = metrics_by_k[str(primary_k)]
     primary_covered_metrics = fully_covered_metrics_by_k[str(primary_k)]
-    settings = get_settings()
     output: dict[str, Any] = {
         "model": settings.embedding_model_id,
+        "model_revision": settings.embedding_model_revision,
         "retrieval_mode": mode,
+        "as_of_filter": arguments.as_of,
+        "code_version": code_version(),
         "dataset": str(arguments.dataset),
         "dataset_hash": dataset_hash,
         "ks": ks,
@@ -246,6 +310,7 @@ def main() -> None:
         },
         "corpus_coverage": corpus_coverage,
         "corpus_snapshot": corpus_snapshot,
+        "frozen_corpus": frozen_corpus,
         "metrics_by_k": metrics_by_k,
         "fully_covered_metrics_by_k": fully_covered_metrics_by_k,
         "mean_hit_at_k": primary_metrics["mean_hit_at_k"],
@@ -267,6 +332,11 @@ def main() -> None:
         "cases": reports,
     }
     persisted = persist_retrieval_report(output)
+    if arguments.output is not None:
+        arguments.output.parent.mkdir(parents=True, exist_ok=True)
+        arguments.output.write_text(
+            json.dumps(persisted, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     tracker = get_experiment_tracker(settings)
     with tracker.start_run("retrieval-evaluation"):
         tracker.log_params(
@@ -274,11 +344,14 @@ def main() -> None:
                 "dataset": str(arguments.dataset),
                 "embedding_model": settings.embedding_model_id,
                 "retrieval_mode": mode,
+                "as_of_filter": arguments.as_of,
+                "code_version": code_version() or "unknown",
                 "k": primary_k,
                 "ks": ",".join(str(k) for k in ks),
                 "case_count": count,
                 "dataset_hash": dataset_hash,
                 "corpus_fingerprint": corpus_snapshot["fingerprint"],
+                "frozen_corpus": frozen_corpus["label"] if frozen_corpus else "none",
             }
         )
         tracking_metrics = {
@@ -308,6 +381,13 @@ def main() -> None:
             ),
             "fully_covered_case_count": float(len(fully_covered_reports)),
         }
+        for key in (
+            "mean_essential_recall_at_k",
+            "essential_full_coverage_rate",
+            "mean_supporting_recall_at_k",
+        ):
+            if primary_metrics.get(key) is not None:
+                tracking_metrics[key] = float(primary_metrics[key])
         if fully_covered_reports:
             tracking_metrics.update(
                 {
@@ -338,6 +418,8 @@ _GOLD_SET_REPORT_FIELDS = (
     "uncertain",
     "source_verified",
     "relevant_clauses",
+    "essential_provisions",
+    "supporting_provisions",
     "supporting_document_numbers",
     "unparsed_provisions",
 )
@@ -369,6 +451,63 @@ def _add_locator_metrics(
         metrics[f"{level}_reciprocal_rank"] = (
             1 / first_rank if first_rank and first_rank <= int(k) else 0.0
         )
+
+
+def _add_provision_metrics(
+    metrics_by_k: dict[str, dict[str, Any]],
+    results: list[SearchResult],
+    case: dict[str, Any],
+) -> dict[str, Any]:
+    """Essential and supporting provision coverage within each passage budget K."""
+
+    passages = [
+        (
+            result.document.document_number,
+            str(result.chunk.article_number),
+            result.chunk.clause_number,
+        )
+        for result in results
+    ]
+    report: dict[str, Any] = {}
+    for label in ("essential", "supporting"):
+        provisions = case[f"{label}_provisions"]
+        if not provisions:
+            continue
+        ranks = provision_ranks(passages, provisions)
+        report[f"{label}_provision_ranks"] = [
+            {"provision": provision, "rank": rank}
+            for provision, rank in zip(provisions, ranks, strict=True)
+        ]
+        for k, metrics in metrics_by_k.items():
+            coverage = provision_coverage(ranks, int(k))
+            metrics[f"{label}_recall_at_k"] = coverage.recall_at_k
+            if label == "essential":
+                metrics["essential_full_coverage_at_k"] = coverage.full_coverage_at_k
+    return report
+
+
+def _provision_summary(reports: list[dict[str, Any]], k: int) -> dict[str, Any]:
+    summary: dict[str, Any] = {}
+    for label in ("essential", "supporting"):
+        metrics = [
+            report["metrics_by_k"][str(k)]
+            for report in reports
+            if f"{label}_recall_at_k" in report["metrics_by_k"][str(k)]
+        ]
+        summary[f"{label}_case_count"] = len(metrics)
+        summary[f"mean_{label}_recall_at_k"] = (
+            sum(float(item[f"{label}_recall_at_k"]) for item in metrics) / len(metrics)
+            if metrics
+            else None
+        )
+        if label == "essential":
+            summary["essential_full_coverage_rate"] = (
+                sum(bool(item["essential_full_coverage_at_k"]) for item in metrics)
+                / len(metrics)
+                if metrics
+                else None
+            )
+    return summary
 
 
 def _clause_hit(result: SearchResult, clauses: list[list[str | None]]) -> bool:
@@ -499,9 +638,9 @@ def _search(
     query: str,
     provider,
     mode: SearchMode,
+    filters: SearchFilters,
     limit: int,
 ) -> list[SearchResult]:
-    filters = SearchFilters()
     if mode == "keyword":
         return keyword_search_chunks(session, query, filters, limit)
     if provider is None:

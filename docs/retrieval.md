@@ -347,16 +347,57 @@ clause:
 - Besides the document and article metrics, the report gives `mean_clause_hit_at_k` and
   `mean_clause_reciprocal_rank`, the guideline's *exact* match. A passage without a
   clause number holds the whole article, so it counts as a clause hit.
+- **Provision coverage** treats K as a budget of passages and asks whether *every*
+  provision was found, not just the first:
+  `mean_essential_recall_at_k` (share of a case's E provisions in the top K passages),
+  `essential_full_coverage_rate` (share of cases with all E provisions in the top K, the
+  benchmark's headline metric), and `mean_supporting_recall_at_k` for S provisions, which
+  are reported but never part of a pass. Each case lists `essential_provision_ranks`, the
+  first rank at which each provision was found (`null` if not in the budget), for error
+  analysis. An inserted clause such as `Art 4(1b)` is matched by its parent clause's
+  passage, because passages split only on numbered clauses.
 - Conditional and false-premise cases (no E provisions) are skipped by the ranking
   metrics. `--verified-only` also skips cases marked `uncertain` or without a verified
   source, which the guideline keeps out of the final benchmark.
-- `as_of_date` is recorded in each case's report but not applied to search: most portal
-  documents have no recorded effective date, so filtering by date would drop them. Cases
-  dated before a law changed (L2, L3) therefore test whether the older version is in the
-  corpus and ranked, not whether search chooses by date.
+- `--as-of case` leaves out document versions that take effect after each case's
+  `as_of_date`; `--as-of none` (the default) searches everything. Versions without a
+  recorded effective date (most portal documents) are always kept, and nothing records
+  when a document stopped applying, so the filter removes later law but cannot remove
+  repealed law.
 
 The scheduled daily evaluation still uses `tax_article_retrieval.json`, since both runs
-would write the same `latest.json` report.
+would write the same `latest.json` report. Use `--output` to keep a gold-set run's report
+as a local file as well.
+
+### Controlled experiments
+
+The daily DAG keeps changing the corpus, so comparing methods needs a frozen corpus and a
+frozen gold set:
+
+1. Finish collecting the documents the gold set cites, and pause the daily DAG
+   ([operations](operations.md)).
+2. Record the corpus:
+
+   ```powershell
+   docker compose exec -T api python scripts/freeze_corpus.py --label corpus-v1 --output data/evaluation/corpus/corpus-v1.json
+   ```
+
+   The manifest lists every document version with its effective date, legal status, a
+   hash of its passages (text, article, clause), and how many passages the configured
+   embedding model has embedded. Commit it, and tag the gold set's commit at the same time.
+3. Run every method against it:
+
+   ```powershell
+   docker compose exec -T api python scripts/evaluate_tax_retrieval.py --dataset data/evaluation/gold_set_v1.csv --verified-only --corpus-manifest data/evaluation/corpus/corpus-v1.json --as-of case --ks 5 10 20 --output data/evaluation/runs/hybrid-asof.json
+   ```
+
+   With `--corpus-manifest` the run stops, listing what was added, removed, or changed,
+   if the corpus no longer matches. `freeze_corpus.py --check <manifest>` does the same
+   check on its own.
+
+Each report records `frozen_corpus`, the dataset hash, the embedding model and revision,
+`as_of_filter`, and `code_version`: the git commit, or `TAXLENS_CODE_VERSION`, which the
+release workflow sets in the API image.
 
 ### Next steps
 

@@ -58,6 +58,58 @@ def evaluate_retrieval(
     )
 
 
+@dataclass(frozen=True)
+class ProvisionCoverage:
+    recall_at_k: float
+    full_coverage_at_k: bool
+
+
+def provision_ranks(
+    passages: Sequence[Sequence[str | None]],
+    provisions: Sequence[Sequence[str | None]],
+) -> list[int | None]:
+    """The first rank at which a passage covers each ``[document, article, clause]``.
+
+    A passage without a clause number holds the whole article, so it covers any clause of
+    that article; a provision without a clause needs only the article. Inserted clauses
+    ("1b") sit inside the passage of the clause they follow, since passages split on
+    numbered clauses only.
+    """
+
+    return [
+        next(
+            (
+                rank
+                for rank, passage in enumerate(passages, start=1)
+                if _covers(passage, provision)
+            ),
+            None,
+        )
+        for provision in provisions
+    ]
+
+
+def provision_coverage(ranks: Sequence[int | None], k: int) -> ProvisionCoverage:
+    if k < 1:
+        raise ValueError("k must be at least 1")
+    if not ranks:
+        return ProvisionCoverage(recall_at_k=0.0, full_coverage_at_k=False)
+    found = sum(rank is not None and rank <= k for rank in ranks)
+    return ProvisionCoverage(
+        recall_at_k=found / len(ranks), full_coverage_at_k=found == len(ranks)
+    )
+
+
+def _covers(passage: Sequence[str | None], provision: Sequence[str | None]) -> bool:
+    document, article, clause = passage
+    gold_document, gold_article, gold_clause = provision
+    if document != gold_document or article != gold_article:
+        return False
+    if gold_clause is None or clause is None:
+        return True
+    return clause in {gold_clause, gold_clause.rstrip("abcdefghijklmnopqrstuvwxyz")}
+
+
 def citation_completeness(claims: Sequence[CitedClaim], citation_count: int) -> float:
     if not claims:
         return 1.0

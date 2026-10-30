@@ -2,7 +2,7 @@ from datetime import date
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -33,6 +33,21 @@ def test_search_returns_matching_article_chunk_with_filters() -> None:
     assert results[0].document.document_number == "31/2025/TT-BTC"
     assert results[0].chunk.article_number == "1"
     assert results[0].score == 1.0
+
+
+def test_search_as_of_leaves_out_later_versions_but_keeps_undated_ones() -> None:
+    engine = _create_engine_with_search_data()
+    with Session(engine) as session:
+        before = search_chunks(session, "VAT", SearchFilters(as_of=date(2025, 1, 1)))
+        later = session.scalars(
+            select(DocumentVersion).where(DocumentVersion.effective_date == date(2025, 7, 1))
+        ).one()
+        later.effective_date = None
+        session.flush()
+        undated = search_chunks(session, "VAT", SearchFilters(as_of=date(2025, 1, 1)))
+
+    assert {result.document.document_number for result in before} == {"02/2024/TT-BTC"}
+    assert "31/2025/TT-BTC" in {result.document.document_number for result in undated}
 
 
 def test_search_api_returns_citation_ready_results() -> None:

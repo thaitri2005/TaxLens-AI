@@ -25,7 +25,7 @@ _SUFFIX_PREFIXES = {"decree": "NĐ-CP", "circular": "TT", "law": "QH"}
 # "181", "181/2025", or a full "84/2025/TT-BNNMT".
 _PROVISION = re.compile(
     r"^(?P<title>[^\d]*?)\s*(?P<number>\d{1,4}(?:/\d{4})?(?:/[A-ZĐ0-9-]+)?)?\s+"
-    r"Art\s+(?P<article>\d+)(?:\((?P<clause>\d+)\)|\s+clause\s+(?P<clause_word>\w+))?"
+    r"Art\s+(?P<article>\d+)(?:\((?P<clause>\d+[a-z]?)\)|\s+clause\s+(?P<clause_word>\w+))?"
 )
 
 
@@ -81,6 +81,8 @@ class GoldCase:
             "relevant_document_numbers": list(articles),
             "relevant_articles": articles,
             "relevant_clauses": clauses,
+            "essential_provisions": self._locators("E", corpus_document_numbers),
+            "supporting_provisions": self._locators("S", corpus_document_numbers),
             "supporting_document_numbers": sorted(supporting - set(articles)),
             "case_type": self.case_type,
             "as_of_date": self.as_of_date.isoformat(),
@@ -88,6 +90,24 @@ class GoldCase:
             "source_verified": self.source_verified,
             "unparsed_provisions": list(self.unparsed),
         }
+
+    def _locators(
+        self, label: str, corpus_document_numbers: Collection[str]
+    ) -> list[list[str | None]]:
+        """Distinct ``[document, article, clause]`` of the provisions with this label."""
+
+        locators: list[list[str | None]] = []
+        for provision in self.provisions:
+            if provision.label != label:
+                continue
+            locator = [
+                resolve_document_number(provision, corpus_document_numbers),
+                provision.article,
+                provision.clause,
+            ]
+            if locator not in locators:
+                locators.append(locator)
+        return locators
 
 
 def load_gold_set(path: Path) -> list[GoldCase]:

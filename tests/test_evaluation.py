@@ -2,7 +2,12 @@ import logging
 
 import pytest
 
-from taxlens.evaluation.metrics import citation_completeness, evaluate_retrieval
+from taxlens.evaluation.metrics import (
+    citation_completeness,
+    evaluate_retrieval,
+    provision_coverage,
+    provision_ranks,
+)
 from taxlens.intelligence.qa import CitedClaim
 from taxlens.intelligence.telemetry import ModelCallTelemetry, record_model_call
 
@@ -29,6 +34,36 @@ def test_reciprocal_rank_is_bounded_by_k() -> None:
     metrics = evaluate_retrieval(["irrelevant", "relevant"], {"relevant"}, k=1)
 
     assert metrics.reciprocal_rank == 0.0
+
+
+def test_provision_ranks_match_document_article_and_clause() -> None:
+    passages = [
+        ("48/2024/QH15", "9", "2"),
+        ("181/2025/NĐ-CP", "4", "1"),
+        ("48/2024/QH15", "9", None),
+    ]
+
+    ranks = provision_ranks(
+        passages,
+        [
+            ["48/2024/QH15", "9", "3"],  # only the whole-article passage holds clause 3
+            ["181/2025/NĐ-CP", "4", "1b"],  # an inserted clause sits in clause 1's passage
+            ["181/2025/NĐ-CP", "4", None],
+            ["181/2025/NĐ-CP", "5", None],
+        ],
+    )
+
+    assert ranks == [3, 2, 2, None]
+
+
+def test_provision_coverage_needs_every_provision_within_k() -> None:
+    assert provision_coverage([1, 3], k=3).full_coverage_at_k is True
+    partial = provision_coverage([1, 3], k=2)
+    assert partial.recall_at_k == 0.5
+    assert partial.full_coverage_at_k is False
+    assert provision_coverage([1, None], k=10).full_coverage_at_k is False
+    with pytest.raises(ValueError, match="at least 1"):
+        provision_coverage([1], k=0)
 
 
 def test_citation_completeness_checks_claim_references() -> None:

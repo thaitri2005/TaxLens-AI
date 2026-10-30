@@ -70,6 +70,16 @@ def test_gold_set_cases_score_only_essential_provisions(tmp_path: Path) -> None:
     assert case["relevant_articles"] == {"48/2024/QH15": ["9"]}
     assert case["relevant_clauses"] == {"48/2024/QH15": [["9", "3"]]}
     assert case["supporting_document_numbers"] == ["181/2025/NĐ-CP"]
+    assert case["essential_provisions"] == [["48/2024/QH15", "9", "3"]]
+    assert case["supporting_provisions"] == [["181/2025/NĐ-CP", "26", None]]
+
+
+def test_parse_provisions_keeps_inserted_clause_letters() -> None:
+    provisions, _ = parse_provisions(
+        "E: Decree 181/2025 Art 4(1) | E: Decree 181/2025 Art 4(1b), added by Decree 359/2025"
+    )
+
+    assert [p.clause for p in provisions] == ["1", "1b"]
 
 
 def test_bundled_gold_set_parses() -> None:

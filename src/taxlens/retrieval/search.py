@@ -6,7 +6,7 @@ from datetime import date
 from functools import reduce
 from typing import Any, Literal
 
-from sqlalchemy import Select, case, func, literal_column, select
+from sqlalchemy import Select, case, func, literal_column, or_, select
 from sqlalchemy.orm import Session
 
 from taxlens.legal_data.models import (
@@ -48,6 +48,9 @@ class SearchFilters:
     issuing_agency: str | None = None
     effective_from: date | None = None
     effective_to: date | None = None
+    # Leaves out versions that take effect after this date; unlike effective_to, keeps
+    # versions with no recorded effective date.
+    as_of: date | None = None
     # Any of these recorded types (a document kind); an empty tuple matches nothing.
     document_types: tuple[str, ...] | None = None
 
@@ -329,6 +332,13 @@ def _apply_filters(statement: Select[Any], filters: SearchFilters) -> Select[Any
         statement = statement.where(DocumentVersion.effective_date >= filters.effective_from)
     if filters.effective_to is not None:
         statement = statement.where(DocumentVersion.effective_date <= filters.effective_to)
+    if filters.as_of is not None:
+        statement = statement.where(
+            or_(
+                DocumentVersion.effective_date.is_(None),
+                DocumentVersion.effective_date <= filters.as_of,
+            )
+        )
     return statement
 
 
