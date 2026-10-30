@@ -54,7 +54,9 @@ At K = 5, 10, 20 passages:
 Per case: win (method covers an essential provision the baseline misses at K, and misses
 none it covers), loss, or tie. With about 25 cases a significance test has little power,
 so the result is stated as paired wins and losses with an exact sign test, plus the
-per-case table; no threshold is claimed.
+per-case table; no threshold is claimed. `scripts/compare_retrieval_runs.py <baseline>
+<method>` computes both from the saved reports and refuses reports made on different
+corpora, datasets, or date filters.
 
 ## Error analysis
 
