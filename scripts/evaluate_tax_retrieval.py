@@ -35,6 +35,7 @@ from taxlens.legal_data.models import (
     LegalDocument,
 )
 from taxlens.retrieval.embeddings import get_embedding_provider
+from taxlens.retrieval.issues import Issue, issue_guided_search
 from taxlens.retrieval.search import (
     SearchFilters,
     SearchMode,
@@ -73,9 +74,18 @@ def main() -> None:
     )
     parser.add_argument(
         "--mode",
-        choices=["keyword", "semantic", "hybrid"],
+        choices=["keyword", "semantic", "hybrid", "issue-guided"],
         default="hybrid",
-        help="Retrieval baseline to evaluate (default: hybrid)",
+        help=(
+            "Retrieval method to evaluate (default: hybrid). issue-guided interleaves hybrid "
+            "searches for the question and each stored issue (--issues)"
+        ),
+    )
+    parser.add_argument(
+        "--issues",
+        type=Path,
+        default=Path("data/evaluation/issues/gold_set_v1.json"),
+        help="Stored decompositions for --mode issue-guided (scripts/decompose_issues.py)",
     )
     parser.add_argument(
         "--as-of",
@@ -152,7 +162,16 @@ def main() -> None:
                 },
             }
         )
-    mode: SearchMode = arguments.mode
+    mode: str = arguments.mode
+    issues_by_case = _load_issues(arguments.issues) if mode == "issue-guided" else {}
+    if mode == "issue-guided":
+        undecomposed = [
+            case["case_id"] for case in dataset if case["case_id"] not in issues_by_case
+        ]
+        if undecomposed:
+            parser.error(
+                f"No stored issues for {', '.join(undecomposed)}; run scripts/decompose_issues.py"
+            )
     provider = get_embedding_provider() if mode != "keyword" else None
     settings = get_settings()
     reports: list[dict[str, Any]] = []
@@ -202,14 +221,17 @@ def main() -> None:
                 if arguments.as_of == "case" and case["as_of_date"]
                 else None
             )
-            results = _search(
-                session,
-                case["query"],
-                provider,
-                mode,
-                filters,
-                max(ks),
-            )
+            if mode == "issue-guided":
+                results = issue_guided_search(
+                    session,
+                    case["query"],
+                    issues_by_case[case["case_id"]],
+                    provider,
+                    filters,
+                    max(ks),
+                )
+            else:
+                results = _search(session, case["query"], provider, mode, filters, max(ks))
             ranked_documents = _unique_document_numbers(results)
             metrics_by_k: dict[str, dict[str, Any]] = {}
             for k in ks:
@@ -297,6 +319,11 @@ def main() -> None:
         "model": settings.embedding_model_id,
         "model_revision": settings.embedding_model_revision,
         "retrieval_mode": mode,
+        "issues": (
+            {"path": str(arguments.issues), "sha256": _file_hash(arguments.issues)}
+            if mode == "issue-guided"
+            else None
+        ),
         "as_of_filter": arguments.as_of,
         "code_version": code_version(),
         "dataset": str(arguments.dataset),
@@ -653,6 +680,18 @@ def _corpus_coverage(session, expected_document_numbers: set[str]) -> dict[str, 
         "embedded_document_count": sum(bool(item["embedding_count"]) for item in statuses),
         "documents": statuses,
     }
+
+
+def _load_issues(path: Path) -> dict[str, list[Issue]]:
+    stored = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        case_id: [Issue(issue=item["issue"], query=item["query"]) for item in entry["issues"]]
+        for case_id, entry in stored["cases"].items()
+    }
+
+
+def _file_hash(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _search(

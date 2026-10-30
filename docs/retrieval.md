@@ -383,6 +383,9 @@ as a local file as well.
 
 ### Controlled experiments
 
+The comparison of hybrid search with issue-guided retrieval (`--mode issue-guided`) is
+planned in [issue-guided-retrieval.md](issue-guided-retrieval.md).
+
 The daily DAG keeps changing the corpus, so comparing methods needs a frozen corpus and a
 frozen gold set:
 

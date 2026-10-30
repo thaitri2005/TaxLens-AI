@@ -1,0 +1,333 @@
+{
+  "cases": {
+    "A1": {
+      "question_hash": "919652f097bc6eb5",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "thuế suất thuế GTGT đối với nước ngọt đóng chai",
+          "query": "thuế suất GTGT nước ngọt đóng chai"
+        },
+        {
+          "issue": "đối tượng chịu thuế GTGT nước ngọt đóng chai",
+          "query": "đối tượng chịu thuế GTGT nước ngọt đóng chai"
+        },
+        {
+          "issue": "trường hợp ngoại lệ thuế GTGT nước ngọt",
+          "query": "trường hợp ngoại lệ thuế GTGT nước ngọt"
+        }
+      ]
+    },
+    "A2": {
+      "question_hash": "8a54fede4ab3d41a",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng chịu thuế GTGT",
+          "query": "sản phẩm rừng trồng chưa qua chế biến"
+        },
+        {
+          "issue": "trường hợp miễn thuế GTGT đối với hàng hóa nông sản",
+          "query": "gỗ rừng trồng sơ chế thông thường miễn thuế GTGT"
+        },
+        {
+          "issue": "thời điểm kê khai thuế GTGT",
+          "query": "thời điểm ghi nhận hàng hóa bán ra kê khai thuế GTGT"
+        }
+      ]
+    },
+    "A3": {
+      "question_hash": "4075734d4b90cec1",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "thời điểm xác định thuế GTGT đối với điện bán ra",
+          "query": "thời điểm xác định thuế GTGT đối với điện bán ra"
+        },
+        {
+          "issue": "thời điểm kê khai thuế GTGT đối với doanh nghiệp bán điện",
+          "query": "thời điểm kê khai thuế GTGT đối với doanh nghiệp bán điện"
+        }
+      ]
+    },
+    "A4": {
+      "question_hash": "2f9ba20468a05819",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng chịu thuế xuất khẩu",
+          "query": "đối tượng chịu thuế xuất khẩu"
+        },
+        {
+          "issue": "trường hợp hoàn thuế GTGT khi trả lại hàng xuất khẩu",
+          "query": "trường hợp hoàn thuế GTGT khi trả lại hàng xuất khẩu"
+        },
+        {
+          "issue": "thời điểm xác định doanh thu và chi phí hàng hóa trả lại",
+          "query": "thời điểm xác định doanh thu và chi phí hàng hóa trả lại"
+        },
+        {
+          "issue": "quy định xử lý thuế khi hàng hóa xuất khẩu bị trả lại",
+          "query": "quy định xử lý thuế khi hàng hóa xuất khẩu bị trả lại"
+        }
+      ]
+    },
+    "A5": {
+      "question_hash": "b8da492728490099",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng chịu thuế GTGT đầu vào",
+          "query": "hàng hóa trả góp chưa thanh toán có chịu thuế GTGT đầu vào không"
+        },
+        {
+          "issue": "trường hợp không được khấu trừ thuế GTGT đầu vào",
+          "query": "thuế GTGT đầu vào không được khấu trừ khi chưa có chứng từ thanh toán"
+        },
+        {
+          "issue": "thủ tục bổ sung khấu trừ thuế GTGT đầu vào",
+          "query": "bổ sung khấu trừ thuế GTGT đầu vào sau khi có chứng từ thanh toán"
+        }
+      ]
+    },
+    "A6": {
+      "question_hash": "4db670e944be3ea4",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng chịu thuế GTGT trong hoạt động trồng trọt",
+          "query": "hoạt động trồng trọt thuộc đối tượng chịu thuế GTGT"
+        },
+        {
+          "issue": "hình thức giao dịch xác định tính chịu thuế GTGT",
+          "query": "giao dịch chuyển nhượng sản phẩm thu hoạch chịu thuế GTGT"
+        },
+        {
+          "issue": "trường hợp không chịu thuế GTGT đối với dịch vụ chăn nuôi",
+          "query": "dịch vụ chăn nuôi không chịu thuế GTGT"
+        },
+        {
+          "issue": "thời điểm áp dụng quy định mới về thuế GTGT",
+          "query": "thời điểm áp dụng quy định thuế GTGT năm 2026"
+        }
+      ]
+    },
+    "A7": {
+      "question_hash": "4b47b7ae0885781b",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng được hoàn thuế GTGT nhập khẩu",
+          "query": "đối tượng được hoàn thuế GTGT nhập khẩu"
+        },
+        {
+          "issue": "thời hạn nộp hồ sơ hoàn thuế GTGT",
+          "query": "thời hạn nộp hồ sơ hoàn thuế GTGT"
+        },
+        {
+          "issue": "trường hợp hoàn thuế GTGT sau thời hạn kê khai",
+          "query": "trường hợp hoàn thuế GTGT sau thời hạn kê khai"
+        },
+        {
+          "issue": "quy định hoàn thuế GTGT xuất khẩu hàng hóa",
+          "query": "quy định hoàn thuế GTGT xuất khẩu hàng hóa"
+        }
+      ]
+    },
+    "A8": {
+      "question_hash": "c62c831054c18bfb",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng được hoàn thuế GTGT",
+          "query": "đối tượng được hoàn thuế giá trị gia tăng"
+        },
+        {
+          "issue": "trường hợp hoàn thuế GTGT nhập khẩu xuất khẩu",
+          "query": "hoàn thuế GTGT hàng nhập khẩu xuất khẩu sang nước thứ ba"
+        },
+        {
+          "issue": "điều kiện khấu trừ thuế GTGT đầu vào",
+          "query": "điều kiện khấu trừ thuế GTGT đầu vào chưa hoàn"
+        },
+        {
+          "issue": "thời điểm hoàn thuế GTGT theo quy định",
+          "query": "thời điểm hoàn thuế GTGT sau khi xuất khẩu"
+        }
+      ]
+    },
+    "A9": {
+      "question_hash": "4af0ce5ee41273e3",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "thời điểm truy thu thuế GTGT",
+          "query": "thời điểm truy thu thuế GTGT đối với hàng hóa không chịu thuế"
+        },
+        {
+          "issue": "hình thức xử phạt vi phạm kê khai thuế",
+          "query": "hình thức xử phạt vi phạm kê khai thuế GTGT"
+        },
+        {
+          "issue": "tính tiền chậm nộp trong trường hợp truy thu",
+          "query": "tính tiền chậm nộp khi truy thu thuế GTGT"
+        }
+      ]
+    },
+    "R1": {
+      "question_hash": "cf970047f8c0dd12",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng chịu thuế xuất khẩu",
+          "query": "đối tượng chịu thuế xuất khẩu"
+        },
+        {
+          "issue": "trường hợp áp dụng thuế suất 0%",
+          "query": "trường hợp áp dụng thuế suất 0%"
+        },
+        {
+          "issue": "quy định hoàn thuế hàng hóa nhập khẩu",
+          "query": "quy định hoàn thuế hàng hóa nhập khẩu"
+        },
+        {
+          "issue": "giao hàng theo chỉ định bên mua",
+          "query": "giao hàng theo chỉ định bên mua"
+        }
+      ]
+    },
+    "R2": {
+      "question_hash": "2a3b26fb1e5a03de",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "thuế suất thuế GTGT đối với nước giải khát",
+          "query": "thuế suất GTGT sản phẩm nước giải khát"
+        },
+        {
+          "issue": "trường hợp ngoại lệ thuế GTGT đối với nước giải khát",
+          "query": "trường hợp miễn thuế GTGT nước giải khát"
+        },
+        {
+          "issue": "thời điểm áp dụng thuế suất mới cho nước giải khát",
+          "query": "thời điểm áp dụng thuế suất GTGT nước giải khát"
+        }
+      ]
+    },
+    "R3": {
+      "question_hash": "b559b7ed4721a4d0",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng được hoàn thuế GTGT",
+          "query": "hàng nông sản xuất khẩu thuộc đối tượng hoàn thuế GTGT"
+        },
+        {
+          "issue": "thời điểm hoàn thuế GTGT",
+          "query": "thời điểm hoàn thuế GTGT đối với hàng nông sản xuất khẩu"
+        },
+        {
+          "issue": "hồ sơ cần thiết để hoàn thuế GTGT",
+          "query": "hồ sơ đề nghị hoàn thuế GTGT hàng nông sản xuất khẩu"
+        }
+      ]
+    },
+    "L1": {
+      "question_hash": "15c08e42d80bd429",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "thuế suất GTGT sản phẩm nước ngọt đóng chai",
+          "query": "thuế suất GTGT sản phẩm nước ngọt đóng chai"
+        },
+        {
+          "issue": "đối tượng chịu thuế hàng hóa có hàm lượng đường dưới 5g/100ml",
+          "query": "đối tượng chịu thuế hàng hóa hàm lượng đường dưới 5g/100ml"
+        },
+        {
+          "issue": "trường hợp ngoại lệ thuế GTGT đối với nước ngọt đóng chai",
+          "query": "trường hợp ngoại lệ thuế GTGT nước ngọt đóng chai"
+        }
+      ]
+    },
+    "L2": {
+      "question_hash": "25faa5f92dac2f06",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng được hoàn thuế GTGT",
+          "query": "đối tượng được hoàn thuế giá trị gia tăng"
+        },
+        {
+          "issue": "trường hợp hoàn thuế GTGT nhập khẩu xuất khẩu",
+          "query": "hoàn thuế GTGT hàng nhập khẩu xuất khẩu sang nước thứ ba"
+        },
+        {
+          "issue": "điều kiện khấu trừ thuế GTGT đầu vào",
+          "query": "điều kiện khấu trừ thuế GTGT đầu vào chưa hoàn"
+        },
+        {
+          "issue": "thời điểm hoàn thuế GTGT theo quy định",
+          "query": "thời điểm hoàn thuế GTGT sau khi xuất khẩu"
+        }
+      ]
+    },
+    "L3": {
+      "question_hash": "73642fdead168613",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng được hoàn thuế GTGT",
+          "query": "đối tượng được hoàn thuế giá trị gia tăng"
+        },
+        {
+          "issue": "trường hợp hoàn thuế GTGT nhập khẩu xuất khẩu",
+          "query": "hoàn thuế GTGT hàng nhập khẩu xuất khẩu sang nước thứ ba"
+        },
+        {
+          "issue": "điều kiện khấu trừ thuế GTGT đầu vào",
+          "query": "điều kiện khấu trừ thuế GTGT đầu vào chưa hoàn"
+        },
+        {
+          "issue": "thời điểm hoàn thuế GTGT theo quy định",
+          "query": "thời điểm hoàn thuế GTGT sau khi xuất khẩu"
+        }
+      ]
+    },
+    "L4": {
+      "question_hash": "f35c63adffd7a88b",
+      "prompt_version": "issues-v2",
+      "model": "Qwen/Qwen3-4B-Instruct-2507",
+      "issues": [
+        {
+          "issue": "đối tượng chịu thuế GTGT đầu vào",
+          "query": "hàng hóa mua trả góp có được khấu trừ thuế GTGT đầu vào"
+        },
+        {
+          "issue": "trường hợp khấu trừ thuế GTGT đầu vào theo hình thức trả góp",
+          "query": "trả góp bằng tiền mặt thuộc đối tượng khấu trừ thuế GTGT đầu vào"
+        },
+        {
+          "issue": "thời điểm xác định thuế GTGT đầu vào",
+          "query": "thời điểm ghi nhận chi phí mua hàng hóa trả góp"
+        }
+      ]
+    }
+  },
+  "updated_at": "2026-10-30T17:22:18.793300+00:00"
+}
