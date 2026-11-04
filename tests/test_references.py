@@ -36,3 +36,14 @@ def test_enacting_clause_is_not_a_reference():
     assert find_references("Căn cứ Luật Thuế giá trị gia tăng số 48/2024/QH15;\nĐiều 1") == [
         LegalReference("1", same_document=True)
     ]
+
+
+def test_law_name_wrapped_across_lines():
+    text = "khoản 1 Điều 2 của Luật Thuế tiêu\nthụ đặc biệt là:"
+    assert find_references(text) == [
+        LegalReference("2", "1", law_name="thue tieu thu dac biet")
+    ]
+
+
+def test_article_heading_is_not_a_reference():
+    assert find_references("Điều 15. Hoàn thuế giá trị gia tăng") == []

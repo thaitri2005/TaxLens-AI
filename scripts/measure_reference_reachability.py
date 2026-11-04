@@ -11,7 +11,8 @@ measure a method. Levels, best first:
 - ``none``: no reference reaches it.
 ``candidates`` is how many distinct articles one hop would have to consider for the case:
 the cost of the upper limit. A law named without a number resolves to the latest law
-issued by the case date whose title contains that name.
+issued by the case date whose whole title the name starts with,
+leaving out resolutions and amending laws.
 """
 
 import argparse
@@ -154,13 +155,16 @@ def _resolve(
     if reference.document_number:
         return numbers.get(reference.document_number)
     if reference.law_name:
+        name = reference.law_name + " "
         matches = [
-            (issued or date.min, number)
+            (len(title), issued or date.min, number)
             for title, number, issued in laws
-            if reference.law_name in title
+            if title.startswith("luat ")
+            and "sua doi" not in title
+            and name.startswith(title.removeprefix("luat ") + " ")
             and (case_date is None or issued is None or issued <= case_date)
         ]
-        return max(matches)[1] if matches else None
+        return max(matches)[2] if matches else None
     return None
 
 

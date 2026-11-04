@@ -17,14 +17,14 @@ _PINPOINT = re.compile(
     r"(?:diem\s+(?P<point>[a-z])\s*,?\s+)?"
     r"(?:khoan\s+(?P<clause>\d+[a-z]?)\s*,?\s+)?"
     r"dieu\s+(?P<article>\d+[a-z]?)\b"
-    r"(?P<target>(?:\s*,?\s*(?:cua|tai)?\s*(?:" + _TYPE + r")\b[^.;\n]{0,90})?)"
+    r"(?P<target>(?:\s*,?\s*(?:cua|tai)?\s*(?:" + _TYPE + r")\b[^.;]{0,90})?)"
 )
 _DOCUMENT = re.compile(r"\b(?P<type>" + _TYPE + r")\s+(?:so\s+)?(?P<number>" + _NUMBER + r")")
 _BARE_NUMBER = re.compile(r"\b(?P<number>\d{1,4}/\d{4}/[a-z0-9]+(?:-[a-z0-9]+)*)")
-_LAW_NAME = re.compile(r"\bluat\s+(?P<name>[a-z ]{3,70})")
+_LAW_NAME = re.compile(r"\bluat\s+(?P<name>[a-z\s]{3,70})")
 # Words that end a law's name in running text.
 _NAME_STOP = re.compile(
-    r"\s(?:so|nam|ngay|va|hoac|thi|quy dinh|duoc|da|sua doi|hien hanh|nay|ve viec)\b.*$"
+    r"\s(?:so|nam|ngay|va|hoac|thi|la|quy dinh|duoc|da|sua doi|hien hanh|nay|ve viec)\b.*$"
 )
 _ENACTING_LINE = re.compile(r"^\W*can cu\b", re.MULTILINE)
 
@@ -54,6 +54,8 @@ def find_references(text: str) -> list[LegalReference]:
     pinned_numbers: set[str] = set()
     for match in _PINPOINT.finditer(folded):
         target = match["target"] or ""
+        if _is_article_heading(folded, match, target):
+            continue
         number = _DOCUMENT.search(target) or _BARE_NUMBER.search(target)
         name = None if number else _law_name(target)
         if number:
@@ -75,9 +77,16 @@ def find_references(text: str) -> list[LegalReference]:
     return references
 
 
+def _is_article_heading(text: str, match: re.Match[str], target: str) -> bool:
+    """``Điều 15. Hoàn thuế`` at the start of a line names the article; it refers to nothing."""
+
+    at_line_start = match.start() == 0 or text[match.start() - 1] == "\n"
+    return at_line_start and not target and text[match.end() : match.end() + 1] in (".", ":")
+
+
 def _law_name(target: str) -> str | None:
     match = _LAW_NAME.search(target)
     if not match:
         return None
-    name = _NAME_STOP.sub("", " " + match["name"].strip()).strip()
+    name = _NAME_STOP.sub("", " " + " ".join(match["name"].split())).strip()
     return name or None

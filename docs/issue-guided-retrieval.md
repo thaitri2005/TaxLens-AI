@@ -119,6 +119,36 @@ links to drop replaced documents before a case date; (2) rank laws and decrees a
 the circulars that implement them when both match; (3) more cases, since 12 cannot
 separate the methods.
 
+## Following one legal reference: upper limit (04/11/2026)
+
+Could following one explicit reference from the retrieved passages recover what they miss?
+`scripts/measure_reference_reachability.py` parses references in the top K passages
+(`taxlens/retrieval/references.py`) and asks whether one points at a missed essential
+provision held in the corpus. Nothing is re-ranked, so this bounds a method and does not
+measure one. Same inputs as the first results; reports are
+`reachability-*-asof-k10.json`.
+
+| Seed passages (K = 10) | Hybrid, of 23 missed | Issue-guided, of 20 missed |
+| --- | --- | --- |
+| All | 0 | 1 (document level) |
+| Issued from 2020 on (exploratory) | 3 (1 clause, 2 document level) | 3 (clause level) |
+
+Hand reading of the matches: Decree 360 Art 3(4) -> Special Consumption Tax Law Art 2(1)
+(A1) and Decree 181 Art 4 -> VAT Law Art 5 (A6) are correct. Decree 181 Art 19 -> Art 4(1)
+(A2) is correct, but that clause has no passage because OCR lost its numbers. Decree 359
+Art 1 mentions Decree 181 only at document level (A2).
+
+About 80% of the top passages come from documents issued before 2020, and those rarely
+cite the provisions a 2025-2026 case needs. Even without them most misses are reached by
+no reference, so one hop looks like a small supplement to ranking, not a fix for it.
+Removing replaced documents should be tested first.
+
+Limits: 12 cases, one parser, OCR text. The 2020 cutoff was chosen after seeing the
+results and is not a tested filter. It was computed from a saved top-50 list, so fewer
+than K passages may remain for a case. The runs were made from a laptop against the frozen
+corpus (checked with `freeze_corpus.py --check`), not in the API image; the top five
+documents of every saved report reproduced.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that
