@@ -160,3 +160,16 @@ def test_evidence_with_low_semantic_similarity_is_not_sent_to_the_model() -> Non
 
     assert assess_evidence([weak], min_semantic_score=0.8).status is EvidenceStatus.LOW_RELEVANCE
     assert assess_evidence([weak]).status is EvidenceStatus.SUFFICIENT
+
+
+def test_keyword_terms_keep_legal_content_late_in_a_long_question() -> None:
+    question = (
+        "Tháng 2/2026, công ty tôi đã được hoàn thuế GTGT cho một lô hàng xuất khẩu, "
+        "nhưng khách hàng nước ngoài trả lại lô hàng."
+    )
+    terms = keyword_terms(question)
+    assert "trả" in terms and "lại" in terms
+
+
+def test_keyword_terms_stay_bounded() -> None:
+    assert len(keyword_terms(" ".join(f"term{i}" for i in range(200)))) == 64

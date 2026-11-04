@@ -22,7 +22,8 @@ from taxlens.retrieval.text import fold_vietnamese
 
 SearchMode = Literal["keyword", "semantic", "hybrid"]
 RRF_K = 60
-MAX_KEYWORD_TERMS = 12
+# Bounds query size only: legal content often comes late in a natural question.
+MAX_KEYWORD_TERMS = 64
 EXACT_MATCH_WEIGHT = 0.5
 _TERM_EDGE_CHARACTERS = "\"'“”‘’.,;:!?()[]{}<>…"
 # Question words and function words that appear in almost every passage. Words that

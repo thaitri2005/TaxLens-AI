@@ -126,7 +126,7 @@ For a query:
    `của`, …) are dropped; words that change legal meaning, such as `không`, are kept. An
    unaccented term is compared with unaccented stopwords, so `la bao nhieu` is handled
    like `là bao nhiêu` while `cơ` (in `cơ quan`) survives although it folds like `có`.
-   Only the first 12 terms are kept (`MAX_KEYWORD_TERMS`), which cuts the legal content of
+   At most 64 terms are kept (`MAX_KEYWORD_TERMS`). A limit of 12 cut the legal content of
    long questions ([measured effect](retrieval-experiments.md#why-a4-and-l2-stay-unfound-05112026)).
 2. Chunks matching **any** unaccented term are candidates. (The previous implementation
    required every word of the question to appear in one chunk and returned nothing for

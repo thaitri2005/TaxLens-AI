@@ -12,6 +12,7 @@ sections do not rewrite earlier ones. For where things stand now, read
 | 04/11/2026 | The ministry's expiry dates | [Plan](#adding-the-ministrys-expiry-dates-experiment-plan-04112026), [results](#adding-the-ministrys-expiry-dates-results-04112026) |
 | 05/11/2026 | Repaired text and two circulars | [Plan](#plan-repaired-text-and-the-two-circulars-05112026), [results](#repaired-text-and-the-two-circulars-results-05112026) |
 | 05/11/2026 | Why A4 and L2 stay unfound | [Diagnosis](#why-a4-and-l2-stay-unfound-05112026) |
+| 05/11/2026 | Removing the keyword term limit | [Plan](#removing-the-keyword-term-limit-plan-05112026) |
 
 The issue-guided plan below was written before any result was seen, so the comparison
 cannot be tuned to the gold set. Changes after the first run are recorded at the end with
@@ -425,6 +426,37 @@ Other observations: vector scores are close together (for L2, 0.93 at the top an
 50), so small differences decide the top ten. L2's rule also appears in Decree 146/2017 Art 1,
 a supporting provision for that case. `89/2026/TT-BTC` repeats A4's rule at Art 54, but it was
 issued on 30/06/2026, after the case date.
+
+## Removing the keyword term limit: plan (05/11/2026)
+
+Written before these runs, and after the exploratory run above, so the hybrid result is already
+known and this repeat cannot count as independent evidence. Independent evidence needs new gold
+cases.
+
+**Change.** `MAX_KEYWORD_TERMS` goes from 12 to 64, which keeps every term of all 12 questions
+(at most 40) and still bounds the size of a query. 64 was not tuned: any value from 40 up gives
+the same result on these cases. Nothing else changes, including the stopwords.
+
+**Runs.** `corpus-v1.2`, `gold-v1.0 --verified-only`, `--as-of case`, K = 5, 10, 20, with the code
+committed first so that each report records it:
+
+| Run | Compared with (limit of 12) |
+| --- | --- |
+| `keyword-asof-nolimit` | `keyword-asof-v1.2` |
+| `hybrid-asof-nolimit` | `hybrid-asof-v1.2` |
+| `issue-guided-asof-nolimit` | `issue-guided-asof-v1.2` |
+| `hybrid-asof-repeals-nolimit`, `issue-guided-asof-repeals-nolimit` | The same method with the filter |
+| `hybrid-asof-ministry-nolimit`, `issue-guided-asof-ministry-nolimit` | No filter, same limit (`explicit` + `ministry`) |
+
+Then, within the new limit: issue-guided against hybrid, and each filter against no filter. Also
+the error analysis and the one-hop check at K = 10 on the no-filter runs.
+
+**Measures.** Full coverage, essential recall, and paired wins and losses as before. Runs on the
+same corpus use `compare_retrieval_runs.py`, which treats the limit as a method difference.
+
+**Safety checks.** `hybrid-asof-nolimit` must reproduce the exploratory figures. Query time is
+measured at both limits. The older `tax_article_retrieval.json` regression set is run at both
+limits, and a real fall there is reported and investigated before this is kept.
 
 ## Changes
 
