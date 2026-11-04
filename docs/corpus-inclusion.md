@@ -46,3 +46,25 @@ then gives three figures, computed separately:
    metadata only. Check gold coverage only after the lists are fixed.
 2. State the document count, passage estimate, and collection time before downloading.
 3. Collect, process, embed, freeze as `corpus-v2`, then repeat the baseline runs.
+
+## Candidates and gold coverage (04/11/2026)
+
+The portal has no legal status, so "in force" in `C4` is approximated by the latest law of
+each name and the laws amending it, minus laws listed as ended
+(`scripts/select_corpus_v2.py`). Result: 798 new documents (405 `C2`, 88 `C3`, 305 `C4`),
+about 35,000 passages by average size. The lists were fixed before gold coverage was
+checked.
+
+Of 30 essential provisions in the 12 scored cases, the rules admit 28, and 10 cases have
+all of theirs admitted.
+
+| Document | Rule | Status |
+| --- | --- | --- |
+| Circular 84/2025/TT-BNNMT (A2) | None: no tax document cites it | Coverage failure |
+| Law 64/2025/QH15 (A7) | None as listed | Listing gap: `C4` should admit it, but the 2025 search hit the result cap. Fix the listing for all 2025 laws, not for this law |
+| Circular 80/2021/TT-BTC (A4), 25/2018/TT-BTC (A7, L2) | `C3` | Admitted, but in neither source: needs an official file, otherwise a coverage failure |
+
+Without those files the ceiling is 8 of 12 cases (A2, A4, A7, L2 fall short). With them it
+is 10, and fixing the 2025 listing makes it 11; A2 stays a coverage failure. Known listing limits: six searches stayed at the
+cap, one failed, and 245 of 379 cited numbers were not on the portal; the ministry
+database has not been searched for them.
