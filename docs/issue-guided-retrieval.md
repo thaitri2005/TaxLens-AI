@@ -191,6 +191,48 @@ check at K = 10 on the filtered runs.
 example `47/2011/TT-BTC`). OCR can hide a statement. Amended document numbers written in
 more than one way are treated separately.
 
+## Removing documents that had ended: results (04/11/2026)
+
+321 of 2,026 documents are listed as ended (239 `explicit`, 43 `guidance`, 39
+`amendment`). No essential gold provision's document had ended by its case's date.
+Reports: `data/evaluation/runs/*-repeals*.json`.
+
+Essential recall over provisions held in the corpus (full coverage in brackets):
+
+| Run | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| hybrid | 0.09 (0) | 0.14 (0) | 0.20 (0) |
+| hybrid, all rules | 0.14 (0) | 0.25 (0.09) | 0.34 (0.18) |
+| hybrid, `explicit` only | 0.09 (0) | 0.14 (0) | 0.20 (0) |
+| issue-guided | 0.16 (0) | 0.23 (0) | 0.23 (0) |
+| issue-guided, all rules | 0.25 (0) | 0.27 (0) | 0.27 (0) |
+| issue-guided, `explicit` only | 0.16 (0) | 0.23 (0) | 0.23 (0) |
+
+Paired against the same method without the filter, all rules:
+
+| Method | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| hybrid (wins, losses, ties; p) | 1, 0, 11; 1.0 | 3, 0, 9; 0.25 | 3, 0, 9; 0.25 |
+| issue-guided | 2, 0, 10; 0.5 | 1, 0, 11; 1.0 | 1, 0, 11; 1.0 |
+
+The direction favours the filter and it lost no case, but 12 cases cannot show a
+difference. These are the first non-zero full-coverage results (hybrid: A8 at K = 10, A8
+and L3 at K = 20).
+
+`explicit` alone changed the top ten documents in 7 of 12 cases and found no further
+provision. All of the gain comes from `guidance` and `amendment`, the two inferred rules
+that have not been validated by a legal expert. Results depend on them.
+
+Missed at K = 10 with the filter, hybrid 24 and issue-guided 23: 13 and 12 not in the top
+200, 6 and 6 ranked below K, 4 not in corpus, 1 no passage. One hop from filtered passages
+reaches 2 of 20 for hybrid (A1 at clause level, A2 at document level) and 1 of 19 for
+issue-guided (A2 at document level), so it remains a small supplement.
+
+Old documents with no statement in the corpus now lead many rankings (`194/2010/TT-BTC`,
+`06/2000/TT-TCHQ`, `18/2001/TT-BTC`, `54/2003/TTLT-BTC-BTM`, `122/2000/TT-BTC`). Most
+misses are still not found in the top 200, which suggests the next limit is matching the
+question to the laws and decrees, not stale documents alone.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that
