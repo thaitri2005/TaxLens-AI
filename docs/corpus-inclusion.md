@@ -107,10 +107,8 @@ was not caused by the file.
 
 ## To do
 
-Not started; `corpus-v1` remains the corpus of record.
+The database now holds `corpus-v1.2`: `corpus-v1` with the split-syllable repair and both circulars. Results are in `docs/issue-guided-retrieval.md`. `corpus-v2` is not started.
 
-1. Load Circulars 80/2021 and 25/2018 with the collection below; their files are found.
-   Reprocess the 8 PDFs with split syllables at the same time.
 2. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
    first, or all 935), and freeze `corpus-v2`.
 3. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given

@@ -310,6 +310,53 @@ database, so a run against `corpus-v1` now stops at its corpus check; the old pa
 embeddings are saved in `data/local/backups/corpus-v1-8pdfs.json` (not committed). The
 circulars are the text as first published.
 
+## Repaired text and the two circulars: results (05/11/2026)
+
+Essential recall over provisions held in the corpus (full coverage in brackets where it is not 0):
+
+| Method | Corpus | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- | --- |
+| Hybrid | `corpus-v1` | 0.09 | 0.14 | 0.20 |
+| | `corpus-v1.1` | 0.09 | 0.14 | 0.20 |
+| | `corpus-v1.2` | 0.11 | 0.15 | 0.22 |
+| Hybrid + filter | `corpus-v1` | 0.14 | 0.25 (0.09) | 0.34 (0.18) |
+| | `corpus-v1.2` | 0.13 | 0.26 (0.08) | 0.34 (0.17) |
+| Issue-guided | `corpus-v1` | 0.16 | 0.23 | 0.23 |
+| | `corpus-v1.1` | 0.16 | 0.23 | 0.25 |
+| | `corpus-v1.2` | 0.15 | 0.21 | 0.26 |
+| Issue-guided + filter | `corpus-v1` | 0.25 | 0.27 | 0.27 |
+| | `corpus-v1.2` | 0.26 | 0.28 | 0.30 |
+
+`corpus-v1` scores 11 cases and `corpus-v1.2` 12, because L2 now has a held provision and A4
+and A7 have more, so the two rows are not on the same denominator.
+
+Split syllables: repairing them changed almost nothing. Of the 11 essential provisions in the
+repaired laws, 10 keep the same rank in both methods. The one change is `84/2025/TT-BNNMT` Art
+20(1)(c) in A2, which issue-guided now finds at rank 19. So split syllables were not why these
+provisions were missed, and the idea is not supported. The repair stays because it costs
+nothing and gives correct text to answer from.
+
+The circulars, by case (no filter, then with filter):
+
+| Case | Provision | Hybrid | Issue-guided |
+| --- | --- | --- | --- |
+| A7 | 25/2018 Art 2 | rank 4, then 6 | rank 15, then 2 |
+| L2 | 25/2018 Art 2 | not found, not found | not found, not found |
+| A4 | 80/2021 Art 40(3), Art 21 | not found, not found | not found, not found |
+
+Over provisions `corpus-v1` already held, adding them made no difference at K = 5 or 20 without
+the filter. Hybrid at K = 10 gained A5 and lost A3, so about 1,000 new passages moved rankings
+without a net effect. For A4, hybrid ranks the document 5th, but not the cited articles.
+
+On `corpus-v1.2` the filter against no filter wins 3, loses 0 at K = 10 for hybrid (p = 0.25)
+and wins 2, loses 0 for issue-guided (p = 0.5). It still removes no gold document.
+`compare_retrieval_runs.py` refuses pairs from different corpora, so wins and losses across
+corpora were counted on the provisions both runs hold.
+
+The result: coverage was only part of the problem. Having the document made one of three cases
+retrievable, and the database now holds `corpus-v1.2` (fingerprint `7df84879`). Runs against
+`corpus-v1` now stop at the corpus check.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that
