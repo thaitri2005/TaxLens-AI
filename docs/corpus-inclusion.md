@@ -110,6 +110,7 @@ was not caused by the file.
 Not started; `corpus-v1` remains the corpus of record.
 
 1. Load Circulars 80/2021 and 25/2018 with the collection below; their files are found.
+   Reprocess the 8 PDFs with split syllables at the same time.
 2. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
    first, or all 935), and freeze `corpus-v2`.
 3. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
@@ -131,8 +132,34 @@ supplement when `corpus-v2` is collected.
 Checked: all 89 articles of 80/2021 and all 5 of 25/2018 are found, each ends in its
 signature block, and the gold provisions are present (80/2021 Art 21 and Art 40(3),
 25/2018 Art 2). Both are the text as first published; later amendments of 80/2021 are
-separate documents. `pypdf` splits some syllables in these files (`thực` as `th ực`), which
-may lower keyword matching, so check the passages once processed.
+separate documents. See the next section for how their text is read.
+
+## Split syllables in PDF text (05/11/2026)
+
+`pypdf` cuts syllables on some PDF fonts (`thực` read as `th ực`). `extract_pages` now
+counts these and, above 5 per 1,000 words, uses `pypdfium2`'s text when that is cleaner.
+Both Gazette circulars fall from about 80 per 1,000 words in the operative text to almost
+none: 25/2018 gives 14 passages, and 80/2021 gives 963 (592 of them appendix forms under
+Art 89). `corpus-v1` is frozen and was not reprocessed.
+
+A read-only count over `corpus-v1` finds 8 PDFs above 10 per 1,000 words, 658 of 61,208
+passages:
+
+| Document | Per 1,000 words | Passages |
+| --- | --- | --- |
+| 20/2008/QĐ-BTC | 67.2 | 9 |
+| 32/2018/QH14 | 64.9 | 181 |
+| 31/2018/QH14 | 56.0 | 156 |
+| 191/2010/TT-BTC | 41.1 | 23 |
+| 48/2024/QH15 | 11.5 | 86 |
+| 56/2024/QH15 | 11.4 | 63 |
+| 254/2013/TT-BTC | 11.0 | 5 |
+| 84/2025/TT-BNNMT | 10.7 | 135 |
+
+Few documents, but essential provisions of 8 of 12 gold cases are in them (A1, A2, A4, A5,
+A6, A8, L3, L4), mostly VAT Law 48/2024. Whether this lowers retrieval is not measured, and
+the new reader has not been tried on these 8 files. Measuring needs them reprocessed and
+embedded under a new corpus label, with the same runs repeated.
 
 ## Ministry search result (04/11/2026)
 

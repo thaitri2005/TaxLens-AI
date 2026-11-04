@@ -3,14 +3,17 @@ from io import BytesIO
 from pathlib import Path
 from uuid import UUID
 
+import pytest
 from pypdf import PdfWriter
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from taxlens.document_processing.process import (
     build_article_chunks,
+    extract_pages,
     extract_text,
     process_document_version,
+    split_syllable_rate,
 )
 from taxlens.ingestion.seed import SeedDocument, ingest_seed_document
 from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument, ProcessingJob
@@ -284,3 +287,50 @@ def test_only_pages_without_a_text_layer_are_ocrd(tmp_path: Path, monkeypatch) -
 
     assert requested == [[1]]
     assert result.extraction_method == "ocr"
+
+
+def test_split_syllable_rate_tells_broken_text_from_clean() -> None:
+    assert split_syllable_rate(["Sửa đổi khoản 4 về thuế giá trị gia tăng"]) == 0
+    assert split_syllable_rate(["S ửa đổi kho ản 4 về thu ế giá tr ị gia tăng"]) > 5
+    assert split_syllable_rate([""]) == 0
+
+
+def test_extract_pages_replaces_split_syllables_from_pypdf(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Page:
+        def extract_text(self) -> str:
+            return "S ửa đổi kho ản 4 về thu ế"
+
+    class Reader:
+        pages = [Page()]
+
+        def __init__(self, _: object) -> None:
+            pass
+
+    module = "taxlens.document_processing.process"
+    monkeypatch.setattr(f"{module}.PdfReader", Reader)
+    monkeypatch.setattr(f"{module}._pdfium_pages", lambda _: ["Sửa đổi khoản 4 về thuế"])
+    assert extract_pages(b"%PDF-1.7", "a.pdf") == ["Sửa đổi khoản 4 về thuế"]
+
+
+def test_extract_pages_keeps_pypdf_text_when_it_is_clean(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Page:
+        def extract_text(self) -> str:
+            return "Sửa đổi khoản 4 về thuế"
+
+    class Reader:
+        pages = [Page()]
+
+        def __init__(self, _: object) -> None:
+            pass
+
+    def never(_: bytes) -> list[str]:
+        raise AssertionError("the second reader should not run on clean text")
+
+    module = "taxlens.document_processing.process"
+    monkeypatch.setattr(f"{module}.PdfReader", Reader)
+    monkeypatch.setattr(f"{module}._pdfium_pages", never)
+    assert extract_pages(b"%PDF-1.7", "a.pdf") == ["Sửa đổi khoản 4 về thuế"]

@@ -54,6 +54,13 @@ MIN_PREAMBLE_CHARACTERS = 20
 CHUNKER_VERSION = 3
 CHUNKER_STAGE_SUFFIX = f":v{CHUNKER_VERSION}"
 _HEADER_NUMBER_PATTERN = re.compile(r"(?i)\bs[ốóôo]\s*(?:hiệu)?\s*[:.]\s*(\S{3,40})")
+# A syllable's opening consonants cut from its vowel ("th ực"), which pypdf produces on some
+# PDF fonts. Clean text has about 0.1 per 1,000 words; affected files have 50 to 80.
+_SPLIT_SYLLABLE_PATTERN = re.compile(
+    r"(?<![^\W\d_])(?:ngh|th|nh|tr|ch|ng|kh|ph|gi|qu|gh|[dđsclmnvhbtgkrx]) "
+    r"(?=[aăâeêioôơuưyàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ])"
+)
+MAX_SPLIT_SYLLABLES_PER_1000_WORDS = 5
 
 
 @dataclass(frozen=True)
@@ -287,10 +294,33 @@ def extract_pages(raw_content: bytes, artifact_key: str) -> list[str]:
     document_format = detect_format(raw_content)
     if document_format == "pdf":
         reader = PdfReader(BytesIO(raw_content))
-        return [page.extract_text() or "" for page in reader.pages]
+        pages = [page.extract_text() or "" for page in reader.pages]
+        if split_syllable_rate(pages) > MAX_SPLIT_SYLLABLES_PER_1000_WORDS:
+            alternative = _pdfium_pages(raw_content)
+            if split_syllable_rate(alternative) < split_syllable_rate(pages):
+                return alternative
+        return pages
     if document_format in ("doc", "rtf", "docx"):
         return [extract_word_processor_text(raw_content)]
     return [raw_content.decode("utf-8", errors="replace")]
+
+
+def split_syllable_rate(pages: list[str]) -> float:
+    """Syllables cut in two per 1,000 words."""
+
+    text = unicodedata.normalize("NFC", " ".join(pages)).casefold()
+    words = len(text.split())
+    return 1000 * len(_SPLIT_SYLLABLE_PATTERN.findall(text)) / words if words else 0.0
+
+
+def _pdfium_pages(raw_content: bytes) -> list[str]:
+    import pypdfium2  # type: ignore[import-untyped]
+
+    document = pypdfium2.PdfDocument(raw_content)
+    try:
+        return [document[index].get_textpage().get_text_bounded() for index in range(len(document))]
+    finally:
+        document.close()
 
 
 def is_paginated(artifact_key: str) -> bool:
