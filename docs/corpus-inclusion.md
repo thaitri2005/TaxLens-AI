@@ -68,3 +68,15 @@ Without those files the ceiling is 8 of 12 cases (A2, A4, A7, L2 fall short). Wi
 is 10, and fixing the 2025 listing makes it 11; A2 stays a coverage failure. Known listing limits: six searches stayed at the
 cap, one failed, and 245 of 379 cited numbers were not on the portal; the ministry
 database has not been searched for them.
+
+## Collection trial (04/11/2026)
+
+Twenty documents drawn at random from the selection in proportion to each rule (10 `C2`, 2
+`C3`, 8 `C4`) were downloaded and processed in the API image, limited to one CPU, with no
+network or database (`data/evaluation/corpus/collection-trial-v2.json`). All 20 succeeded,
+in about 34 minutes: 66 s per document, or 101 s with one outlier
+(`124/2020/QH14`, 778 s for 9 pages, not yet explained).
+
+Projected for all 798 documents: about 15-22 hours of processing and about 57,000 passages,
+not the 35,000 estimated above, because laws averaged 105 passages in the sample. Laptop
+timings may differ from the Azure vCPU, and the `C3` figure rests on two documents.
