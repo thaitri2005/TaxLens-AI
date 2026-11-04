@@ -282,6 +282,34 @@ rest still depends on `guidance` and `amendment`, such as `130/2016/TT-BTC` and
 All four rules changed the top ten documents in 4 of 12 cases and found no further
 provision, so the 119 extra documents add nothing on these 12 cases.
 
+## Plan: repaired text and the two circulars (05/11/2026)
+
+Written before any run. Two questions, kept apart by adding one change at a time:
+
+1. Do split syllables lower retrieval? `corpus-v1.1` is `corpus-v1` with the 8 affected PDFs
+   read again. Dry run on the stored files: 6 fall to 0 per 1,000 words, `254/2013/TT-BTC`
+   to 3.1, and `191/2010/TT-BTC` only to 31.9, so one stays broken.
+2. What do Circulars 80/2021 and 25/2018 add? `corpus-v1.2` is `corpus-v1.1` plus both.
+
+Runs, each with `gold-v1.0 --verified-only` and `--as-of case`:
+
+| Corpus | Runs | Compared with |
+| --- | --- | --- |
+| `corpus-v1.1` | hybrid, issue-guided | `corpus-v1` |
+| `corpus-v1.2` | hybrid, issue-guided | `corpus-v1.1` |
+| `corpus-v1.2` | both with the `explicit` + inferred filter | no filter on `corpus-v1.2`; the same filter on `corpus-v1` |
+
+Measures: essential recall at K = 5, 10, 20, full coverage, and paired wins and losses. Adding
+the circulars raises the number of provisions held in the corpus, which can lower mean recall
+by itself, so A4, A7, and L2 are reported case by case, and recall is also given over the
+provisions `corpus-v1` already held. The repeal list is the `corpus-v1` one and does not list
+either circular. With 12 cases, a small change is not evidence either way.
+
+`corpus-v1` keeps its manifest and reports. Reprocessing replaces the 8 PDFs' passages in the
+database, so a run against `corpus-v1` now stops at its corpus check; the old passages and
+embeddings are saved in `data/local/backups/corpus-v1-8pdfs.json` (not committed). The
+circulars are the text as first published.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that
