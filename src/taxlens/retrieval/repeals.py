@@ -11,7 +11,9 @@ Three rules, weakest last:
 - ``guidance``: a document whose title says it guides or details a document that ended.
 - ``amendment``: a document whose title says it amends a document that ended.
 
-The last two are inferences, which a legal expert should validate. A document with no
+``guidance`` and ``amendment`` are inferences, which a legal expert should validate. A
+fourth rule, ``ministry``, is added by ``scripts/add_ministry_expiry.py``: the Ministry of
+Finance's own status and expiry date. A document with no
 such statement is kept, so the filter errs towards keeping.
 """
 
@@ -55,7 +57,7 @@ _GUIDES = re.compile(r"\b(?:huong dan|quy dinh chi tiet)\b")
 _AMENDS = re.compile(r"\bsua doi\b")
 
 
-RULES = ("explicit", "guidance", "amendment")
+RULES = ("explicit", "guidance", "amendment", "ministry")
 
 
 @dataclass(frozen=True)

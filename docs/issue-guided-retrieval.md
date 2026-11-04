@@ -233,6 +233,27 @@ Old documents with no statement in the corpus now lead many rankings (`194/2010/
 misses are still not found in the top 200, which suggests the next limit is matching the
 question to the laws and decrees, not stale documents alone.
 
+## Adding the ministry's expiry dates: experiment plan (04/11/2026)
+
+Written before any run. The repeal filter gets all its gain from two inferred rules, and
+the ministry lists 120 corpus documents as expired that the filter keeps.
+
+**Method.** `scripts/add_ministry_expiry.py` adds a `ministry` rule to a new file,
+`data/evaluation/repeals/corpus-v1-ministry.json`: a corpus document the ministry marks
+`Hết hiệu lực`, with a real expiry date (placeholders from year 2900 are ignored). Where a
+document is already listed, the earlier date stands. The ministry's status is as of
+04/11/2026, and only its dates decide whether a case is affected.
+
+**Runs**, same inputs as before, K = 5, 10, 20:
+
+| Run | Rules | Baseline |
+| --- | --- | --- |
+| `hybrid-asof-ministry-all`, `issue-guided-asof-ministry-all` | all four | the same method with the three earlier rules |
+| `hybrid-asof-ministry-explicit`, `issue-guided-asof-ministry-explicit` | `explicit`, `ministry` | the same method with no filter |
+
+The second pair asks whether stated and official dates can replace the unvalidated
+inferences. Measures as before; gold provisions removed are reported as filter errors.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that
