@@ -62,7 +62,7 @@ all of theirs admitted.
 | --- | --- | --- |
 | Circular 84/2025/TT-BNNMT (A2) | None: no tax document cites it | Coverage failure |
 | Law 64/2025/QH15 (A7) | None as listed | Listing gap: `C4` should admit it, but the 2025 search hit the result cap. Fix the listing for all 2025 laws, not for this law |
-| Circular 80/2021/TT-BTC (A4), 25/2018/TT-BTC (A7, L2) | `C3` | Admitted, but in neither source: needs an official file, otherwise a coverage failure |
+| Circular 80/2021/TT-BTC (A4), 25/2018/TT-BTC (A7, L2) | `C3` | Admitted, but in neither source: official Gazette files found 05/11/2026, see "Official files for the two circulars" |
 
 Without those files the ceiling is 8 of 12 cases (A2, A4, A7, L2 fall short). With them it
 is 10, and fixing the 2025 listing makes it 11; A2 stays a coverage failure. Known listing limits: six searches stayed at the
@@ -109,12 +109,30 @@ was not caused by the file.
 
 Not started; `corpus-v1` remains the corpus of record.
 
-1. Find official files for Circulars 80/2021 and 25/2018, or report them as coverage
-   failures.
+1. Load Circulars 80/2021 and 25/2018 with the collection below; their files are found.
 2. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
    first, or all 935), and freeze `corpus-v2`.
 3. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
    coverage, and end to end.
+
+## Official files for the two circulars (05/11/2026)
+
+Both are in the Official Gazette (Công báo), `congbao.chinhphu.vn`, a source we do not
+collect from. They are saved in `data/local/supplement/` (not committed), with the page
+addresses in `data/corpus/gold_supplement.json`. Neither is in the database or in
+`corpus-v1`, and neither is in `selected-v2.json`, so they must be loaded from the
+supplement when `corpus-v2` is collected.
+
+| Circular | Gazette issues | Pages | SHA-256 |
+| --- | --- | --- | --- |
+| 80/2021/TT-BTC | 959 to 974, eight parts merged in order | 760 | `81508854a4c42be68bd09c8cd13b37f114b7081172bce9182a47e7568ccf1e3e` |
+| 25/2018/TT-BTC | 499 + 500 | 7 | `e42cbdf9dbff1904346583e81097e954dffc3837b009df0c64eddd61aa36ffa4` |
+
+Checked: all 89 articles of 80/2021 and all 5 of 25/2018 are found, each ends in its
+signature block, and the gold provisions are present (80/2021 Art 21 and Art 40(3),
+25/2018 Art 2). Both are the text as first published; later amendments of 80/2021 are
+separate documents. `pypdf` splits some syllables in these files (`thực` as `th ực`), which
+may lower keyword matching, so check the passages once processed.
 
 ## Ministry search result (04/11/2026)
 
