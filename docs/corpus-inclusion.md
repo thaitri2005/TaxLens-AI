@@ -81,16 +81,37 @@ Projected for all 798 documents: about 15-22 hours of processing and about 57,00
 not the 35,000 estimated above, because laws averaged 105 passages in the sample. Laptop
 timings may differ from the Azure vCPU, and the `C3` figure rests on two documents.
 
+## Listing update (04/11/2026)
+
+This replaces the counts above. The 2025 law search and the capped tax searches were
+narrowed with keywords from listed titles and a fixed list of tax topics, adding 6 laws
+and 42 tax documents, including Law 64/2025. The first citation lookup searched for `ND-CP`
+instead of `NĐ-CP`, which wrongly recorded most decrees as missing; repeating it raised
+`C3` from 134 to 299 of 379 cited numbers.
+
+The selection is now 935 new documents (420 `C2`, 211 `C3`, 304 `C4`). By the trial's
+per-rule averages that is about 64,000 passages and 19 hours of processing, on a corpus of
+61,208 passages today. The `C3` averages rest on two documents.
+
+`C4` now admits Law 64/2025, so 29 of 30 essential provisions are admitted. Without
+official files for Circulars 80/2021 and 25/2018 the ceiling stays at 8 of 12 cases, and
+with them it is 11. Circular 84/2025 (A2) remains a coverage failure.
+
+Still open in the listing: one search at the cap (`2016/8/mức thu`), and 80 cited numbers
+found on neither the portal nor the cached ministry listings, including those two
+circulars. A full ministry listing across every field was stopped after 39 minutes
+without a result: it pages through the whole database with no number filter.
+
+The slow trial document (`124/2020/QH14`) took about 32 seconds when repeated, so its 778 s
+was not caused by the file.
+
 ## To do
 
 Not started; `corpus-v1` remains the corpus of record.
 
-1. Fix the 2025 law listing, which hit the result cap (Law 64/2025 was missed).
-2. Find official files for Circulars 80/2021 and 25/2018, or report them as coverage
+1. Find official files for Circulars 80/2021 and 25/2018, or report them as coverage
    failures.
-3. Search the ministry database for the 245 cited numbers not on the portal.
-4. Explain the slow trial document (`124/2020/QH14`).
-5. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
-   first, or all 798), and freeze `corpus-v2`.
-6. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
+2. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
+   first, or all 935), and freeze `corpus-v2`.
+3. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
    coverage, and end to end.
