@@ -115,3 +115,12 @@ Not started; `corpus-v1` remains the corpus of record.
    first, or all 935), and freeze `corpus-v2`.
 3. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
    coverage, and end to end.
+
+## Ministry search result (04/11/2026)
+
+Paging through the ministry's circulars, joint circulars, and decrees (7,295 records, about
+45 minutes) raised `C3` from 299 to 339 of 379 cited numbers. The selection is now 975 new
+documents (420 `C2`, 251 `C3`, 304 `C4`), about 66,000 passages and 20 hours by the trial's
+averages. 40 numbers stay unresolved, including Circulars 80/2021 and 25/2018.
+
+Each record's status and expiry date is kept in `data/evaluation/corpus/mof-status.json`.
