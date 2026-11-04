@@ -80,3 +80,17 @@ in about 34 minutes: 66 s per document, or 101 s with one outlier
 Projected for all 798 documents: about 15-22 hours of processing and about 57,000 passages,
 not the 35,000 estimated above, because laws averaged 105 passages in the sample. Laptop
 timings may differ from the Azure vCPU, and the `C3` figure rests on two documents.
+
+## To do
+
+Not started; `corpus-v1` remains the corpus of record.
+
+1. Fix the 2025 law listing, which hit the result cap (Law 64/2025 was missed).
+2. Find official files for Circulars 80/2021 and 25/2018, or report them as coverage
+   failures.
+3. Search the ministry database for the 245 cited numbers not on the portal.
+4. Explain the slow trial document (`124/2020/QH14`).
+5. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
+   first, or all 798), and freeze `corpus-v2`.
+6. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
+   coverage, and end to end.
