@@ -124,3 +124,11 @@ documents (420 `C2`, 251 `C3`, 304 `C4`), about 66,000 passages and 20 hours by 
 averages. 40 numbers stay unresolved, including Circulars 80/2021 and 25/2018.
 
 Each record's status and expiry date is kept in `data/evaluation/corpus/mof-status.json`.
+
+The ministry's status also tests the repeal list (`data/evaluation/repeals/corpus-v1.json`),
+though not as ground truth, since it lists `94/2010/TT-BTC` as in force although Circular
+99/2016 says it ended. 1,111 of the 2,026 corpus documents are in these records. Where the
+ministry and the list both say a document ended (64 documents), the date matches for 57,
+is within a year for 5, and differs further for 2. The ministry lists 178 documents from
+the repeal list as in force, not yet examined. It lists 184 corpus documents as expired,
+of which the repeal list has only 64, so 120 could be removed that the filter keeps.
