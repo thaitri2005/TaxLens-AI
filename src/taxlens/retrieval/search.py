@@ -29,11 +29,61 @@ _TERM_EDGE_CHARACTERS = "\"'“”‘’.,;:!?()[]{}<>…"
 # change legal meaning (for example "không" in "không chịu thuế") are deliberately kept.
 _KEYWORD_STOPWORDS = frozenset(
     {
-        "là", "của", "và", "các", "những", "được", "cho", "trong", "với", "về", "theo",
-        "thì", "này", "đó", "nào", "gì", "bao", "nhiêu", "như", "thế", "có", "một", "để",
-        "từ", "tại", "khi", "nếu", "hay", "hoặc", "ạ", "nhé", "vậy", "sao",
-        "a", "an", "the", "of", "to", "in", "on", "for", "and", "or", "is", "are", "be",
-        "what", "which", "how", "when", "does", "do", "with", "by", "about",
+        "là",
+        "của",
+        "và",
+        "các",
+        "những",
+        "được",
+        "cho",
+        "trong",
+        "với",
+        "về",
+        "theo",
+        "thì",
+        "này",
+        "đó",
+        "nào",
+        "gì",
+        "bao",
+        "nhiêu",
+        "như",
+        "thế",
+        "có",
+        "một",
+        "để",
+        "từ",
+        "tại",
+        "khi",
+        "nếu",
+        "hay",
+        "hoặc",
+        "ạ",
+        "nhé",
+        "vậy",
+        "sao",
+        "a",
+        "an",
+        "the",
+        "of",
+        "to",
+        "in",
+        "on",
+        "for",
+        "and",
+        "or",
+        "is",
+        "are",
+        "be",
+        "what",
+        "which",
+        "how",
+        "when",
+        "does",
+        "do",
+        "with",
+        "by",
+        "about",
     }
 )
 _FOLDED_KEYWORD_STOPWORDS = frozenset(fold_vietnamese(word) for word in _KEYWORD_STOPWORDS)
@@ -54,6 +104,8 @@ class SearchFilters:
     as_of: date | None = None
     # Any of these recorded types (a document kind); an empty tuple matches nothing.
     document_types: tuple[str, ...] | None = None
+    # Leaves out these document numbers, such as documents that had ended by a case's date.
+    excluded_document_numbers: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -134,9 +186,11 @@ def hybrid_search_chunks(
 ) -> list[SearchResult]:
     keyword_results = keyword_search_chunks(session, query, filters, candidate_limit)
     if provider is None or session.get_bind().dialect.name != "postgresql":
-        return (reranker or NoOpReranker()).rerank(
-            query, deduplicate_passages(keyword_results), limit
-        ).results
+        return (
+            (reranker or NoOpReranker())
+            .rerank(query, deduplicate_passages(keyword_results), limit)
+            .results
+        )
 
     query_embedding = provider.embed_query(query)
     semantic_results = semantic_search_chunks(
@@ -147,9 +201,11 @@ def hybrid_search_chunks(
         candidate_limit,
     )
     fused_results = fuse_ranked_results(keyword_results, semantic_results, candidate_limit)
-    return (reranker or NoOpReranker()).rerank(
-        query, deduplicate_passages(fused_results), limit
-    ).results
+    return (
+        (reranker or NoOpReranker())
+        .rerank(query, deduplicate_passages(fused_results), limit)
+        .results
+    )
 
 
 def deduplicate_passages(results: list[SearchResult]) -> list[SearchResult]:
@@ -333,6 +389,10 @@ def _apply_filters(statement: Select[Any], filters: SearchFilters) -> Select[Any
         statement = statement.where(DocumentVersion.effective_date >= filters.effective_from)
     if filters.effective_to is not None:
         statement = statement.where(DocumentVersion.effective_date <= filters.effective_to)
+    if filters.excluded_document_numbers:
+        statement = statement.where(
+            LegalDocument.document_number.not_in(filters.excluded_document_numbers)
+        )
     if filters.as_of is not None:
         known_start = func.coalesce(DocumentVersion.effective_date, DocumentVersion.issue_date)
         statement = statement.where(or_(known_start.is_(None), known_start <= filters.as_of))

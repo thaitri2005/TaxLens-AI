@@ -28,6 +28,7 @@ from taxlens.legal_data.models import DocumentVersion, LegalDocument
 from taxlens.retrieval.embeddings import get_embedding_provider
 from taxlens.retrieval.issues import Issue, issue_guided_search
 from taxlens.retrieval.references import LegalReference, find_references
+from taxlens.retrieval.repeals import ended_documents
 from taxlens.retrieval.search import SearchFilters, hybrid_search_chunks
 from taxlens.retrieval.text import fold_vietnamese
 
@@ -48,6 +49,12 @@ def main() -> None:
     guided = report["retrieval_mode"] == "issue-guided"
     stored = json.loads(arguments.issues.read_text(encoding="utf-8"))["cases"] if guided else {}
     as_of = report.get("as_of_filter") == "case"
+    stored_repeals = report.get("repeals")
+    ended = (
+        json.loads(Path(stored_repeals["path"]).read_text(encoding="utf-8"))["repeals"]
+        if stored_repeals
+        else {}
+    )
     provider = get_embedding_provider()
     rows: list[dict[str, Any]] = []
     cases: list[dict[str, Any]] = []
@@ -63,7 +70,14 @@ def main() -> None:
                 continue
             text = case.get("search_date") or case.get("as_of_date")
             case_date = date.fromisoformat(text) if text else None
-            filters = SearchFilters(as_of=case_date if as_of else None)
+            filters = SearchFilters(
+                as_of=case_date if as_of else None,
+                excluded_document_numbers=(
+                    ended_documents(ended, case_date, stored_repeals["rules"])
+                    if stored_repeals and case_date
+                    else ()
+                ),
+            )
             if guided:
                 issues = [
                     Issue(issue=item["issue"], query=item["query"])

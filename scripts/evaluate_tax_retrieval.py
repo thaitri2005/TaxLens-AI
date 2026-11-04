@@ -37,6 +37,7 @@ from taxlens.legal_data.models import (
 )
 from taxlens.retrieval.embeddings import get_embedding_provider
 from taxlens.retrieval.issues import Issue, issue_guided_search
+from taxlens.retrieval.repeals import RULES, ended_documents
 from taxlens.retrieval.search import (
     SearchFilters,
     SearchMode,
@@ -98,6 +99,21 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--repeals",
+        type=Path,
+        help=(
+            "Stored list of ended documents (scripts/extract_repeals.py); with --as-of case, "
+            "leaves out those that had ended by each case's date"
+        ),
+    )
+    parser.add_argument(
+        "--repeal-rules",
+        nargs="+",
+        choices=RULES,
+        default=list(RULES),
+        help="Which inference rules of --repeals to apply (default: all)",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -141,13 +157,9 @@ def main() -> None:
         if not isinstance(query, str) or not query.strip():
             parser.error(f"Evaluation case {index} must contain a non-empty query")
         if not isinstance(relevant_documents, list) or not relevant_documents:
-            parser.error(
-                f"Evaluation case {index} must contain relevant_document_numbers"
-            )
+            parser.error(f"Evaluation case {index} must contain relevant_document_numbers")
         if not all(isinstance(document_number, str) for document_number in relevant_documents):
-            parser.error(
-                f"Evaluation case {index} has an invalid relevant document number"
-            )
+            parser.error(f"Evaluation case {index} has an invalid relevant document number")
         dataset.append(
             {
                 "case_id": case_id,
@@ -174,6 +186,13 @@ def main() -> None:
             parser.error(
                 f"No stored issues for {', '.join(undecomposed)}; run scripts/decompose_issues.py"
             )
+    if arguments.repeals and arguments.as_of != "case":
+        parser.error("--repeals needs --as-of case")
+    repeals = (
+        json.loads(arguments.repeals.read_text(encoding="utf-8"))["repeals"]
+        if arguments.repeals
+        else {}
+    )
     provider = get_embedding_provider() if mode != "keyword" else None
     settings = get_settings()
     reports: list[dict[str, Any]] = []
@@ -219,10 +238,16 @@ def main() -> None:
                 if covered_documents
                 else "not_covered"
             )
-            filters = SearchFilters(
-                as_of=date.fromisoformat(case["search_date"])
+            case_date = (
+                date.fromisoformat(case["search_date"])
                 if arguments.as_of == "case" and case["search_date"]
                 else None
+            )
+            filters = SearchFilters(
+                as_of=case_date,
+                excluded_document_numbers=(
+                    ended_documents(repeals, case_date, arguments.repeal_rules) if case_date else ()
+                ),
             )
             if mode == "issue-guided":
                 results = issue_guided_search(
@@ -316,9 +341,7 @@ def main() -> None:
             ) / len(level_metrics)
     for k in ks:
         metrics_by_k[str(k)].update(_provision_summary(reports, k))
-    fully_covered_metrics_by_k = {
-        str(k): metrics_summary(fully_covered_reports, k) for k in ks
-    }
+    fully_covered_metrics_by_k = {str(k): metrics_summary(fully_covered_reports, k) for k in ks}
     primary_metrics = metrics_by_k[str(primary_k)]
     primary_covered_metrics = fully_covered_metrics_by_k[str(primary_k)]
     output: dict[str, Any] = {
@@ -331,6 +354,15 @@ def main() -> None:
             else None
         ),
         "as_of_filter": arguments.as_of,
+        "repeals": (
+            {
+                "path": str(arguments.repeals),
+                "sha256": _file_hash(arguments.repeals),
+                "rules": arguments.repeal_rules,
+            }
+            if arguments.repeals
+            else None
+        ),
         "code_version": code_version(),
         "dataset": str(arguments.dataset),
         "dataset_hash": dataset_hash,
@@ -355,13 +387,9 @@ def main() -> None:
         "mean_ndcg_at_k": primary_metrics["mean_ndcg_at_k"],
         "fully_covered_case_count": len(fully_covered_reports),
         "fully_covered_mean_hit_at_k": primary_covered_metrics["mean_hit_at_k"],
-        "fully_covered_mean_precision_at_k": primary_covered_metrics[
-            "mean_precision_at_k"
-        ],
+        "fully_covered_mean_precision_at_k": primary_covered_metrics["mean_precision_at_k"],
         "fully_covered_mean_recall_at_k": primary_covered_metrics["mean_recall_at_k"],
-        "fully_covered_mean_reciprocal_rank": primary_covered_metrics[
-            "mean_reciprocal_rank"
-        ],
+        "fully_covered_mean_reciprocal_rank": primary_covered_metrics["mean_reciprocal_rank"],
         "fully_covered_mean_ndcg_at_k": primary_covered_metrics["mean_ndcg_at_k"],
         "coverage_summary": coverage_summary,
         "cases": reports,
@@ -395,22 +423,12 @@ def main() -> None:
             "mean_recall_at_k": float(persisted["mean_recall_at_k"]),
             "mean_reciprocal_rank": float(persisted["mean_reciprocal_rank"]),
             "mean_ndcg_at_k": float(persisted["mean_ndcg_at_k"]),
-            "corpus_present_document_count": float(
-                corpus_coverage["present_document_count"]
-            ),
-            "corpus_chunked_document_count": float(
-                corpus_coverage["chunked_document_count"]
-            ),
-            "corpus_embedded_document_count": float(
-                corpus_coverage["embedded_document_count"]
-            ),
-            "corpus_total_document_count": float(
-                corpus_snapshot["document_count"]
-            ),
+            "corpus_present_document_count": float(corpus_coverage["present_document_count"]),
+            "corpus_chunked_document_count": float(corpus_coverage["chunked_document_count"]),
+            "corpus_embedded_document_count": float(corpus_coverage["embedded_document_count"]),
+            "corpus_total_document_count": float(corpus_snapshot["document_count"]),
             "corpus_total_chunk_count": float(corpus_snapshot["chunk_count"]),
-            "corpus_total_embedding_count": float(
-                corpus_snapshot["embedding_count"]
-            ),
+            "corpus_total_embedding_count": float(corpus_snapshot["embedding_count"]),
             "document_coverage_rate": float(
                 _coverage_summary(reports, corpus_coverage)["document_coverage_rate"]
             ),
@@ -428,9 +446,7 @@ def main() -> None:
         if fully_covered_reports:
             tracking_metrics.update(
                 {
-                    "fully_covered_mean_hit_at_k": float(
-                        persisted["fully_covered_mean_hit_at_k"]
-                    ),
+                    "fully_covered_mean_hit_at_k": float(persisted["fully_covered_mean_hit_at_k"]),
                     "fully_covered_mean_precision_at_k": float(
                         persisted["fully_covered_mean_precision_at_k"]
                     ),
@@ -514,8 +530,7 @@ def _add_provision_metrics(
             continue
         ranks = provision_ranks(passages, provisions)
         in_corpus = [
-            any(place[0] in embedded_document_numbers for place in places)
-            for places in provisions
+            any(place[0] in embedded_document_numbers for place in places) for places in provisions
         ]
         report[f"{label}_provision_ranks"] = [
             {"provision": provision, "rank": rank, "in_corpus": present}
@@ -551,12 +566,15 @@ def _passage_locators(
         if clauses is None and chunk.article_number is not None:
             key = (chunk.document_version_id, chunk.article_number)
             if key not in part_counts:
-                part_counts[key] = session.scalar(
-                    select(func.count(DocumentChunk.id)).where(
-                        DocumentChunk.document_version_id == chunk.document_version_id,
-                        DocumentChunk.article_number == chunk.article_number,
+                part_counts[key] = (
+                    session.scalar(
+                        select(func.count(DocumentChunk.id)).where(
+                            DocumentChunk.document_version_id == chunk.document_version_id,
+                            DocumentChunk.article_number == chunk.article_number,
+                        )
                     )
-                ) or 0
+                    or 0
+                )
             if part_counts[key] > 1:
                 clauses = frozenset(
                     match.group(1) for match in CLAUSE_PATTERN.finditer(chunk.content)
@@ -581,8 +599,7 @@ def _provision_summary(reports: list[dict[str, Any]], k: int) -> dict[str, Any]:
         )
         if prefix.startswith("essential"):
             summary[f"{prefix}_full_coverage_rate"] = (
-                sum(bool(item[f"{prefix}_full_coverage_at_k"]) for item in metrics)
-                / len(metrics)
+                sum(bool(item[f"{prefix}_full_coverage_at_k"]) for item in metrics) / len(metrics)
                 if metrics
                 else None
             )
@@ -614,9 +631,7 @@ def _coverage_summary(
     return {
         "expected_document_count": expected_count,
         "embedded_document_count": embedded_count,
-        "document_coverage_rate": (
-            embedded_count / expected_count if expected_count else 0.0
-        ),
+        "document_coverage_rate": (embedded_count / expected_count if expected_count else 0.0),
         "fully_covered_case_count": sum(
             report["coverage_status"] == "fully_covered" for report in reports
         ),
@@ -648,9 +663,7 @@ def _corpus_snapshot(session) -> dict[str, object]:
         for document_number, raw_content_hash in version_rows
     ]
     fingerprint = hashlib.sha256(
-        json.dumps(fingerprint_payload, sort_keys=True, separators=(",", ":")).encode(
-            "utf-8"
-        )
+        json.dumps(fingerprint_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
     version_count = session.scalar(select(func.count(DocumentVersion.id))) or 0
     chunk_count = session.scalar(select(func.count(DocumentChunk.id))) or 0
@@ -682,22 +695,31 @@ def _corpus_coverage(session, expected_document_numbers: set[str]) -> dict[str, 
             )
             continue
 
-        version_count = session.scalar(
-            select(func.count(DocumentVersion.id)).where(
-                DocumentVersion.document_id == document.id
+        version_count = (
+            session.scalar(
+                select(func.count(DocumentVersion.id)).where(
+                    DocumentVersion.document_id == document.id
+                )
             )
-        ) or 0
-        chunk_count = session.scalar(
-            select(func.count(DocumentChunk.id))
-            .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
-            .where(DocumentVersion.document_id == document.id)
-        ) or 0
-        embedding_count = session.scalar(
-            select(func.count(DocumentEmbedding.id))
-            .join(DocumentChunk, DocumentEmbedding.document_chunk_id == DocumentChunk.id)
-            .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
-            .where(DocumentVersion.document_id == document.id)
-        ) or 0
+            or 0
+        )
+        chunk_count = (
+            session.scalar(
+                select(func.count(DocumentChunk.id))
+                .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
+                .where(DocumentVersion.document_id == document.id)
+            )
+            or 0
+        )
+        embedding_count = (
+            session.scalar(
+                select(func.count(DocumentEmbedding.id))
+                .join(DocumentChunk, DocumentEmbedding.document_chunk_id == DocumentChunk.id)
+                .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
+                .where(DocumentVersion.document_id == document.id)
+            )
+            or 0
+        )
         statuses.append(
             {
                 "document_number": document_number,

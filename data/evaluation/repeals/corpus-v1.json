@@ -1,0 +1,1616 @@
+{
+  "document_count": 2026,
+  "ended_count": 321,
+  "rules": {
+    "explicit": 239,
+    "amendment": 39,
+    "guidance": 43
+  },
+  "repeals": {
+    "01/2003/QĐ-BTC": {
+      "ended_on": "2006-10-16",
+      "rule": "explicit",
+      "by": "97/2006/TT-BTC"
+    },
+    "01/2022/TT-BTC": {
+      "ended_on": "2025-07-20",
+      "rule": "explicit",
+      "by": "33/2025/TT-BTC"
+    },
+    "02/2013/TT-BTC": {
+      "ended_on": "2016-06-10",
+      "rule": "amendment",
+      "by": "27/2010/tt-btc"
+    },
+    "03/2008/QĐ-BTC": {
+      "ended_on": "2012-10-01",
+      "rule": "explicit",
+      "by": "126/2012/TT-BTC"
+    },
+    "03/2013/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "278/2016/TT-BTC"
+    },
+    "03/2015/TT-BTC": {
+      "ended_on": "2015-01-21",
+      "rule": "explicit",
+      "by": "06/2015/TT-BTC"
+    },
+    "04/2007/QĐ-BTC": {
+      "ended_on": "2007-03-06",
+      "rule": "explicit",
+      "by": "09/2007/QĐ-BTC"
+    },
+    "06/2017/TT-BTC": {
+      "ended_on": "2020-07-01",
+      "rule": "guidance",
+      "by": "78/2006/QH11"
+    },
+    "09/2007/QĐ-BTC": {
+      "ended_on": "2007-04-27",
+      "rule": "explicit",
+      "by": "29/2007/QĐ-BTC"
+    },
+    "09/NHNN3": {
+      "ended_on": "2004-12-10",
+      "rule": "guidance",
+      "by": "20/2000/NĐ-CP"
+    },
+    "10/2003/QĐ-BTC": {
+      "ended_on": "2013-10-15",
+      "rule": "explicit",
+      "by": "114/2013/TT-BTC"
+    },
+    "10/2015/TT-BTC": {
+      "ended_on": "2019-01-15",
+      "rule": "guidance",
+      "by": "54/2014/qd-ttg"
+    },
+    "100/2012/TT-BTC": {
+      "ended_on": "2013-01-01",
+      "rule": "explicit",
+      "by": "193/2012/TT-BTC"
+    },
+    "100/2016/NĐ-CP": {
+      "ended_on": "2025-07-01",
+      "rule": "guidance",
+      "by": "13/2008/QH12"
+    },
+    "100/2020/NĐ-CP": {
+      "ended_on": "2026-08-21",
+      "rule": "explicit",
+      "by": "273/2026/NĐ-CP"
+    },
+    "103/2012/TT-BTC": {
+      "ended_on": "2012-07-03",
+      "rule": "explicit",
+      "by": "109/2012/TT-BTC"
+    },
+    "103/2014/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "89/2026/TT-BTC"
+    },
+    "105/2010/TT-BTC": {
+      "ended_on": "2015-11-20",
+      "rule": "explicit",
+      "by": "152/2015/TT-BTC"
+    },
+    "105/2018/TT-BTC": {
+      "ended_on": "2024-03-21",
+      "rule": "explicit",
+      "by": "08/2024/TT-BTC"
+    },
+    "106/2007/TTLT/BTC-BTNMT": {
+      "ended_on": "2013-07-01",
+      "rule": "guidance",
+      "by": "125/2003/ttlt-btc-btnmt"
+    },
+    "106/2013/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "amendment",
+      "by": "176/2012/tt-btc"
+    },
+    "106/2020/TT-BTC": {
+      "ended_on": "2026-05-11",
+      "rule": "explicit",
+      "by": "30/2026/TT-BTC"
+    },
+    "107/2002/TT-BTC": {
+      "ended_on": "2010-05-27",
+      "rule": "explicit",
+      "by": "48/2010/TT-BTC"
+    },
+    "107/2010/TTLT-BTC-TNMT": {
+      "ended_on": "2013-07-01",
+      "rule": "guidance",
+      "by": "125/2003/ttlt-btc-btnmt"
+    },
+    "109/2000/TT-BTC": {
+      "ended_on": "2012-02-01",
+      "rule": "explicit",
+      "by": "176/2011/TT-BTC"
+    },
+    "109/2012/TT-BTC": {
+      "ended_on": "2012-09-12",
+      "rule": "explicit",
+      "by": "148/2012/TT-BTC"
+    },
+    "109/2014/TT-BTC": {
+      "ended_on": "2019-08-26",
+      "rule": "guidance",
+      "by": "72/2013/qd-ttg"
+    },
+    "11/2003/QĐ-BTC": {
+      "ended_on": "2013-10-15",
+      "rule": "explicit",
+      "by": "123/2013/TT-BTC"
+    },
+    "11/2013/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "amendment",
+      "by": "04/2012/tt-btc"
+    },
+    "11/2020/TT-BTC": {
+      "ended_on": "2023-10-16",
+      "rule": "amendment",
+      "by": "278/2016/TT-BTC"
+    },
+    "110/2015/TT-BTC": {
+      "ended_on": "2021-05-03",
+      "rule": "explicit",
+      "by": "19/2021/TT-BTC"
+    },
+    "111/2013/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "87/2026/TT-BTC"
+    },
+    "112/2000/TT-BTC": {
+      "ended_on": "2006-10-16",
+      "rule": "explicit",
+      "by": "97/2006/TT-BTC"
+    },
+    "112/2013/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "265/2016/TT-BTC"
+    },
+    "112/2017/TT-BTC": {
+      "ended_on": "2021-02-22",
+      "rule": "amendment",
+      "by": "227/2016/TT-BTC"
+    },
+    "113/2009/TT-BTC": {
+      "ended_on": "2015-11-23",
+      "rule": "amendment",
+      "by": "66/2009/tt-btc"
+    },
+    "113/2015/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "amendment",
+      "by": "04/2012/tt-btc"
+    },
+    "113/2017/TT-BTC": {
+      "ended_on": "2023-11-15",
+      "rule": "amendment",
+      "by": "202/2016/TT-BTC"
+    },
+    "114/2002/TT-BTC": {
+      "ended_on": "2005-05-16",
+      "rule": "guidance",
+      "by": "114/2002/qd-ttg"
+    },
+    "114/2010/TT-BTC": {
+      "ended_on": "2015-08-04",
+      "rule": "explicit",
+      "by": "93/2015/TT-BTC"
+    },
+    "114/2011/TT-BTC": {
+      "ended_on": "2014-05-08",
+      "rule": "explicit",
+      "by": "34/2014/TT-BTC"
+    },
+    "114/2012/TT-BTC": {
+      "ended_on": "2013-01-01",
+      "rule": "explicit",
+      "by": "193/2012/TT-BTC"
+    },
+    "114/2017/TT-BTC": {
+      "ended_on": "2023-08-01",
+      "rule": "amendment",
+      "by": "277/2016/TT-BTC"
+    },
+    "115/2006/TT-BTC": {
+      "ended_on": "2009-03-21",
+      "rule": "guidance",
+      "by": "132/2004/tt-btc"
+    },
+    "115/2010/TT-BTC": {
+      "ended_on": "2011-01-01",
+      "rule": "amendment",
+      "by": "216/2009/TT-BTC"
+    },
+    "116/2012/TT-BTC": {
+      "ended_on": "2019-11-22",
+      "rule": "explicit",
+      "by": "71/2019/TT-BTC"
+    },
+    "117/2018/TT-BTC": {
+      "ended_on": "2021-09-19",
+      "rule": "amendment",
+      "by": "279/2016/TT-BTC"
+    },
+    "117/2025/NĐ-CP": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "252/2026/NĐ-CP"
+    },
+    "119/2012/TT-BTC": {
+      "ended_on": "2013-01-01",
+      "rule": "explicit",
+      "by": "193/2012/TT-BTC"
+    },
+    "119/2014/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "amendment",
+      "by": "111/2013/TT-BTC"
+    },
+    "12/2013/TT-BTC": {
+      "ended_on": "2014-01-01",
+      "rule": "explicit",
+      "by": "164/2013/TT-BTC"
+    },
+    "12/2020/TT-BTC": {
+      "ended_on": "2021-01-22",
+      "rule": "amendment",
+      "by": "167/2016/tt-btc"
+    },
+    "121/2011/NĐ-CP": {
+      "ended_on": "2025-07-01",
+      "rule": "guidance",
+      "by": "13/2008/QH12"
+    },
+    "121/2013/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "289/2016/TT-BTC"
+    },
+    "123/2008/NĐ-CP": {
+      "ended_on": "2025-07-01",
+      "rule": "guidance",
+      "by": "13/2008/QH12"
+    },
+    "123/2012/TT-BTC": {
+      "ended_on": "2025-10-01",
+      "rule": "guidance",
+      "by": "14/2008/qh12"
+    },
+    "123/2020/NĐ-CP": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "254/2026/NĐ-CP"
+    },
+    "124/2009/TT-BTC": {
+      "ended_on": "2010-07-23",
+      "rule": "explicit",
+      "by": "105/2010/TT-BTC"
+    },
+    "125/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "155/2017/NĐ-CP"
+    },
+    "126/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "206/2016/TT-BTC"
+    },
+    "126/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "159/2017/NĐ-CP"
+    },
+    "126/2020/NĐ-CP": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "252/2026/NĐ-CP"
+    },
+    "127/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "158/2017/NĐ-CP"
+    },
+    "127/2022/NĐ-CP": {
+      "ended_on": "2025-07-15",
+      "rule": "explicit",
+      "by": "206/2025/NĐ-CP"
+    },
+    "128/2014/TT-BTC": {
+      "ended_on": "2019-08-26",
+      "rule": "explicit",
+      "by": "42/2019/TT-BTC"
+    },
+    "128/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "153/2017/NĐ-CP"
+    },
+    "129/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "156/2017/NĐ-CP"
+    },
+    "13/2004/QĐ-BTC": {
+      "ended_on": "2013-10-15",
+      "rule": "amendment",
+      "by": "10/2003/QĐ-BTC"
+    },
+    "13/2008/QH12": {
+      "ended_on": "2025-07-01",
+      "rule": "explicit",
+      "by": "48/2024/QH15"
+    },
+    "13/2023/TT-BTC": {
+      "ended_on": "2025-07-01",
+      "rule": "guidance",
+      "by": "49/2022/nd-cp"
+    },
+    "130/2010/TT-BTC": {
+      "ended_on": "2016-07-01",
+      "rule": "explicit",
+      "by": "49/2016/TT-BTC"
+    },
+    "130/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "157/2017/QĐ-TTG"
+    },
+    "130/2016/TT-BTC": {
+      "ended_on": "2025-07-01",
+      "rule": "guidance",
+      "by": "13/2008/QH12"
+    },
+    "130/2017/TT-BTC": {
+      "ended_on": "2019-09-20",
+      "rule": "amendment",
+      "by": "215/2016/TT-BTC"
+    },
+    "131/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "149/2017/NĐ-CP"
+    },
+    "132/2013/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "192/2016/TT-BTC"
+    },
+    "132/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "154/2017/NĐ-CP"
+    },
+    "133/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "160/2017/NĐ-CP"
+    },
+    "134/2014/TT-BTC": {
+      "ended_on": "2019-05-20",
+      "rule": "explicit",
+      "by": "18/2019/TT-BTC"
+    },
+    "135/2010/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "guidance",
+      "by": "146/2009/tt-btc"
+    },
+    "135/2013/TT-BTC": {
+      "ended_on": "2019-11-22",
+      "rule": "explicit",
+      "by": "71/2019/TT-BTC"
+    },
+    "137/2016/NĐ-CP": {
+      "ended_on": "2018-01-01",
+      "rule": "explicit",
+      "by": "150/2017/NĐ-CP"
+    },
+    "139/2016/NĐ-CP": {
+      "ended_on": "2026-01-01",
+      "rule": "explicit",
+      "by": "362/2025/NĐ-CP"
+    },
+    "14/2021/TT-BTC": {
+      "ended_on": "2025-10-12",
+      "rule": "explicit",
+      "by": "86/2025/TT-BTC"
+    },
+    "140/2009/TT-BTC": {
+      "ended_on": "2010-01-01",
+      "rule": "amendment",
+      "by": "106/2007/qd-btc"
+    },
+    "140/2016/NĐ-CP": {
+      "ended_on": "2022-03-01",
+      "rule": "explicit",
+      "by": "10/2022/NĐ-CP"
+    },
+    "141/2013/TT-BTC": {
+      "ended_on": "2025-07-01",
+      "rule": "guidance",
+      "by": "13/2008/QH12"
+    },
+    "141/2014/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "182/2016/TT-BTC"
+    },
+    "144/2010/TTLT-BTC-BTP": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "216/2016/TT-BTC"
+    },
+    "146/2017/NĐ-CP": {
+      "ended_on": "2025-12-15",
+      "rule": "amendment",
+      "by": "12/2015/nd-cp"
+    },
+    "148/2012/TT-BTC": {
+      "ended_on": "2012-11-30",
+      "rule": "explicit",
+      "by": "208/2012/TT-BTC"
+    },
+    "148/2013/TT- BTC": {
+      "ended_on": "2017-02-15",
+      "rule": "guidance",
+      "by": "44/2013/qd-ttg"
+    },
+    "148/2013/TT-BTC": {
+      "ended_on": "2017-02-15",
+      "rule": "explicit",
+      "by": "167/2016/NĐ-CP"
+    },
+    "149/2005/NĐ-CP": {
+      "ended_on": "2010-10-01",
+      "rule": "explicit",
+      "by": "87/2010/NĐ-CP"
+    },
+    "149/2017/NĐ-CP": {
+      "ended_on": "2022-12-30",
+      "rule": "explicit",
+      "by": "125/2022/NĐ-CP"
+    },
+    "150/2010/TT-BTC": {
+      "ended_on": "2023-04-03",
+      "rule": "explicit",
+      "by": "19/2023/TT-BTC"
+    },
+    "150/2013/TT-BTC": {
+      "ended_on": "2016-08-13",
+      "rule": "explicit",
+      "by": "99/2016/TT-BTC"
+    },
+    "151/2011/TT-BTC": {
+      "ended_on": "2016-05-01",
+      "rule": "explicit",
+      "by": "45/2016/TT-BTC"
+    },
+    "151/2014/TT-BTC": {
+      "ended_on": "2025-12-15",
+      "rule": "guidance",
+      "by": "91/2014/NĐ-CP"
+    },
+    "152/2004/NĐ-CP": {
+      "ended_on": "2007-02-14",
+      "rule": "guidance",
+      "by": "164/2003/NĐ-CP"
+    },
+    "153/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "303/2016/TT-BTC"
+    },
+    "153/2017/NĐ-CP": {
+      "ended_on": "2022-12-30",
+      "rule": "explicit",
+      "by": "118/2022/NĐ-CP"
+    },
+    "155/2011/TT-BTC": {
+      "ended_on": "2015-01-01",
+      "rule": "explicit",
+      "by": "176/2014/TT-BTC"
+    },
+    "155/2012/TT-BTC": {
+      "ended_on": "2016-01-01",
+      "rule": "explicit",
+      "by": "170/2015/TT-BTC"
+    },
+    "156/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "212/2016/TT-BTC"
+    },
+    "156/2013/TT-BTC": {
+      "ended_on": "2020-07-01",
+      "rule": "guidance",
+      "by": "78/2006/QH11"
+    },
+    "156/2015/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "guidance",
+      "by": "236/2009/tt-btc"
+    },
+    "157/2007/TT-BTC": {
+      "ended_on": "2014-02-21",
+      "rule": "explicit",
+      "by": "215/2013/TT-BTC"
+    },
+    "157/2009/TT-BTC": {
+      "ended_on": "2020-07-01",
+      "rule": "guidance",
+      "by": "78/2006/QH11"
+    },
+    "157/2011/TT-BTC": {
+      "ended_on": "2013-01-01",
+      "rule": "explicit",
+      "by": "193/2012/TT-BTC"
+    },
+    "157/2015/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "219/2016/TT-BTC"
+    },
+    "158/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "144/2016/TT-BTC"
+    },
+    "159/2017/NĐ-CP": {
+      "ended_on": "2022-12-30",
+      "rule": "explicit",
+      "by": "122/2022/NĐ-CP"
+    },
+    "163/2010/TTLT-BTC-BNV": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "228/2016/TT-BTC"
+    },
+    "164/2003/NĐ-CP": {
+      "ended_on": "2007-02-14",
+      "rule": "explicit",
+      "by": "24/2007/NĐ-CP"
+    },
+    "164/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "138/2016/TT-BTC"
+    },
+    "167/2016/NĐ-CP": {
+      "ended_on": "2020-10-15",
+      "rule": "explicit",
+      "by": "100/2020/NĐ-CP"
+    },
+    "168/2010/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "217/2016/TT-BTC"
+    },
+    "168/2011/TT-BTC": {
+      "ended_on": "2020-08-01",
+      "rule": "explicit",
+      "by": "52/2020/TT-BTC"
+    },
+    "17/2014/TT-BTC": {
+      "ended_on": "2016-01-01",
+      "rule": "explicit",
+      "by": "182/2015/TT-BTC"
+    },
+    "17/2018/TT-BTC": {
+      "ended_on": "2022-06-01",
+      "rule": "explicit",
+      "by": "19/2022/TT-BTC"
+    },
+    "170/2010/TT-BTC": {
+      "ended_on": "2014-11-10",
+      "rule": "explicit",
+      "by": "141/2014/TT-BTC"
+    },
+    "170/2015/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "256/2016/TT-BTC"
+    },
+    "170/2016/TT-BTC": {
+      "ended_on": "2018-03-12",
+      "rule": "explicit",
+      "by": "08/2018/TT-BTC"
+    },
+    "171/2000/QĐ-BTC": {
+      "ended_on": "2013-10-15",
+      "rule": "explicit",
+      "by": "122/2013/TT-BTC"
+    },
+    "172/2010/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "274/2016/TT-BTC"
+    },
+    "172/2016/TT-BTC": {
+      "ended_on": "2022-08-08",
+      "rule": "explicit",
+      "by": "38/2022/TT-BTC"
+    },
+    "173/2009/TT-BTC": {
+      "ended_on": "2012-01-01",
+      "rule": "guidance",
+      "by": "36/2008/qd-btc"
+    },
+    "173/2016/TT-BTC": {
+      "ended_on": "2025-07-01",
+      "rule": "amendment",
+      "by": "219/2013/TT-BTC"
+    },
+    "174/2011/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "244/2016/TT-BTC"
+    },
+    "178/2011/TT-BTC": {
+      "ended_on": "2026-01-01",
+      "rule": "explicit",
+      "by": "113/2025/TT-BTC"
+    },
+    "178/2016/TT-BTC": {
+      "ended_on": "2018-05-14",
+      "rule": "explicit",
+      "by": "34/2018/TT-BTC"
+    },
+    "179/2013/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "89/2026/TT-BTC"
+    },
+    "179/2015/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "guidance",
+      "by": "02/2014/tt-btc"
+    },
+    "180/2010/TT-BTC": {
+      "ended_on": "2015-09-10",
+      "rule": "explicit",
+      "by": "110/2015/TT-BTC"
+    },
+    "180/2011/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "207/2016/TT-BTC"
+    },
+    "182/2011/TT-BTC": {
+      "ended_on": "2014-05-08",
+      "rule": "explicit",
+      "by": "35/2014/TT-BTC"
+    },
+    "185/2013/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "291/2016/TT-BTC"
+    },
+    "185/2014/TT-BTC": {
+      "ended_on": "2015-01-07",
+      "rule": "explicit",
+      "by": "03/2015/TT-BTC"
+    },
+    "185/2016/TT-BTC": {
+      "ended_on": "2023-07-15",
+      "rule": "explicit",
+      "by": "34/2023/TT-BTC"
+    },
+    "188/2016/TT-BTC": {
+      "ended_on": "2023-08-01",
+      "rule": "explicit",
+      "by": "37/2023/TT-BTC"
+    },
+    "189/2010/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "208/2016/TT-BTC"
+    },
+    "189/2012/TT-BTC": {
+      "ended_on": "2014-02-03",
+      "rule": "explicit",
+      "by": "200/2013/TT-BTC"
+    },
+    "19/2001/NĐ-CP": {
+      "ended_on": "2006-05-19",
+      "rule": "explicit",
+      "by": "51/2006/NĐ-CP"
+    },
+    "19/2001/QĐ-BTC": {
+      "ended_on": "2010-12-02",
+      "rule": "explicit",
+      "by": "193/2010/TT-BTC"
+    },
+    "190/2010/TT-BTC": {
+      "ended_on": "2010-12-22",
+      "rule": "explicit",
+      "by": "213/2010/TT-BTC"
+    },
+    "190/2012/TT-BTC": {
+      "ended_on": "2015-11-23",
+      "rule": "amendment",
+      "by": "66/2009/tt-btc"
+    },
+    "190/2016/TT-BTC": {
+      "ended_on": "2024-03-21",
+      "rule": "explicit",
+      "by": "11/2024/TT-BTC"
+    },
+    "191/2016/TT-BTC": {
+      "ended_on": "2024-03-21",
+      "rule": "explicit",
+      "by": "10/2024/TT-BTC"
+    },
+    "193/2012/TT-BTC": {
+      "ended_on": "2014-01-01",
+      "rule": "explicit",
+      "by": "164/2013/TT-BTC"
+    },
+    "195/2016/TT-BTC": {
+      "ended_on": "2018-08-10",
+      "rule": "explicit",
+      "by": "56/2018/TT-BTC"
+    },
+    "196/2016/TT-BTC": {
+      "ended_on": "2024-09-01",
+      "rule": "explicit",
+      "by": "47/2024/TT-BTC"
+    },
+    "197/2011/TT-BTC": {
+      "ended_on": "2012-02-21",
+      "rule": "explicit",
+      "by": "25/2012/TT-BTC"
+    },
+    "197/2012/TT-BTC": {
+      "ended_on": "2014-11-01",
+      "rule": "explicit",
+      "by": "133/2014/TT-BTC"
+    },
+    "197/2013/TT-BTC": {
+      "ended_on": "2016-10-01",
+      "rule": "explicit",
+      "by": "131/2016/TT-BTC"
+    },
+    "20/2000/NĐ-CP": {
+      "ended_on": "2004-12-10",
+      "rule": "explicit",
+      "by": "202/2004/NĐ-CP"
+    },
+    "20/2017/TT-BTC": {
+      "ended_on": "2025-07-01",
+      "rule": "amendment",
+      "by": "130/2016/TT-BTC"
+    },
+    "20/2019/NĐ-CP": {
+      "ended_on": "2022-03-01",
+      "rule": "amendment",
+      "by": "140/2016/NĐ-CP"
+    },
+    "20/2019/TT-BTC": {
+      "ended_on": "2022-03-01",
+      "rule": "explicit",
+      "by": "13/2022/TT-BTC"
+    },
+    "200/2010/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "205/2016/TT-BTC"
+    },
+    "200/2013/TT-BTC": {
+      "ended_on": "2015-10-08",
+      "rule": "explicit",
+      "by": "156/2015/TT-BTC"
+    },
+    "201/2013/TT-BTC": {
+      "ended_on": "2021-08-03",
+      "rule": "explicit",
+      "by": "45/2021/TT-BTC"
+    },
+    "202/2016/TT-BTC": {
+      "ended_on": "2023-11-15",
+      "rule": "explicit",
+      "by": "61/2023/TT-BTC"
+    },
+    "203/2000/QĐ-BTC": {
+      "ended_on": "2006-12-06",
+      "rule": "explicit",
+      "by": "68/2006/QĐ-BTC"
+    },
+    "204/2009/TT-BTC": {
+      "ended_on": "2015-01-01",
+      "rule": "explicit",
+      "by": "172/2014/TT-BTC"
+    },
+    "204/2013/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "284/2016/TT-BTC"
+    },
+    "207/2015/TT-BTC": {
+      "ended_on": "2017-02-15",
+      "rule": "explicit",
+      "by": "167/2016/NĐ-CP"
+    },
+    "209/2016/TT-BTC": {
+      "ended_on": "2023-07-01",
+      "rule": "explicit",
+      "by": "28/2023/TT-BTC"
+    },
+    "21/2007/QĐ-BTC": {
+      "ended_on": "2017-04-18",
+      "rule": "explicit",
+      "by": "17/2017/TT-BTC"
+    },
+    "21/2026/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "guidance",
+      "by": "126/2020/NĐ-CP"
+    },
+    "210/2016/TT-BTC": {
+      "ended_on": "2023-07-01",
+      "rule": "explicit",
+      "by": "27/2023/TT-BTC"
+    },
+    "215/2000/QĐ-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "265"
+    },
+    "215/2016/TT-BTC": {
+      "ended_on": "2019-09-20",
+      "rule": "explicit",
+      "by": "47/2019/TT-BTC"
+    },
+    "216/2009/TT-BTC": {
+      "ended_on": "2011-01-01",
+      "rule": "explicit",
+      "by": "184/2010/TT-BTC"
+    },
+    "216/2015/TT-BTC": {
+      "ended_on": "2016-09-01",
+      "rule": "explicit",
+      "by": "124/2016/NĐ-CP"
+    },
+    "217/2015/TT-BTC": {
+      "ended_on": "2020-01-01",
+      "rule": "explicit",
+      "by": "80/2019/TT-BTC"
+    },
+    "218/2010/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "195/2016/TT-BTC"
+    },
+    "219/2013/TT-BTC": {
+      "ended_on": "2025-07-01",
+      "rule": "guidance",
+      "by": "209/2013/nd-cp"
+    },
+    "219/2016/TT-BTC": {
+      "ended_on": "2021-05-22",
+      "rule": "explicit",
+      "by": "25/2021/TT-BTC"
+    },
+    "22/2001/TT-BTC": {
+      "ended_on": "2002-11-07",
+      "rule": "explicit",
+      "by": "98/2002/TT-BTC"
+    },
+    "22/2009/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "263/2016/TT-BTC"
+    },
+    "22/2020/NĐ-CP": {
+      "ended_on": "2026-01-01",
+      "rule": "amendment",
+      "by": "139/2016/NĐ-CP"
+    },
+    "221/2016/TT-BTC": {
+      "ended_on": "2017-11-21",
+      "rule": "explicit",
+      "by": "106/2017/TT-BTC"
+    },
+    "223/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "231/2016/TT-BTC"
+    },
+    "227/2016/TT-BTC": {
+      "ended_on": "2021-02-22",
+      "rule": "explicit",
+      "by": "02/2021/TT-BTC"
+    },
+    "229/2016/TT-BTC": {
+      "ended_on": "2023-10-22",
+      "rule": "explicit",
+      "by": "60/2023/TT-BTC"
+    },
+    "23/2009/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "197/2016/TT-BTC"
+    },
+    "24/2007/QĐ-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "amendment",
+      "by": "89/2004/qd-btc"
+    },
+    "24/2015/TT-BTC": {
+      "ended_on": "2016-09-01",
+      "rule": "explicit",
+      "by": "133/2016/NĐ-CP"
+    },
+    "248/2016/TT-BTC": {
+      "ended_on": "2026-04-01",
+      "rule": "explicit",
+      "by": "39/2026/TT-BTC"
+    },
+    "25/2015/TT-BTC": {
+      "ended_on": "2016-09-01",
+      "rule": "explicit",
+      "by": "125/2016/NĐ-CP"
+    },
+    "25/2021/TT-BTC": {
+      "ended_on": "2026-04-01",
+      "rule": "explicit",
+      "by": "28/2026/TT-BTC"
+    },
+    "250/2016/TT-BTC": {
+      "ended_on": "2020-01-13",
+      "rule": "explicit",
+      "by": "85/2019/TT-BTC"
+    },
+    "251/2016/TT-BTC": {
+      "ended_on": "2020-07-27",
+      "rule": "explicit",
+      "by": "58/2020/TT-BTC"
+    },
+    "256/2016/TT-BTC": {
+      "ended_on": "2019-10-16",
+      "rule": "explicit",
+      "by": "59/2019/TT-BTC"
+    },
+    "26/2001/NĐ-CP": {
+      "ended_on": "2004-01-01",
+      "rule": "guidance",
+      "by": "30/1998/NĐ-CP"
+    },
+    "26/2015/TT-BTC": {
+      "ended_on": "2025-12-15",
+      "rule": "guidance",
+      "by": "12/2015/nd-cp"
+    },
+    "269/2016/TT-BTC": {
+      "ended_on": "2026-10-09",
+      "rule": "explicit",
+      "by": "152/2026/TT-BTC"
+    },
+    "270/2016/TT-BTC": {
+      "ended_on": "2022-02-25",
+      "rule": "explicit",
+      "by": "01/2022/TT-BTC"
+    },
+    "274/2016/TT-BTC": {
+      "ended_on": "2021-04-05",
+      "rule": "explicit",
+      "by": "14/2021/TT-BTC"
+    },
+    "277/2016/TT-BTC": {
+      "ended_on": "2023-08-01",
+      "rule": "explicit",
+      "by": "41/2023/TT-BTC"
+    },
+    "278/2016/TT-BTC": {
+      "ended_on": "2023-10-16",
+      "rule": "explicit",
+      "by": "59/2023/TT-BTC"
+    },
+    "279/2016/TT-BTC": {
+      "ended_on": "2021-09-19",
+      "rule": "explicit",
+      "by": "67/2021/TT-BTC"
+    },
+    "285/2016/TT-BTC": {
+      "ended_on": "2021-01-11",
+      "rule": "explicit",
+      "by": "101/2020/TT-BTC"
+    },
+    "286/2016/TT-BTC": {
+      "ended_on": "2021-09-19",
+      "rule": "explicit",
+      "by": "67/2021/TT-BTC"
+    },
+    "29/2007/QĐ-BTC": {
+      "ended_on": "2007-05-31",
+      "rule": "explicit",
+      "by": "39/2007/QĐ-BTC"
+    },
+    "29/2016/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "amendment",
+      "by": "32/2013/tt-btc"
+    },
+    "293/2016/TT-BTC": {
+      "ended_on": "2021-10-01",
+      "rule": "explicit",
+      "by": "70/2021/TT-BTC"
+    },
+    "295/2016/TT-BTC": {
+      "ended_on": "2026-03-27",
+      "rule": "explicit",
+      "by": "11/2026/TT-BTC"
+    },
+    "30/1998/NĐ-CP": {
+      "ended_on": "2004-01-01",
+      "rule": "explicit",
+      "by": "164/2003/NĐ-CP"
+    },
+    "30/2004/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "275/2016/TT-BTC"
+    },
+    "30/2014/TT-BTC": {
+      "ended_on": "2016-01-01",
+      "rule": "explicit",
+      "by": "182/2015/TT-BTC"
+    },
+    "301/2016/TT-BTC": {
+      "ended_on": "2022-03-01",
+      "rule": "explicit",
+      "by": "13/2022/TT-BTC"
+    },
+    "304/2016/TT-BTC": {
+      "ended_on": "2019-04-10",
+      "rule": "explicit",
+      "by": "19/2019/TT-BTC"
+    },
+    "305/2016/TT-BTC": {
+      "ended_on": "2022-06-01",
+      "rule": "explicit",
+      "by": "19/2022/TT-BTC"
+    },
+    "31/2001/NĐ-CP": {
+      "ended_on": "2006-07-01",
+      "rule": "explicit",
+      "by": "56/2006/NĐ-CP"
+    },
+    "31/2007/QĐ-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "230/2016/TT-BTC"
+    },
+    "31/2010/TT-BTC": {
+      "ended_on": "2011-01-01",
+      "rule": "amendment",
+      "by": "216/2009/TT-BTC"
+    },
+    "33/2019/TT-BTC": {
+      "ended_on": "2026-11-23",
+      "rule": "explicit",
+      "by": "149/2026/TT-BTC"
+    },
+    "331/2016/TT-BTC": {
+      "ended_on": "2019-10-16",
+      "rule": "amendment",
+      "by": "256/2016/TT-BTC"
+    },
+    "3357/KTTH": {
+      "ended_on": "2004-01-01",
+      "rule": "guidance",
+      "by": "30/1998/NĐ-CP"
+    },
+    "34/2007/QĐ-BTC": {
+      "ended_on": "2013-04-25",
+      "rule": "explicit",
+      "by": "27/2013/TT-BTC"
+    },
+    "35/2013/TT-BTC": {
+      "ended_on": "2015-09-10",
+      "rule": "guidance",
+      "by": "180/2010/TT-BTC"
+    },
+    "36/2007/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "amendment",
+      "by": "88/2002/TT-BTC"
+    },
+    "36/2013/TT-BTC": {
+      "ended_on": "2016-06-01",
+      "rule": "explicit",
+      "by": "33/2016/TT-BTC"
+    },
+    "37/2006/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "259/2016/TT-BTC"
+    },
+    "37/2017/TT-BTC": {
+      "ended_on": "2025-12-15",
+      "rule": "amendment",
+      "by": "26/2015/TT-BTC"
+    },
+    "39/2013/TT-BTC": {
+      "ended_on": "2014-01-01",
+      "rule": "explicit",
+      "by": "164/2013/TT-BTC"
+    },
+    "39/2015/QĐ-TTG": {
+      "ended_on": "2017-02-15",
+      "rule": "explicit",
+      "by": "167/2016/NĐ-CP"
+    },
+    "41/2017/TT-BTC": {
+      "ended_on": "2020-12-20",
+      "rule": "guidance",
+      "by": "20/2017/nd-cp"
+    },
+    "41/2020/TT-BTC": {
+      "ended_on": "2021-05-22",
+      "rule": "amendment",
+      "by": "219/2016/TT-BTC"
+    },
+    "43/2013/TT-BTC": {
+      "ended_on": "2013-04-26",
+      "rule": "explicit",
+      "by": "47/2013/TT-BTC"
+    },
+    "44/2000/NĐ-CP": {
+      "ended_on": "2004-09-22",
+      "rule": "explicit",
+      "by": "169/2004/NĐ-CP"
+    },
+    "44/2011/TT-BTC": {
+      "ended_on": "2015-03-15",
+      "rule": "explicit",
+      "by": "13/2015/TT-BTC"
+    },
+    "44/2013/TT-BTC": {
+      "ended_on": "2014-01-01",
+      "rule": "explicit",
+      "by": "164/2013/TT-BTC"
+    },
+    "49/1999/NĐ-CP": {
+      "ended_on": "2004-11-04",
+      "rule": "explicit",
+      "by": "185/2004/NĐ-CP"
+    },
+    "49/2006/QĐ-BTC": {
+      "ended_on": "2006-09-22",
+      "rule": "explicit",
+      "by": "51/2006/QĐ-BTC"
+    },
+    "51/2006/QĐ-BTC": {
+      "ended_on": "2006-10-06",
+      "rule": "explicit",
+      "by": "54/2006/QĐ-BTC"
+    },
+    "51/2025/NĐ-CP": {
+      "ended_on": "2027-03-01",
+      "rule": "explicit",
+      "by": "202/2026/NĐ-CP"
+    },
+    "52/2014/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "185/2016/TT-BTC"
+    },
+    "53/2013/TT-BTC": {
+      "ended_on": "2016-01-01",
+      "rule": "explicit",
+      "by": "154/2015/TT-BTC"
+    },
+    "53/2015/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "amendment",
+      "by": "127/2013/tt-btc"
+    },
+    "54/2006/QĐ-BTC": {
+      "ended_on": "2006-12-11",
+      "rule": "explicit",
+      "by": "70/2006/QĐ-BTC"
+    },
+    "55/2007/TT-BTC": {
+      "ended_on": "2016-08-15",
+      "rule": "explicit",
+      "by": "96/2016/TT-BTC"
+    },
+    "55/2010/TT-BTC": {
+      "ended_on": "2026-07-06",
+      "rule": "explicit",
+      "by": "97/2026/TT-BTC"
+    },
+    "56/2015/TT-BCT": {
+      "ended_on": "2025-12-02",
+      "rule": "explicit",
+      "by": "61/2025/TT-BCT"
+    },
+    "56/2018/TT-BTC": {
+      "ended_on": "2023-08-01",
+      "rule": "explicit",
+      "by": "38/2023/TT-BTC"
+    },
+    "58/2012/TT-BTC": {
+      "ended_on": "2014-07-01",
+      "rule": "explicit",
+      "by": "72/2014/TT-BTC"
+    },
+    "59/2006/QĐ-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "270/2016/TT-BTC"
+    },
+    "59/2017/TT-BTC": {
+      "ended_on": "2022-01-11",
+      "rule": "explicit",
+      "by": "02/2022/TT-BTC"
+    },
+    "60/2000/TT-BTC": {
+      "ended_on": "2007-07-06",
+      "rule": "explicit",
+      "by": "79/2007/TT-BTC"
+    },
+    "60/2012/TT-BTC": {
+      "ended_on": "2014-10-01",
+      "rule": "explicit",
+      "by": "103/2014/TT-BTC"
+    },
+    "60/2023/TT-BTC": {
+      "ended_on": "2026-01-01",
+      "rule": "explicit",
+      "by": "155/2025/TT-BTC"
+    },
+    "61/2007/TT-BTC": {
+      "ended_on": "2013-11-15",
+      "rule": "explicit",
+      "by": "166/2013/TT-BTC"
+    },
+    "61/2013/TT-BTC": {
+      "ended_on": "2014-10-01",
+      "rule": "guidance",
+      "by": "04/2013/tt-btc"
+    },
+    "62/2017/TT-BTC": {
+      "ended_on": "2022-01-11",
+      "rule": "explicit",
+      "by": "02/2022/TT-BTC"
+    },
+    "62/2023/TT-BTC": {
+      "ended_on": "2026-04-01",
+      "rule": "explicit",
+      "by": "28/2026/TT-BTC"
+    },
+    "63/2014/TT-BTC": {
+      "ended_on": "2015-08-04",
+      "rule": "explicit",
+      "by": "95/2015/TT-BTC"
+    },
+    "64/2013/TT-BTC": {
+      "ended_on": "2014-06-01",
+      "rule": "explicit",
+      "by": "39/2014/TT-BTC"
+    },
+    "66/2006/QĐ-BTC": {
+      "ended_on": "2013-10-01",
+      "rule": "amendment",
+      "by": "22/2005/qd-btc"
+    },
+    "66/2010/TT-BTC": {
+      "ended_on": "2017-04-28",
+      "rule": "explicit",
+      "by": "41/2017/TT-BTC"
+    },
+    "66/2019/TT-BTC": {
+      "ended_on": "2021-05-03",
+      "rule": "guidance",
+      "by": "110/2015/TT-BTC"
+    },
+    "67/2012/TT-BTC": {
+      "ended_on": "2013-01-01",
+      "rule": "explicit",
+      "by": "193/2012/TT-BTC"
+    },
+    "68/2006/QĐ-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "260/2016/TT-BTC"
+    },
+    "68/2011/TT-BTC": {
+      "ended_on": "2012-05-22",
+      "rule": "explicit",
+      "by": "82/2012/TT-BTC"
+    },
+    "69/2006/QĐ-BTC": {
+      "ended_on": "2011-01-01",
+      "rule": "explicit",
+      "by": "169/2010/TT-BTC"
+    },
+    "69/2006/QĐ-TTG": {
+      "ended_on": "2011-08-15",
+      "rule": "explicit",
+      "by": "36/2011/QĐ-TTG"
+    },
+    "70/2006/QĐ-BTC": {
+      "ended_on": "2007-01-09",
+      "rule": "explicit",
+      "by": "04/2007/QĐ-BTC"
+    },
+    "70/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "187/2016/TT-BTC"
+    },
+    "70/2013/TT-BTC": {
+      "ended_on": "2014-01-01",
+      "rule": "explicit",
+      "by": "164/2013/TT-BTC"
+    },
+    "70/2025/NĐ-CP": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "254/2026/NĐ-CP"
+    },
+    "71/2006/QĐ-BTC": {
+      "ended_on": "2011-11-18",
+      "rule": "explicit",
+      "by": "136/2011/TT-BTC"
+    },
+    "72/2012/TT-BTC": {
+      "ended_on": "2012-05-24",
+      "rule": "explicit",
+      "by": "84/2012/TT-BTC"
+    },
+    "73/1999/TT-BTC": {
+      "ended_on": "2012-10-01",
+      "rule": "explicit",
+      "by": "133/2012/TT-BTC"
+    },
+    "75/2009/TT-BTC": {
+      "ended_on": "2010-01-01",
+      "rule": "amendment",
+      "by": "106/2007/qd-btc"
+    },
+    "75/2014/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "210/2016/TT-BTC"
+    },
+    "75/2020/TT-BTC": {
+      "ended_on": "2021-09-19",
+      "rule": "amendment",
+      "by": "279/2016/TT-BTC"
+    },
+    "76/2006/QĐ-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "amendment",
+      "by": "215/2000/QĐ-BTC"
+    },
+    "76/2010/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "287/2016/TT-BTC"
+    },
+    "77/2002/TT-BTC": {
+      "ended_on": "2006-10-16",
+      "rule": "explicit",
+      "by": "97/2006/TT-BTC"
+    },
+    "77/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "168/2016/TT-BTC"
+    },
+    "78/2006/QH11": {
+      "ended_on": "2020-07-01",
+      "rule": "explicit",
+      "by": "38/2019/QH14"
+    },
+    "78/2013/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "271/2016/TT-BTC"
+    },
+    "79/2017/TT-BTC": {
+      "ended_on": "2020-07-01",
+      "rule": "guidance",
+      "by": "78/2006/QH11"
+    },
+    "79/2018/TT-BTC": {
+      "ended_on": "2024-03-21",
+      "rule": "explicit",
+      "by": "07/2024/TT-BTC"
+    },
+    "80/2010/TT-BTC": {
+      "ended_on": "2011-01-01",
+      "rule": "amendment",
+      "by": "216/2009/TT-BTC"
+    },
+    "80/2012/TT-BTC": {
+      "ended_on": "2016-08-12",
+      "rule": "explicit",
+      "by": "95/2016/TT-BTC"
+    },
+    "82/2010/TT-BTC": {
+      "ended_on": "2013-11-05",
+      "rule": "explicit",
+      "by": "131/2013/TT-BTC"
+    },
+    "82/2018/TT-BTC": {
+      "ended_on": "2025-07-01",
+      "rule": "guidance",
+      "by": "209/2013/nd-cp"
+    },
+    "84/2009/TT-BTC": {
+      "ended_on": "2014-08-10",
+      "rule": "amendment",
+      "by": "131/2008/tt-btc"
+    },
+    "84/2012/TT-BTC": {
+      "ended_on": "2012-06-08",
+      "rule": "explicit",
+      "by": "94/2012/TT-BTC"
+    },
+    "85/2007/NĐ-CP": {
+      "ended_on": "2020-07-01",
+      "rule": "guidance",
+      "by": "78/2006/QH11"
+    },
+    "85/2007/TT-BTC": {
+      "ended_on": "2012-07-01",
+      "rule": "explicit",
+      "by": "80/2012/TT-BTC"
+    },
+    "85/2015/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "170/2016/TT-BTC"
+    },
+    "86/2024/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "90/2026/TT-BTC"
+    },
+    "88/2002/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "232/2016/TT-BTC"
+    },
+    "88/2015/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "249/2016/TT-BTC"
+    },
+    "89/2000/TT-BTC": {
+      "ended_on": "2004-11-04",
+      "rule": "guidance",
+      "by": "49/1999/NĐ-CP"
+    },
+    "90/2023/NĐ-CP": {
+      "ended_on": "2026-01-01",
+      "rule": "explicit",
+      "by": "364/2025/NĐ-CP"
+    },
+    "91/2014/NĐ-CP": {
+      "ended_on": "2025-12-15",
+      "rule": "explicit",
+      "by": "320/2025/NĐ-CP"
+    },
+    "91/2021/TT-BTC": {
+      "ended_on": "2024-03-21",
+      "rule": "explicit",
+      "by": "10/2024/TT-BTC"
+    },
+    "92/2015/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "89/2026/TT-BTC"
+    },
+    "93/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "243/2016/TT-BTC"
+    },
+    "93/2014/TT-BTC": {
+      "ended_on": "2017-08-15",
+      "rule": "explicit",
+      "by": "64/2017/TT-BTC"
+    },
+    "93/2017/TT-BTC": {
+      "ended_on": "2025-07-01",
+      "rule": "amendment",
+      "by": "219/2013/TT-BTC"
+    },
+    "93/QĐ-BTC": {
+      "ended_on": "2013-11-15",
+      "rule": "guidance",
+      "by": "61/2007/TT-BTC"
+    },
+    "94/2010/TT-BTC": {
+      "ended_on": "2016-08-13",
+      "rule": "explicit",
+      "by": "99/2016/TT-BTC"
+    },
+    "94/2012/TT-BTC": {
+      "ended_on": "2012-06-22",
+      "rule": "explicit",
+      "by": "103/2012/TT-BTC"
+    },
+    "94/2016/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "guidance",
+      "by": "59/2006/QĐ-BTC"
+    },
+    "94/2025/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "guidance",
+      "by": "126/2020/NĐ-CP"
+    },
+    "95/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "190/2016/TT-BTC"
+    },
+    "96/2002/QĐ-BTC": {
+      "ended_on": "2014-01-01",
+      "rule": "amendment",
+      "by": "1632/1998/qd-btc"
+    },
+    "96/2015/TT-BTC": {
+      "ended_on": "2026-03-12",
+      "rule": "explicit",
+      "by": "20/2026/TT-BTC"
+    },
+    "96/2016/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "89/2026/TT-BTC"
+    },
+    "96/2017/TT-BTC": {
+      "ended_on": "2020-01-13",
+      "rule": "guidance",
+      "by": "250/2016/TT-BTC"
+    },
+    "97/2002/TT-BTC": {
+      "ended_on": "2010-03-05",
+      "rule": "explicit",
+      "by": "11/2010/TT-BTC"
+    },
+    "97/2011/TT-BTC": {
+      "ended_on": "2015-11-23",
+      "rule": "amendment",
+      "by": "66/2009/tt-btc"
+    },
+    "97/2012/TT-BTC": {
+      "ended_on": "2017-01-01",
+      "rule": "explicit",
+      "by": "140/2016/TT-BTC"
+    },
+    "97/2016/TT-BTC": {
+      "ended_on": "2026-07-01",
+      "rule": "explicit",
+      "by": "89/2026/TT-BTC"
+    },
+    "99/1998/TT": {
+      "ended_on": "2004-01-01",
+      "rule": "guidance",
+      "by": "30/1998/NĐ-CP"
+    },
+    "99/98/TT/BTC": {
+      "ended_on": "2004-01-01",
+      "rule": "guidance",
+      "by": "30/1998/NĐ-CP"
+    }
+  }
+}

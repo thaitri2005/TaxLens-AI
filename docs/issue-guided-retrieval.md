@@ -149,6 +149,48 @@ than K passages may remain for a case. The runs were made from a laptop against 
 corpus (checked with `freeze_corpus.py --check`), not in the API image; the top five
 documents of every saved report reproduced.
 
+## Removing documents that had ended: experiment plan (04/11/2026)
+
+Written before any retrieval run with the filter. The extraction was inspected only for
+what it removes, never for how a method scores.
+
+**Question.** Does leaving out documents that had ended by a case's date retrieve more of
+its essential provisions within the same budget?
+
+**Why not the recorded status.** The corpus holds no expired document and marks
+`219/2013/TT-BTC` as `EFFECTIVE`, while most gold documents are `DISCOVERED`.
+
+**Method** (`taxlens/retrieval/repeals.py`, `scripts/extract_repeals.py`). Stored once in
+`data/evaluation/repeals/corpus-v1.json`, without using the gold set:
+
+- `explicit`: a document says another ends entirely (`hết hiệu lực`, `bãi bỏ`, `thay
+  thế`). Statements about a part of a document are ignored.
+- `guidance`: a title says the document guides or details one that ended, by number or by
+  the law of that name in force when it was issued.
+- `amendment`: a title says the document amends one that ended.
+
+A document ends on its repealer's date, and is left out only for cases on or after that
+date. `guidance` and `amendment` are inferences that a legal expert should validate.
+
+**Runs**, all on `corpus-v1`, `gold-v1.0 --verified-only`, `--as-of case`, K = 5, 10, 20:
+
+| Run | Baseline |
+| --- | --- |
+| `hybrid`, all rules (`hybrid-asof-repeals.json`) | `hybrid-asof.json` |
+| `issue-guided`, all rules (`issue-guided-asof-repeals.json`) | `issue-guided-asof.json` |
+| `hybrid`, `explicit` only (`hybrid-asof-repeals-explicit.json`) | `hybrid-asof.json` |
+| `issue-guided`, `explicit` only (`issue-guided-asof-repeals-explicit.json`) | `issue-guided-asof.json` |
+
+**Measures.** Primary: `essential_in_corpus_full_coverage_rate`, then
+`mean_essential_in_corpus_recall_at_k`, with paired wins and losses and an exact sign test
+from `scripts/compare_retrieval_runs.py`. No threshold is claimed with 12 cases. Also
+reported: gold provisions the filter removes (a filter error if any), and the one-hop
+check at K = 10 on the filtered runs.
+
+**Known limits.** Documents that end without any statement in the corpus stay in (for
+example `47/2011/TT-BTC`). OCR can hide a statement. Amended document numbers written in
+more than one way are treated separately.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that
