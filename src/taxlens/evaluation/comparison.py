@@ -1,4 +1,4 @@
-"""Paired comparison of two retrieval runs on the same cases (docs/issue-guided-retrieval.md).
+"""Paired comparison of two retrieval runs on the same cases (docs/retrieval-experiments.md).
 
 A case is a win for the method when, within the top K, it finds an essential provision the
 baseline misses and misses none the baseline finds; a loss in the opposite case; anything

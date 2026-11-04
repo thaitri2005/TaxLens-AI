@@ -76,8 +76,12 @@ Each step skips work already done, so the commands can be rerun at any time.
 | `evaluate_qa.py` | Runs the cheap, no-judge Q&A evaluation. |
 | `freeze_corpus.py` | Records the corpus for an experiment (`--output`) or checks it is unchanged (`--check`) ([retrieval.md](retrieval.md#controlled-experiments)). |
 | `annotation_agreement.py` | Cohen's kappa between two annotators' gold-set CSVs ([guideline](annotation-guideline.md#process)). |
-| `decompose_issues.py` | Stores each gold-set question's legal issues for issue-guided retrieval; needs `HF_TOKEN`, not the database ([plan](issue-guided-retrieval.md)). |
-| `compare_retrieval_runs.py` | Paired wins, losses, and sign test between two saved retrieval reports. |
+| `decompose_issues.py` | Stores each gold-set question's legal issues for issue-guided retrieval; needs `HF_TOKEN`, not the database ([plan](retrieval-experiments.md)). |
+| `compare_retrieval_runs.py` | Paired wins, losses, and sign test between two saved retrieval reports. Refuses reports from different corpora. |
+| `diagnose_retrieval_misses.py` | Gives each essential provision a saved run missed one cause ([experiments](retrieval-experiments.md)). |
+| `measure_reference_reachability.py` | Upper limit of following one legal reference from a saved run's top passages. |
+| `extract_repeals.py`, `add_ministry_expiry.py` | Build the lists of ended documents in `data/evaluation/repeals/`, used with `--repeals` and `--repeal-rules`. |
+| `list_cited_candidates.py`, `list_portal_candidates.py`, `complete_portal_candidates.py`, `resolve_cited_candidates.py`, `select_corpus_v2.py` | Build the `corpus-v2` candidate lists and selection ([rules](corpus-inclusion.md)). |
 | `benchmark_ocr.py` | Word error rate of OCR settings against a born-digital PDF. |
 | `prune_non_tax_documents.py` | Lists, or with `--apply` deletes, documents whose titles are not about tax. |
 | `seed.py` | Sample documents and the initial administrator. |

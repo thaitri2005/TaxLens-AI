@@ -62,6 +62,11 @@ Remaining OCR errors include lost diacritics (`hóa don`), stray punctuation bef
 headings (`| Điều 5.`), and misread separators (`Điều 9, Thời điểm`). Later stages are
 built to tolerate them rather than assume clean text.
 
+`pypdf` cuts syllables on some PDF fonts (`thực` read as `th ực`), common in Official
+Gazette files. When a PDF has more than 5 such cuts per 1,000 words, `extract_pages` uses
+`pypdfium2`'s text if it has fewer. Documents processed before this was added keep their
+stored text unless reprocessed.
+
 Text is normalized to Unicode NFC (PDF text layers may use decomposed characters that
 would never match a typed query), whitespace is collapsed per line, and pages are joined
 with a form-feed marker so every chunk keeps page numbers.
@@ -121,6 +126,8 @@ For a query:
    `của`, …) are dropped; words that change legal meaning, such as `không`, are kept. An
    unaccented term is compared with unaccented stopwords, so `la bao nhieu` is handled
    like `là bao nhiêu` while `cơ` (in `cơ quan`) survives although it folds like `có`.
+   Only the first 12 terms are kept (`MAX_KEYWORD_TERMS`), which cuts the legal content of
+   long questions ([measured effect](retrieval-experiments.md#why-a4-and-l2-stay-unfound-05112026)).
 2. Chunks matching **any** unaccented term are candidates. (The previous implementation
    required every word of the question to appear in one chunk and returned nothing for
    most natural questions.)
@@ -384,8 +391,10 @@ as a local file as well.
 
 ### Controlled experiments
 
-The comparison of hybrid search with issue-guided retrieval (`--mode issue-guided`) is
-planned in [issue-guided-retrieval.md](issue-guided-retrieval.md).
+Current results are in [evaluation-status.md](evaluation-status.md), and the full record,
+including hybrid search against issue-guided retrieval (`--mode issue-guided`), is in
+[retrieval-experiments.md](retrieval-experiments.md). The database holds `corpus-v1.2`, so
+use that manifest in the commands below; a run against `corpus-v1` stops at its corpus check.
 
 The daily DAG keeps changing the corpus, so comparing methods needs a frozen corpus and a
 frozen gold set:
@@ -403,11 +412,12 @@ frozen gold set:
    Documents already in the corpus are skipped. A ministry circular the portal does not
    carry can be collected with `--source mof --include-expired --only <number>`, which
    searches every field of the ministry database. Two cited circulars,
-   80/2021/TT-BTC and 25/2018/TT-BTC, are in neither source. Their official Gazette files
-   are saved as `data/local/supplement/80-2021-TT-BTC.pdf` and `25-2018-TT-BTC.pdf`, with
-   the page addresses in `data/corpus/gold_supplement.json`. Load them with
-   `python scripts/seed.py --manifest data/corpus/gold_supplement.json`. Until then they
-   are corpus gaps (A4, A7, L2). Then process and embed the new documents.
+   80/2021/TT-BTC and 25/2018/TT-BTC, are in neither source; their Official Gazette files
+   are in `data/local/supplement/` (not committed), with the page addresses in
+   `data/corpus/gold_supplement.json`. They are loaded in `corpus-v1.2` and need loading
+   again only on a new database. `scripts/seed.py --manifest` does this, but it also
+   creates the seed admin account, so on a shared database call `ingest_seed_document`
+   directly. Then process and embed the new documents.
 2. Record the corpus:
 
    ```powershell
@@ -432,6 +442,8 @@ Each report records `frozen_corpus`, the dataset hash, the embedding model and r
 release workflow sets in the API image.
 
 ### Next steps
+
+The current order of work is in [evaluation-status.md](evaluation-status.md#open-work).
 
 1. Grow the gold set to at least 50 cases against the full corpus (direct lookups, dates,
    amendments, comparisons, multi-document questions, unanswerable questions, text

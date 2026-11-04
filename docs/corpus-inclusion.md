@@ -5,6 +5,12 @@ documents to add. `corpus-v1` closed its gaps with `collect_sources.py --cited-b
 collects what the gold set cites: those documents enter because they are the answers, and
 a non-tax law then has no similar documents around it. These rules replace that step.
 
+**Where this stands:** `corpus-v2` is selected but not collected. The selection is 975 new
+documents (420 `C2`, 251 `C3`, 304 `C4`), about 66,000 passages and 20 hours of processing.
+Dated sections below are in the order the work was done, so later ones correct earlier
+counts. The corpora and results so far are summarized in
+[evaluation-status.md](evaluation-status.md).
+
 ## Rules
 
 A document enters `corpus-v2` if it is national and normative (a law, resolution of the
@@ -105,22 +111,31 @@ without a result: it pages through the whole database with no number filter.
 The slow trial document (`124/2020/QH14`) took about 32 seconds when repeated, so its 778 s
 was not caused by the file.
 
-## To do
+## Ministry search result (04/11/2026)
 
-The database now holds `corpus-v1.2`: `corpus-v1` with the split-syllable repair and both circulars. Results are in `docs/issue-guided-retrieval.md`. `corpus-v2` is not started.
+Paging through the ministry's circulars, joint circulars, and decrees (7,295 records, about
+45 minutes) raised `C3` from 299 to 339 of 379 cited numbers. The selection is now 975 new
+documents (420 `C2`, 251 `C3`, 304 `C4`), about 66,000 passages and 20 hours by the trial's
+averages. 40 numbers stay unresolved; Circulars 80/2021 and 25/2018 were among them until
+they were found in the Gazette (below).
 
-1. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
-   first, or all 975), and freeze `corpus-v2`.
-2. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
-   coverage, and end to end.
+Each record's status and expiry date is kept in `data/evaluation/corpus/mof-status.json`.
+
+The ministry's status also tests the repeal list (`data/evaluation/repeals/corpus-v1.json`),
+though not as ground truth, since it lists `94/2010/TT-BTC` as in force although Circular
+99/2016 says it ended. 1,111 of the 2,026 corpus documents are in these records. Where the
+ministry and the list both say a document ended (64 documents), the date matches for 57,
+is within a year for 5, and differs further for 2. The ministry lists 178 documents from
+the repeal list as in force, not yet examined. It lists 184 corpus documents as expired,
+of which the repeal list has only 64, so 120 could be removed that the filter keeps.
 
 ## Official files for the two circulars (05/11/2026)
 
 Both are in the Official Gazette (Công báo), `congbao.chinhphu.vn`, a source we do not
 collect from. They are saved in `data/local/supplement/` (not committed), with the page
-addresses in `data/corpus/gold_supplement.json`. Neither is in the database or in
-`corpus-v1`, and neither is in `selected-v2.json`, so they must be loaded from the
-supplement when `corpus-v2` is collected.
+addresses in `data/corpus/gold_supplement.json`. Both are now in the database, as part of
+`corpus-v1.2`. Neither is in `selected-v2.json`, so a `corpus-v2` built on a new database
+must load them from the supplement.
 
 | Circular | Gazette issues | Pages | SHA-256 |
 | --- | --- | --- | --- |
@@ -138,7 +153,7 @@ separate documents. See the next section for how their text is read.
 counts these and, above 5 per 1,000 words, uses `pypdfium2`'s text when that is cleaner.
 Both Gazette circulars fall from about 80 per 1,000 words in the operative text to almost
 none: 25/2018 gives 14 passages, and 80/2021 gives 963 (592 of them appendix forms under
-Art 89). `corpus-v1` is frozen and was not reprocessed.
+Art 89). 80/2021 has 964 passages as loaded, after OCR of its 9 pages without usable text.
 
 A read-only count over `corpus-v1` finds 8 PDFs above 10 per 1,000 words, 658 of 61,208
 passages:
@@ -155,23 +170,18 @@ passages:
 | 84/2025/TT-BNNMT | 10.7 | 135 |
 
 Few documents, but essential provisions of 8 of 12 gold cases are in them (A1, A2, A4, A5,
-A6, A8, L3, L4), mostly VAT Law 48/2024. Whether this lowers retrieval is not measured, and
-the new reader has not been tried on these 8 files. Measuring needs them reprocessed and
-embedded under a new corpus label, with the same runs repeated.
+A6, A8, L3, L4), mostly VAT Law 48/2024. Reprocessing them as `corpus-v1.1` changed almost
+no rank, so split syllables were not why those provisions were missed: see
+[retrieval-experiments.md](retrieval-experiments.md). `191/2010/TT-BTC` stays broken, at 31.9
+per 1,000 words.
 
-## Ministry search result (04/11/2026)
+## To do
 
-Paging through the ministry's circulars, joint circulars, and decrees (7,295 records, about
-45 minutes) raised `C3` from 299 to 339 of 379 cited numbers. The selection is now 975 new
-documents (420 `C2`, 251 `C3`, 304 `C4`), about 66,000 passages and 20 hours by the trial's
-averages. 40 numbers stay unresolved, including Circulars 80/2021 and 25/2018.
+The database holds `corpus-v1.2`; `corpus-v2` is not started. Results so far show that more
+documents do not by themselves make provisions retrievable, so decide on this after the keyword
+term limit is dealt with ([open work](evaluation-status.md#open-work)).
 
-Each record's status and expiry date is kept in `data/evaluation/corpus/mof-status.json`.
-
-The ministry's status also tests the repeal list (`data/evaluation/repeals/corpus-v1.json`),
-though not as ground truth, since it lists `94/2010/TT-BTC` as in force although Circular
-99/2016 says it ended. 1,111 of the 2,026 corpus documents are in these records. Where the
-ministry and the list both say a document ended (64 documents), the date matches for 57,
-is within a year for 5, and differs further for 2. The ministry lists 178 documents from
-the repeal list as in force, not yet examined. It lists 184 corpus documents as expired,
-of which the repeal list has only 64, so 120 could be removed that the filter keeps.
+1. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
+   first, or all 975), and freeze `corpus-v2`.
+2. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
+   coverage, and end to end.

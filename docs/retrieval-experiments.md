@@ -1,7 +1,21 @@
-# Issue-guided retrieval: experiment plan
+# Retrieval experiments
 
-Written before any result was seen, so the comparison cannot be tuned to the gold set.
-Changes after the first run are recorded at the end with their reason.
+The record of retrieval experiments on the gold set, in the order they were done. Later
+sections do not rewrite earlier ones. For where things stand now, read
+[evaluation-status.md](evaluation-status.md).
+
+| Date | Experiment | Sections |
+| --- | --- | --- |
+| 31/10/2026 | Issue-guided retrieval | [Question](#question) to [First results](#first-results-31102026) |
+| 04/11/2026 | Following one legal reference | [Upper limit](#following-one-legal-reference-upper-limit-04112026) |
+| 04/11/2026 | Removing documents that had ended | [Plan](#removing-documents-that-had-ended-experiment-plan-04112026), [results](#removing-documents-that-had-ended-results-04112026) |
+| 04/11/2026 | The ministry's expiry dates | [Plan](#adding-the-ministrys-expiry-dates-experiment-plan-04112026), [results](#adding-the-ministrys-expiry-dates-results-04112026) |
+| 05/11/2026 | Repaired text and two circulars | [Plan](#plan-repaired-text-and-the-two-circulars-05112026), [results](#repaired-text-and-the-two-circulars-results-05112026) |
+| 05/11/2026 | Why A4 and L2 stay unfound | [Diagnosis](#why-a4-and-l2-stay-unfound-05112026) |
+
+The issue-guided plan below was written before any result was seen, so the comparison
+cannot be tuned to the gold set. Changes after the first run are recorded at the end with
+their reason.
 
 ## Question
 
@@ -356,6 +370,61 @@ corpora were counted on the provisions both runs hold.
 The result: coverage was only part of the problem. Having the document made one of three cases
 retrievable, and the database now holds `corpus-v1.2` (fingerprint `7df84879`). Runs against
 `corpus-v1` now stop at the corpus check.
+
+## Why A4 and L2 stay unfound (05/11/2026)
+
+Exploratory and read-only, on `corpus-v1.2`, `--as-of case`. It was not planned in advance,
+and it uses the same 12 cases that showed the problem, so treat it as a strong lead that needs
+a planned rerun, not as a result of record.
+
+Ranks of the gold passages in each list before fusion (exact vector search, no filter). Hybrid
+search takes the top 50 of each list:
+
+| Case | Passage | Keyword | Vector |
+| --- | --- | --- | --- |
+| A7, found | 25/2018 Art 2, two passages | 185, 1,041 | 1, 3 |
+| L2, not found | 25/2018 Art 2, two passages | 91, 117 | 17, 22 |
+| A4, not found | 80/2021 Art 40(3) | 2,159 | 48 |
+| A4, not found | 80/2021 Art 21, three passages | not matched | below 5,000 |
+
+**The main cause is the keyword term limit.** `MAX_KEYWORD_TERMS = 12` keeps a question's first
+12 terms after stopwords. Every scored question has more: 18 to 40. For long natural questions
+the kept terms are mostly the opening (`Tháng`, `công`, `ty`, `tôi`, `đã`), and the legal
+content is cut: A4 loses `khẩu`, `khách`, `trả`, `lại`, and L2 loses `GTGT`, `hoàn`, `300`,
+`triệu`. The keyword list is then noise, and fusion ranks that noise above a passage found by
+vector search alone. Keyword search alone scored 0 at every K in every run, which should have
+prompted this check much earlier.
+
+Raising the limit to 40, which removes it for all 12 questions, and changing nothing else
+(hybrid on `corpus-v1.2`, no filter):
+
+| Limit | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| 12 | 0.11 (0) | 0.15 (0) | 0.22 (0) |
+| 40 | 0.30 (0.08) | 0.41 (0.17) | 0.45 (0.25) |
+
+Paired: 5 wins, 1 loss at K = 5 (p = 0.22; A7 falls from rank 4 to 6), 6 wins, 0 losses at K =
+10 (p = 0.03), and 5 wins, 0 losses at K = 20 (p = 0.06). L2's keyword rank goes from 91 to 1
+and it reaches rank 5 after fusion. Reports: `hybrid-asof-v1.2-terms40.json`, with the
+single-list runs `keyword-asof-v1.2.json` and `semantic-asof-v1.2.json`. The report's code
+version does not show the changed limit, which was set at run time.
+
+Every earlier figure in this document was measured under the limit of 12. Issue-guided search
+and the filters have not been run without it, so their gains may be larger or smaller.
+
+**A4 is not fixed by this,** for separate reasons:
+
+- Art 40(3) still ranks 162 by keyword. Its wording (`người bán trả lại`) differs from the
+  question's (`khách hàng nước ngoài trả lại`), and many old passages match common terms.
+- Art 21 concerns late-payment interest, which the question never mentions. No single search
+  can reach it; it needs a legal step from the recovery of the refund to its interest.
+- At the limit of 12, 20 of the top 50 keyword passages for A4 are forms and tax returns,
+  including `80/2021` Art 89's appendix. At 40 terms that falls to 3.
+
+Other observations: vector scores are close together (for L2, 0.93 at the top and 0.91 at rank
+50), so small differences decide the top ten. L2's rule also appears in Decree 146/2017 Art 1,
+a supporting provision for that case. `89/2026/TT-BTC` repeats A4's rule at Art 54, but it was
+issued on 30/06/2026, after the case date.
 
 ## Changes
 

@@ -1,4 +1,4 @@
-"""Give each essential provision a saved run missed one cause (docs/issue-guided-retrieval.md).
+"""Give each essential provision a saved run missed one cause (docs/retrieval-experiments.md).
 
     python scripts/diagnose_retrieval_misses.py data/evaluation/runs/hybrid-asof.json --k 10
 
