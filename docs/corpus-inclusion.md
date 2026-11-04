@@ -109,9 +109,9 @@ was not caused by the file.
 
 The database now holds `corpus-v1.2`: `corpus-v1` with the split-syllable repair and both circulars. Results are in `docs/issue-guided-retrieval.md`. `corpus-v2` is not started.
 
-2. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
-   first, or all 935), and freeze `corpus-v2`.
-3. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
+1. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
+   first, or all 975), and freeze `corpus-v2`.
+2. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
    coverage, and end to end.
 
 ## Official files for the two circulars (05/11/2026)
