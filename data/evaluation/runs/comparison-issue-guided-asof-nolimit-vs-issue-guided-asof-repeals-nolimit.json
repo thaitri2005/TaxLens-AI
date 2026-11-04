@@ -1,0 +1,383 @@
+{
+  "baseline": "issue-guided",
+  "method": "issue-guided",
+  "by_k": [
+    {
+      "k": 5,
+      "case_count": 12,
+      "wins": 3,
+      "losses": 0,
+      "ties": 9,
+      "sign_test_p": 0.25,
+      "baseline_full_coverage": 0.0,
+      "method_full_coverage": 0.0,
+      "cases": [
+        {
+          "case_id": "A1",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A2",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A5",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A6",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A7",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 3,
+          "gained": [
+            "[['25/2018/TT-BTC', '2', None]]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "A8",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A9",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L2",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 1,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L3",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [
+            "[['48/2024/QH15', '15', '1']]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "L4",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [
+            "[['181/2025/NĐ-CP', '26', '2']]"
+          ],
+          "lost": []
+        }
+      ]
+    },
+    {
+      "k": 10,
+      "case_count": 12,
+      "wins": 3,
+      "losses": 0,
+      "ties": 9,
+      "sign_test_p": 0.25,
+      "baseline_full_coverage": 0.0,
+      "method_full_coverage": 0.0,
+      "cases": [
+        {
+          "case_id": "A1",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A2",
+          "outcome": "tie",
+          "baseline_found": 2,
+          "method_found": 2,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A5",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A6",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A7",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 3,
+          "gained": [
+            "[['25/2018/TT-BTC', '2', None]]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "A8",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [
+            "[['48/2024/QH15', '15', '1']]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "A9",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L2",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 1,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L3",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [
+            "[['48/2024/QH15', '15', '1']]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "L4",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        }
+      ]
+    },
+    {
+      "k": 20,
+      "case_count": 12,
+      "wins": 2,
+      "losses": 0,
+      "ties": 10,
+      "sign_test_p": 0.5,
+      "baseline_full_coverage": 0.0,
+      "method_full_coverage": 0.16666666666666666,
+      "cases": [
+        {
+          "case_id": "A1",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A2",
+          "outcome": "tie",
+          "baseline_found": 3,
+          "method_found": 3,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A5",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A6",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A7",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A8",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 2,
+          "in_corpus": 2,
+          "gained": [
+            "[['181/2025/NĐ-CP', '29', '1']]",
+            "[['48/2024/QH15', '15', '1']]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "A9",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L2",
+          "outcome": "win",
+          "baseline_found": 0,
+          "method_found": 1,
+          "in_corpus": 1,
+          "gained": [
+            "[['25/2018/TT-BTC', '2', None]]"
+          ],
+          "lost": []
+        },
+        {
+          "case_id": "L3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L4",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        }
+      ]
+    }
+  ]
+}

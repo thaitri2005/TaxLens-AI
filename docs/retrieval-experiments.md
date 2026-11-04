@@ -12,7 +12,7 @@ sections do not rewrite earlier ones. For where things stand now, read
 | 04/11/2026 | The ministry's expiry dates | [Plan](#adding-the-ministrys-expiry-dates-experiment-plan-04112026), [results](#adding-the-ministrys-expiry-dates-results-04112026) |
 | 05/11/2026 | Repaired text and two circulars | [Plan](#plan-repaired-text-and-the-two-circulars-05112026), [results](#repaired-text-and-the-two-circulars-results-05112026) |
 | 05/11/2026 | Why A4 and L2 stay unfound | [Diagnosis](#why-a4-and-l2-stay-unfound-05112026) |
-| 05/11/2026 | Removing the keyword term limit | [Plan](#removing-the-keyword-term-limit-plan-05112026) |
+| 05/11/2026 | Removing the keyword term limit | [Plan](#removing-the-keyword-term-limit-plan-05112026), [results](#removing-the-keyword-term-limit-results-05112026) |
 
 The issue-guided plan below was written before any result was seen, so the comparison
 cannot be tuned to the gold set. Changes after the first run are recorded at the end with
@@ -457,6 +457,102 @@ same corpus use `compare_retrieval_runs.py`, which treats the limit as a method 
 **Safety checks.** `hybrid-asof-nolimit` must reproduce the exploratory figures. Query time is
 measured at both limits. The older `tax_article_retrieval.json` regression set is run at both
 limits, and a real fall there is reported and investigated before this is kept.
+
+## Removing the keyword term limit: results (05/11/2026)
+
+The limit was the main cause of the low recall. Removing it nearly tripled hybrid recall at K = 10,
+and the hybrid figures match the exploratory run exactly. It made issue-guided retrieval no better,
+for a reason found below. These runs repeat a result already seen, on the same 12 cases, so they are
+not independent evidence.
+
+Essential recall on `corpus-v1.2` with `--as-of case`, with full coverage in brackets where it is
+not 0:
+
+| Method | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| Keyword, limit of 12 | 0 | 0 | 0 |
+| **Keyword, no limit** | **0.22 (0.08)** | **0.42 (0.25)** | **0.42 (0.25)** |
+| Hybrid, limit of 12 | 0.11 | 0.15 | 0.22 |
+| **Hybrid, no limit** | **0.30 (0.08)** | **0.41 (0.17)** | **0.45 (0.25)** |
+| Hybrid, no limit, filter | 0.41 (0.17) | 0.45 (0.25) | 0.45 (0.25) |
+| Hybrid, no limit, ministry dates only | 0.34 (0.08) | 0.45 (0.25) | 0.45 (0.25) |
+| Issue-guided, limit of 12 | 0.15 | 0.21 | 0.26 |
+| Issue-guided, no limit | 0.10 | 0.17 | 0.28 |
+| Issue-guided, no limit, filter | 0.22 | 0.28 | 0.45 (0.17) |
+| Issue-guided, no limit, ministry dates only | 0.17 | 0.24 | 0.41 (0.08) |
+
+Paired wins and losses (exact sign test):
+
+| Comparison | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| Keyword: no limit against limit | 5-0, p = 0.06 | 8-0, p = 0.008 | 8-0, p = 0.008 |
+| Hybrid: no limit against limit | 5-1, p = 0.22 | 6-0, p = 0.03 | 5-0, p = 0.06 |
+| Hybrid with filter: no limit against limit | 7-0, p = 0.02 | 4-0, p = 0.13 | 2-0, p = 0.5 |
+| Issue-guided: no limit against limit | 1-2, p = 1 | 1-2, p = 1 | 2-1, p = 1 |
+| Issue-guided against hybrid, no limit | 0-4, p = 0.13 | 1-5, p = 0.22 | 1-3, p = 0.63 |
+| Hybrid against keyword, no limit | 2-0, p = 0.5 | 1-1, p = 1 | 1-0, p = 1 |
+| Hybrid: filter against none, no limit | 3-0, p = 0.25 | 1-0, p = 1 | tied |
+| Hybrid: ministry dates against none, no limit | 1-0, p = 1 | 1-0, p = 1 | tied |
+| Issue-guided: filter against none, no limit | 3-0, p = 0.25 | 3-0, p = 0.25 | 2-0, p = 0.5 |
+| Issue-guided: ministry dates against none, no limit | 2-0, p = 0.5 | 2-0, p = 0.5 | 2-0, p = 0.5 |
+
+**The filter matters less now.** Without the limit it adds to hybrid mainly at K = 5, and it changes
+one case at K = 10.
+
+**Hybrid and keyword are close.** Without the limit, keyword search alone almost matches hybrid. At
+K = 10 hybrid does better on A7 and keyword on L3. Twelve cases cannot separate them.
+
+**Why issue-guided fell behind.** It takes passages in turn from the whole question's ranking and each
+issue's ranking, so with 3 or 4 issues a passage at rank 5 of the question's ranking lands near rank
+16 to 21. A1 goes from 5 to 16, A7 from 6 to 19, L3 from 3 to 11, and A8 and L2 from 5 to outside the
+top 20. Under the limit the question's ranking was weak, so this cost little. This explanation came
+after the results, so any change to the merge needs its own plan and new cases.
+
+**What is still missed at K = 10.** Hybrid misses 20 provisions: 14 not retrieved, 5 ranked below 10,
+and 1 with no passage. Issue-guided misses 25: 13, 11, and 1. Following one legal reference reaches 1
+of the 20 at document level and none at article or clause level, and likewise 1 of the 25.
+
+### Query time
+
+Removing the limit took keyword search from about 7 s to about 17 s a question, which is too slow to
+release. A long question matches almost everything (61,610 of 62,182 passages for the longest), and
+the old query tested every term against each of them, decompressing the stored vector each time: 8.3
+million buffer reads in one query.
+
+The query now counts each term's matches from the GIN indexes and calculates the rank score only for
+passages that can still reach the top results: 86 of the 61,610 in that query. This is safe because
+that part of the score is always below 1. It needs a GIN index on the accented vector too (migration
+`20261105_0006`), and sequential scans are turned off during this query, because the planner does not
+count the cost of decompression.
+
+Keyword search over the 12 gold questions, top 50, from a laptop 55 ms from the database:
+
+| Query | Median | Slowest |
+| --- | --- | --- |
+| Old query, limit of 12 | 7 s | 11 s |
+| Old query, limit of 64 | 17 s | 27 s |
+| New query, limit of 64, default plan | 2.7 s | 3.6 s |
+| **New query, limit of 64, no sequential scans** | **1.7 s** | **2.4 s** |
+
+In a hybrid search, embedding the question adds about 0.06 s and vector search about 0.5 s. Keyword
+evaluation of the 12 cases fell from 3.75 minutes to under a minute, and issue-guided from 8.5 minutes
+to 2.7.
+
+**Results are unchanged.** All seven runs were repeated with the new query. Every case field matches
+(435 per run, including the ranked documents), so the reports kept here are the ones from before the
+query changed, recording commit `389b46b`. The regression set also matches between the two queries.
+
+**Safety checks.** `hybrid-asof-nolimit` reproduces the exploratory figures. On
+`tax_article_retrieval.json`, the 18 cases average the same at limits of 12 and 64 (hit rate 0.83, MRR
+0.51 at K = 5), though the rankings of 2 cases differ.
+
+**On the database.** The index was built by hand on Azure with `CREATE INDEX CONCURRENTLY`, without
+recording the migration, because the live API would fail on a revision it does not know the next time
+it starts. The migration uses `IF NOT EXISTS`, so the next release records it and changes nothing.
+
+**Noticed in passing.** The vector search currently scans every embedding, which is exact. A simpler
+query on the same table used the HNSW index and returned only 40 rows, since `hnsw.ef_search` defaults
+to 40. A plan change could therefore shorten the candidate list without any error.
 
 ## Changes
 

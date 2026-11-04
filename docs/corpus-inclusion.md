@@ -178,8 +178,8 @@ per 1,000 words.
 ## To do
 
 The database holds `corpus-v1.2`; `corpus-v2` is not started. Results so far show that more
-documents do not by themselves make provisions retrievable, so decide on this after the keyword
-term limit is dealt with ([open work](evaluation-status.md#open-work)).
+documents do not by themselves make provisions retrievable. The keyword term limit is now gone, so
+this decision is open ([open work](evaluation-status.md#open-work)).
 
 1. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
    first, or all 975), and freeze `corpus-v2`.

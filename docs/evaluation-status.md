@@ -8,11 +8,13 @@ the dated record behind each figure is in
 
 - Gold set: `gold-v1.0 --verified-only`, 12 scored cases. That is too few to show most
   differences, so wins and losses are given with every comparison.
-- The keyword term limit is the largest problem found. Removing it nearly tripled hybrid recall
-  at K = 10 in an exploratory run. **The fix is not in the code yet**, and the run needs
-  repeating under a written plan.
+- The keyword term limit was the largest problem found. Removing it nearly tripled hybrid recall
+  at K = 10, from 0.15 to 0.41. The change is in the code, with a faster query that returns the
+  same results, but **the live site has it only after the next release**.
+- Hybrid and keyword search are now close, and these cases cannot separate them. Issue-guided
+  retrieval has fallen behind both.
 - More documents alone do not fix retrieval: adding the two missing circulars made only one of
-  three affected cases findable.
+  three affected cases findable until the limit was removed.
 
 ## Corpora
 
@@ -30,46 +32,51 @@ embeddings are saved in `data/local/backups/corpus-v1-8pdfs.json`, which is not 
 
 ## Results
 
-Essential recall over provisions held in the corpus, on `corpus-v1.2` with `--as-of case`. Full
-coverage is in brackets where it is not 0.
+Essential recall over provisions held in the corpus, on `corpus-v1.2` with `--as-of case` and no
+term limit. Full coverage is in brackets where it is not 0.
 
 | Method | K = 5 | K = 10 | K = 20 |
 | --- | --- | --- | --- |
-| Keyword, limit of 12 terms | 0 | 0 | 0 |
-| Semantic | 0.11 | 0.13 | 0.30 (0.08) |
-| Hybrid, limit of 12 | 0.11 | 0.15 | 0.22 |
-| Hybrid, limit of 12, with filter | 0.13 | 0.26 (0.08) | 0.34 (0.17) |
-| Issue-guided, limit of 12 | 0.15 | 0.21 | 0.26 |
-| Issue-guided, limit of 12, with filter | 0.26 | 0.28 | 0.30 |
-| **Hybrid, limit of 40 (exploratory)** | **0.30 (0.08)** | **0.41 (0.17)** | **0.45 (0.25)** |
+| Keyword | 0.22 (0.08) | 0.42 (0.25) | 0.42 (0.25) |
+| Semantic (no terms, so unaffected) | 0.11 | 0.13 | 0.30 (0.08) |
+| **Hybrid** | **0.30 (0.08)** | **0.41 (0.17)** | **0.45 (0.25)** |
+| Hybrid, filter | 0.41 (0.17) | 0.45 (0.25) | 0.45 (0.25) |
+| Hybrid, ministry dates only | 0.34 (0.08) | 0.45 (0.25) | 0.45 (0.25) |
+| Issue-guided | 0.10 | 0.17 | 0.28 |
+| Issue-guided, filter | 0.22 | 0.28 | 0.45 (0.17) |
+| Issue-guided, ministry dates only | 0.17 | 0.24 | 0.41 (0.08) |
 
-"With filter" leaves out documents that had ended by the case date, including two inferred rules
-that no legal expert has validated. Issue-guided search and the filters have not been run without
-the limit.
+"Filter" leaves out documents that had ended by the case date, including two inferred rules that no
+legal expert has validated. "Ministry dates only" leaves out that inference. Figures under the limit
+of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-term-limit-results-05112026).
 
 ## What each experiment found
 
 | Experiment | Finding | Standing |
 | --- | --- | --- |
-| Keyword term limit | Hybrid at K = 10 rises from 0.15 to 0.41: 6 wins, 0 losses, p = 0.03 | Strong lead, exploratory, not yet in the code |
-| Filter for ended documents | Hybrid at K = 10 wins 3, loses 0, p = 0.25, and removes no gold document | Promising; the gain depends on unvalidated rules |
-| The ministry's expiry dates | Without inference, about half of hybrid's filter gain and all of issue-guided's at K = 10 and 20 | The conservative version of the filter |
-| Issue-guided against hybrid | Wins 2, loses 0 at K = 10, p = 0.5, measured on `corpus-v1` | Unresolved; repeat without the limit |
-| Two missing circulars | A7 found, L2 and A4 not (L2 is found once the limit is removed) | Loaded |
+| Keyword term limit | Hybrid at K = 10 rises from 0.15 to 0.41: 6 wins, 0 losses, p = 0.03. Keyword rises from 0 to 0.42: 8 wins, 0 losses, p = 0.008 | In the code. Repeats a result already seen, so new cases are needed as independent evidence |
+| Query time | Keyword search takes 1.7 s a question, against 17 s with the old query and 7 s under the limit. Results are identical | In the code; the index is on Azure and the migration records it at the next release |
+| Issue-guided against hybrid | Hybrid is ahead without the limit: at K = 10 issue-guided wins 1, loses 5, p = 0.22. Taking turns between rankings pushes the question's own results down | Not worth using as it is; a different merge would need its own plan |
+| Filter for ended documents | Hybrid wins 3, loses 0 at K = 5, p = 0.25, and changes one case at K = 10. Removes no gold document | Smaller effect than before; the gain depends on unvalidated rules |
+| The ministry's expiry dates | Hybrid gets the same recall as the full filter at K = 10 and 20, and part of it at K = 5, without inference | The conservative version of the filter |
+| Two missing circulars | A7 and L2 found; A4 not, since Art 40(3) is worded differently from the question | Loaded |
 | Split-syllable repair | Almost no rank changed | Kept for correct text, not a retrieval gain |
-| Following one legal reference | Reaches at most 1 of 20 missed provisions at K = 10 | A small supplement; repeat without the limit |
+| Following one legal reference | Reaches 1 of 20 missed provisions at K = 10, at document level only | Not worth building now |
 
 ## Open work
 
 In suggested order:
 
-1. Write a plan, remove the term limit in `retrieval/search.py`, check query time and the older
-   regression datasets, and rerun every method and filter. This also changes search on the site.
-2. Add more gold cases, since 12 cannot separate most methods.
-3. Have a tax expert review the inferred rules, the 178 documents the ministry lists as in force
+1. Release, so the site gets the longer queries and the faster search. The index is already on Azure.
+2. Add more gold cases, since 12 cannot separate most methods and the limit result needs independent
+   evidence.
+3. Find out why 14 of hybrid's 20 missed provisions at K = 10 are not retrieved at all. Candidates
+   are different wording (A4 Art 40(3)) and provisions that the question does not mention (A4 Art 21).
+4. Have a tax expert review the inferred rules, the 178 documents the ministry lists as in force
    but our list ends, the alternative valid evidence sets, and whether Circular 80/2021 Art 40(3)
    still applied on A4's date.
-4. Handle forms and appendices such as `80/2021` Art 89's 592 passages, and multi-step cases such
-   as A4's interest provision.
-5. Decide on `corpus-v2` after step 1, because more passages add competition for the top ranks.
-   It needs a database backup, Airflow, and a go-ahead.
+5. Handle forms and appendices such as `80/2021` Art 89's 592 passages.
+6. Set `hnsw.ef_search` or otherwise protect the vector search: it scans every embedding today, and
+   a plan that used the index would return at most 40 candidates, not 50, without any error.
+7. Decide on `corpus-v2`, because more passages add competition for the top ranks. It needs a
+   database backup, Airflow, and a go-ahead.

@@ -118,7 +118,7 @@ compared with the stored document number; a mismatch is recorded on the processi
 
 PostgreSQL stores two generated `tsvector` columns per chunk (migration
 `20261017_0005`): one over the text as written and one with Vietnamese diacritics removed
-by `translate()`. Only the unaccented column is GIN-indexed.
+by `translate()`. Both columns are GIN-indexed.
 
 For a query:
 
@@ -135,6 +135,10 @@ For a query:
    term that also matches with its accents, plus a cover-density tie-breaker. Chunks
    containing all terms therefore rank first, and the accent bonus keeps `thuế` (tax)
    ahead of `thuê` (rent) although both fold to `thue`.
+4. Term matches are counted from the indexes, and the tie-breaker, which is always below 1, is
+   calculated only for chunks that can still reach the top results. A long question matches
+   almost every chunk, so reading them all took about 17 s; this takes about 2 s
+   ([measured](retrieval-experiments.md#query-time)).
 
 ## 4. Semantic retrieval and fusion
 
