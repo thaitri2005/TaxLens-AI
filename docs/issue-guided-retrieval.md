@@ -254,6 +254,34 @@ document is already listed, the earlier date stands. The ministry's status is as
 The second pair asks whether stated and official dates can replace the unvalidated
 inferences. Measures as before; gold provisions removed are reported as filter errors.
 
+Correction after the first runs: a document already listed by an inference kept that label
+even when the ministry confirmed it, so `explicit` + `ministry` wrongly kept
+`219/2013/TT-BTC` and seven others. Such documents now take the `ministry` label, and that
+pair was run again. The result of all four rules does not depend on the label.
+
+## Adding the ministry's expiry dates: results (04/11/2026)
+
+The ministry's dates list 119 more documents as ended and confirm 8 inferred ones, among
+them `219/2013/TT-BTC`. No gold provision's document had ended by its case's date.
+
+Essential recall over provisions held in the corpus (full coverage in brackets):
+
+| Filter | Hybrid, K = 5 | K = 10 | K = 20 | Issue-guided, K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- | --- | --- | --- |
+| None | 0.09 (0) | 0.14 (0) | 0.20 (0) | 0.16 (0) | 0.23 (0) | 0.23 (0) |
+| `explicit` + `ministry` | 0.09 (0) | 0.20 (0) | 0.25 (0.09) | 0.20 (0) | 0.27 (0) | 0.27 (0) |
+| `explicit` + inferred | 0.14 (0) | 0.25 (0.09) | 0.34 (0.18) | 0.25 (0) | 0.27 (0) | 0.27 (0) |
+| All four | 0.14 (0) | 0.25 (0.09) | 0.34 (0.18) | 0.25 (0) | 0.27 (0) | 0.27 (0) |
+
+Against no filter, `explicit` + `ministry` wins 2, loses 0 at K = 10 for hybrid (p = 0.5)
+and wins 1, loses 0 for issue-guided (p = 1.0). So the ministry's record, which needs no
+inference, reproduces part of the gain and all of issue-guided's at K = 10 and 20. The
+rest still depends on `guidance` and `amendment`, such as `130/2016/TT-BTC` and
+`26/2015/TT-BTC`, which the ministry lists as in force.
+
+All four rules changed the top ten documents in 4 of 12 cases and found no further
+provision, so the 119 extra documents add nothing on these 12 cases.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that

@@ -38,9 +38,18 @@ def main() -> None:
         if current is None:
             repeals[number] = {"ended_on": ended_on, "rule": "ministry", "by": "ministry status"}
             added += 1
-        elif ended_on < current["ended_on"]:
-            repeals[number] = {**current, "ended_on": ended_on}
-            earlier += 1
+        else:
+            # The ministry's record stands in for an inference it confirms.
+            inferred = current["rule"] in ("guidance", "amendment")
+            if ended_on < current["ended_on"]:
+                earlier += 1
+            if inferred or ended_on < current["ended_on"]:
+                repeals[number] = {
+                    **current,
+                    "rule": "ministry" if inferred else current["rule"],
+                    "by": "ministry status" if inferred else current["by"],
+                    "ended_on": min(ended_on, current["ended_on"]),
+                }
     rules: dict[str, int] = {}
     for repeal in repeals.values():
         rules[repeal["rule"]] = rules.get(repeal["rule"], 0) + 1

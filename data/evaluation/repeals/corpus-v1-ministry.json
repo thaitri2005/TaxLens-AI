@@ -3,9 +3,9 @@
   "ended_count": 440,
   "rules": {
     "explicit": 239,
-    "amendment": 39,
-    "guidance": 43,
-    "ministry": 119
+    "ministry": 127,
+    "guidance": 37,
+    "amendment": 37
   },
   "repeals": {
     "01/2003/QĐ-BTC": {
@@ -20,8 +20,8 @@
     },
     "02/2013/TT-BTC": {
       "ended_on": "2016-06-10",
-      "rule": "amendment",
-      "by": "27/2010/tt-btc"
+      "rule": "ministry",
+      "by": "ministry status"
     },
     "03/2008/QĐ-BTC": {
       "ended_on": "2012-10-01",
@@ -200,8 +200,8 @@
     },
     "114/2002/TT-BTC": {
       "ended_on": "2005-05-16",
-      "rule": "guidance",
-      "by": "114/2002/qd-ttg"
+      "rule": "ministry",
+      "by": "ministry status"
     },
     "114/2010/TT-BTC": {
       "ended_on": "2015-08-04",
@@ -225,8 +225,8 @@
     },
     "115/2006/TT-BTC": {
       "ended_on": "2009-03-21",
-      "rule": "guidance",
-      "by": "132/2004/tt-btc"
+      "rule": "ministry",
+      "by": "ministry status"
     },
     "115/2010/TT-BTC": {
       "ended_on": "2011-01-01",
@@ -535,8 +535,8 @@
     },
     "156/2013/TT-BTC": {
       "ended_on": "2020-07-01",
-      "rule": "guidance",
-      "by": "78/2006/QH11"
+      "rule": "ministry",
+      "by": "ministry status"
     },
     "156/2015/TT-BTC": {
       "ended_on": "2017-01-01",
@@ -895,8 +895,8 @@
     },
     "219/2013/TT-BTC": {
       "ended_on": "2025-07-01",
-      "rule": "guidance",
-      "by": "209/2013/nd-cp"
+      "rule": "ministry",
+      "by": "ministry status"
     },
     "219/2016/TT-BTC": {
       "ended_on": "2021-05-22",
@@ -1125,8 +1125,8 @@
     },
     "36/2007/TT-BTC": {
       "ended_on": "2017-01-01",
-      "rule": "amendment",
-      "by": "88/2002/TT-BTC"
+      "rule": "ministry",
+      "by": "ministry status"
     },
     "36/2013/TT-BTC": {
       "ended_on": "2016-06-01",
@@ -1280,8 +1280,8 @@
     },
     "61/2013/TT-BTC": {
       "ended_on": "2014-10-01",
-      "rule": "guidance",
-      "by": "04/2013/tt-btc"
+      "rule": "ministry",
+      "by": "ministry status"
     },
     "62/2017/TT-BTC": {
       "ended_on": "2022-01-11",
@@ -1495,8 +1495,8 @@
     },
     "89/2000/TT-BTC": {
       "ended_on": "2004-11-04",
-      "rule": "guidance",
-      "by": "49/1999/NĐ-CP"
+      "rule": "ministry",
+      "by": "ministry status"
     },
     "90/2023/NĐ-CP": {
       "ended_on": "2026-01-01",
