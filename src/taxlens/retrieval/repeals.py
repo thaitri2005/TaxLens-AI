@@ -101,9 +101,9 @@ def explicit_targets(text: str) -> set[str]:
     opener = _LIST_OPENER.search(folded)
     if opener:
         for item in re.split(r";\s*|\.\s+", folded[opener.end() :]):
-            match = _LIST_ITEM.match(item)
-            if match:
-                targets.add(match["number"])
+            item_match = _LIST_ITEM.match(item)
+            if item_match:
+                targets.add(item_match["number"])
     return targets
 
 

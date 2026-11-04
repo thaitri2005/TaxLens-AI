@@ -1,5 +1,6 @@
 import importlib.util
 import uuid
+from datetime import date
 from pathlib import Path
 
 from sqlalchemy.dialects import postgresql
@@ -23,8 +24,7 @@ from taxlens.retrieval.snippets import build_excerpt, lexical_support
 from taxlens.retrieval.text import VIETNAMESE_ACCENTED, VIETNAMESE_UNACCENTED, fold_vietnamese
 
 MIGRATION = (
-    Path(__file__).parents[1]
-    / "migrations/versions/20261017_0005_document_chunk_search_vector.py"
+    Path(__file__).parents[1] / "migrations/versions/20261017_0005_document_chunk_search_vector.py"
 )
 
 
@@ -54,9 +54,24 @@ def test_postgres_keyword_query_matches_folded_terms_and_rewards_exact_accents()
     )
 
     tsquery = "websearch_to_tsquery('simple'::regconfig, "
-    assert f"search_vector_folded @@ {tsquery}'hoa or don')" in sql
+    assert f"search_vector_folded @@ {tsquery}'hoa')" in sql
+    assert f"search_vector_folded @@ {tsquery}'don')" in sql
     assert f"document_chunks.search_vector @@ {tsquery}'hóa')" in sql
+    assert f"ts_rank_cd(document_chunks.search_vector_folded, {tsquery}'hoa or don'), 32)" in sql
     assert "'là'" not in sql and "'gì'" not in sql
+
+
+def test_postgres_keyword_query_reads_only_chunks_that_can_reach_the_limit() -> None:
+    sql = str(
+        _postgresql_keyword_statement("hóa đơn", SearchFilters(as_of=date(2024, 1, 1)), 5).compile(
+            dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
+        )
+    )
+
+    # Filters apply before the cutoff, or filtered-out chunks would raise it and lose results.
+    assert sql.index("issue_date") < sql.index("OFFSET 4")
+    assert "eligible.match_score > coalesce((SELECT eligible.match_score" in sql
+    assert "- 1" in sql
 
 
 def test_article_headings_tolerate_ocr_noise_and_reject_references() -> None:
@@ -122,8 +137,7 @@ def test_excerpt_quotes_the_passage_sentence_matching_the_question() -> None:
         "Điều 9. Thời điểm lập hóa đơn. "
         + "Nội dung không liên quan đến câu hỏi. " * 10
         + "Thời điểm lập hóa đơn đối với cung cấp dịch vụ là thời điểm hoàn thành việc cung cấp "
-        "dịch vụ. "
-        + "Một đoạn khác. " * 10
+        "dịch vụ. " + "Một đoạn khác. " * 10
     )
 
     excerpt = build_excerpt(content, "thoi diem lap hoa don cung cap dich vu", 140)

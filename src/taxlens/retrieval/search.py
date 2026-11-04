@@ -1,12 +1,10 @@
-import operator
 import unicodedata
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
-from functools import reduce
 from typing import Any, Literal
 
-from sqlalchemy import Select, case, func, literal_column, or_, select
+from sqlalchemy import Select, func, literal, literal_column, or_, select, text, union_all
 from sqlalchemy.orm import Session
 
 from taxlens.legal_data.models import (
@@ -143,11 +141,16 @@ def keyword_search_chunks(
     if not normalized_query:
         return []
     active_filters = filters or SearchFilters()
-    if session.get_bind().dialect.name == "postgresql":
-        statement = _postgresql_keyword_statement(normalized_query, active_filters, limit)
-    else:
+    if session.get_bind().dialect.name != "postgresql":
         statement = _fallback_keyword_statement(normalized_query, active_filters, limit)
-    return _to_keyword_results(session.execute(statement).all())
+        return _to_keyword_results(session.execute(statement).all())
+    # The planner picks a sequential scan for common terms because it does not count the
+    # cost of decompressing each stored vector; the GIN index is much faster for them.
+    session.execute(text("SET LOCAL enable_seqscan = off"))
+    statement = _postgresql_keyword_statement(normalized_query, active_filters, limit)
+    rows = session.execute(statement).all()
+    session.execute(text("SET LOCAL enable_seqscan = on"))
+    return _to_keyword_results(rows)
 
 
 def semantic_search_chunks(
@@ -316,6 +319,11 @@ def _postgresql_keyword_statement(query: str, filters: SearchFilters, limit: int
     first. Matching runs on the accent-folded vector, so unaccented queries and OCR text
     that lost diacritics match; an exact accented match earns a bonus, which keeps "thuế"
     (tax) ahead of "thuê" (rent) although both fold to "thue".
+
+    A long question matches nearly every chunk, and testing each term against each chunk's
+    stored vector takes minutes of decompression. So term matches are counted from the GIN
+    indexes alone, and only chunks that can still reach the top ``limit`` are read: the
+    remaining part of the score, ``ts_rank_cd`` with normalization 32, is always below 1.
     """
 
     terms = keyword_terms(query) or [query]
@@ -324,27 +332,50 @@ def _postgresql_keyword_statement(query: str, filters: SearchFilters, limit: int
     config: Any = literal_column("'simple'::regconfig")
     folded_vector: Any = literal_column("document_chunks.search_vector_folded")
     accented_vector: Any = literal_column("document_chunks.search_vector")
-    any_term_query = func.websearch_to_tsquery(config, " or ".join(folded_terms))
-    folded_matches = _matched_term_count(folded_vector, config, folded_terms)
-    score_parts = [folded_matches, func.ts_rank_cd(folded_vector, any_term_query, 32)]
-    if accented_terms:
-        score_parts.append(
-            EXACT_MATCH_WEIGHT * _matched_term_count(accented_vector, config, accented_terms)
-        )
-    score: Any = reduce(operator.add, score_parts).label("score")
-    statement = _base_statement(score).where(folded_vector.op("@@")(any_term_query))
-    statement = _apply_filters(statement, filters)
-    return statement.order_by(score.desc(), DocumentChunk.id).limit(limit)
-
-
-def _matched_term_count(vector: Any, config: Any, terms: list[str]) -> Any:
-    return reduce(
-        operator.add,
-        [
-            case((vector.op("@@")(func.websearch_to_tsquery(config, term)), 1), else_=0)
-            for term in terms
-        ],
+    term_matches = union_all(
+        *_term_matches(folded_vector, config, folded_terms, 1.0),
+        *_term_matches(accented_vector, config, accented_terms, EXACT_MATCH_WEIGHT),
+    ).subquery("term_matches")
+    matched = (
+        select(term_matches.c.chunk_id, func.sum(term_matches.c.weight).label("match_score"))
+        .group_by(term_matches.c.chunk_id)
+        .subquery("matched")
     )
+    eligible = _apply_filters(
+        select(matched.c.chunk_id, matched.c.match_score)
+        .join(DocumentChunk, DocumentChunk.id == matched.c.chunk_id)
+        .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
+        .join(LegalDocument, DocumentVersion.document_id == LegalDocument.id)
+        .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id),
+        filters,
+    ).cte("eligible")
+    last_kept_match_score = (
+        select(eligible.c.match_score)
+        .order_by(eligible.c.match_score.desc())
+        .offset(max(limit - 1, 0))
+        .limit(1)
+        .scalar_subquery()
+    )
+    any_term_query = func.websearch_to_tsquery(config, " or ".join(folded_terms))
+    score: Any = (
+        eligible.c.match_score + func.ts_rank_cd(folded_vector, any_term_query, 32)
+    ).label("score")
+    return (
+        _base_statement(score)
+        .join(eligible, eligible.c.chunk_id == DocumentChunk.id)
+        .where(eligible.c.match_score > func.coalesce(last_kept_match_score, 0.0) - 1)
+        .order_by(score.desc(), DocumentChunk.id)
+        .limit(limit)
+    )
+
+
+def _term_matches(vector: Any, config: Any, terms: list[str], weight: float) -> list[Select[Any]]:
+    return [
+        select(DocumentChunk.id.label("chunk_id"), literal(weight).label("weight")).where(
+            vector.op("@@")(func.websearch_to_tsquery(config, term))
+        )
+        for term in terms
+    ]
 
 
 def _fallback_keyword_statement(query: str, filters: SearchFilters, limit: int) -> Select[Any]:
