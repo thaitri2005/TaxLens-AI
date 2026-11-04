@@ -1,0 +1,3077 @@
+{
+  "threshold": 2,
+  "counts_at": {
+    "1": 1179,
+    "2": 379,
+    "3": 189
+  },
+  "candidates": {
+    "83/2013/nd-cp": {
+      "citing_count": 148,
+      "citing": [
+        "01/2020/TT-BTC",
+        "03/2016/TT-BTC",
+        "06/VBHN-BTC (2018)",
+        "08/2014/TT-BTC",
+        "08/2018/TT-BTC"
+      ]
+    },
+    "120/2016/nd-cp": {
+      "citing_count": 136,
+      "citing": [
+        "01/2020/TT-BTC",
+        "02/2021/TT-BTC",
+        "02/2022/TT-BTC",
+        "05/2021/TT-BTC",
+        "06/VBHN-BTC (2018)"
+      ]
+    },
+    "166/2025/nd-cp": {
+      "citing_count": 49,
+      "citing": [
+        "01/2026/TT-BTC",
+        "109/2025/TT-BTC",
+        "109/2026/TT-BTC",
+        "11/2026/TT-BTC",
+        "110/2025/TT-BTC"
+      ]
+    },
+    "51/2010/nd-cp": {
+      "citing_count": 47,
+      "citing": [
+        "114/2013/TT-BTC",
+        "122/2016/TT-BTC",
+        "124/2015/TT-BTC",
+        "125/2015/TT-BTC",
+        "128/2011/TT-BTC"
+      ]
+    },
+    "28/2011/tt-btc": {
+      "citing_count": 37,
+      "citing": [
+        "01/2013/TT-BTC",
+        "103/2013/TT-BTC",
+        "104/2011/TT-BTC",
+        "114/2013/TT-BTC",
+        "120/2011/TT-BTC"
+      ]
+    },
+    "11/2020/nd-cp": {
+      "citing_count": 32,
+      "citing": [
+        "07/2024/TT-BTC",
+        "08/2024/TT-BTC",
+        "09/2024/TT-BTC",
+        "10/2024/TT-BTC",
+        "109/2025/TT-BTC"
+      ]
+    },
+    "91/2022/nd-cp": {
+      "citing_count": 32,
+      "citing": [
+        "07/2024/TT-BTC",
+        "08/2024/TT-BTC",
+        "09/2024/TT-BTC",
+        "10/2024/TT-BTC",
+        "109/2025/TT-BTC"
+      ]
+    },
+    "106/2010/nd-cp": {
+      "citing_count": 31,
+      "citing": [
+        "01/2013/TT-BTC",
+        "103/2013/TT-BTC",
+        "104/2011/TT-BTC",
+        "114/2013/TT-BTC",
+        "120/2011/TT-BTC"
+      ]
+    },
+    "08/2015/nd-cp": {
+      "citing_count": 29,
+      "citing": [
+        "07/2019/TT-BTC",
+        "09/2019/TT-BTC",
+        "101/2015/TT-BTC",
+        "103/2015/TT-BTC",
+        "106/2016/TT-BTC"
+      ]
+    },
+    "38/2015/tt-btc": {
+      "citing_count": 26,
+      "citing": [
+        "07/2019/TT-BTC",
+        "106/2016/TT-BTC",
+        "120/2015/TT-BTC",
+        "128/2016/TT-BTC",
+        "128/2026/TT-BTC"
+      ]
+    },
+    "04/2014/nd-cp": {
+      "citing_count": 25,
+      "citing": [
+        "108/2015/TT-BTC",
+        "114/2015/TT-BTC",
+        "122/2015/TT-BTC",
+        "123/2016/TT-BTC",
+        "132/2014/TT-BTC"
+      ]
+    },
+    "57/2002/nd-cp": {
+      "citing_count": 22,
+      "citing": [
+        "08/2014/TT-BTC",
+        "110/2014/TT-BTC",
+        "128/2011/TT-BTC",
+        "13/2002/CT-TTG",
+        "136/2011/TT-BTC"
+      ]
+    },
+    "71/2014/qh13": {
+      "citing_count": 21,
+      "citing": [
+        "106/2016/QH13",
+        "109/2025/QH15",
+        "113/2025/TT-BTC",
+        "116/2020/QH14",
+        "127/2026/TT-BTC"
+      ]
+    },
+    "74/2022/tt-btc": {
+      "citing_count": 21,
+      "citing": [
+        "07/2024/TT-BTC",
+        "08/2024/TT-BTC",
+        "09/2024/TT-BTC",
+        "10/2024/TT-BTC",
+        "11/2024/TT-BTC"
+      ]
+    },
+    "12/2015/nd-cp": {
+      "citing_count": 19,
+      "citing": [
+        "152/2015/TT-BTC",
+        "18/VBHN-BTC",
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP",
+        "19/VBHN-BTC (2026)"
+      ]
+    },
+    "24/2006/nd-cp": {
+      "citing_count": 19,
+      "citing": [
+        "110/2014/TT-BTC",
+        "115/2011/NĐ-CP",
+        "118/2015/TT-BTC",
+        "128/2011/TT-BTC",
+        "136/2011/TT-BTC"
+      ]
+    },
+    "60/2007/tt-btc": {
+      "citing_count": 19,
+      "citing": [
+        "106/2009/TT-BTC",
+        "12/2009/TT-BTC",
+        "124/2008/TT-BTC",
+        "149/2010/TT-BTC",
+        "166/2010/TT-BTC"
+      ]
+    },
+    "78/2021/tt-btc": {
+      "citing_count": 17,
+      "citing": [
+        "02/2022/TT-BTC",
+        "09/2024/TT-BTC",
+        "10/2024/TT-BTC",
+        "11/2024/TT-BTC",
+        "15/2025/TT-BTC"
+      ]
+    },
+    "69/2018/nd-cp": {
+      "citing_count": 14,
+      "citing": [
+        "03/2026/TT-BCT",
+        "04/2026/TT-BCT",
+        "11/2022/TT-BCT",
+        "13/2023/TT-BCT",
+        "18/2021/NĐ-CP"
+      ]
+    },
+    "134/2016/nd-cp": {
+      "citing_count": 13,
+      "citing": [
+        "01/2025/QĐ-TTG",
+        "07/2019/TT-BTC",
+        "14/2019/NĐ-CP",
+        "18/2021/NĐ-CP",
+        "18/VBHN-BTC (2026)"
+      ]
+    },
+    "128/2003/tt-btc": {
+      "citing_count": 12,
+      "citing": [
+        "07/2007/TT-BTC",
+        "08/2005/TT-BTC",
+        "08/2007/TT-BTC",
+        "100/2004/TT-BTC",
+        "105/2006/TT-BTC"
+      ]
+    },
+    "28/2012/nd-cp": {
+      "citing_count": 12,
+      "citing": [
+        "144/2016/TT-BTC",
+        "162/2016/TT-BTC",
+        "170/2013/TT-BTC",
+        "181/2016/TT-BTC",
+        "182/2016/TT-BTC"
+      ]
+    },
+    "40/2017/tt-btc": {
+      "citing_count": 12,
+      "citing": [
+        "01/2026/TT-BTC",
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC",
+        "130/2026/TT-BTC",
+        "133/2026/TT-BTC"
+      ]
+    },
+    "79/2000/nd-cp": {
+      "citing_count": 12,
+      "citing": [
+        "102/2002/TT-BTC",
+        "108/2002/NĐ-CP",
+        "122/2000/TT-BTC",
+        "158/2003/NĐ-CP",
+        "19/2002/CT-TTG"
+      ]
+    },
+    "87/2025/qh15": {
+      "citing_count": 12,
+      "citing": [
+        "110/2026/TT-BTC",
+        "111/2026/TT-BTC",
+        "130/2025/TT-BTC",
+        "19/VBHN-BTC (2026)",
+        "22/2005/TT-BTC"
+      ]
+    },
+    "04/1999/nd-cp": {
+      "citing_count": 11,
+      "citing": [
+        "116/99/QĐ-BTC",
+        "141/99/QĐ-BTC",
+        "150/1999/TT-BTC",
+        "180/2000/QĐ/BTC",
+        "32/2001/TT-BTC"
+      ]
+    },
+    "59/2018/nd-cp": {
+      "citing_count": 11,
+      "citing": [
+        "07/2019/TT-BTC",
+        "127/2026/TT-BTC",
+        "13/2020/TT-BTC",
+        "29/VBHN-BTC (2019)",
+        "52/2020/TT-BTC"
+      ]
+    },
+    "134/2003/nd-cp": {
+      "citing_count": 10,
+      "citing": [
+        "123/2005/NĐ-CP",
+        "140/2005/NĐ-CP",
+        "141/2004/NĐ-CP",
+        "151/2003/NĐ-CP",
+        "30/2005/NĐ-CP"
+      ]
+    },
+    "181/2004/nd-cp": {
+      "citing_count": 10,
+      "citing": [
+        "07/2007/TT-BTC",
+        "08/2007/TT-BTC",
+        "10/2007/TT-BTC",
+        "105/2006/TT-BTC",
+        "120/2011/TT-BTC"
+      ]
+    },
+    "84/2008/tt-btc": {
+      "citing_count": 10,
+      "citing": [
+        "02/2010/TT-BTC",
+        "110/2026/TT-BTC",
+        "113/2011/TT-BTC",
+        "12/2011/TT-BTC",
+        "160/2009/TT-BTC"
+      ]
+    },
+    "90/2004/tt-btc": {
+      "citing_count": 10,
+      "citing": [
+        "106/2009/TT-BTC",
+        "14/2012/TT-BTC",
+        "145/2012/TT-BTC",
+        "159/2013/TT-BTC",
+        "22/2007/QĐ-BTC"
+      ]
+    },
+    "97/2010/tt-btc": {
+      "citing_count": 10,
+      "citing": [
+        "112/2010/TTLT-BTC-BLĐTBXH",
+        "114/2013/TT-BTC",
+        "123/2013/TT-BTC",
+        "140/2011/TTLT-BTC-LĐTBXH",
+        "165/2013/TT-BTC"
+      ]
+    },
+    "06/2011/nd-cp": {
+      "citing_count": 9,
+      "citing": [
+        "144/2016/TT-BTC",
+        "170/2013/TT-BTC",
+        "181/2016/TT-BTC",
+        "182/2016/TT-BTC",
+        "204/2016/TT-BTC"
+      ]
+    },
+    "128/2013/tt-btc": {
+      "citing_count": 9,
+      "citing": [
+        "126/2014/TT-BTC",
+        "13/2014/TT-BTC",
+        "139/2013/TT-BTC",
+        "14/2015/TT-BTC",
+        "164/2013/TT-BTC"
+      ]
+    },
+    "17/2006/nd-cp": {
+      "citing_count": 9,
+      "citing": [
+        "07/2007/TT-BTC",
+        "08/2007/TT-BTC",
+        "10/2007/TT-BTC",
+        "105/2006/TT-BTC",
+        "162/2007/TT-BTC"
+      ]
+    },
+    "187/2013/nd-cp": {
+      "citing_count": 9,
+      "citing": [
+        "01/2017/TT-BCT",
+        "03/2018/TT-BCT",
+        "13/2014/TT-BTC",
+        "14/2015/TT-BTC",
+        "20/2014/TT-BTC"
+      ]
+    },
+    "258/2016/tt-btc": {
+      "citing_count": 9,
+      "citing": [
+        "112/2020/TT-BTC",
+        "120/2021/TT-BTC",
+        "43/2024/TT-BTC",
+        "44/2023/TT-BTC",
+        "47/2021/TT-BTC"
+      ]
+    },
+    "347/2025/nd-cp": {
+      "citing_count": 9,
+      "citing": [
+        "11/2026/TT-BTC",
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC",
+        "150/2026/TT-BTC",
+        "152/2026/TT-BTC"
+      ]
+    },
+    "39/2018/tt-btc": {
+      "citing_count": 9,
+      "citing": [
+        "07/2019/TT-BTC",
+        "128/2026/TT-BTC",
+        "13/2020/TT-BTC",
+        "29/VBHN-BTC (2019)",
+        "56/2019/TT-BTC"
+      ]
+    },
+    "56/2009/nd-cp": {
+      "citing_count": 9,
+      "citing": [
+        "101/2011/NĐ-CP",
+        "12/2010/QĐ-TTG",
+        "140/2012/TT-BTC",
+        "154/2011/TT-BTC",
+        "39/2010/TT-BTC"
+      ]
+    },
+    "03/2022/qh15": {
+      "citing_count": 8,
+      "citing": [
+        "145/2026/TT-BTC",
+        "174/2025/NĐ-CP",
+        "180/2024/NĐ-CP",
+        "44/2023/NĐ-CP",
+        "56/2024/QH15"
+      ]
+    },
+    "108/2006/nd-cp": {
+      "citing_count": 8,
+      "citing": [
+        "140/2012/TT-BTC",
+        "154/2011/TT-BTC",
+        "16/2013/TT-BTC",
+        "170/2011/TT-BTC",
+        "199/2012/TT-BTC"
+      ]
+    },
+    "12/2018/tt-bct": {
+      "citing_count": 8,
+      "citing": [
+        "04/2026/TT-BCT",
+        "11/2022/TT-BCT",
+        "13/2023/TT-BCT",
+        "20/2020/TT-BCT",
+        "37/2023/TT-BCT"
+      ]
+    },
+    "139/2010/tt-btc": {
+      "citing_count": 8,
+      "citing": [
+        "140/2011/TTLT-BTC-LĐTBXH",
+        "171/2011/TT-BTC",
+        "192/2013/TTLT-BTC-BTP",
+        "214/2015/TT-BTC",
+        "26/2014/TTLT-BTC-BCT"
+      ]
+    },
+    "203/2025/qh15": {
+      "citing_count": 8,
+      "citing": [
+        "109/2025/QH15",
+        "109/2025/UBTVQH15",
+        "110/2025/UBTVQH15",
+        "149/2025/QH15",
+        "204/2025/QH15"
+      ]
+    },
+    "40/2007/nd-cp": {
+      "citing_count": 8,
+      "citing": [
+        "116/2011/TT-BTC",
+        "19/2014/TT-BTC",
+        "194/2010/TT-BTC",
+        "20/2014/TT-BTC",
+        "205/2010/TT-BTC"
+      ]
+    },
+    "54/1999/tt-btc": {
+      "citing_count": 8,
+      "citing": [
+        "141/99/QĐ-BTC",
+        "180/2000/QĐ/BTC",
+        "32/2001/TT-BTC",
+        "34/2001/TT-BTC",
+        "53/2001/TT/BTC"
+      ]
+    },
+    "102/2012/tt-btc": {
+      "citing_count": 7,
+      "citing": [
+        "213/2013/TTLT-BTC-BLĐTBXH",
+        "26/2014/TTLT-BTC-BCT",
+        "29/2018/TT-BTC",
+        "33/2018/TT-BTC",
+        "36/2026/TT-BTC"
+      ]
+    },
+    "109/2016/tt-btc": {
+      "citing_count": 7,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC",
+        "26/2018/TT-BTC",
+        "29/2018/TT-BTC",
+        "32/2023/TT-BTC"
+      ]
+    },
+    "111/2015/nd-cp": {
+      "citing_count": 7,
+      "citing": [
+        "21/2016/TT-BTC",
+        "245/2026/NĐ-CP",
+        "52/2021/NĐ-CP",
+        "57/2020/NĐ-CP",
+        "64/2024/NĐ-CP"
+      ]
+    },
+    "12/2006/nd-cp": {
+      "citing_count": 7,
+      "citing": [
+        "03/2006/TTLT-BTM-BGTVT-BTC-BCA",
+        "124/2007/TT-BTC",
+        "139/2013/TT-BTC",
+        "194/2010/TT-BTC",
+        "33/2013/TT-BCT"
+      ]
+    },
+    "122/2016/nd-cp": {
+      "citing_count": 7,
+      "citing": [
+        "101/2021/NĐ-CP",
+        "111/2020/NĐ-CP",
+        "18/2021/NĐ-CP",
+        "51/2022/NĐ-CP",
+        "53/2021/NĐ-CP"
+      ]
+    },
+    "29/2025/nd-cp": {
+      "citing_count": 7,
+      "citing": [
+        "109/2025/TT-BTC",
+        "110/2025/TT-BTC",
+        "113/2025/TT-BTC",
+        "70/2025/TT-BTC",
+        "71/2025/TT-BTC"
+      ]
+    },
+    "65/2020/qh14": {
+      "citing_count": 7,
+      "citing": [
+        "107/2023/QH15",
+        "109/2025/UBTVQH15",
+        "110/2025/UBTVQH15",
+        "19/2026/QH16",
+        "204/2025/QH15"
+      ]
+    },
+    "70/2014/qh13": {
+      "citing_count": 7,
+      "citing": [
+        "106/2016/QH13",
+        "180/2024/NĐ-CP",
+        "195/2015/TT-BTC",
+        "44/2023/NĐ-CP",
+        "66/2025/QH15"
+      ]
+    },
+    "79/2009/tt-btc": {
+      "citing_count": 7,
+      "citing": [
+        "101/2010/TT-BTC",
+        "118/2011/TT-BTC",
+        "118/2012/TT-BTC",
+        "128/2010/TT-BTC",
+        "194/2010/TT-BTC"
+      ]
+    },
+    "09/2026/qh16": {
+      "citing_count": 6,
+      "citing": [
+        "110/2026/TT-BTC",
+        "158/2025/TT-BTC",
+        "253/2026/NĐ-CP",
+        "43/2026/QH16",
+        "87/2026/TT-BTC"
+      ]
+    },
+    "108/2025/qh15": {
+      "citing_count": 6,
+      "citing": [
+        "254/2026/NĐ-CP",
+        "255/2026/NĐ-CP",
+        "86/2026/TT-BTC",
+        "89/2026/TT-BTC",
+        "90/2026/TT-BTC"
+      ]
+    },
+    "109/2013/nd-cp": {
+      "citing_count": 6,
+      "citing": [
+        "02/2026/NĐ-CP",
+        "10/2014/TT-BTC",
+        "125/2020/NĐ-CP",
+        "160/2013/TT-BTC",
+        "176/2016/TT-BTC"
+      ]
+    },
+    "113/2005/tt-btc": {
+      "citing_count": 6,
+      "citing": [
+        "07/2007/TT-BTC",
+        "08/2007/TT-BTC",
+        "10/2007/TT-BTC",
+        "105/2006/TT-BTC",
+        "46/2006/TT-BTC"
+      ]
+    },
+    "118/2015/nd-cp": {
+      "citing_count": 6,
+      "citing": [
+        "18/2021/NĐ-CP",
+        "18/VBHN-BTC",
+        "20/2026/TT-BTC",
+        "214/2015/TT-BTC",
+        "81/2018/TT-BTC"
+      ]
+    },
+    "123/2009/tt-btc": {
+      "citing_count": 6,
+      "citing": [
+        "140/2011/TTLT-BTC-LĐTBXH",
+        "26/2014/TTLT-BTC-BCT",
+        "26/2018/TT-BTC",
+        "29/2018/TT-BTC",
+        "33/2018/TT-BTC"
+      ]
+    },
+    "153/2010/tt-btc": {
+      "citing_count": 6,
+      "citing": [
+        "191/2010/TT- BTC",
+        "191/2010/TT-BTC",
+        "233/2012/TT-BTC",
+        "32/2011/TT-BTC",
+        "39/2014/TT-BTC"
+      ]
+    },
+    "167/2025/nd-cp": {
+      "citing_count": 6,
+      "citing": [
+        "113/2025/TT-BTC",
+        "127/2026/TT-BTC",
+        "128/2026/TT-BTC",
+        "273/2026/NĐ-CP",
+        "86/2025/TT-BTC"
+      ]
+    },
+    "187/2025/nd-cp": {
+      "citing_count": 6,
+      "citing": [
+        "110/2026/TT-BTC",
+        "111/2026/TT-BTC",
+        "128/2026/TT-BTC",
+        "130/2025/TT-BTC",
+        "22/2005/TT-BTC"
+      ]
+    },
+    "218/2013/nd-cp": {
+      "citing_count": 6,
+      "citing": [
+        "19/VBHN-BTC (2026)",
+        "20/2026/TT-BTC",
+        "214/2015/TT-BTC",
+        "26/2016/TT-BTC",
+        "320/2025/NĐ-CP"
+      ]
+    },
+    "43/2024/qh15": {
+      "citing_count": 6,
+      "citing": [
+        "109/2025/QH15",
+        "150/2026/TT-BTC",
+        "230/2025/NĐ-CP",
+        "50/2026/NĐ-CP",
+        "56/2024/QH15"
+      ]
+    },
+    "62/2025/qh15": {
+      "citing_count": 6,
+      "citing": [
+        "109/2025/UBTVQH15",
+        "110/2025/UBTVQH15",
+        "19/2026/QH16",
+        "204/2025/QH15",
+        "216/2025/QH15"
+      ]
+    },
+    "80/2021/tt-btc": {
+      "citing_count": 6,
+      "citing": [
+        "111/2021/TT-BTC",
+        "122/2025/NĐ-CP",
+        "20/2026/TT-BTC",
+        "40/2025/TT-BTC",
+        "41/2026/TT-BTC"
+      ]
+    },
+    "01/2010/tt-btc": {
+      "citing_count": 5,
+      "citing": [
+        "140/2011/TTLT-BTC-LĐTBXH",
+        "213/2013/TTLT-BTC-BLĐTBXH",
+        "26/2018/TT-BTC",
+        "29/2018/TT-BTC",
+        "91/2012/TT-BTC"
+      ]
+    },
+    "06/2021/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP",
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP",
+        "70/2025/TT-BTC"
+      ]
+    },
+    "07/2022/qh15": {
+      "citing_count": 5,
+      "citing": [
+        "113/2025/TT-BTC",
+        "127/2026/TT-BTC",
+        "150/2026/TT-BTC",
+        "56/2024/QH15",
+        "90/2025/QH15"
+      ]
+    },
+    "08/2013/tt-btc": {
+      "citing_count": 5,
+      "citing": [
+        "20/2026/TT-BTC",
+        "83/2016/TT-BTC",
+        "84/2016/TT-BTC",
+        "87/2026/TT-BTC",
+        "99/2016/TT-BTC"
+      ]
+    },
+    "08/2022/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "02/2022/TT-BTC",
+        "153/2024/NĐ-CP",
+        "31/2023/TT-BTC",
+        "86/2026/TT-BTC",
+        "87/2024/TT-BTC"
+      ]
+    },
+    "102/2008/tt-btc": {
+      "citing_count": 5,
+      "citing": [
+        "114/2013/TT-BTC",
+        "123/2013/TT-BTC",
+        "132/2014/TT-BTC",
+        "165/2013/TT-BTC",
+        "199/2016/TT-BTC"
+      ]
+    },
+    "12/2025/tt-btc": {
+      "citing_count": 5,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC",
+        "130/2026/TT-BTC",
+        "133/2026/TT-BTC",
+        "36/2026/TT-BTC"
+      ]
+    },
+    "127/2013/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "13/2014/TT-BTC",
+        "155/2016/TT-BTC",
+        "215/2013/TT-BTC",
+        "70/2014/TT-BTC",
+        "72/2014/TT-BTC"
+      ]
+    },
+    "129/2013/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "125/2020/NĐ-CP",
+        "166/2013/TT-BTC",
+        "215/2013/TT-BTC",
+        "72/2014/TT-BTC",
+        "87/2018/TT-BTC"
+      ]
+    },
+    "133/2025/qh15": {
+      "citing_count": 5,
+      "citing": [
+        "134/2026/TT-BTC",
+        "141/2026/NĐ-CP",
+        "33/2023/TT-BTC",
+        "43/2026/QH16",
+        "86/2026/TT-BTC"
+      ]
+    },
+    "142/2005/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "103/2024/NĐ-CP",
+        "121/2010/NĐ-CP",
+        "16/2013/TT-BTC",
+        "69/2009/NĐ-CP",
+        "96/2011/TT-BTC"
+      ]
+    },
+    "21/2001/tt-btc": {
+      "citing_count": 5,
+      "citing": [
+        "32/2001/TT-BTC",
+        "34/2001/TT-BTC",
+        "53/2001/TT/BTC",
+        "63/2002/TT-BTC",
+        "69/2001/QĐ/BTC"
+      ]
+    },
+    "24/2000/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "06/2000/TT-TCHQ",
+        "08/2014/TT-BTC",
+        "13/2001/TT-BTC",
+        "199/2012/TT-BTC",
+        "24/2002/TT-BTC"
+      ]
+    },
+    "24/2023/qh15": {
+      "citing_count": 5,
+      "citing": [
+        "113/2026/TT-BTC",
+        "115/2026/TT-BTC",
+        "150/2026/TT-BTC",
+        "151/2026/TT-BTC",
+        "56/2024/QH15"
+      ]
+    },
+    "31/2024/qh15": {
+      "citing_count": 5,
+      "citing": [
+        "115/2026/TT-BTC",
+        "151/2026/TT-BTC",
+        "56/2024/QH15",
+        "84/2025/TT-BNNMT",
+        "90/2025/QH15"
+      ]
+    },
+    "373/2025/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "252/2026/NĐ-CP",
+        "28/2026/TT-BTC",
+        "30/2026/TT-BTC",
+        "39/2026/TT-BTC",
+        "41/2026/TT-BTC"
+      ]
+    },
+    "40/2009/tt-bldtbxh": {
+      "citing_count": 5,
+      "citing": [
+        "140/2012/TT-BTC",
+        "154/2011/TT-BTC",
+        "16/2013/TT-BTC",
+        "170/2011/TT-BTC",
+        "83/2012/TT-BTC"
+      ]
+    },
+    "43/2006/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "128/2011/TT-BTC",
+        "151/2010/TT-BTC",
+        "16/2007/TTLT/BTC-BLĐTBXH",
+        "245/2009/TT-BTC",
+        "26/2007/TT-BTC"
+      ]
+    },
+    "45/2011/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "124/2011/TT-BTC",
+        "140/2013/TT-BTC",
+        "140/2015/TT-BTC",
+        "34/2013/TT-BTC",
+        "75/2016/TT-BTC"
+      ]
+    },
+    "60/2003/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "15/2007/TTLT-BTC-BNN",
+        "160/2012/TTLT-BTC-BCT",
+        "166/2012/TT-BTC",
+        "39/2011/TTLT-BTNMT-BTC",
+        "99/2006/TT-BTC"
+      ]
+    },
+    "64/2020/qh14": {
+      "citing_count": 5,
+      "citing": [
+        "115/2026/TT-BTC",
+        "150/2026/TT-BTC",
+        "151/2026/TT-BTC",
+        "56/2024/QH15",
+        "90/2025/QH15"
+      ]
+    },
+    "65/2013/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "206/2013/TTLT-BTC-BCA",
+        "212/2013/TTLT-BTC-BQP",
+        "253/2026/NĐ-CP",
+        "40/2025/TT-BTC",
+        "87/2026/TT-BTC"
+      ]
+    },
+    "67/2011/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "106/2018/TT-BTC",
+        "152/2011/TT-BTC",
+        "159/2012/TT-BTC",
+        "32/VBHN-BTC (2019)",
+        "59/2015/TT-BTC"
+      ]
+    },
+    "67/2020/qh14": {
+      "citing_count": 5,
+      "citing": [
+        "02/2026/NĐ-CP",
+        "133/2026/TT-BTC",
+        "291/2026/NĐ-CP",
+        "310/2025/NĐ-CP",
+        "56/2024/QH15"
+      ]
+    },
+    "68/2016/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP",
+        "56/2019/TT-BTC",
+        "67/2020/NĐ-CP",
+        "72/2020/TT-BTC"
+      ]
+    },
+    "78/2014/tt-btc": {
+      "citing_count": 5,
+      "citing": [
+        "20/2026/TT-BTC",
+        "214/2015/TT-BTC",
+        "26/2016/TT-BTC",
+        "83/2016/TT-BTC",
+        "87/2026/TT-BTC"
+      ]
+    },
+    "84/2007/nd-cp": {
+      "citing_count": 5,
+      "citing": [
+        "103/2020/TT-BTC",
+        "120/2010/NĐ-CP",
+        "69/2009/NĐ-CP",
+        "77/2008/TT-BTC",
+        "93/2011/TT-BTC"
+      ]
+    },
+    "01/2015/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "13/2015/TT-BTC",
+        "13/2020/TT-BTC",
+        "67/2020/NĐ-CP",
+        "80/2019/TT-BTC"
+      ]
+    },
+    "04/2007/qh12": {
+      "citing_count": 4,
+      "citing": [
+        "140/2012/TT-BTC",
+        "154/2011/TT-BTC",
+        "29/2012/QH13",
+        "48/2024/QH15"
+      ]
+    },
+    "04/2014/tt-bct": {
+      "citing_count": 4,
+      "citing": [
+        "01/2017/TT-BCT",
+        "03/2018/TT-BCT",
+        "25/2015/TT-BCT",
+        "39/2016/TT-BCT"
+      ]
+    },
+    "06/2007/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "26/2018/TT-BTC",
+        "32/2023/TT-BTC",
+        "36/2026/TT-BTC",
+        "48/2013/TTLT-BTC-BLĐTBXH"
+      ]
+    },
+    "108/2015/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "14/2019/NĐ-CP",
+        "195/2015/TT-BTC",
+        "26/VBHN-BTC (2019)",
+        "360/2025/NĐ-CP"
+      ]
+    },
+    "11/2022/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "43/2024/TT-BTC",
+        "44/2023/TT-BTC",
+        "64/2025/TT-BTC",
+        "65/2025/TT-BTC"
+      ]
+    },
+    "124/2005/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "100/2008/TTLT-BTC-BGTVT-BCA-BTP-NHNNVN",
+        "160/2012/TTLT-BTC-BCT",
+        "78/2007/TT-BTC",
+        "79/2007/TT-BTC"
+      ]
+    },
+    "124/2020/qh14": {
+      "citing_count": 4,
+      "citing": [
+        "112/2020/TT-BTC",
+        "12/2021/TT-BTC",
+        "18/2021/TT-BTC",
+        "47/2021/TT-BTC"
+      ]
+    },
+    "130/2008/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "06/2010/TT-BTC",
+        "128/2011/TT-BTC",
+        "176/2010/TT-BTC",
+        "96/2011/TT-BTC"
+      ]
+    },
+    "141/2025/qh15": {
+      "citing_count": 4,
+      "citing": [
+        "141/2026/NĐ-CP",
+        "19/VBHN-BTC (2026)",
+        "43/2026/QH16",
+        "83/2024/TT-BTC"
+      ]
+    },
+    "15/2021/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "20/2022/NĐ-CP",
+        "27/2023/TT-BTC",
+        "28/2023/TT-BTC",
+        "38/2022/TT-BTC"
+      ]
+    },
+    "154/2005/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "13/2014/TT-BTC",
+        "194/2010/TT-BTC",
+        "45/2011/TT-BTC",
+        "72/2014/TT-BTC"
+      ]
+    },
+    "156/2011/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "103/2015/TT-BTC",
+        "13/2014/TT-BTC",
+        "29/2014/TT-BTC",
+        "83/2014/TT-BTC"
+      ]
+    },
+    "172/1998/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "18/2001/TT-BTC",
+        "24/2002/TT-BTC",
+        "26/2003/TT-BTC",
+        "34/2004/TT-BTC"
+      ]
+    },
+    "204/2004/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "02/2010/TT-BTC",
+        "33/2018/TT-BTC",
+        "89/2026/TT-BTC",
+        "94/2007/TTLT-BTC-BNV"
+      ]
+    },
+    "209/2013/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP",
+        "26/2016/TT-BTC",
+        "72/2014/TT-BTC"
+      ]
+    },
+    "26/2009/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "113/2011/NĐ-CP",
+        "195/2015/TT-BTC",
+        "20/2014/TT-BTC",
+        "26/VBHN-BTC (2019)"
+      ]
+    },
+    "47/2006/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "100/2008/TTLT-BTC-BGTVT-BCA-BTP-NHNNVN",
+        "160/2012/TTLT-BTC-BCT",
+        "78/2007/TT-BTC",
+        "79/2007/TT-BTC"
+      ]
+    },
+    "60/2021/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "19/VBHN-BTC (2026)",
+        "31/2023/TT-BTC",
+        "320/2025/NĐ-CP",
+        "82/2023/NĐ-CP"
+      ]
+    },
+    "68/2000/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "107/2005/QĐ-TTG",
+        "171/2011/TT-BTC",
+        "40/2003/TT-BTC",
+        "85/2013/TT-BTC"
+      ]
+    },
+    "69/2012/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "106/2018/TT-BTC",
+        "159/2012/TT-BTC",
+        "32/VBHN-BTC (2019)",
+        "59/2015/TT-BTC"
+      ]
+    },
+    "75/2002/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "302/2016/TT-BTC",
+        "41/2006/TT-BTC",
+        "42/2003/TT-BTC",
+        "74/2006/TT-BTC"
+      ]
+    },
+    "77/2017/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "111/2021/TT-BTC",
+        "119/2026/TT-BTC",
+        "86/2026/TT-BTC",
+        "92/2019/TT-BTC"
+      ]
+    },
+    "78/2003/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "13/2005/NĐ-CP",
+        "151/2004/NĐ-CP",
+        "213/2004/NĐ-CP",
+        "48/2005/NĐ-CP"
+      ]
+    },
+    "80/2021/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "12/2023/NĐ-CP",
+        "245/2026/NĐ-CP",
+        "64/2024/NĐ-CP",
+        "82/2025/NĐ-CP"
+      ]
+    },
+    "83/2014/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "106/2016/TT-BTC",
+        "316/2016/TT-BTC",
+        "67/2020/NĐ-CP",
+        "69/2016/TT-BTC"
+      ]
+    },
+    "86/2011/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "110/2014/TT-BTC",
+        "140/2011/TTLT-BTC-LĐTBXH",
+        "213/2013/TTLT-BTC-BLĐTBXH",
+        "92/2017/TT-BTC"
+      ]
+    },
+    "87/2017/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "09/2018/TT-BTC",
+        "101/2020/TT-BTC",
+        "111/2017/TT-BTC",
+        "22/2018/TT-BTC"
+      ]
+    },
+    "88/2004/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "08/2005/TT-BTC",
+        "123/2004/TT-BTC",
+        "128/2004/TT-BTC",
+        "82/2006/TT-BTC"
+      ]
+    },
+    "89/1998/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "100/1999/TT-BTC",
+        "106/99/TT-BTC",
+        "122/2000/TT-BTC",
+        "175/98/TT/BTC"
+      ]
+    },
+    "95/2012/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "01/2017/TT-BCT",
+        "25/2015/TT-BCT",
+        "39/2016/TT-BCT",
+        "57/2014/TT-BCT"
+      ]
+    },
+    "99/1998/tt-btc": {
+      "citing_count": 4,
+      "citing": [
+        "08/2001/TT-BTC",
+        "100/1999/TT-BTC",
+        "44/1999/TT-BTC",
+        "96/1999/TT-BTC"
+      ]
+    },
+    "99/2003/nd-cp": {
+      "citing_count": 4,
+      "citing": [
+        "07/2007/TT-BTC",
+        "08/2007/TT-BTC",
+        "105/2006/TT-BTC",
+        "46/2006/TT-BTC"
+      ]
+    },
+    "01/2016/tt-btttt": {
+      "citing_count": 3,
+      "citing": [
+        "03/2018/TT-BTC",
+        "265",
+        "273/2016/TT-BTC"
+      ]
+    },
+    "02/2001/tt-tchq": {
+      "citing_count": 3,
+      "citing": [
+        "143/2015/TT-BTC",
+        "19/2014/TT-BTC",
+        "20/2014/TT-BTC"
+      ]
+    },
+    "02/2017/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "31/2023/TT-BTC",
+        "35/2017/TT-BTC",
+        "55/2018/TT-BTC"
+      ]
+    },
+    "08/2003/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP",
+        "72/2014/TT-BTC"
+      ]
+    },
+    "08/2011/qh13": {
+      "citing_count": 3,
+      "citing": [
+        "101/2011/NĐ-CP",
+        "154/2011/TT-BTC",
+        "42/2012/TT-BTC"
+      ]
+    },
+    "100/2025/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "01/2026/TT-BTC",
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC"
+      ]
+    },
+    "103/1999/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "172/2001/QĐ-TTG",
+        "62/2002/TT-BTC",
+        "98/2002/TT-BTC"
+      ]
+    },
+    "104/2026/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC",
+        "36/2026/TT-BTC"
+      ]
+    },
+    "105/2008/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "112/2010/TTLT-BTC-BLĐTBXH",
+        "166/2012/TT-BTC",
+        "48/2013/TTLT-BTC-BLĐTBXH"
+      ]
+    },
+    "107/2016/qh13": {
+      "citing_count": 3,
+      "citing": [
+        "07/2019/TT-BTC",
+        "18/2021/NĐ-CP",
+        "86/2026/TT-BTC"
+      ]
+    },
+    "109/2025/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "03/2026/TT-BCT",
+        "04/2026/TT-BCT",
+        "145/2026/TT-BTC"
+      ]
+    },
+    "117/2011/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "13/2014/TT-BTC",
+        "139/2013/TT-BTC",
+        "70/2014/TT-BTC"
+      ]
+    },
+    "121/2025/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "128/2026/TT-BTC",
+        "86/2026/TT-BTC",
+        "90/2026/TT-BTC"
+      ]
+    },
+    "127/2025/qh15": {
+      "citing_count": 3,
+      "citing": [
+        "141/2026/NĐ-CP",
+        "19/VBHN-BTC (2026)",
+        "43/2026/QH16"
+      ]
+    },
+    "129/2008/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "128/2011/TT-BTC",
+        "149/2010/TT-BTC",
+        "194/2010/TT-BTC"
+      ]
+    },
+    "132/2008/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "24/2021/TT-BTC",
+        "37/2013/TT-BTC",
+        "67/2021/TT-BTC"
+      ]
+    },
+    "15/2003/qh11": {
+      "citing_count": 3,
+      "citing": [
+        "120/2011/TT-BTC",
+        "129/2003/NĐ-CP",
+        "95/2004/TT-BTC"
+      ]
+    },
+    "152/2025/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "01/2026/TT-BTC",
+        "130/2026/TT-BTC",
+        "146/2026/TT-BTC"
+      ]
+    },
+    "163/2009/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "116/2011/TT-BTC",
+        "182/2012/TT-BTC",
+        "194/2010/TT-BTC"
+      ]
+    },
+    "165/2026/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "113/2026/TT-BTC",
+        "127/2026/TT-BTC",
+        "134/2026/TT-BTC"
+      ]
+    },
+    "187/2004/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "10/2007/TT-BTC",
+        "24/2007/NĐ-CP",
+        "69/2009/NĐ-CP"
+      ]
+    },
+    "188/2009/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "111/2012/TT-BTC",
+        "80/2014/TT-BTC",
+        "82/2012/TT-BTC"
+      ]
+    },
+    "19/2015/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "128/2016/TT-BTC",
+        "35/2017/TT-BTC",
+        "87/2024/TT-BTC"
+      ]
+    },
+    "194/2012/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "192/2013/TTLT-BTC-BTP",
+        "26/2018/TT-BTC",
+        "29/2018/TT-BTC"
+      ]
+    },
+    "196/2012/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "13/2014/TT-BTC",
+        "139/2013/TT-BTC",
+        "70/2014/TT-BTC"
+      ]
+    },
+    "197/2004/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "112/2010/TTLT-BTC-BLĐTBXH",
+        "146/2005/QĐ-TTG",
+        "69/2009/NĐ-CP"
+      ]
+    },
+    "20/2011/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "120/2011/TT-BTC",
+        "21/2017/NĐ-CP",
+        "292/2025/NĐ-CP"
+      ]
+    },
+    "203/2009/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "118/2010/TT-BTC",
+        "171/2010/TTLT-BTC-BNNPTNT",
+        "194/2010/TT-BTC"
+      ]
+    },
+    "203/2014/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "106/2016/TT-BTC",
+        "112/2015/TTLT-BTC-BKHCN",
+        "49/2015/TT-BTC"
+      ]
+    },
+    "21/2013/tt-btttt": {
+      "citing_count": 3,
+      "citing": [
+        "03/2018/TT-BTC",
+        "265",
+        "273/2016/TT-BTC"
+      ]
+    },
+    "25/2011/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "03/2018/TT-BTC",
+        "265",
+        "273/2016/TT-BTC"
+      ]
+    },
+    "254/2025/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "36/2026/TT-BTC",
+        "50/2026/NĐ-CP",
+        "89/2026/TT-BTC"
+      ]
+    },
+    "265/2025/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC",
+        "253/2026/NĐ-CP"
+      ]
+    },
+    "31/2021/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP",
+        "360/2025/NĐ-CP"
+      ]
+    },
+    "36/2018/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "32/2023/TT-BTC",
+        "40/2023/TT-BTC",
+        "95/2021/TT-BTC"
+      ]
+    },
+    "37/2022/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "113/2026/TT-BTC",
+        "32/2023/TT-BTC",
+        "36/2026/TT-BTC"
+      ]
+    },
+    "38/2015/tt-btce": {
+      "citing_count": 3,
+      "citing": [
+        "106/2016/TT-BTC",
+        "191/2015/TT-BTC",
+        "83/2016/TT-BTC"
+      ]
+    },
+    "38/2025/tt-bkhcn": {
+      "citing_count": 3,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC",
+        "36/2026/TT-BTC"
+      ]
+    },
+    "40/2021/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "100/2021/TT-BTC",
+        "40/2025/TT-BTC",
+        "89/2026/TT-BTC"
+      ]
+    },
+    "44/2008/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "120/2010/NĐ-CP",
+        "93/2011/TT-BTC",
+        "96/2011/TT-BTC"
+      ]
+    },
+    "46/2014/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "103/2024/NĐ-CP",
+        "214/2015/TT-BTC",
+        "26/2016/TT-BTC"
+      ]
+    },
+    "49/2010/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "14/2015/TT-BTC",
+        "194/2010/TT-BTC",
+        "216/2010/TT-BTC"
+      ]
+    },
+    "49/2016/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "02/2026/NĐ-CP",
+        "125/2020/NĐ-CP",
+        "176/2016/TT-BTC"
+      ]
+    },
+    "51/1999/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "113/2003/TT-BTC",
+        "24/2002/TT-BTC",
+        "98/2002/TT-BTC"
+      ]
+    },
+    "56/2023/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "113/2026/TT-BTC",
+        "130/2026/TT-BTC",
+        "133/2026/TT-BTC"
+      ]
+    },
+    "57/2024/qh15": {
+      "citing_count": 3,
+      "citing": [
+        "113/2026/TT-BTC",
+        "90/2025/QH15",
+        "98/2025/TT-BTC"
+      ]
+    },
+    "59/2003/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "15/2007/TTLT-BTC-BNN",
+        "39/2011/TTLT-BTNMT-BTC",
+        "99/2006/TT-BTC"
+      ]
+    },
+    "61/2006/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "201/2012/TT-BTC",
+        "81/2013/TT-BTC",
+        "82/2012/TT-BTC"
+      ]
+    },
+    "67/2013/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "04/2026/TT-BCT",
+        "22/2018/TT-BTC",
+        "299/2016/TT-BTC"
+      ]
+    },
+    "71/2006/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "16/2007/TTLT/BTC-BLĐTBXH",
+        "245/2009/TT-BTC",
+        "26/2007/TT-BTC"
+      ]
+    },
+    "71/2025/qh15": {
+      "citing_count": 3,
+      "citing": [
+        "109/2025/QH15",
+        "113/2026/TT-BTC",
+        "230/2025/NĐ-CP"
+      ]
+    },
+    "73/2024/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "22/2026/NQ-CP",
+        "64/2025/TT-BTC",
+        "71/2025/TT-BTC"
+      ]
+    },
+    "78/2000/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "03/2009/QĐ-TTG",
+        "152/2011/TT-BTC",
+        "32/VBHN-BTC (2019)"
+      ]
+    },
+    "78/2015/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "01/2016/TTLT-BKHĐT-BTC",
+        "67/2020/NĐ-CP",
+        "95/2016/TT-BTC"
+      ]
+    },
+    "85/2011/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "126/2014/TT-BTC",
+        "184/2015/TT-BTC",
+        "83/2016/TT-BTC"
+      ]
+    },
+    "88/2025/qh15": {
+      "citing_count": 3,
+      "citing": [
+        "02/2026/NĐ-CP",
+        "133/2026/TT-BTC",
+        "291/2026/NĐ-CP"
+      ]
+    },
+    "89/2025/qh15": {
+      "citing_count": 3,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC",
+        "89/2026/TT-BTC"
+      ]
+    },
+    "91/2005/tt-btc": {
+      "citing_count": 3,
+      "citing": [
+        "16/2007/TTLT/BTC-BLĐTBXH",
+        "26/2007/TT-BTC",
+        "90/2006/TTLT-BTC-UBTDTT"
+      ]
+    },
+    "94/2012/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "110/2026/TT-BTC",
+        "160/2013/TT-BTC",
+        "299/2016/TT-BTC"
+      ]
+    },
+    "97/2007/nd-cp": {
+      "citing_count": 3,
+      "citing": [
+        "139/2013/TT-BTC",
+        "179/2011/TT-BTC",
+        "194/2010/TT-BTC"
+      ]
+    },
+    "004/2025/tt-bnv": {
+      "citing_count": 2,
+      "citing": [
+        "133/2026/TT-BTC",
+        "36/2026/TT-BTC"
+      ]
+    },
+    "01/2007/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "17/2017/TT-BTC",
+        "31/2014/TTLT-BNNPTNT-BTC"
+      ]
+    },
+    "02/2015/tt-bldtbxh": {
+      "citing_count": 2,
+      "citing": [
+        "31/2023/TT-BTC",
+        "32/2023/TT-BTC"
+      ]
+    },
+    "03/2017/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "146/2017/TT-BTC",
+        "360/2025/NĐ-CP"
+      ]
+    },
+    "04/2006/tt-btm": {
+      "citing_count": 2,
+      "citing": [
+        "33/2013/TT-BCT",
+        "45/2010/TT-BCT"
+      ]
+    },
+    "04/2007/tt-btm": {
+      "citing_count": 2,
+      "citing": [
+        "13/2014/TT-BTC",
+        "194/2010/TT-BTC"
+      ]
+    },
+    "04/2009/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "101/2010/TT-BTC",
+        "230/2009/TT-BTC"
+      ]
+    },
+    "04/2013/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "110/2014/TT-BTC",
+        "131/2013/TT-BTC"
+      ]
+    },
+    "05/2009/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "45/2009/TT- BTC",
+        "45/2009/TT-BTC"
+      ]
+    },
+    "05/2012/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "195/2015/TT-BTC",
+        "20/2014/TT-BTC"
+      ]
+    },
+    "06/2001/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "152/2011/TT-BTC",
+        "32/VBHN-BTC (2019)"
+      ]
+    },
+    "07/1998/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "09/1998/TT-BTM",
+        "43/1998/TT"
+      ]
+    },
+    "08/2019/tt-bkhdt": {
+      "citing_count": 2,
+      "citing": [
+        "32/2023/TT-BTC",
+        "36/2026/TT-BTC"
+      ]
+    },
+    "09/2022/qh15": {
+      "citing_count": 2,
+      "citing": [
+        "56/2024/QH15",
+        "90/2025/QH15"
+      ]
+    },
+    "10/1998/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "115/1998/TT-BTC",
+        "35/1998/TT"
+      ]
+    },
+    "10/2025/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "149/2026/TT-BTC",
+        "64/2025/TT-BTC"
+      ]
+    },
+    "101/2001/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "08/2005/TT-BTC",
+        "26/2003/TT-BTC"
+      ]
+    },
+    "101/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "112/2010/TTLT-BTC-BLĐTBXH",
+        "26/2014/TTLT-BTC-BCT"
+      ]
+    },
+    "101/2017/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "27/2019/TT-BTC",
+        "95/2021/TT-BTC"
+      ]
+    },
+    "102/2007/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "117/2012/TT-BTC",
+        "12/2015/TT-BTC"
+      ]
+    },
+    "102/2021/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "252/2026/NĐ-CP",
+        "291/2026/NĐ-CP"
+      ]
+    },
+    "102/2024/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "230/2025/NĐ-CP",
+        "50/2026/NĐ-CP"
+      ]
+    },
+    "105/2017/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "15/2020/TT-BTC",
+        "22/2018/TT-BTC"
+      ]
+    },
+    "107/2009/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "118/2010/TT-BTC",
+        "24/2013/TT-BTC"
+      ]
+    },
+    "108/2011/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "225/TT-BTC",
+        "78/2018/TT-BTC"
+      ]
+    },
+    "11/2022/qh15": {
+      "citing_count": 2,
+      "citing": [
+        "310/2025/NĐ-CP",
+        "56/2024/QH15"
+      ]
+    },
+    "110/2004/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "07/2019/TT-BTC",
+        "93/2018/TT-BTC"
+      ]
+    },
+    "111/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP"
+      ]
+    },
+    "113/2002/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "302/2016/TT-BTC",
+        "42/2003/TT-BTC"
+      ]
+    },
+    "115/2022/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "13/2025/NĐ-CP",
+        "68/2023/NĐ-CP"
+      ]
+    },
+    "116/2004/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "112/2010/TTLT-BTC-BLĐTBXH",
+        "29/2010/TTLT-BGDĐT-BTC-BLĐTBXH"
+      ]
+    },
+    "116/2017/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "101/2021/NĐ-CP",
+        "26/2023/NĐ-CP"
+      ]
+    },
+    "117/2013/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "05/2016/QĐ-TTG",
+        "82/2023/NĐ-CP"
+      ]
+    },
+    "118/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "194/2010/TT-BTC",
+        "20/2014/TT-BTC"
+      ]
+    },
+    "119/2018/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "18/VBHN-BTC",
+        "68/2019/TT-BTC"
+      ]
+    },
+    "119/2026/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "86/2026/TT-BTC",
+        "89/2026/TT-BTC"
+      ]
+    },
+    "12/2009/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "176/2011/TT-BTC",
+        "57/2014/TT-BCT"
+      ]
+    },
+    "12/2018/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "13/2020/TT-BTC",
+        "67/2020/NĐ-CP"
+      ]
+    },
+    "120/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "149/2010/TT-BTC",
+        "194/2010/TT-BTC"
+      ]
+    },
+    "126/2011/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "139/2013/TT-BTC",
+        "62/2012/TT-BTC"
+      ]
+    },
+    "126/2024/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "109/2026/TT-BTC",
+        "320/2025/NĐ-CP"
+      ]
+    },
+    "128/2004/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "174/2015/TT-BTC",
+        "212/2014/TT-BTC"
+      ]
+    },
+    "128/2008/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "184/2015/TT-BTC",
+        "194/2010/TT-BTC"
+      ]
+    },
+    "13/2012/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "105/2012/TT-BTC",
+        "146/2026/TT-BTC"
+      ]
+    },
+    "130/2005/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "05/2016/QĐ-TTG",
+        "82/2023/NĐ-CP"
+      ]
+    },
+    "131/2008/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "83/2014/TT-BTC",
+        "91/2009/TT-BTC"
+      ]
+    },
+    "133/2013/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "29/VBHN-BTC (2019)",
+        "72/2015/TT-BTC"
+      ]
+    },
+    "137/2007/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "112/2010/TTLT-BTC-BLĐTBXH",
+        "140/2011/TTLT-BTC-LĐTBXH"
+      ]
+    },
+    "137/2017/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "32/2023/TT-BTC",
+        "90/2019/TT-BTC"
+      ]
+    },
+    "14/2006/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "45/2007/TT-BTC",
+        "77/2006/QĐ-BTC"
+      ]
+    },
+    "14/2008/qh12": {
+      "citing_count": 2,
+      "citing": [
+        "03/2021/TT-BTC",
+        "32/2013/QH13"
+      ]
+    },
+    "14/2018/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "80/2019/TT-BTC",
+        "90/2026/TT-BTC"
+      ]
+    },
+    "140/2007/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "21/2010/TTLT/BTC-BGDĐT",
+        "40/2015/TTLT-BTC-BGDĐT"
+      ]
+    },
+    "140/2025/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC"
+      ]
+    },
+    "141/2003/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "162/2007/TT-BTC",
+        "26/2006/TT-BTC"
+      ]
+    },
+    "141/2025/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "115/2026/TT-BTC",
+        "151/2026/TT-BTC"
+      ]
+    },
+    "142/2007/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "187/2013/TT-BTC",
+        "56/2008/TT-BTC"
+      ]
+    },
+    "142/2025/qh15": {
+      "citing_count": 2,
+      "citing": [
+        "134/2026/TT-BTC",
+        "252/2026/NĐ-CP"
+      ]
+    },
+    "143/2003/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "01/2005/TT-BXD",
+        "171/2010/TTLT-BTC-BNNPTNT"
+      ]
+    },
+    "143/2025/qh15": {
+      "citing_count": 2,
+      "citing": [
+        "141/2026/NĐ-CP",
+        "43/2026/QH16"
+      ]
+    },
+    "144/2025/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC"
+      ]
+    },
+    "146/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "30/2026/TT-BTC",
+        "61/2025/TT-BCT"
+      ]
+    },
+    "15/2012/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "13/2014/TT-BTC",
+        "51/2012/TT-BTC"
+      ]
+    },
+    "15/2022/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "18/VBHN-BTC",
+        "254/2026/NĐ-CP"
+      ]
+    },
+    "155/2020/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "145/2026/TT-BTC",
+        "68/2021/TT-BTC"
+      ]
+    },
+    "157/2017/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "119/2022/NĐ-CP",
+        "157/2017/QĐ-TTG"
+      ]
+    },
+    "158/2016/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "27/2023/NĐ-CP",
+        "38/2017/TT-BTNMT"
+      ]
+    },
+    "16/2001/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "24/2002/TT-BTC",
+        "53/2002/TT/BTC"
+      ]
+    },
+    "16/2008/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "143/2015/TT-BTC",
+        "20/2014/TT-BTC"
+      ]
+    },
+    "16/2012/tt-nhnn": {
+      "citing_count": 2,
+      "citing": [
+        "182/2015/TT-BTC",
+        "36/2015/TT-BTC"
+      ]
+    },
+    "161/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "02/2010/TT-BTC",
+        "12/2011/TT-BTC"
+      ]
+    },
+    "161/2012/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "110/2014/TT-BTC",
+        "29/2018/TT-BTC"
+      ]
+    },
+    "163/2016/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "26/2018/TT-BTC",
+        "33/2018/TT-BTC"
+      ]
+    },
+    "165/2010/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "139/2013/TT-BTC",
+        "62/2012/TT-BTC"
+      ]
+    },
+    "168/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "68/2025/TT-BTC",
+        "68/2026/NĐ-CP"
+      ]
+    },
+    "170/2003/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "119/2010/TT-BTC",
+        "22/2007/TTLT/BTC-BGTVT"
+      ]
+    },
+    "173/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC"
+      ]
+    },
+    "175/1998/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "106/99/TT-BTC",
+        "122/2000/TT-BTC"
+      ]
+    },
+    "18/2002/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "69/2002/TT-BTC",
+        "98/2002/TT-BTC"
+      ]
+    },
+    "18/2009/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "139/2013/TT-BTC",
+        "179/2011/TT-BTC"
+      ]
+    },
+    "18/2011/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "128/2011/TT-BTC",
+        "96/2011/TT-BTC"
+      ]
+    },
+    "18/2014/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "26/2018/TT-BTC",
+        "40/2023/TT-BTC"
+      ]
+    },
+    "18/2026/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "89/2026/TT-BTC",
+        "90/2026/TT-BTC"
+      ]
+    },
+    "182/2024/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP"
+      ]
+    },
+    "184/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "1186/QĐ-BTC",
+        "129/2011/TT-BTC"
+      ]
+    },
+    "185/2010/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "31/2014/TTLT-BNNPTNT-BTC",
+        "45/2014/TT-BTC"
+      ]
+    },
+    "185/2013/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "13/2015/TT-BTC",
+        "13/2020/TT-BTC"
+      ]
+    },
+    "186/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "113/2026/TT-BTC",
+        "254/2026/NĐ-CP"
+      ]
+    },
+    "188/2004/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "13/2006/NĐ-CP",
+        "69/2009/NĐ-CP"
+      ]
+    },
+    "188/2011/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "202/2013/TT-BTC",
+        "268/2016/TT-BTC"
+      ]
+    },
+    "188/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "12/2026/TT-BTC",
+        "148/2026/TT-BTC"
+      ]
+    },
+    "19/2006/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "106/2016/TT-BTC",
+        "194/2010/TT-BTC"
+      ]
+    },
+    "19/2012/ttlt-btc-bkhdt-btttt": {
+      "citing_count": 2,
+      "citing": [
+        "26/2014/TTLT-BTC-BCT",
+        "29/2018/TT-BTC"
+      ]
+    },
+    "19/2020/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "119/2026/TT-BTC",
+        "86/2026/TT-BTC"
+      ]
+    },
+    "190/2013/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "155/2016/TT-BTC",
+        "215/2013/TT-BTC"
+      ]
+    },
+    "192/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "103/2020/TT-BTC",
+        "16/2013/TT-BTC"
+      ]
+    },
+    "193/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "03/2026/TT-BCT",
+        "04/2026/TT-BCT"
+      ]
+    },
+    "198/2025/qh15": {
+      "citing_count": 2,
+      "citing": [
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP"
+      ]
+    },
+    "20/2015/tt-bkhdt": {
+      "citing_count": 2,
+      "citing": [
+        "01/2016/TTLT-BKHĐT-BTC",
+        "95/2016/TT-BTC"
+      ]
+    },
+    "20/2023/qh15": {
+      "citing_count": 2,
+      "citing": [
+        "113/2026/TT-BTC",
+        "90/2025/QH15"
+      ]
+    },
+    "21/2015/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "113/2026/TT-BTC",
+        "40/2023/TT-BTC"
+      ]
+    },
+    "214/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "12/2026/TT-BTC",
+        "134/2026/TT-BTC"
+      ]
+    },
+    "215/2010/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "143/2015/TT-BTC",
+        "20/2014/TT-BTC"
+      ]
+    },
+    "215/2013/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "126/2014/TT-BTC",
+        "17/2017/TT-BTC"
+      ]
+    },
+    "217/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "252/2026/NĐ-CP",
+        "89/2026/TT-BTC"
+      ]
+    },
+    "219/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "140/2011/TTLT-BTC-LĐTBXH",
+        "48/2013/TTLT-BTC-BLĐTBXH"
+      ]
+    },
+    "224/2026/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC"
+      ]
+    },
+    "23/2007/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "100/2007/TT-BTC",
+        "70/2007/TTLT-BTC"
+      ]
+    },
+    "239/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP"
+      ]
+    },
+    "242/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "86/2026/TT-BTC",
+        "89/2026/TT-BTC"
+      ]
+    },
+    "25/2017/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "111/2021/TT-BTC",
+        "112/2018/TT-BTC"
+      ]
+    },
+    "25/2018/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "20/2026/TT-BTC",
+        "87/2026/TT-BTC"
+      ]
+    },
+    "25/2022/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "43/2024/TT-BTC",
+        "44/2023/TT-BTC"
+      ]
+    },
+    "27/2007/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "112/2018/TT-BTC",
+        "32/2011/TT-BTC"
+      ]
+    },
+    "27/2007/tt-bldtbxh": {
+      "citing_count": 2,
+      "citing": [
+        "112/2010/TTLT-BTC-BLĐTBXH",
+        "29/2010/TTLT-BGDĐT-BTC-BLĐTBXH"
+      ]
+    },
+    "27/2019/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "33/2019/TT-BTC",
+        "47/2024/TT-BTC"
+      ]
+    },
+    "274/2026/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "134/2026/TT-BTC",
+        "98/2025/TT-BTC"
+      ]
+    },
+    "29/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "211/2016/TT-BTC",
+        "212"
+      ]
+    },
+    "299/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "127/2026/TT-BTC",
+        "128/2026/TT-BTC"
+      ]
+    },
+    "31/2021/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "32/2025/TT-BTC",
+        "94/2026/TT-BTC"
+      ]
+    },
+    "32/2009/qh12": {
+      "citing_count": 2,
+      "citing": [
+        "110/2026/TT-BTC",
+        "160/2009/TT-BTC"
+      ]
+    },
+    "32/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "194/2010/TT-BTC",
+        "36/2016/TT-BTC"
+      ]
+    },
+    "32/2014/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "126/2014/TT-BTC",
+        "84/2016/TT-BTC"
+      ]
+    },
+    "328/2016/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "01/2020/TT-BTC",
+        "89/2026/TT-BTC"
+      ]
+    },
+    "34/2016/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "68/2021/TT-BTC",
+        "87/2024/TT-BTC"
+      ]
+    },
+    "35/2001/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "103/2020/TT-BTC",
+        "95/2004/TT-BTC"
+      ]
+    },
+    "35/2002/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "113/2003/TT-BTC",
+        "98/2002/TT-BTC"
+      ]
+    },
+    "35/2010/qh12": {
+      "citing_count": 2,
+      "citing": [
+        "110/2026/TT-BTC",
+        "21/2017/NĐ-CP"
+      ]
+    },
+    "35/2018/qh14": {
+      "citing_count": 2,
+      "citing": [
+        "127/2026/TT-BTC",
+        "33/2023/TT-BTC"
+      ]
+    },
+    "35/2026/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC"
+      ]
+    },
+    "358/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC"
+      ]
+    },
+    "38/2013/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "181/2013/TT-BTC",
+        "45/2014/TT-BTC"
+      ]
+    },
+    "39/2026/tt-bkhcn": {
+      "citing_count": 2,
+      "citing": [
+        "113/2026/TT-BTC",
+        "130/2026/TT-BTC"
+      ]
+    },
+    "40/2008/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "194/2010/TT-BTC",
+        "205/2010/TT-BTC"
+      ]
+    },
+    "41/2022/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "18/VBHN-BTC",
+        "254/2026/NĐ-CP"
+      ]
+    },
+    "43/2022/qh15": {
+      "citing_count": 2,
+      "citing": [
+        "18/VBHN-BTC",
+        "254/2026/NĐ-CP"
+      ]
+    },
+    "44/2017/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "05/2020/TT-BTC",
+        "152/2015/TT-BTC"
+      ]
+    },
+    "44/2018/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "101/2020/TT-BTC",
+        "67/2021/TT-BTC"
+      ]
+    },
+    "45/1998/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "139/1998/TTLT-BTC-KHCNMT",
+        "16/2000/NĐ-CP"
+      ]
+    },
+    "45/2014/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "103/2024/NĐ-CP",
+        "26/2016/TT-BTC"
+      ]
+    },
+    "49/2022/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP"
+      ]
+    },
+    "50/2020/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "86/2026/TT-BTC",
+        "89/2026/TT-BTC"
+      ]
+    },
+    "52/2024/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP"
+      ]
+    },
+    "53/2010/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "194/2010/TT-BTC",
+        "87/2010/NĐ-CP"
+      ]
+    },
+    "54/2015/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "06/VBHN-BTC (2018)",
+        "257/2016/TT-BTC"
+      ]
+    },
+    "54/2019/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "110/2025/TT-BTC",
+        "360/2025/NĐ-CP"
+      ]
+    },
+    "54/2021/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "36/2026/TT-BTC",
+        "95/2021/TT-BTC"
+      ]
+    },
+    "55/2015/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "226/2016/TT-BTC",
+        "61/2023/TT-BTC"
+      ]
+    },
+    "57/1998/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "186/2000/QĐ/BTC",
+        "2545/1998/QĐ-BGTVT"
+      ]
+    },
+    "57/2021/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "19/VBHN-BTC (2026)",
+        "320/2025/NĐ-CP"
+      ]
+    },
+    "58/2011/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "140/2011/TTLT-BTC-LĐTBXH",
+        "213/2013/TTLT-BTC-BLĐTBXH"
+      ]
+    },
+    "58/2017/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "127/2026/TT-BTC",
+        "90/2019/TT-BTC"
+      ]
+    },
+    "60/2015/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "106/2018/TT-BTC",
+        "32/VBHN-BTC (2019)"
+      ]
+    },
+    "61/2020/qh14": {
+      "citing_count": 2,
+      "citing": [
+        "18/2021/NĐ-CP",
+        "67/2025/QH15"
+      ]
+    },
+    "61/2024/qh15": {
+      "citing_count": 2,
+      "citing": [
+        "07/2025/QĐ-TTG",
+        "83/2024/TT-BTC"
+      ]
+    },
+    "63/1998/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "115/1998/TT-BTC",
+        "13/2001/TT-BTC"
+      ]
+    },
+    "63/2001/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "152/2011/TT-BTC",
+        "32/VBHN-BTC (2019)"
+      ]
+    },
+    "63/2020/qh14": {
+      "citing_count": 2,
+      "citing": [
+        "107/2023/QH15",
+        "64/2025/QH15"
+      ]
+    },
+    "64/2000/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "90/2000/TT-BTC",
+        "99/2002/TT-BTC"
+      ]
+    },
+    "65/2017/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "07/2020/NĐ-CP",
+        "09/2019/TT-BTC"
+      ]
+    },
+    "66/2009/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "100/2011/TT-BTC",
+        "182/2014/TT-BTC"
+      ]
+    },
+    "68/2001/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "112/2003/TT-BTC",
+        "74/2006/TT-BTC"
+      ]
+    },
+    "68/2014/qh13": {
+      "citing_count": 2,
+      "citing": [
+        "75/2016/TT-BTC",
+        "99/2016/TT-BTC"
+      ]
+    },
+    "69/2008/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "103/2024/NĐ-CP",
+        "230/2025/NĐ-CP"
+      ]
+    },
+    "7/2026/tt-bnv": {
+      "citing_count": 2,
+      "citing": [
+        "112/2026/TT-BTC",
+        "113/2026/TT-BTC"
+      ]
+    },
+    "70/2002/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "152/2011/TT-BTC",
+        "32/VBHN-BTC (2019)"
+      ]
+    },
+    "70/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "36/2026/TT-BTC",
+        "51/2025/TT-BTC"
+      ]
+    },
+    "71/2006/qh11": {
+      "citing_count": 2,
+      "citing": [
+        "164/2013/TT-BTC",
+        "32/2013/QH13"
+      ]
+    },
+    "72/2015/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "18/VBHN-BTC (2026)",
+        "181/2025/NĐ-CP"
+      ]
+    },
+    "72/2018/qh14": {
+      "citing_count": 2,
+      "citing": [
+        "13/2025/NĐ-CP",
+        "68/2023/NĐ-CP"
+      ]
+    },
+    "73/2010/ttlt-btc-btp": {
+      "citing_count": 2,
+      "citing": [
+        "140/2011/TTLT-BTC-LĐTBXH",
+        "48/2013/TTLT-BTC-BLĐTBXH"
+      ]
+    },
+    "73/2019/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "12/2020/TT-BTTTT",
+        "95/2021/TT-BTC"
+      ]
+    },
+    "75/2022/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "22/2026/NQ-CP",
+        "71/2025/TT-BTC"
+      ]
+    },
+    "77/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "150/2026/TT-BTC",
+        "84/2025/TT-BNNMT"
+      ]
+    },
+    "79/2005/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "16/2007/TTLT/BTC-BLĐTBXH",
+        "90/2006/TTLT-BTC-UBTDTT"
+      ]
+    },
+    "79/2012/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "136/2014/TT-BTC",
+        "288/2016/TT-BTC"
+      ]
+    },
+    "79/2025/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "110/2026/TT-BTC",
+        "97/2026/TT-BTC"
+      ]
+    },
+    "81/2013/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "155/2016/TT-BTC",
+        "166/2013/TT-BTC"
+      ]
+    },
+    "82/2006/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "116/2013/TT-BTC",
+        "90/2011/TT-BTC"
+      ]
+    },
+    "82/2018/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "18/2021/NĐ-CP",
+        "43/2019/TT-BTC"
+      ]
+    },
+    "85/2003/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "19/2006/TT-BTC",
+        "62/2004/TT-BTC"
+      ]
+    },
+    "86/2013/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "29/VBHN-BTC (2019)",
+        "72/2015/TT-BTC"
+      ]
+    },
+    "89/2002/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "191/2010/TT- BTC",
+        "191/2010/TT-BTC"
+      ]
+    },
+    "89/2003/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "124/2008/TT-BTC",
+        "97/2006/TT-BTC"
+      ]
+    },
+    "91/2017/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "33/2018/TT-BTC",
+        "40/2023/TT-BTC"
+      ]
+    },
+    "92/2010/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "83/2012/TT-BTC",
+        "96/2011/TT-BTC"
+      ]
+    },
+    "93/2025/qh15": {
+      "citing_count": 2,
+      "citing": [
+        "109/2025/QH15",
+        "110/2025/UBTVQH15"
+      ]
+    },
+    "98/2007/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "102/2010/TTLT-BTC-NHNN",
+        "13/2009/NĐ-CP"
+      ]
+    },
+    "98/2017/nd-cp": {
+      "citing_count": 2,
+      "citing": [
+        "03/2018/TT-BCT",
+        "55/2018/TT-BCT"
+      ]
+    },
+    "99/2010/tt-btc": {
+      "citing_count": 2,
+      "citing": [
+        "194/2010/TT-BTC",
+        "49/2015/TT-BTC"
+      ]
+    }
+  }
+}
