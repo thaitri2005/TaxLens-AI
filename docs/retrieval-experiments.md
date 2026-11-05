@@ -22,6 +22,7 @@ their comparisons between methods no longer hold as they stand. Evaluation-statu
 | 05/11/2026 | Leaving forms out of search | [Plan](#leaving-forms-out-of-search-plan-05112026), [results](#leaving-forms-out-of-search-results-05112026) |
 | 05/11/2026 | Keeping vector search exact | [Change](#keeping-vector-search-exact-05112026) |
 | 05/11/2026 | Making search faster | [Results](#making-search-faster-05112026) |
+| 05/11/2026 | TCVN3 text left unconverted | [Findings](#tcvn3-text-left-unconverted-05112026) |
 | 05/11/2026 | Audit before corpus-v2 | [Findings](#audit-before-corpus-v2-05112026) |
 | 05/11/2026 | Removing the keyword term limit | [Plan](#removing-the-keyword-term-limit-plan-05112026), [results](#removing-the-keyword-term-limit-results-05112026) |
 
@@ -701,6 +702,47 @@ terms would change results. Running the two searches at once would save at most 
 wait a user sees is the cold start after idle, up to a minute, and avoiding it means keeping a replica
 running at a cost, which is a budget decision.
 
+## TCVN3 text left unconverted (05/11/2026)
+
+Found after the audit, from `9964 truncated` in the log of `rechunk_outdated`. That count was far
+above the audit's 16 passages, which used word count rather than tokens. A sample of the truncated passages
+was not Vietnamese Unicode at all: `chuyÓn ph©n b»ng tiÖn` is the old TCVN3 font
+encoding of `chuyển phân bằng tiện`. The audit missed this because its accent check counts
+those characters as accents.
+
+**Cause.** The converter treated a line holding `â`, `ê` or `ô` as already Unicode. TCVN3 uses the
+same bytes for `õ`, `ờ` and `ụ`, so most long lines were skipped and only short ones converted,
+which left documents half converted. This dates from the converter's first version (19/10/2026).
+
+**Size.** At least 526 of the 2,028 audited documents, about 11,300 passages or 18% of the corpus,
+nearly all from before about 2006. 16 of the 20 documents in the build's test also had it, so the
+975 new documents would have too. Stored text holds 2,353 lines starting `Điều n` as it stands and
+4,669 once converted, because `§iÒu 1` was not recognised as an article.
+
+**All reported results on `corpus-v1.2` were measured with this bug.** Keyword search could not match
+these passages properly and the embedding model read them as noise. Most are old, so the effect on
+the gold set, which asks about current law, is not known until the baselines are repeated.
+
+**Fix.** A line now counts as TCVN3 only on characters Unicode Vietnamese does not use, and a line
+that cannot tell follows its nearest neighbour. A document is converted only if at least 10% of the
+lines that can tell are TCVN3, since OCR noise can look similar (`Ghi chú: ¬¬` came out as
+`Ghi chỳ: ơơ` in the first attempt).
+
+| Check | Result |
+| --- | --- |
+| 149 real Word and RTF files, extracted again | 99.7% of words in vocabulary, no TCVN3 characters left |
+| Unicode documents wrongly changed, all 2,525 stored texts | None; the 20 changed in that group all hold TCVN3 |
+| Passages over 512 tokens after the fix, 120 stored texts | Articles 12 of 2,337 (0.5%), other text 328 of 1,825 (18%), losing 5-6% of their length |
+
+Some files mix fonts within a line, and words such as `cã` can stay unconverted there, since they
+prove nothing alone. The 9,964 therefore came mostly from TCVN3, which splits into many more tokens than Vietnamese
+Unicode, so the passage size stays as it is.
+
+**Repair.** `reextract_legacy_text` reads every stored text and extracts the affected Word and RTF
+files again from the raw file, with no OCR. PDFs are left alone, because conversion could make a
+garbled text layer look like Vietnamese and pass the check for one; the job reports how many it
+skipped.
+
 ## Audit before corpus-v2 (05/11/2026)
 
 Collecting `corpus-v2` is the expensive step, so everything that could force a second pass was
@@ -716,7 +758,7 @@ checked first: all 2,022 stored texts, the database, and all 935 portal links in
 | Failed documents | 8: 7 are Excel workbooks filed as `.rtf`, and 1 is a 2-byte file | Left as they are. Old tariff tables; not worth a parser |
 | Selection links | All 935 reachable, 1.39 GB in total, largest 27 MB. The 40 ministry links can only be checked from Vietnam | Nothing needed |
 | Document numbers | 5 with stray spaces (`148/2013/TT- BTC`) are duplicates of documents also held under the clean number, so they can take two result slots | Left in place, since removing them deletes data. To be decided separately |
-| Embeddings | All passages embedded; 16 passages over 512 tokens by word count | Nothing needed |
+| Embeddings | All passages embedded. The 16 passages over 512 tokens used word count and were far too low; see [TCVN3 text](#tcvn3-text-left-unconverted-05112026) | Nothing needed |
 
 **OCR comparison.** Tesseract at 300 DPI, mode 6. "Word match" compares OCR of 8 born-digital pages
 with their text layer. "In vocabulary" is the share of words on 16 scanned pages from the selection
@@ -747,8 +789,8 @@ nhận` in a sentence for a signature and dropped attached regulations; the dry 
   answers quote the source.
 - **Re-OCR of the 576 older scanned documents.** The gain is about 1.5 points of word match, at about
   24,000 pages. New documents use the better setting, so the corpus has two OCR settings.
-- **A smaller passage size.** 16 passages exceed the embedding limit by word count, though Vietnamese
-  tokens run higher. Changing it means re-embedding everything, with no evidence that it would help.
+- **A smaller passage size.** Few article passages exceed the embedding limit once TCVN3 is converted.
+  Changing it means re-embedding everything, with no evidence that it would help.
 
 ## Changes
 

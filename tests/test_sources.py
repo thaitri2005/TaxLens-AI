@@ -12,7 +12,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from taxlens.document_processing.formats import detect_format, extract_word_processor_text
-from taxlens.document_processing.legacy_text import convert_tcvn3
+from taxlens.document_processing.legacy_text import convert_tcvn3, has_legacy_text
 from taxlens.document_processing.process import build_article_chunks, find_section_headings
 from taxlens.ingestion.connectors import ConnectorError, GovernmentPortalSearch, SourceDocument
 from taxlens.ingestion.mof import MofLegalDocumentConnector, MofSearchOptions
@@ -32,6 +32,37 @@ def test_tcvn3_text_is_converted_to_unicode_and_unicode_lines_are_kept() -> None
         "THÔNG TƯ của Bộ Tài chính",
         "Thông tư đã là Unicode",
     ]
+
+
+def test_tcvn3_lines_holding_letters_shared_with_unicode_are_converted() -> None:
+    # In TCVN3 "ê" is "ờ", "ô" is "ụ" and "â" is "õ". These lines used to pass as Unicode.
+    legacy = "ngµy 28 th¸ng 8 n¨m 1993 cña ChÝnh phñ\n§iÒu 1. Ng\xadêi nép thuÕ cô thÓ\nBé"
+
+    assert convert_tcvn3(legacy).split("\n") == [
+        "ngày 28 tháng 8 năm 1993 của Chính phủ",
+        "Điều 1. Người nộp thuế cụ thể",
+        "Bộ",
+    ]
+
+
+def test_unicode_text_with_only_shared_letters_or_symbols_is_kept() -> None:
+    text = "Thông báo\nTên bài\nGiá 3 × 4 § 2\n«Thông báo»"
+
+    assert convert_tcvn3(text) == text
+    assert not has_legacy_text(text)
+
+
+def test_ocr_noise_in_a_unicode_document_is_not_converted() -> None:
+    text = "\n".join(["Căn cứ Luật Quản lý thuế"] * 20 + ["Ghi chú: Ch¬¬ ti¢p"])
+
+    assert convert_tcvn3(text) == text
+
+
+def test_tcvn3_mixed_with_unicode_lines_is_converted_line_by_line() -> None:
+    text = "Căn cứ Luật Quản lý thuế\nTh«ng t\xad h\xadíng dÉn thuÕ"
+
+    assert convert_tcvn3(text) == "Căn cứ Luật Quản lý thuế\nThông tư hướng dẫn thuế"
+    assert convert_tcvn3(convert_tcvn3(text)) == convert_tcvn3(text)
 
 
 def test_rtf_uses_each_font_charset_and_unicode_escapes() -> None:

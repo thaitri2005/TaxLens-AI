@@ -124,11 +124,14 @@ def run_processing_job(
     rechunk_outdated: bool = False,
     reocr: bool = False,
     reextract_listed: bool = False,
+    reextract_legacy_text: bool = False,
 ) -> dict[str, Any]:
     _authorize(x_taxlens_internal_token)
     arguments = ["--limit", str(limit)]
     if reextract_listed:
         arguments += ["--reextract-listed", "data/evaluation/corpus/reextract-v2.json"]
+    if reextract_legacy_text:
+        arguments.append("--reextract-legacy-text")
     if retry_failed:
         arguments.append("--retry-failed")
     if rechunk_outdated:

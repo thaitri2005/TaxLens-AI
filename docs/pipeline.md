@@ -67,7 +67,7 @@ Word files therefore cost a small fraction of a scan, and their text is exact. T
 is detected from the file content (`taxlens/document_processing/formats.py`): files named
 `.doc` are often RTF. Text in the pre-Unicode TCVN3 encoding (`.VnTime` fonts, common
 before about 2005) and RTF runs in the Windows Vietnamese code page are converted to
-Unicode. Documents from before about 2011 often have no "Điều" articles; they are split by
+Unicode. PDF text layers are not converted, since that could disguise a garbled layer. Documents from before about 2011 often have no "Điều" articles; they are split by
 their section headings ("PHẦN A", "I. ĐỐI TƯỢNG ÁP DỤNG") instead, and Word documents carry
 no page numbers.
 

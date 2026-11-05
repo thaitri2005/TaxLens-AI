@@ -61,6 +61,14 @@ def run_maintenance(params: dict[str, object], **_: object) -> None:
         run_api_job("/internal/airflow/process", {"limit": 1000, "reextract_listed": "true"})
         run_api_job("/internal/airflow/embed")
         return
+    if action == "reextract_legacy_text":
+        # Word and RTF files only, so no OCR. The second pass should report 0 documents.
+        for _ in range(2):
+            run_api_job(
+                "/internal/airflow/process", {"limit": 1000, "reextract_legacy_text": "true"}
+            )
+        run_api_job("/internal/airflow/embed")
+        return
     if action == "collect_selected_dry_run":
         run_api_job("/internal/airflow/collect-selected", {"dry_run": "true"})
         return
@@ -117,14 +125,13 @@ with DAG(
                 "process_and_embed",
                 "rechunk_outdated",
                 "reextract_listed",
+                "reextract_legacy_text",
                 "collect_selected_dry_run",
                 "collect_selected",
             ],
         ),
         # Only used by ocr_benchmark; optional so other actions can leave them empty.
-        "document_number": Param(
-            None, type=["null", "string"], description="ocr_benchmark only"
-        ),
+        "document_number": Param(None, type=["null", "string"], description="ocr_benchmark only"),
         "pages": Param(
             3, type=["null", "integer"], minimum=1, maximum=10, description="ocr_benchmark only"
         ),

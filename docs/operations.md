@@ -303,7 +303,7 @@ compete for the API's memory and CPU, and unpause it afterwards.
 Adds the 975 selected documents ([rules](corpus-inclusion.md)) through the existing Airflow apps, so
 no new Azure resources are needed. Existing documents are not OCR'd again, apart from 10 listed ones.
 
-Expect 20+ hours, with the site slow meanwhile, since jobs share the API's vCPU. Do not release while
+Expect about 15 hours, with the site slow meanwhile, since jobs share the API's vCPU. Do not release while
 it runs. Trigger each action from the Airflow UI, **Trigger DAG w/ config** on
 `taxlens_corpus_maintenance`, and wait for each to finish:
 
@@ -321,7 +321,8 @@ Leave `tax_regulation_discovery_daily` **paused**: it would add documents to the
 | 2 | `{"action": "collect_selected", "limit": 20, "rounds": 1}` | The test: 20 documents, timed from the task log |
 | 3 | `{"action": "rechunk_outdated"}` | Relabels appendix text from stored text, with no OCR, and embeds about 18,000 passages |
 | 4 | `{"action": "reextract_listed"}` | Re-OCRs the 10 documents with garbled text layers (399 pages) |
-| 5 | `{"action": "collect_selected", "limit": 100, "rounds": 10}` | The full run. Safe to re-trigger: documents already held are skipped |
+| 5 | `{"action": "reextract_legacy_text"}` | Converts [TCVN3 text](retrieval-experiments.md#tcvn3-text-left-unconverted-05112026) in about 550 Word and RTF documents, with no OCR, in about 1 hour. The second pass in the log should report 0 documents |
+| 6 | `{"action": "collect_selected", "limit": 100, "rounds": 10}` | The full run. Safe to re-trigger: documents already held are skipped |
 
 Then stop both apps with `az containerapp stop`, since the scheduler costs money while it runs. The
 40 ministry documents need a Vietnamese connection:

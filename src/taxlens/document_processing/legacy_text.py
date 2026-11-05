@@ -27,22 +27,115 @@ _TCVN3 = {
     0xFA: "ỳ", 0xFB: "ỷ", 0xFC: "ỹ", 0xFD: "ý", 0xFE: "ỵ",
 }
 _TCVN3_TABLE = {code: character for code, character in _TCVN3.items()}
+# Letters that Unicode Vietnamese stores in the Latin-1 range. TCVN3 uses the same bytes for
+# other letters: "ê" is "ờ", "ô" is "ụ", and "â" is "õ". They say nothing about the encoding.
+_SHARED_WITH_UNICODE = frozenset("áâãèéêìíòóôõùúýÈÉÊÌÒÓÔÕÝ")
 _TCVN3_MARKERS = frozenset(chr(code) for code in _TCVN3)
-_UNICODE_VIETNAMESE = re.compile(r"[ăâđêôơưĂÂĐÊÔƠƯẠ-ỹ]")
+_TCVN3_ONLY = _TCVN3_MARKERS - _SHARED_WITH_UNICODE
+# Used as quotation marks in Unicode text, so they count only inside a word.
+_QUOTES = frozenset("«»")
+# Ordinary symbols in Unicode text, so one alone does not prove a word is TCVN3.
+_SYMBOLS = frozenset("×§©®")
+MIN_LEGACY_SHARE = 0.1
+# Vietnamese letters outside Latin-1, which TCVN3 text cannot contain.
+_UNICODE_VIETNAMESE = re.compile(r"[ăđĩũơưĂĐĨŨƠƯẠ-ỹ]")
 _WORD = re.compile(r"\S+")
 
 
+def _tcvn3_only_letters(text: str) -> int:
+    """TCVN3-only characters touching a letter, so "§ 2" and "3 × 4" do not count."""
+
+    count = 0
+    for index, character in enumerate(text):
+        if character not in _TCVN3_ONLY:
+            continue
+        before = index > 0 and _is_letter(text[index - 1])
+        after = index + 1 < len(text) and _is_letter(text[index + 1])
+        if (before and after) if character in _QUOTES else (before or after):
+            count += 1
+    return count
+
+
+def _is_letter(character: str) -> bool:
+    return character.isalpha()
+
+
 def looks_like_tcvn3(line: str) -> bool:
-    markers = sum(character in _TCVN3_MARKERS for character in line)
-    return markers >= 2 and not _UNICODE_VIETNAMESE.search(line)
+    """True when the line itself proves it is TCVN3."""
+
+    if _UNICODE_VIETNAMESE.search(line):
+        return False
+    only = _tcvn3_only_letters(line)
+    shared = sum(character in _SHARED_WITH_UNICODE for character in line)
+    return only >= 2 or (only == 1 and shared >= 1)
 
 
 def convert_tcvn3(text: str) -> str:
-    """Convert TCVN3 lines to Unicode, leaving Unicode and plain ASCII lines unchanged."""
+    """Convert TCVN3 text to Unicode, leaving Unicode and plain ASCII text unchanged.
 
-    return "\n".join(
-        _convert_line(line) if looks_like_tcvn3(line) else line for line in text.split("\n")
-    )
+    A line such as "Bé" cannot be judged alone, so it follows the nearest line that can be.
+    Within a Unicode line, only words that prove to be TCVN3 are converted.
+    """
+
+    lines = text.split(chr(10))
+    verdicts = [_verdict(line) for line in lines]
+    legacy_lines = verdicts.count(True)
+    # OCR noise such as "trực ti¢p" proves a line or two; TCVN3 text proves many.
+    if legacy_lines < MIN_LEGACY_SHARE * (legacy_lines + verdicts.count(False)) or not legacy_lines:
+        return text
+    settled = _nearest_verdicts(verdicts)
+    converted: list[str] = []
+    for line, verdict, nearest in zip(lines, verdicts, settled, strict=True):
+        if verdict is False:
+            converted.append(_convert_words(line))
+        elif nearest and any(character in _TCVN3_MARKERS for character in line):
+            converted.append(_convert_line(line))
+        else:
+            converted.append(line)
+    return chr(10).join(converted)
+
+
+def has_legacy_text(text: str) -> bool:
+    return convert_tcvn3(text) != text
+
+
+def _verdict(line: str) -> bool | None:
+    """True for TCVN3, False for Unicode Vietnamese, None when the line cannot tell."""
+
+    if _UNICODE_VIETNAMESE.search(line):
+        return False
+    return True if looks_like_tcvn3(line) else None
+
+
+def _nearest_verdicts(verdicts: list[bool | None]) -> list[bool]:
+    """Each line's own verdict, or that of the nearest line that has one."""
+
+    distance_and_verdict: list[tuple[int, bool] | None] = [None] * len(verdicts)
+    for order in (range(len(verdicts)), range(len(verdicts) - 1, -1, -1)):
+        latest: tuple[int, bool] | None = None
+        for index in order:
+            verdict = verdicts[index]
+            if verdict is not None:
+                latest = (index, verdict)
+            if latest is None:
+                continue
+            distance = abs(index - latest[0])
+            current = distance_and_verdict[index]
+            if current is None or distance < current[0]:
+                distance_and_verdict[index] = (distance, latest[1])
+    return [item is not None and item[1] for item in distance_and_verdict]
+
+
+def _convert_words(line: str) -> str:
+    return _WORD.sub(lambda match: _converted_word(match.group(0)), line)
+
+
+def _converted_word(word: str) -> str:
+    only = _tcvn3_only_letters(word)
+    symbol_alone = only == 1 and any(character in _SYMBOLS for character in word)
+    if only and not symbol_alone and not _UNICODE_VIETNAMESE.search(word):
+        return _convert_line(word)
+    return word
 
 
 def _convert_line(line: str) -> str:

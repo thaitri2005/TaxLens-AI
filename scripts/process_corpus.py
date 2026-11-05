@@ -1,4 +1,5 @@
 import argparse
+import concurrent.futures
 import json
 import time
 import uuid
@@ -7,6 +8,7 @@ from pathlib import Path
 from sqlalchemy import Select, exists, func, select
 
 from taxlens.db import SessionLocal
+from taxlens.document_processing.legacy_text import has_legacy_text
 from taxlens.document_processing.process import (
     CHUNKER_STAGE_SUFFIX,
     ProcessResult,
@@ -14,7 +16,10 @@ from taxlens.document_processing.process import (
     process_document_version,
 )
 from taxlens.legal_data.models import DocumentVersion, LegalDocument, ProcessingJob
+from taxlens.storage.base import ObjectStorage
 from taxlens.storage.factory import get_object_storage
+
+WORD_PROCESSOR_SUFFIXES = (".doc", ".docx", ".rtf")
 
 
 def main() -> None:
@@ -45,6 +50,11 @@ def main() -> None:
         help="Re-run extraction and OCR for the document numbers listed in this JSON file",
     )
     parser.add_argument(
+        "--reextract-legacy-text",
+        action="store_true",
+        help="Re-run extraction for Word and RTF documents whose stored text still holds TCVN3",
+    )
+    parser.add_argument(
         "--retry-failed",
         action="store_true",
         help="Include document versions whose latest processing job failed",
@@ -55,7 +65,9 @@ def main() -> None:
 
     storage = get_object_storage()
     candidates = (
-        _listed_query(arguments.reextract_listed)
+        _legacy_text_query(storage)
+        if arguments.reextract_legacy_text
+        else _listed_query(arguments.reextract_listed)
         if arguments.reextract_listed is not None
         else _outdated_query()
         if arguments.rechunk_outdated
@@ -98,7 +110,9 @@ def main() -> None:
                     storage,
                     version,
                     force=force,
-                    reextract=arguments.reocr or arguments.reextract_listed is not None,
+                    reextract=arguments.reocr
+                    or arguments.reextract_listed is not None
+                    or arguments.reextract_legacy_text,
                 )
             except Exception as error:
                 # One broken document must not stop the batch or block later runs.
@@ -131,6 +145,47 @@ def _listed_query(path: Path) -> Select[tuple[DocumentVersion]]:
         .where(LegalDocument.document_number.in_(numbers))
         .order_by(DocumentVersion.created_at)
     )
+
+
+def _legacy_text_query(storage: ObjectStorage) -> Select[tuple[DocumentVersion]]:
+    """Versions to extract again, found by reading every stored text.
+
+    They are extracted from the raw file because stored text can mix converted and unconverted
+    lines. PDFs are left out: conversion could make a garbled text layer look like Vietnamese.
+    """
+
+    with SessionLocal() as session:
+        rows = session.execute(
+            select(
+                DocumentVersion.id,
+                DocumentVersion.normalized_artifact_key,
+                DocumentVersion.raw_artifact_key,
+            ).where(DocumentVersion.normalized_artifact_key.is_not(None))
+        ).all()
+
+    def holds_legacy_text(key: str) -> bool:
+        if not storage.exists(key):
+            return False
+        return has_legacy_text(storage.get_bytes(key).decode("utf-8", errors="replace"))
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        flags = list(pool.map(holds_legacy_text, [row[1] for row in rows]))
+    flagged = [row for row, flag in zip(rows, flags, strict=True) if flag]
+    selected = [row[0] for row in flagged if _is_word_processor_file(row[2])]
+    print(
+        f"Stored texts checked: {len(rows)}; holding TCVN3: {len(flagged)}; "
+        f"PDF or other, left alone: {len(flagged) - len(selected)}",
+        flush=True,
+    )
+    return (
+        select(DocumentVersion)
+        .where(DocumentVersion.id.in_(selected))
+        .order_by(DocumentVersion.created_at)
+    )
+
+
+def _is_word_processor_file(key: str | None) -> bool:
+    return key is not None and key.lower().endswith(WORD_PROCESSOR_SUFFIXES)
 
 
 def _outdated_query() -> Select[tuple[DocumentVersion]]:
