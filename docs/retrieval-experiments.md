@@ -665,9 +665,10 @@ provisions (ranks 3 and 6), and the other 12 stay outside their top 200. Those q
 before these results, and they name the visible issues, not the unstated steps.
 
 **What follows.** Half of the 14 cannot be reached by better matching of the question's words. That
-needs a step that works out what law the question depends on, such as a model proposing the legal
-issues, or following a curated map from a topic to its general rules. Any of these needs its own plan
-and new cases. Some of the 7 may also be stricter than a retriever should be held to (A7's effective
+needs a step that works out what law the question depends on. The stored issue queries already come
+from a model (`decompose_issues.py`, Qwen3-4B), and they do not name these steps, so this would need
+a stronger model or prompt, or a curated map from a topic to its general rules. Any of these needs
+its own plan and new cases. Some of the 7 may also be stricter than a retriever should be held to (A7's effective
 date, A6's definitions), which is a question for the expert review of alternative evidence sets.
 
 ## Making search faster (05/11/2026)

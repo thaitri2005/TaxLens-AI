@@ -160,7 +160,8 @@ shorten the candidate list, so the query orders by `distance + 0` and the index 
 Printed forms are left out of keyword and hybrid results unless the question asks for one
 (`mẫu số`, `biểu mẫu`, `mẫu biểu`, `mẫu đơn`, `tờ khai`). A passage with four or more blank-field
 runs counts as a form (`is_form_passage`). Twice the limit is fetched and forms are removed
-afterwards, so nothing in the database changes.
+afterwards, so nothing in the database changes. Together these two rules and the speed changes are
+on `main` ([what is live](evaluation-status.md#what-is-live)).
 
 ## 5. Evidence gate (`intelligence/evidence.py`)
 

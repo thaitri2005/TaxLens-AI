@@ -9,14 +9,32 @@ the dated record behind each figure is in
 - Gold set: `gold-v1.0 --verified-only`, 12 scored cases. That is too few to show most
   differences, so wins and losses are given with every comparison.
 - The keyword term limit was the largest problem found. Removing it nearly tripled hybrid recall
-  at K = 10, from 0.15 to 0.41. The change is in the code, with a faster query that returns the
-  same results. It went live on 05/11/2026 (`158c4c2`).
+  at K = 10, from 0.15 to 0.41. It went live on 05/11/2026.
+- A hybrid search now takes about 1.5 s a question in the code on `main`, and results are unchanged.
+  [What is live](#what-is-live) lists what still waits for a release.
 - Hybrid and keyword search are now close, and these cases cannot separate them. Issue-guided
   retrieval has fallen behind both.
-- Of hybrid's 20 misses at K = 10, 14 are nowhere near the top, and 7 of those need a legal step
-  the question does not state. Better word matching cannot reach them.
+- **Most essential provisions are still missed:** 20 of hybrid's at K = 10. 14 of those are nowhere
+  near the top, and 7 need a legal step the question does not state, which better word matching
+  cannot reach.
 - More documents alone do not fix retrieval: adding the two missing circulars made only one of
   three affected cases findable until the limit was removed.
+
+## What is live
+
+The site runs `158c4c2`, released 05/11/2026. `main` is ahead of it.
+
+| Change | On the site | On `main` |
+| --- | --- | --- |
+| Every term of a long question is searched | Yes | Yes |
+| Keyword query that counts matches from the indexes (migration `20261105_0006`) | Yes | Yes |
+| Forms left out of search | No | Yes |
+| Vector search kept exact | No | Yes |
+| Faster vector and keyword queries | No | Yes |
+| Unused HNSW index dropped, 121 MB (migration `20261105_0007`) | No | Yes |
+
+Airflow is off, so the corpus is not being updated. All times here were measured from a laptop, and
+none on the site. Answer quality has not been evaluated since the limit was removed.
 
 ## What the limit changed
 
@@ -73,15 +91,16 @@ term limit. Full coverage is in brackets where it is not 0.
 | Issue-guided, ministry dates only | 0.17 | 0.24 | 0.41 (0.08) |
 
 "Filter" leaves out documents that had ended by the case date, including two inferred rules that no
-legal expert has validated. "Ministry dates only" leaves out that inference. Figures under the limit
-of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-term-limit-results-05112026).
+legal expert has validated. "Ministry dates only" leaves out that inference. Leaving forms out
+changes one figure among those measured: hybrid with the filter is 0.38 at K = 5. Figures under the
+limit of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-term-limit-results-05112026).
 
 ## What each experiment found
 
 | Experiment | Finding | Standing |
 | --- | --- | --- |
 | Keyword term limit | Hybrid at K = 10 rises from 0.15 to 0.41: 6 wins, 0 losses, p = 0.03. Keyword rises from 0 to 0.42: 8 wins, 0 losses, p = 0.008 | Live. Repeats a result already seen, so new cases are needed as independent evidence |
-| Query time | Keyword search takes 1.7 s a question, against 17 s with the old query and 7 s under the limit. Results are identical | Live, with migration `20261105_0006` recorded. Timed from a laptop, not yet on the site |
+| Query time | Keyword search takes 1.7 s a question as released, against 17 s with the old query and 7 s under the limit. Results are identical | Live. Timed from a laptop |
 | Issue-guided against hybrid | Hybrid is ahead without the limit: at K = 10 issue-guided wins 1, loses 5, p = 0.22. Taking turns between rankings pushes the question's own results down | Not worth using as it is; a different merge would need its own plan |
 | Filter for ended documents | Hybrid wins 3, loses 0 at K = 5, p = 0.25, and changes one case at K = 10. Removes no gold document | Smaller effect than before; the gain depends on unvalidated rules |
 | The ministry's expiry dates | Hybrid gets the same recall as the full filter at K = 10 and 20, and part of it at K = 5, without inference | The conservative version of the filter |
@@ -89,7 +108,7 @@ of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-term-li
 | Why 14 provisions are not retrieved | 7 need an unstated legal step, 6 share words but the facts bury them, 1 is worded differently. Term weighting and expanding abbreviations reach none of them | Grouping not reviewed by an expert. Points to working out the legal issues first |
 | Leaving forms out of search | No recall gain, and 1 rank moved by one. Forms leave the top 50 entirely (22 before) | In the code, not yet released. Kept for what readers and the model see |
 | Keeping vector search exact | Same results; rules out silently returning at most 40 candidates | In the code, not yet released |
-| Making search faster | A hybrid search takes 1.5 s, against 2.8 s, with identical results. Drops an unused 121 MB index | In the code, not yet released |
+| Making search faster | A hybrid search takes 1.5 s, against 2.8 s, with identical results: keyword 1.3 s, vector 0.2 s. Drops an unused 121 MB index | In the code, not yet released. Timed from a laptop |
 | Split-syllable repair | Almost no rank changed | Kept for correct text, not a retrieval gain |
 | Following one legal reference | Reaches 1 of 20 missed provisions at K = 10, at document level only | Not worth building now |
 
@@ -97,14 +116,16 @@ of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-term-li
 
 In suggested order:
 
-1. Add more gold cases, since 12 cannot separate most methods and the limit result needs independent
+1. Run **Release and deploy**, then time search on the site and evaluate answers with `evaluate_qa.py`,
+   which needs Hugging Face credits.
+2. Add more gold cases, since 12 cannot separate most methods and the limit result needs independent
    evidence.
-2. Plan a step that works out which legal issues a question depends on, since 7 of the 14
+3. Plan a step that works out which legal issues a question depends on, since 7 of the 14
    unretrieved provisions need one ([diagnosis](retrieval-experiments.md#why-14-provisions-are-not-retrieved-05112026)).
-3. Have a tax expert review the inferred rules, the 178 documents the ministry lists as in force
+4. Have a tax expert review the inferred rules, the 178 documents the ministry lists as in force
    but our list ends, the alternative valid evidence sets, and whether Circular 80/2021 Art 40(3)
    still applied on A4's date.
-4. Fix the article labels of forms, so that a form in Circular 80/2021 no longer reads as Art 89.
+5. Fix the article labels of forms, so that a form in Circular 80/2021 no longer reads as Art 89.
    This needs reprocessing and a new corpus version. Search already leaves forms out unless asked.
-5. Decide on `corpus-v2`, because more passages add competition for the top ranks. It needs a
+6. Decide on `corpus-v2`, because more passages add competition for the top ranks. It needs a
    database backup, Airflow, and a go-ahead.
