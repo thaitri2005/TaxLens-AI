@@ -152,6 +152,15 @@ cannot be loaded, search and Q&A fall back to keyword retrieval instead of faili
 When a question names exactly one document number (`32/2025/TT-BTC`, `48/2024/QH15`,
 `18/VBHN-BTC`), retrieval is restricted to that document.
 
+Vector search always scans every embedding (it orders by `distance + 0`), because the HNSW index
+returns at most `hnsw.ef_search` rows and filters them afterwards, which could silently shorten
+the candidate list.
+
+Printed forms are left out of keyword and hybrid results unless the question asks for one
+(`mẫu số`, `biểu mẫu`, `mẫu biểu`, `mẫu đơn`, `tờ khai`). A passage with four or more blank-field
+runs counts as a form (`is_form_passage`). Twice the limit is fetched and forms are removed
+afterwards, so nothing in the database changes.
+
 ## 5. Evidence gate (`intelligence/evidence.py`)
 
 Before any model call, the top passages (5 by default) are assessed:
@@ -262,6 +271,11 @@ not change without the limit. See
 - The article-level results above predate the full corpus; with about 2,000 documents
   competing, they should be measured again ([Evaluation](#evaluation)). The long-question
   results rest on 12 cases.
+- Text after a document's last article is filed under that article, so a form or appendix in
+  Circular 80/2021 reads as Art 89.
+- A provision the question depends on but has no words for, such as late interest after a
+  returned export, is usually not retrieved
+  ([diagnosis](retrieval-experiments.md#why-14-provisions-are-not-retrieved-05112026)).
 - Grounding is lexical: a fact that reuses the passage's words in a misleading order would
   pass. The excerpts let a reader check the source directly.
 

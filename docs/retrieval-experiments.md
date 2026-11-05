@@ -18,6 +18,9 @@ their comparisons between methods no longer hold as they stand. Evaluation-statu
 | 04/11/2026 | The ministry's expiry dates | [Plan](#adding-the-ministrys-expiry-dates-experiment-plan-04112026), [results](#adding-the-ministrys-expiry-dates-results-04112026) |
 | 05/11/2026 | Repaired text and two circulars | [Plan](#plan-repaired-text-and-the-two-circulars-05112026), [results](#repaired-text-and-the-two-circulars-results-05112026) |
 | 05/11/2026 | Why A4 and L2 stay unfound | [Diagnosis](#why-a4-and-l2-stay-unfound-05112026) |
+| 05/11/2026 | Why 14 provisions are not retrieved | [Diagnosis](#why-14-provisions-are-not-retrieved-05112026) |
+| 05/11/2026 | Leaving forms out of search | [Plan](#leaving-forms-out-of-search-plan-05112026), [results](#leaving-forms-out-of-search-results-05112026) |
+| 05/11/2026 | Keeping vector search exact | [Change](#keeping-vector-search-exact-05112026) |
 | 05/11/2026 | Removing the keyword term limit | [Plan](#removing-the-keyword-term-limit-plan-05112026), [results](#removing-the-keyword-term-limit-results-05112026) |
 
 The issue-guided plan below was written before any result was seen, so the comparison
@@ -592,6 +595,79 @@ not count against the change; a loss would, and it would be investigated before 
 **Safety checks.** The `tax_article_retrieval.json` regression set is repeated, and top-10 forms are
 counted again. Mislabelled forms remain when a question asks for one, since fixing the article labels
 needs reprocessing and a new corpus version.
+
+## Leaving forms out of search: results (05/11/2026)
+
+No recall gain, as expected, and no gold provision was removed. Forms no longer appear in the top 50
+of any of the 12 cases, where hybrid had 22 before (4 of them in a top 10). The change is kept for
+what reaches the reader and the model, not for recall.
+
+| Run | K = 5 | K = 10 | K = 20 | Against the same run with forms |
+| --- | --- | --- | --- | --- |
+| `keyword-asof-noforms` | 0.22 | 0.42 | 0.42 | Tied at every K |
+| `hybrid-asof-noforms` | 0.30 | 0.41 | 0.45 | Tied at every K |
+| `hybrid-asof-repeals-noforms` | 0.38 | 0.45 | 0.45 | K = 5: 0 wins, 1 loss, p = 1; tied at 10 and 20 |
+
+**The one loss.** With the filter, A1's Law 66/2025 Art 2(1) moves from rank 5 to 6, the only rank of
+a gold provision that changes in any of the three runs. Removing a form from one candidate list
+changes the fused scores of the passages around it, and another passage overtook it. This is a shift
+of one rank from fusion, not a wrong removal, so the change is kept.
+
+**Safety checks.** `tax_article_retrieval.json` averages the same (hit rate 0.83, MRR 0.51 at K = 5),
+though the rankings of 2 of 18 cases differ. A question asking for a form still gets forms, and they
+still carry the wrong article label: a form in Circular 80/2021 reads as Art 89. Forms with fewer
+than four blanks stay in.
+
+## Keeping vector search exact (05/11/2026)
+
+Vector search now orders by `distance + 0`, which stops PostgreSQL from using the HNSW index. The
+index returns at most `hnsw.ef_search` rows (40 by default) and applies filters afterwards, so using
+it could return fewer candidates than asked for, without any error. pgvector 0.8.2 on Azure offers no
+`hnsw.iterative_scan` setting here, so raising the limit would not have solved filtering.
+
+The semantic report matches `semantic-asof-v1.2` in every case field, and 50 rows come back even when
+sequential scans are discouraged. The cost is a scan of every embedding, about 0.5 s per question
+today, which grows with the corpus. The index is now unused, and is worth dropping or revisiting
+before `corpus-v2`.
+
+## Why 14 provisions are not retrieved (05/11/2026)
+
+Hybrid misses 20 provisions at K = 10, and 14 of them are not in its top 200. This looks at those 14:
+their rank across every passage, and the question beside the passage. The grouping is our reading,
+not a legal expert's.
+
+**They are not near misses.** Their best keyword rank is 315 and their best vector rank is 127, and
+most are in the thousands. Taking more candidates would not help.
+
+| Reason | Provisions | What it needs |
+| --- | --- | --- |
+| **A legal step the question does not state** (7) | A1 VAT Law Art 9(3), the 10% residual rate, and Decree 174/2025 Art 1(1), the temporary reduction. A4 Tax Administration Law Art 47, amended returns, and Art 59 and Circular 80/2021 Art 21, late interest. A7 Law 64/2025 Art 58(1), which law applies, and Decree 181/2025 Art 38(1), its effective date | Working out the step first. The question has no words for it |
+| **Shared legal words, buried by the facts** (6) | A2 VAT Law Art 5(1) and Circular 84/2025 Art 20(1). A6 Cultivation and Livestock Laws Art 2(2), the definitions. A9 Tax Administration Law Art 16(11) and Decree 125/2020 Art 9(2), no penalty when following official guidance | A query for the legal issue instead of the story |
+| **Different wording** (1) | A3 Tax Administration Law Art 44(1): the question says `thời điểm khai thuế`, the law `thời hạn nộp hồ sơ khai thuế` | Matching by meaning, or a synonym |
+
+**What did not help (exploratory).** Our first idea was that counting every term equally lets common
+words outweigh rare legal ones, and that `GTGT` fails to match `giá trị gia tăng`. Both were tried on
+these same cases. Neither brought any of the 14 into the top 10:
+
+| Hybrid variant | K = 5 | K = 10 | K = 20 | Wins and losses at K = 5, 10, 20 |
+| --- | --- | --- | --- | --- |
+| Current | 0.30 | 0.41 | 0.45 | |
+| Rare terms weigh more (IDF) | 0.10 | 0.45 | 0.45 | 0-4, 1-0, tied |
+| Abbreviations expanded | 0.26 | 0.42 | 0.44 | 1-2, 1-1, 1-1 |
+| Both | 0.22 | 0.42 | 0.42 | 1-2, 1-1, 0-1 |
+
+The only provision any of them gained at K = 10 is L3's Decree 181/2025 Art 29(1), which was at rank
+11 and is not one of the 14. Keyword search alone only lost at K = 10. Neither is worth adopting.
+
+**Focused queries help only part of the middle group.** The existing issue queries find both A2
+provisions (ranks 3 and 6), and the other 12 stay outside their top 200. Those queries were written
+before the gold answers were consulted, and they name the visible issues, not the unstated steps.
+
+**What follows.** Half of the 14 cannot be reached by better matching of the question's words. That
+needs a step that works out what law the question depends on, such as a model proposing the legal
+issues, or following a curated map from a topic to its general rules. Any of these needs its own plan
+and new cases. Some of the 7 may also be stricter than a retriever should be held to (A7's effective
+date, A6's definitions), which is a question for the expert review of alternative evidence sets.
 
 ## Changes
 

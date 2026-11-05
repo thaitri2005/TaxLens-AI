@@ -175,6 +175,8 @@ TaxLens is a development-stage research tool, **not legal or tax advice**.
 
 - Answers are only as complete as the corpus. Official letters (*công văn*) and
   provincial documents are not collected.
+- Search finds what a question words. A rule it depends on but does not mention, such as late
+  interest after a returned export, is often missed.
 - Most government PDFs are scans, so OCR errors affect search and quotations.
 - Government-portal documents have no recorded legal status (`DISCOVERED`) unless the
   Ministry of Finance record exists; answers flag this.

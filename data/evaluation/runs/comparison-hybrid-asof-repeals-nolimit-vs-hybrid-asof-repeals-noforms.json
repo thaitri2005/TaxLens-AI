@@ -1,0 +1,368 @@
+{
+  "baseline": "hybrid",
+  "method": "hybrid",
+  "by_k": [
+    {
+      "k": 5,
+      "case_count": 12,
+      "wins": 0,
+      "losses": 1,
+      "ties": 11,
+      "sign_test_p": 1.0,
+      "baseline_full_coverage": 0.16666666666666666,
+      "method_full_coverage": 0.16666666666666666,
+      "cases": [
+        {
+          "case_id": "A1",
+          "outcome": "loss",
+          "baseline_found": 1,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": [
+            "[['66/2025/QH15', '2', '1']]"
+          ]
+        },
+        {
+          "case_id": "A2",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A5",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A6",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A7",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A8",
+          "outcome": "tie",
+          "baseline_found": 2,
+          "method_found": 2,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A9",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L2",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 1,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L4",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        }
+      ]
+    },
+    {
+      "k": 10,
+      "case_count": 12,
+      "wins": 0,
+      "losses": 0,
+      "ties": 12,
+      "sign_test_p": 1.0,
+      "baseline_full_coverage": 0.25,
+      "method_full_coverage": 0.25,
+      "cases": [
+        {
+          "case_id": "A1",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A2",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A5",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A6",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A7",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A8",
+          "outcome": "tie",
+          "baseline_found": 2,
+          "method_found": 2,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A9",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L2",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 1,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L3",
+          "outcome": "tie",
+          "baseline_found": 2,
+          "method_found": 2,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L4",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        }
+      ]
+    },
+    {
+      "k": 20,
+      "case_count": 12,
+      "wins": 0,
+      "losses": 0,
+      "ties": 12,
+      "sign_test_p": 1.0,
+      "baseline_full_coverage": 0.25,
+      "method_full_coverage": 0.25,
+      "cases": [
+        {
+          "case_id": "A1",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A2",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A3",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A4",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 4,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A5",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A6",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A7",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 3,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A8",
+          "outcome": "tie",
+          "baseline_found": 2,
+          "method_found": 2,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "A9",
+          "outcome": "tie",
+          "baseline_found": 0,
+          "method_found": 0,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L2",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 1,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L3",
+          "outcome": "tie",
+          "baseline_found": 2,
+          "method_found": 2,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        },
+        {
+          "case_id": "L4",
+          "outcome": "tie",
+          "baseline_found": 1,
+          "method_found": 1,
+          "in_corpus": 2,
+          "gained": [],
+          "lost": []
+        }
+      ]
+    }
+  ]
+}

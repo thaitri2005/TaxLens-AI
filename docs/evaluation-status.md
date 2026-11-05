@@ -13,6 +13,8 @@ the dated record behind each figure is in
   same results. It went live on 05/11/2026 (`158c4c2`).
 - Hybrid and keyword search are now close, and these cases cannot separate them. Issue-guided
   retrieval has fallen behind both.
+- Of hybrid's 20 misses at K = 10, 14 are nowhere near the top, and 7 of those need a legal step
+  the question does not state. Better word matching cannot reach them.
 - More documents alone do not fix retrieval: adding the two missing circulars made only one of
   three affected cases findable until the limit was removed.
 
@@ -84,6 +86,9 @@ of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-term-li
 | Filter for ended documents | Hybrid wins 3, loses 0 at K = 5, p = 0.25, and changes one case at K = 10. Removes no gold document | Smaller effect than before; the gain depends on unvalidated rules |
 | The ministry's expiry dates | Hybrid gets the same recall as the full filter at K = 10 and 20, and part of it at K = 5, without inference | The conservative version of the filter |
 | Two missing circulars | A7 and L2 found; A4 not, since Art 40(3) is worded differently from the question | Loaded |
+| Why 14 provisions are not retrieved | 7 need an unstated legal step, 6 share words but the facts bury them, 1 is worded differently. Term weighting and expanding abbreviations reach none of them | Grouping not reviewed by an expert. Points to working out the legal issues first |
+| Leaving forms out of search | No recall gain, and 1 rank moved by one. Forms leave the top 50 entirely (22 before) | In the code, not yet released. Kept for what readers and the model see |
+| Keeping vector search exact | Same results; rules out silently returning at most 40 candidates | In the code, not yet released |
 | Split-syllable repair | Almost no rank changed | Kept for correct text, not a retrieval gain |
 | Following one legal reference | Reaches 1 of 20 missed provisions at K = 10, at document level only | Not worth building now |
 
@@ -93,13 +98,12 @@ In suggested order:
 
 1. Add more gold cases, since 12 cannot separate most methods and the limit result needs independent
    evidence.
-2. Find out why 14 of hybrid's 20 missed provisions at K = 10 are not retrieved at all. Candidates
-   are different wording (A4 Art 40(3)) and provisions that the question does not mention (A4 Art 21).
+2. Plan a step that works out which legal issues a question depends on, since 7 of the 14
+   unretrieved provisions need one ([diagnosis](retrieval-experiments.md#why-14-provisions-are-not-retrieved-05112026)).
 3. Have a tax expert review the inferred rules, the 178 documents the ministry lists as in force
    but our list ends, the alternative valid evidence sets, and whether Circular 80/2021 Art 40(3)
    still applied on A4's date.
-4. Handle forms and appendices such as `80/2021` Art 89's 592 passages.
-5. Set `hnsw.ef_search` or otherwise protect the vector search: it scans every embedding today, and
-   a plan that used the index would return at most 40 candidates, not 50, without any error.
-6. Decide on `corpus-v2`, because more passages add competition for the top ranks. It needs a
+4. Fix the article labels of forms, so that a form in Circular 80/2021 no longer reads as Art 89.
+   This needs reprocessing and a new corpus version. Search already leaves forms out unless asked.
+5. Decide on `corpus-v2`, because more passages add competition for the top ranks. It needs a
    database backup, Airflow, and a go-ahead.
