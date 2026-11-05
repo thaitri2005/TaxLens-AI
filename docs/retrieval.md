@@ -225,6 +225,30 @@ model saw only the first 2,500. Those figures flatter the old pipeline: an 80,00
 "article" counted as a hit even though the answer was usually outside the part the model
 saw.
 
+### Long questions (November 2026)
+
+Until 05/11/2026 only the first 12 terms of a question reached keyword search. Questions written
+as a real case run to 40 terms, and their legal content usually comes after the facts, so keyword
+search was often matching only the background. Removing the limit is the largest gain measured so
+far, on the 12 scored gold cases, `corpus-v1.2`:
+
+| Mode | Essential recall | Limit of 12 | No limit | Wins and losses |
+| --- | --- | --- | --- | --- |
+| Keyword | K = 10 | 0 | 0.42 | 8-0, p = 0.008 |
+| Hybrid | K = 5 | 0.11 | 0.30 | 5-1, p = 0.22 |
+| Hybrid | K = 10 | 0.15 | 0.41 | 6-0, p = 0.03 |
+| Hybrid | K = 20 | 0.22 | 0.45 | 5-0, p = 0.06 |
+
+These figures measure retrieval only, and more than half of the essential provisions are still
+missed at K = 10. Answers have not been evaluated with this change. The evidence gate and the
+grounding check do not depend on the number of terms: the gate reads vector scores, and the check
+compares a fact with its cited passage.
+
+The figures in the table above did not show the problem because the questions in
+`tax_article_retrieval.json` are short: at most 15 terms, and 4 of 20 are above 12. Its scores do
+not change without the limit. See
+[the full results](retrieval-experiments.md#removing-the-keyword-term-limit-results-05112026).
+
 ## Known limitations
 
 - OCR quality bounds everything: a heading the OCR destroyed (`'Điều'8.`) merges two
@@ -235,8 +259,9 @@ saw.
   1,500-character cap and OCR'd tables exceed it (about a third of passages), so their
   vector covers only the beginning; keyword search still sees the whole passage. Lowering
   the cap would need re-chunking and re-embedding the corpus.
-- The evaluation results above predate the full corpus; with about 2,000 documents
-  competing, they should be measured again ([Evaluation](#evaluation)).
+- The article-level results above predate the full corpus; with about 2,000 documents
+  competing, they should be measured again ([Evaluation](#evaluation)). The long-question
+  results rest on 12 cases.
 - Grounding is lexical: a fact that reuses the passage's words in a misleading order would
   pass. The excerpts let a reader check the source directly.
 

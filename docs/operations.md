@@ -147,6 +147,11 @@ Keep pull requests small and focused, and delete the branch after merging.
    approve it when the run pauses. The API applies database migrations itself after it
    starts.
 
+Do not run `alembic upgrade` on the Azure database before the release that contains the migration:
+the running image does not know the new revision and cannot start again if it scales down. To
+prepare an index ahead of a release, build it by hand with `CREATE INDEX CONCURRENTLY IF NOT EXISTS`
+and write the migration with `IF NOT EXISTS`, as `20261105_0006` does.
+
 The same workflow has two options:
 
 - **Roll back or redeploy**: untick `build` and enter an existing `image_tag` (a commit

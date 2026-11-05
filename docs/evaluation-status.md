@@ -16,6 +16,30 @@ the dated record behind each figure is in
 - More documents alone do not fix retrieval: adding the two missing circulars made only one of
   three affected cases findable until the limit was removed.
 
+## What the limit changed
+
+From 17/10/2026, when the search overhaul added `MAX_KEYWORD_TERMS = 12`, until 05/11/2026, keyword
+search saw only the first 12 terms of a question. Before the overhaul it required every word of a
+question to appear in one passage, and returned nothing for most natural questions. So long
+questions had not had working keyword search at any point before this fix. This affected the live
+site's search and answers, and every gold-set experiment.
+
+It went unnoticed because the older regression set has short questions (at most 15 terms), while
+the gold questions have up to 40, and all 12 scored ones were cut. Keyword search scoring exactly 0
+on the gold set was the visible sign.
+
+| Earlier conclusion | Under the limit | Without it |
+| --- | --- | --- |
+| Baseline hybrid recall at K = 10 | 0.15 | 0.41 |
+| Keyword search alone | 0 at every K | 0.42 at K = 10, close to hybrid |
+| Issue-guided against hybrid at K = 10 | Ahead, 0.21 against 0.15 | Behind, 0.17 against 0.41 |
+| Filter for ended documents, hybrid at K = 10 | 0.15 to 0.26 | 0.41 to 0.45 |
+| L2 | Not found, though its circular was loaded | Found at rank 5 |
+
+**What this does not show.** The gain rests on 12 cases and repeats a result already seen. It
+measures retrieval, not answers, and more than half of the essential provisions are still missed at
+K = 10. The article-level regression scores do not change.
+
 ## Corpora
 
 The database holds `corpus-v1.2`. Manifests are in `data/evaluation/corpus/`.

@@ -30,7 +30,7 @@ question.
 - **Document library** (administrators): corpus statistics at a glance, search by number or title,
   filters by source, kind (law, decree, circular, …), and legal status, and paged
   browsing of documents and their passages. English and Vietnamese throughout.
-- **Historical corpus**: about 2,000 tax documents (59,598 passages) from the government
+- **Historical corpus**: about 2,000 tax documents (62,182 passages) from the government
   portal and the Ministry of Finance database, including pre-Unicode Word files from the
   1990s.
 - **Automated pipeline**: Airflow collects new documents daily, extracts or OCRs them,
@@ -87,8 +87,8 @@ flowchart LR
    encodings) or with Vietnamese Tesseract OCR, then split along the legal structure
    (*Điều* → *khoản*, or *Phần* / numbered sections in older documents) into passages of
    at most 1,500 characters with article, clause, and page.
-3. **Retrieval**: diacritic-insensitive keyword ranking and `multilingual-e5-small`
-   semantic search, combined by reciprocal rank fusion.
+3. **Retrieval**: diacritic-insensitive keyword ranking over every term of the question
+   and `multilingual-e5-small` semantic search, combined by reciprocal rank fusion.
 4. **Evidence gate**: superseded and unlocated passages are set aside, and clearly
    unrelated questions are refused before any model call.
 5. **Answer**: the model answers from numbered passages or says they do not answer the

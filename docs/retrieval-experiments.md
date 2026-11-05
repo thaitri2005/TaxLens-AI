@@ -4,6 +4,12 @@ The record of retrieval experiments on the gold set, in the order they were done
 sections do not rewrite earlier ones. For where things stand now, read
 [evaluation-status.md](evaluation-status.md).
 
+**Read this first.** Every result dated before the
+[term limit results](#removing-the-keyword-term-limit-results-05112026) was measured with keyword
+search cut to the first 12 terms of each question. Those sections stay as they were written, but
+their comparisons between methods no longer hold as they stand. Evaluation-status lists
+[what changed](evaluation-status.md#what-the-limit-changed).
+
 | Date | Experiment | Sections |
 | --- | --- | --- |
 | 31/10/2026 | Issue-guided retrieval | [Question](#question) to [First results](#first-results-31102026) |
