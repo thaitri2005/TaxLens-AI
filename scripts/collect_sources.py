@@ -29,6 +29,7 @@ import sys
 import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
+from dataclasses import fields as dataclass_fields
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -115,6 +116,11 @@ def _parse_arguments() -> argparse.Namespace:
         type=Path,
         help="Only the documents this gold set cites, from any portal category",
     )
+    window.add_argument(
+        "--selected",
+        type=Path,
+        help="Only the documents in this selection (data/evaluation/corpus/selected-v2.json)",
+    )
     parser.add_argument("--include-expired", action="store_true")
     parser.add_argument(
         "--only",
@@ -166,6 +172,8 @@ def _list_sources(
 
     candidates: list[Candidate] = []
     unavailable: list[str] = []
+    if arguments.selected is not None:
+        return _selected_documents(source, arguments.selected), []
     if arguments.cited_by is not None:
         government = GovernmentPortalSearch()
         try:
@@ -211,6 +219,30 @@ def _list_sources(
             )
             candidates.extend(Candidate(document, government.fetch_document) for document in found)
     return candidates, unavailable
+
+
+def _selected_documents(source: str, selection: Path) -> list[Candidate]:
+    """The selection's documents from this source; each record names its own file."""
+
+    records = json.loads(selection.read_text(encoding="utf-8"))["documents"].values()
+    fetchers: dict[str, Callable[[SourceDocument], bytes]] = {}
+    if source in ("government", "all"):
+        government = GovernmentPortalSearch()
+        fetchers[government.source_name] = government.fetch_document
+    if source in ("mof", "all"):
+        fetchers[MOF_SOURCE] = MofLegalDocumentConnector().fetch_document
+    fields = {field.name for field in dataclass_fields(SourceDocument)}
+    candidates: list[Candidate] = []
+    for record in records:
+        fetch = fetchers.get(record["source_name"])
+        if fetch is None:
+            continue
+        values = {key: value for key, value in record.items() if key in fields}
+        values["issue_date"] = _date_or_none(record.get("issue_date"))
+        values["effective_date"] = _date_or_none(record.get("effective_date"))
+        candidates.append(Candidate(SourceDocument(**values), fetch))
+    logger.info("Selection: %d document(s) from %s", len(candidates), source)
+    return candidates
 
 
 def _cited_documents(government: GovernmentPortalSearch, gold_set: Path) -> list[SourceDocument]:

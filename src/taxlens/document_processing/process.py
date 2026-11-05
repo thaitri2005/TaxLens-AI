@@ -1,6 +1,7 @@
 import hashlib
 import re
 import unicodedata
+import uuid
 from bisect import bisect_right
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ from taxlens.legal_data.models import (
     LegalDocument,
     ProcessingJob,
 )
+from taxlens.retrieval.embeddings import passage_text
 from taxlens.retrieval.text import fold_vietnamese
 from taxlens.storage.base import ObjectStorage
 
@@ -51,7 +53,7 @@ MAX_MERGED_INTRO_CHARACTERS = 400
 MIN_PREAMBLE_CHARACTERS = 20
 # Bump when chunking changes; processed versions with an older stage suffix are re-chunked
 # from stored text by ``process_corpus.py --rechunk-outdated``.
-CHUNKER_VERSION = 3
+CHUNKER_VERSION = 4
 CHUNKER_STAGE_SUFFIX = f":v{CHUNKER_VERSION}"
 _HEADER_NUMBER_PATTERN = re.compile(r"(?i)\bs[ốóôo]\s*(?:hiệu)?\s*[:.]\s*(\S{3,40})")
 # A syllable's opening consonants cut from its vowel ("th ực"), which pypdf produces on some
@@ -61,6 +63,34 @@ _SPLIT_SYLLABLE_PATTERN = re.compile(
     r"(?=[aăâeêioôơuưyàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ])"
 )
 MAX_SPLIT_SYLLABLES_PER_1000_WORDS = 5
+# Some PDFs carry a text layer from someone else's poor OCR ("hiQn gi6m tr6n s6 ti6n thu6").
+# Vietnamese has accents on about a quarter of its letters, so a page far below that, cut
+# syllables, or control characters mean the layer should not be trusted. A page needs
+# enough letters to judge.
+MIN_LETTERS_TO_JUDGE_TEXT_LAYER = 100
+MIN_ACCENTED_LETTER_SHARE = 0.05
+MAX_SPLIT_SYLLABLES_IN_TEXT_LAYER = 20
+_ACCENTED_LETTER_PATTERN = re.compile(
+    "[ăâđêôơưáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]", re.IGNORECASE
+)
+_CONTROL_CHARACTER_PATTERN = re.compile("[\x80-\x9f]")
+# Where a document's operative text ends: its signature block. Compared with the unaccented,
+# lower-case line, since OCR often damages these lines.
+_SIGNATURE_LINE_STARTS = (
+    "kt. bo truong",
+    "kt.bo truong",
+    "kt. thu tuong",
+    "tm. chinh phu",
+    "tm.chinh phu",
+    "tm. quoc hoi",
+    "tm. uy ban",
+    "tl. bo truong",
+    "tl.bo truong",
+    "xac thuc van ban hop nhat",
+)
+_SIGNATURE_LINES = ("bo truong", "thu tuong", "chu tich quoc hoi", "chu tich nuoc")
+MAX_SHORT_LINE_CHARACTERS = 40
+MIN_ATTACHED_ARTICLES = 5
 
 
 @dataclass(frozen=True)
@@ -140,15 +170,35 @@ def process_document_version(
         )
 
     used_ocr = False
+    failed_ocr_pages: list[int] = []
     try:
         pages = extract_pages(raw_content, version.raw_artifact_key)
         settings = get_settings()
         # OCR only the pages without a usable text layer: a digital PDF with a few scanned
         # appendix pages should not be OCR'd in full.
         scanned_pages = [index for index, page in enumerate(pages) if not _has_usable_text([page])]
-        if scanned_pages and raw_content.startswith(b"%PDF") and settings.ocr_enabled:
-            for index, text in ocr_pages(raw_content, settings, scanned_pages).items():
-                pages[index] = text
+        doubtful_pages = [
+            index
+            for index, page in enumerate(pages)
+            if index not in scanned_pages and _untrustworthy_text_layer(page)
+        ]
+        if (
+            (scanned_pages or doubtful_pages)
+            and raw_content.startswith(b"%PDF")
+            and (settings.ocr_enabled)
+        ):
+            for index, text in ocr_pages(
+                raw_content,
+                settings,
+                sorted([*scanned_pages, *doubtful_pages]),
+                failed_pages=failed_ocr_pages,
+            ).items():
+                # A doubtful page may simply be English or a table of Latin names: keep its
+                # text layer unless OCR clearly reads more Vietnamese from it.
+                if index not in doubtful_pages or (
+                    _accented_letter_share(text) > 2 * _accented_letter_share(pages[index])
+                ):
+                    pages[index] = text
             used_ocr = True
         if not _has_usable_text(pages):
             raise ValueError(
@@ -190,6 +240,12 @@ def process_document_version(
         _complete_job(
             session, version, job, "OCR_CHUNKED" if used_ocr else "CHUNKED", normalized_pages
         )
+        if failed_ocr_pages and job.error_code is None:
+            job.error_code = "OCR_PAGES_FAILED"
+            job.error_detail = (
+                f"OCR failed on {len(failed_ocr_pages)} of {len(pages)} pages: "
+                f"{', '.join(str(index + 1) for index in failed_ocr_pages[:50])}"
+            )
     session.commit()
     return ProcessResult(
         status="PROCESSED",
@@ -212,8 +268,10 @@ def _complete_job(
     job.error_detail = None
     document = session.get(LegalDocument, version.document_id)
     header_number = header_document_number(pages[0] if pages else "")
-    if document is not None and header_number and not _same_number(
-        header_number, document.document_number
+    if (
+        document is not None
+        and header_number
+        and not _same_number(header_number, document.document_number)
     ):
         # Catalog listings have attached the wrong number before (an amending decree filed
         # under the decree it amends); surface it instead of silently citing the wrong one.
@@ -313,6 +371,23 @@ def split_syllable_rate(pages: list[str]) -> float:
     return 1000 * len(_SPLIT_SYLLABLE_PATTERN.findall(text)) / words if words else 0.0
 
 
+def _untrustworthy_text_layer(page: str) -> bool:
+    letters = sum(character.isalpha() for character in page)
+    if letters < MIN_LETTERS_TO_JUDGE_TEXT_LAYER:
+        return False
+    return (
+        _accented_letter_share(page) < MIN_ACCENTED_LETTER_SHARE
+        or len(_CONTROL_CHARACTER_PATTERN.findall(page)) >= 3
+        or split_syllable_rate([page]) > MAX_SPLIT_SYLLABLES_IN_TEXT_LAYER
+    )
+
+
+def _accented_letter_share(page: str) -> float:
+    normalized = unicodedata.normalize("NFC", page)
+    letters = sum(character.isalpha() for character in normalized)
+    return len(_ACCENTED_LETTER_PATTERN.findall(normalized)) / letters if letters else 0.0
+
+
 def _pdfium_pages(raw_content: bytes) -> list[str]:
     import pypdfium2  # type: ignore[import-untyped]
 
@@ -343,17 +418,23 @@ def build_article_chunks(
     # Documents from before about 2011 are often organized as "Phần / I. / 1." without
     # "Điều" articles; their section headings become the structure instead.
     headings = find_article_headings(text) or find_section_headings(text)
+    # Forms, tables, and appendices follow the signature. They are not part of the last article,
+    # and an "Điều 1." inside a template is not an article of this document.
+    appendix_start = _appendix_start(text, headings)
+    if appendix_start is not None:
+        headings = [heading for heading in headings if heading.start < appendix_start]
+    operative_end = appendix_start if appendix_start is not None else len(text)
     chunks: list[ParsedChunk] = []
 
     # Text before the first article holds the title, issuing body, and legal bases.
-    preamble_end = headings[0].start if headings else len(text)
+    preamble_end = headings[0].start if headings else operative_end
     preamble = text[:preamble_end]
     if not headings or len("".join(preamble.split())) >= MIN_PREAMBLE_CHARACTERS:
         for start, end in _split_span(text, 0, preamble_end, max_characters):
             chunks.append(_parsed_chunk(text, page_boundaries, start, end, None, None, None))
 
     for index, heading in enumerate(headings):
-        article_end = headings[index + 1].start if index + 1 < len(headings) else len(text)
+        article_end = headings[index + 1].start if index + 1 < len(headings) else operative_end
         for segment_start, segment_end, clause_number in _article_segments(
             text, heading.start, heading.end, article_end, max_characters
         ):
@@ -369,7 +450,74 @@ def build_article_chunks(
                         clause_number,
                     )
                 )
+    if appendix_start is not None:
+        for start, end in _split_span(text, appendix_start, len(text), max_characters):
+            chunks.append(_parsed_chunk(text, page_boundaries, start, end, None, None, None))
     return chunks
+
+
+def _appendix_start(text: str, headings: Sequence["ArticleHeading"]) -> int | None:
+    """Where a document's operative text ends: its signature, or an appendix after the last article.
+
+    Documents without numbered articles are left alone: their sections have no last article.
+    Articles after a signature are real when they continue the numbering (a signature line was
+    misread or misplaced) or form a long new series (a regulation attached to a decision). The
+    short, repeating "Điều 1." of form templates are not.
+    """
+
+    if not headings or headings[0].number is None:
+        return None
+    last_end = headings[-1].end
+    for line in re.finditer(r"(?m)^.*$", text[headings[0].end :]):
+        original = line.group(0).strip(" \t|_-.;,")
+        if not original:
+            continue
+        start = headings[0].end + line.start()
+        if _is_signature_line(original):
+            before = [heading for heading in headings if heading.start < start]
+            after = [heading for heading in headings if heading.start >= start]
+            if not after or not _articles_are_real(before, after):
+                return start
+        elif start >= last_end and (
+            original.startswith("PHỤ LỤC")
+            or (
+                len(original) <= MAX_SHORT_LINE_CHARACTERS
+                and original.startswith(("Phụ lục", "Mẫu số", "MẪU SỐ"))
+            )
+        ):
+            return start
+    return None
+
+
+def _is_signature_line(line: str) -> bool:
+    folded = fold_vietnamese(line).casefold()
+    if folded.startswith(("noi nhan:", "noi nhan :")) or folded == "noi nhan":
+        return True
+    if folded.startswith(_SIGNATURE_LINE_STARTS):
+        return True
+    return (
+        len(line) <= MAX_SHORT_LINE_CHARACTERS
+        and line.isupper()
+        and folded.startswith(_SIGNATURE_LINES)
+    )
+
+
+def _articles_are_real(
+    before: Sequence["ArticleHeading"], after: Sequence["ArticleHeading"]
+) -> bool:
+    numbers = [_article_value(heading) for heading in after]
+    if numbers[0] == _article_value(before[-1]) + 1:
+        return True
+    return (
+        numbers[0] == 1
+        and len(numbers) >= MIN_ATTACHED_ARTICLES
+        and all(later > earlier for earlier, later in zip(numbers, numbers[1:], strict=False))
+    )
+
+
+def _article_value(heading: "ArticleHeading") -> int:
+    match = re.match(r"\d+", heading.number or "")
+    return int(match.group(0)) if match else 0
 
 
 @dataclass(frozen=True)
@@ -405,9 +553,7 @@ def find_article_headings(text: str) -> list[ArticleHeading]:
             continue
         previous_number = numeric
         headings.append(
-            ArticleHeading(
-                start=match.start(), end=match.end(), number=number, title=title or None
-            )
+            ArticleHeading(start=match.start(), end=match.end(), number=number, title=title or None)
         )
     return headings
 
@@ -543,6 +689,11 @@ def _replace_chunks(
     existing_chunks: Sequence[DocumentChunk],
     normalized_pages: list[str],
 ) -> int:
+    # A passage whose text is unchanged keeps its embedding, so re-chunking a document costs
+    # only the passages that really changed.
+    reusable = _embeddings_by_passage(session, existing_chunks)
+    for embedding in (item for items in reusable.values() for item in items):
+        session.expunge(embedding)
     _delete_chunks_and_embeddings(session, version.id, existing_chunks)
     normalized_text = PAGE_SEPARATOR.join(normalized_pages)
     page_boundaries = (
@@ -550,19 +701,52 @@ def _replace_chunks(
     )
     chunks = build_article_chunks(normalized_text, page_boundaries)
     for chunk in chunks:
-        session.add(
-            DocumentChunk(
-                document_version_id=version.id,
-                article_number=chunk.article_number,
-                clause_number=chunk.clause_number,
-                heading=chunk.heading,
-                page_start=chunk.page_start,
-                page_end=chunk.page_end,
-                content=chunk.content,
-                token_count=len(chunk.content.split()),
-            )
+        new_chunk = DocumentChunk(
+            id=uuid.uuid4(),
+            document_version_id=version.id,
+            article_number=chunk.article_number,
+            clause_number=chunk.clause_number,
+            heading=chunk.heading,
+            page_start=chunk.page_start,
+            page_end=chunk.page_end,
+            content=chunk.content,
+            token_count=len(chunk.content.split()),
         )
+        session.add(new_chunk)
+        stored = reusable.get(_passage_hash(chunk.heading, chunk.content))
+        if stored:
+            old = stored.pop()
+            session.add(
+                DocumentEmbedding(
+                    document_chunk_id=new_chunk.id,
+                    model_id=old.model_id,
+                    model_revision=old.model_revision,
+                    dimensions=old.dimensions,
+                    content_hash=old.content_hash,
+                    embedding=old.embedding,
+                )
+            )
     return len(chunks)
+
+
+def _passage_hash(heading: str | None, content: str | None) -> str:
+    text = passage_text(heading, content)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _embeddings_by_passage(
+    session: Session, chunks: Sequence[DocumentChunk]
+) -> dict[str, list[DocumentEmbedding]]:
+    if not chunks:
+        return {}
+    stored: dict[str, list[DocumentEmbedding]] = {}
+    for embedding in session.scalars(
+        select(DocumentEmbedding).where(
+            DocumentEmbedding.document_chunk_id.in_([chunk.id for chunk in chunks])
+        )
+    ):
+        stored.setdefault(embedding.content_hash, []).append(embedding)
+    return stored
 
 
 def _record_failure(

@@ -91,6 +91,31 @@ def run_backfill_job(
     return _start_job("collect_sources.py", arguments)
 
 
+@router.post("/collect-selected", status_code=status.HTTP_202_ACCEPTED)
+def run_selected_collection_job(
+    x_taxlens_internal_token: str | None = Header(default=None),
+    limit: int = Query(default=100, ge=1, le=2000),
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Collect the corpus-v2 selection, at most ``limit`` downloads per run.
+
+    Only its portal documents: the Ministry of Finance refuses connections from Azure.
+    """
+
+    _authorize(x_taxlens_internal_token)
+    arguments = [
+        "--source",
+        "government",
+        "--selected",
+        "data/evaluation/corpus/selected-v2.json",
+        "--limit",
+        str(limit),
+    ]
+    if dry_run:
+        arguments.append("--dry-run")
+    return _start_job("collect_sources.py", arguments)
+
+
 @router.post("/process", status_code=status.HTTP_202_ACCEPTED)
 def run_processing_job(
     x_taxlens_internal_token: str | None = Header(default=None),
@@ -98,9 +123,12 @@ def run_processing_job(
     retry_failed: bool = False,
     rechunk_outdated: bool = False,
     reocr: bool = False,
+    reextract_listed: bool = False,
 ) -> dict[str, Any]:
     _authorize(x_taxlens_internal_token)
     arguments = ["--limit", str(limit)]
+    if reextract_listed:
+        arguments += ["--reextract-listed", "data/evaluation/corpus/reextract-v2.json"]
     if retry_failed:
         arguments.append("--retry-failed")
     if rechunk_outdated:
@@ -283,8 +311,7 @@ def _forget_old_jobs() -> None:
     for job_id in [
         job.id
         for job in _jobs.values()
-        if job.finished_at is not None
-        and now - job.finished_at > FINISHED_JOB_RETENTION_SECONDS
+        if job.finished_at is not None and now - job.finished_at > FINISHED_JOB_RETENTION_SECONDS
     ]:
         _jobs.pop(job_id).output_path.unlink(missing_ok=True)
 

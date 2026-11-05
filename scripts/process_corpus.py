@@ -1,6 +1,8 @@
 import argparse
+import json
 import time
 import uuid
+from pathlib import Path
 
 from sqlalchemy import Select, exists, func, select
 
@@ -38,6 +40,11 @@ def main() -> None:
         help="Process at most this many document versions in one bounded batch",
     )
     parser.add_argument(
+        "--reextract-listed",
+        type=Path,
+        help="Re-run extraction and OCR for the document numbers listed in this JSON file",
+    )
+    parser.add_argument(
         "--retry-failed",
         action="store_true",
         help="Include document versions whose latest processing job failed",
@@ -48,7 +55,9 @@ def main() -> None:
 
     storage = get_object_storage()
     candidates = (
-        _outdated_query()
+        _listed_query(arguments.reextract_listed)
+        if arguments.reextract_listed is not None
+        else _outdated_query()
         if arguments.rechunk_outdated
         else _scanned_query()
         if arguments.reocr
@@ -79,14 +88,17 @@ def main() -> None:
             document_number = document.document_number if document is not None else str(version_id)
             title = document.title if document is not None else "Unknown document"
             print(
-                f"[{index}/{total}] START {document_number} | {title} | "
-                f"{version.raw_artifact_key}",
+                f"[{index}/{total}] START {document_number} | {title} | {version.raw_artifact_key}",
                 flush=True,
             )
             started_at = time.perf_counter()
             try:
                 result = process_document_version(
-                    session, storage, version, force=force, reextract=arguments.reocr
+                    session,
+                    storage,
+                    version,
+                    force=force,
+                    reextract=arguments.reocr or arguments.reextract_listed is not None,
                 )
             except Exception as error:
                 # One broken document must not stop the batch or block later runs.
@@ -108,6 +120,16 @@ def main() -> None:
     print(
         f"Processing complete: {processed} processed, {unchanged} unchanged, "
         f"{failed} failed, {chunk_count} chunks"
+    )
+
+
+def _listed_query(path: Path) -> Select[tuple[DocumentVersion]]:
+    numbers = json.loads(path.read_text(encoding="utf-8"))["documents"]
+    return (
+        select(DocumentVersion)
+        .join(LegalDocument)
+        .where(LegalDocument.document_number.in_(numbers))
+        .order_by(DocumentVersion.created_at)
     )
 
 

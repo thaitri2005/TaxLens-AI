@@ -22,6 +22,10 @@ from airflow.models.param import Param
 from airflow.operators.python import PythonOperator
 from taxlens_jobs import run_api_job
 
+# One batch should finish inside the API's six-hour job limit.
+SELECTED_BATCH_DOCUMENTS = 100
+RECHUNK_BATCHES = 4
+
 
 def run_maintenance(params: dict[str, object], **_: object) -> None:
     action = params["action"]
@@ -46,6 +50,29 @@ def run_maintenance(params: dict[str, object], **_: object) -> None:
         if action == "backfill_corpus":
             run_api_job("/internal/airflow/process", {"limit": 1000})
             run_api_job("/internal/airflow/embed")
+        return
+    if action == "rechunk_outdated":
+        # Uses stored text, so no OCR; only passages whose text changed are embedded again.
+        for _ in range(RECHUNK_BATCHES):
+            run_api_job("/internal/airflow/process", {"limit": 1000, "rechunk_outdated": "true"})
+        run_api_job("/internal/airflow/embed")
+        return
+    if action == "reextract_listed":
+        run_api_job("/internal/airflow/process", {"limit": 1000, "reextract_listed": "true"})
+        run_api_job("/internal/airflow/embed")
+        return
+    if action == "collect_selected_dry_run":
+        run_api_job("/internal/airflow/collect-selected", {"dry_run": "true"})
+        return
+    if action == "collect_selected":
+        limit = params.get("limit") or SELECTED_BATCH_DOCUMENTS
+        for _ in range(params.get("rounds") or 1):
+            output = run_api_job("/internal/airflow/collect-selected", {"limit": limit})
+            run_api_job("/internal/airflow/process", {"limit": limit})
+            run_api_job("/internal/airflow/embed")
+            if ", 0 remaining for later runs" in output:
+                print("The selection is complete.")
+                break
         return
     if action in ("prune_non_tax_dry_run", "prune_non_tax_apply"):
         run_api_job(
@@ -88,6 +115,10 @@ with DAG(
                 "backfill_dry_run",
                 "backfill_corpus",
                 "process_and_embed",
+                "rechunk_outdated",
+                "reextract_listed",
+                "collect_selected_dry_run",
+                "collect_selected",
             ],
         ),
         # Only used by ocr_benchmark; optional so other actions can leave them empty.
@@ -99,7 +130,16 @@ with DAG(
         ),
         "from_year": Param(1990, type=["null", "integer"], description="backfill only"),
         "limit": Param(
-            300, type=["null", "integer"], minimum=1, description="backfill: downloads per run"
+            300,
+            type=["null", "integer"],
+            minimum=1,
+            description="backfill, collect_selected: downloads per run",
+        ),
+        "rounds": Param(
+            1,
+            type=["null", "integer"],
+            minimum=1,
+            description="collect_selected: batches to run, stopping when the selection is done",
         ),
         "include_expired": Param(False, type="boolean", description="backfill only"),
     },

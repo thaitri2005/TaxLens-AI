@@ -21,11 +21,13 @@ def ocr_pages(
     page_indices: Sequence[int] | None = None,
     dpi: int | None = None,
     page_segmentation_mode: int | None = None,
+    failed_pages: list[int] | None = None,
 ) -> dict[int, str]:
     """OCR the given zero-based pages (all pages by default); returns text per page.
 
     A page that times out or fails is returned as empty text so one bad page does not
-    discard a long document; the caller decides whether enough text remains.
+    discard a long document; the caller decides whether enough text remains. Its index is
+    added to ``failed_pages``, so that lost text is recorded instead of passing unnoticed.
     """
 
     if not settings.ocr_enabled:
@@ -62,6 +64,8 @@ def ocr_pages(
                 # pytesseract raises RuntimeError on timeout; keep the rest of the document.
                 print(f"Tesseract OCR page {index + 1} failed: {error}", flush=True)
                 texts[index] = ""
+                if failed_pages is not None:
+                    failed_pages.append(index)
             finally:
                 image.close()
                 bitmap.close()

@@ -9,6 +9,8 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from taxlens.document_processing.process import (
+    _passage_hash,
+    _untrustworthy_text_layer,
     build_article_chunks,
     extract_pages,
     extract_text,
@@ -16,7 +18,13 @@ from taxlens.document_processing.process import (
     split_syllable_rate,
 )
 from taxlens.ingestion.seed import SeedDocument, ingest_seed_document
-from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument, ProcessingJob
+from taxlens.legal_data.models import (
+    DocumentChunk,
+    DocumentEmbedding,
+    DocumentVersion,
+    LegalDocument,
+    ProcessingJob,
+)
 from taxlens.storage.local import LocalObjectStorage
 
 
@@ -82,9 +90,7 @@ def test_extract_text_accepts_pdf_artifacts() -> None:
     assert extract_text(buffer.getvalue(), "raw/example.pdf") == ""
 
 
-def test_processing_marks_image_only_pdf_as_ocr_required(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_processing_marks_image_only_pdf_as_ocr_required(tmp_path: Path, monkeypatch) -> None:
     engine = create_engine("sqlite+pysqlite:///:memory:")
     LegalDocument.metadata.create_all(engine)
     storage = LocalObjectStorage(tmp_path / "storage")
@@ -110,7 +116,7 @@ def test_processing_marks_image_only_pdf_as_ocr_required(
     with Session(engine) as session:
         monkeypatch.setattr(
             "taxlens.document_processing.process.ocr_pages",
-            lambda raw_content, settings, page_indices=None: {0: ""},
+            lambda raw_content, settings, page_indices=None, failed_pages=None: {0: ""},
         )
         ingestion = ingest_seed_document(session, storage, seed_document)
         version = session.get(DocumentVersion, UUID(ingestion.version_id))
@@ -125,9 +131,7 @@ def test_processing_marks_image_only_pdf_as_ocr_required(
         assert job.error_code == "OCR_REQUIRED"
 
 
-def test_processing_uses_ocr_when_native_pdf_text_is_unusable(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_processing_uses_ocr_when_native_pdf_text_is_unusable(tmp_path: Path, monkeypatch) -> None:
     engine = create_engine("sqlite+pysqlite:///:memory:")
     LegalDocument.metadata.create_all(engine)
     storage = LocalObjectStorage(tmp_path / "storage")
@@ -152,7 +156,7 @@ def test_processing_uses_ocr_when_native_pdf_text_is_unusable(
 
     monkeypatch.setattr(
         "taxlens.document_processing.process.ocr_pages",
-        lambda raw_content, settings, page_indices=None: {
+        lambda raw_content, settings, page_indices=None, failed_pages=None: {
             0: "Article 1. OCR scope\nVietnamese tax content for the fallback test."
         },
     )
@@ -167,7 +171,7 @@ def test_processing_uses_ocr_when_native_pdf_text_is_unusable(
         assert result.status == "PROCESSED"
         assert result.chunk_count == 1
         assert job is not None
-        assert job.stage == "OCR_CHUNKED:v3"
+        assert job.stage == "OCR_CHUNKED:v4"
 
 
 def test_missing_raw_artifact_is_recorded_as_failed_instead_of_raising(tmp_path: Path) -> None:
@@ -241,13 +245,18 @@ def test_forced_processing_rechunks_from_stored_text_and_marks_chunker_version(
 
     assert result.extraction_method == "rechunked"
     assert result.chunk_count == 2
-    assert job is not None and job.stage == "CHUNKED:v3"
+    assert job is not None and job.stage == "CHUNKED:v4"
 
 
 def test_only_pages_without_a_text_layer_are_ocrd(tmp_path: Path, monkeypatch) -> None:
     requested: list[list[int]] = []
 
-    def fake_ocr(raw_content: bytes, settings: object, page_indices: list[int]) -> dict[int, str]:
+    def fake_ocr(
+        raw_content: bytes,
+        settings: object,
+        page_indices: list[int],
+        failed_pages: list[int] | None = None,
+    ) -> dict[int, str]:
         requested.append(list(page_indices))
         return {index: "Phụ lục được nhận dạng bằng OCR với đủ nội dung." for index in page_indices}
 
@@ -334,3 +343,102 @@ def test_extract_pages_keeps_pypdf_text_when_it_is_clean(
     monkeypatch.setattr(f"{module}.PdfReader", Reader)
     monkeypatch.setattr(f"{module}._pdfium_pages", never)
     assert extract_pages(b"%PDF-1.7", "a.pdf") == ["Sửa đổi khoản 4 về thuế"]
+
+
+def test_text_after_the_signature_is_not_part_of_the_last_article() -> None:
+    chunks = build_article_chunks(
+        "Điều 1. Phạm vi\nNội dung một.\n\nĐiều 2. Hiệu lực\nNội dung hai.\n\n"
+        "Nơi nhận:\n- Như trên.\n\nMẫu số 01\nĐiều 1. Giao cho ông ......\nĐiều 2. Thi hành"
+    )
+
+    assert [chunk.article_number for chunk in chunks] == ["1", "2", None]
+    assert "Nơi nhận" not in chunks[1].content
+    assert "Mẫu số 01" in chunks[2].content and chunks[2].heading is None
+
+
+def test_an_appendix_without_a_signature_is_split_from_the_last_article() -> None:
+    chunks = build_article_chunks(
+        "Điều 1. Hiệu lực\nNội dung một.\nPhụ lục I ban hành kèm theo nghị định này là một phần "
+        "của nghị định.\n\nPHỤ LỤC I\nDanh mục hàng hóa"
+    )
+
+    assert [chunk.article_number for chunk in chunks] == ["1", None]
+    assert "ban hành kèm theo" in chunks[0].content
+    assert "Danh mục" in chunks[1].content
+
+
+def test_a_document_without_numbered_articles_is_left_alone() -> None:
+    text = "PHẦN A\nNội dung phần một.\nNơi nhận:\n- Như trên."
+    assert [chunk.article_number for chunk in build_article_chunks(text)] == [None]
+
+
+def test_a_garbled_text_layer_is_not_trusted() -> None:
+    garbled = "hiQn gi6m tr6n s6 ti6n thu6 tliit cdn ng cria c6c nEm tru6c " * 5
+    clean = "Thuế giá trị gia tăng được áp dụng đối với hàng hóa và dịch vụ chịu thuế " * 5
+
+    assert _untrustworthy_text_layer(garbled)
+    assert not _untrustworthy_text_layer(clean)
+    assert not _untrustworthy_text_layer("Too short to judge")
+
+
+def test_rechunking_keeps_the_embeddings_of_unchanged_passages(tmp_path: Path) -> None:
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    LegalDocument.metadata.create_all(engine)
+    storage = LocalObjectStorage(tmp_path / "storage")
+    with Session(engine) as session:
+        ingestion = ingest_seed_document(
+            session,
+            storage,
+            SeedDocument(
+                source_name="seed-corpus",
+                source_url="https://example.invalid/keep",
+                source_document_id="keep",
+                document_number="97/2025/TT-BTC",
+                title="Keep",
+                document_type="CIRCULAR",
+                issuing_agency=None,
+                issue_date=None,
+                effective_date=None,
+                legal_status="DISCOVERED",
+                content=b"Article 1. Scope\nFirst content.\n\nArticle 2. Dates\nSecond content.",
+            ),
+        )
+        version = session.get(DocumentVersion, UUID(ingestion.version_id))
+        assert version is not None
+        process_document_version(session, storage, version)
+        first = session.scalars(
+            select(DocumentChunk).where(DocumentChunk.article_number == "1")
+        ).one()
+        second = session.scalars(
+            select(DocumentChunk).where(DocumentChunk.article_number == "2")
+        ).one()
+        session.add_all(
+            [
+                DocumentEmbedding(
+                    document_chunk_id=first.id,
+                    model_id="m",
+                    model_revision="r",
+                    dimensions=384,
+                    content_hash=_passage_hash(first.heading, first.content),
+                    embedding=[0.5] * 384,
+                ),
+                DocumentEmbedding(
+                    document_chunk_id=second.id,
+                    model_id="m",
+                    model_revision="r",
+                    dimensions=384,
+                    content_hash="an older passage text",
+                    embedding=[0.1] * 384,
+                ),
+            ]
+        )
+        session.commit()
+        old_ids = {first.id, second.id}
+
+        process_document_version(session, storage, version, force=True)
+
+        kept = session.scalars(select(DocumentEmbedding)).all()
+        assert len(kept) == 1
+        chunk = session.get(DocumentChunk, kept[0].document_chunk_id)
+        assert chunk is not None and chunk.article_number == "1" and chunk.id not in old_ids
+        assert list(kept[0].embedding)[0] == 0.5

@@ -1,0 +1,15 @@
+{
+  "reason": "Most pages have a text layer that is garbled; re-extract with the current checks (docs/evaluation-status.md)",
+  "documents": [
+    "111/2021/TT-BTC",
+    "125/2017/NĐ-CP",
+    "127/2022/NĐ-CP",
+    "154/2016/NĐ-CP",
+    "191/2010/TT-BTC",
+    "304/2016/TT-BTC",
+    "38/2017/TT-BTNMT",
+    "42/2015/TT-BTC",
+    "85/2018/TT-BTC",
+    "87/2025/NĐ-CP"
+  ]
+}
