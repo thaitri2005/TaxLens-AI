@@ -21,7 +21,6 @@ from taxlens.storage.base import ObjectStorage
 from taxlens.storage.factory import get_object_storage
 
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Normalize and chunk pending TaxLens documents")
     parser.add_argument(
