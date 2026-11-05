@@ -1,7 +1,9 @@
 import importlib.util
+import re
 import uuid
 from datetime import date
 from pathlib import Path
+from types import SimpleNamespace
 
 from sqlalchemy.dialects import postgresql
 
@@ -18,7 +20,10 @@ from taxlens.retrieval.search import (
     SearchFilters,
     SearchResult,
     _postgresql_keyword_statement,
+    asks_for_form,
+    is_form_passage,
     keyword_terms,
+    semantic_search_chunks,
 )
 from taxlens.retrieval.snippets import build_excerpt, lexical_support
 from taxlens.retrieval.text import VIETNAMESE_ACCENTED, VIETNAMESE_UNACCENTED, fold_vietnamese
@@ -72,6 +77,41 @@ def test_postgres_keyword_query_reads_only_chunks_that_can_reach_the_limit() -> 
     assert sql.index("issue_date") < sql.index("OFFSET 4")
     assert "eligible.match_score > coalesce((SELECT eligible.match_score" in sql
     assert "- 1" in sql
+
+
+def test_forms_are_told_apart_from_rules() -> None:
+    assert is_form_passage("Tên: ...... Địa chỉ: ...... Mã số: ...... Ngày: ......")
+    assert is_form_passage("Họ tên: ____________ Số: ______ Ngày: ______ Nơi cấp: ______")
+    assert not is_form_passage("1. Mức thuế suất 10% áp dụng đối với hàng hóa, dịch vụ.")
+    assert not is_form_passage("Mã hàng ...... thuế suất ...... (một bảng có ít ô trống)")
+
+
+def test_a_question_about_a_form_keeps_forms() -> None:
+    assert asks_for_form("Mẫu số 01/GTGT điền thế nào?")
+    assert asks_for_form("to khai thue gtgt")
+    assert not asks_for_form("Thuế suất thuế GTGT của nước ngọt là bao nhiêu?")
+
+
+def test_vector_search_stays_an_exact_scan() -> None:
+    statements = []
+
+    class Rows:
+        def all(self) -> list[object]:
+            return []
+
+    class Session:
+        def get_bind(self) -> object:
+            return SimpleNamespace(dialect=postgresql.dialect())
+
+        def execute(self, statement: object) -> Rows:
+            statements.append(statement)
+            return Rows()
+
+    provider = SimpleNamespace(model_id="m", model_revision="r", dimensions=3)
+    semantic_search_chunks(Session(), [0.1, 0.2, 0.3], provider, limit=5)  # type: ignore[arg-type]
+
+    sql = str(statements[0].compile(dialect=postgresql.dialect()))
+    assert re.search(r"ORDER BY \(?document_embeddings\.embedding <=> \S+\)? \+ ", sql)
 
 
 def test_article_headings_tolerate_ocr_noise_and_reject_references() -> None:

@@ -561,6 +561,38 @@ it starts. The migration uses `IF NOT EXISTS`, so the next release records it an
 query on the same table used the HNSW index and returned only 40 rows, since `hnsw.ef_search` defaults
 to 40. A plan change could therefore shorten the candidate list without any error.
 
+## Leaving forms out of search: plan (05/11/2026)
+
+Written before these runs. The term limit no longer hides this, so its effect can be seen on its own.
+
+**Problem.** Tax circulars attach printed forms, and they are chunked like law. 2,154 of 62,182
+passages have four or more blank fields, mostly in `89/2026/TT-BTC` and `80/2021/TT-BTC`. They take
+few top slots (4 of the 120 in hybrid's top 10 over the 12 cases: A1 2, A3 1, A9 1), but one passage
+pretends to be a rule. The chunker also files everything after a document's last article under that
+article, so a form in Circular 80/2021 is cited as Art 89.
+
+**Change.** A passage with four or more blank-field runs counts as a form (`is_form_passage`). Keyword
+and hybrid search leave forms out unless the question asks for one (`mẫu số`, `biểu mẫu`, `mẫu biểu`,
+`mẫu đơn`, `tờ khai`). Twice the limit is fetched and forms are removed afterwards, so the database,
+the passages, and the corpus do not change, and the change is one code path to undo. Appendices that
+hold rules, such as rate tables and lists of goods, stay in. 4 was not tuned on recall: it was set
+from the sample below, with 2 and 3 being mixed with tariff tables.
+
+**Checked before running.** No passage holding an essential provision has four or more blanks. In a
+random sample of 30, 27 are clearly forms or templates, 2 are unclear, and 1 is a tariff table.
+
+**Runs.** `corpus-v1.2`, `gold-v1.0 --verified-only`, `--as-of case`, K = 5, 10, 20:
+`keyword-asof-noforms` against `keyword-asof-nolimit`, `hybrid-asof-noforms` against
+`hybrid-asof-nolimit`, and `hybrid-asof-repeals-noforms` against `hybrid-asof-repeals-nolimit`.
+
+**Expected.** A small effect at most: only A1, A3, and A9 have forms in the top 10, and no gold
+provision is removed. Forms hold slots that real passages can take. So a null result on recall would
+not count against the change; a loss would, and it would be investigated before keeping it.
+
+**Safety checks.** The `tax_article_retrieval.json` regression set is repeated, and top-10 forms are
+counted again. Mislabelled forms remain when a question asks for one, since fixing the article labels
+needs reprocessing and a new corpus version.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that

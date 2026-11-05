@@ -1,3 +1,4 @@
+import re
 import unicodedata
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -23,6 +24,12 @@ RRF_K = 60
 # Bounds query size only: legal content often comes late in a natural question.
 MAX_KEYWORD_TERMS = 64
 EXACT_MATCH_WEIGHT = 0.5
+# Blank fields of a printed form. Four or more mark a form or template, which has no rule
+# of its own; tariff tables and OCR noise rarely reach four.
+_FORM_BLANK_PATTERN = re.compile(r"\.{5,}|…{2,}|_{5,}|(?:\. ){4,}")
+MIN_FORM_BLANKS = 4
+# Compared with the unaccented question.
+_FORM_REQUEST_PHRASES = ("mau so", "bieu mau", "mau bieu", "mau don", "to khai")
 _TERM_EDGE_CHARACTERS = "\"'“”‘’.,;:!?()[]{}<>…"
 # Question words and function words that appear in almost every passage. Words that
 # change legal meaning (for example "không" in "không chịu thuế") are deliberately kept.
@@ -141,16 +148,20 @@ def keyword_search_chunks(
     if not normalized_query:
         return []
     active_filters = filters or SearchFilters()
+    exclude_forms = not asks_for_form(normalized_query)
+    fetched = limit * 2 if exclude_forms else limit
     if session.get_bind().dialect.name != "postgresql":
-        statement = _fallback_keyword_statement(normalized_query, active_filters, limit)
-        return _to_keyword_results(session.execute(statement).all())
+        statement = _fallback_keyword_statement(normalized_query, active_filters, fetched)
+        results = _to_keyword_results(session.execute(statement).all())
+        return _without_forms(results, limit) if exclude_forms else results
     # The planner picks a sequential scan for common terms because it does not count the
     # cost of decompressing each stored vector; the GIN index is much faster for them.
     session.execute(text("SET LOCAL enable_seqscan = off"))
-    statement = _postgresql_keyword_statement(normalized_query, active_filters, limit)
+    statement = _postgresql_keyword_statement(normalized_query, active_filters, fetched)
     rows = session.execute(statement).all()
     session.execute(text("SET LOCAL enable_seqscan = on"))
-    return _to_keyword_results(rows)
+    results = _to_keyword_results(rows)
+    return _without_forms(results, limit) if exclude_forms else results
 
 
 def semantic_search_chunks(
@@ -159,6 +170,7 @@ def semantic_search_chunks(
     provider: EmbeddingProvider,
     filters: SearchFilters | None = None,
     limit: int = 20,
+    exclude_forms: bool = False,
 ) -> list[SearchResult]:
     if session.get_bind().dialect.name != "postgresql":
         return []
@@ -175,8 +187,12 @@ def semantic_search_chunks(
         )
     )
     statement = _apply_filters(statement, active_filters)
-    rows = session.execute(statement.order_by(distance, DocumentChunk.id).limit(limit)).all()
-    return _to_semantic_results(rows)
+    # "+ 0" keeps this an exact scan. The HNSW index returns at most hnsw.ef_search rows (40 by
+    # default) and applies filters afterwards, so using it could silently shorten this list.
+    fetched = limit * 2 if exclude_forms else limit
+    rows = session.execute(statement.order_by(distance + 0, DocumentChunk.id).limit(fetched)).all()
+    results = _to_semantic_results(rows)
+    return _without_forms(results, limit) if exclude_forms else results
 
 
 def hybrid_search_chunks(
@@ -203,6 +219,7 @@ def hybrid_search_chunks(
         provider,
         filters,
         candidate_limit,
+        exclude_forms=not asks_for_form(query),
     )
     fused_results = fuse_ranked_results(keyword_results, semantic_results, candidate_limit)
     return (
@@ -210,6 +227,21 @@ def hybrid_search_chunks(
         .rerank(query, deduplicate_passages(fused_results), limit)
         .results
     )
+
+
+def is_form_passage(content: str) -> bool:
+    """Whether a passage is a printed form or template rather than a rule."""
+
+    return len(_FORM_BLANK_PATTERN.findall(content)) >= MIN_FORM_BLANKS
+
+
+def asks_for_form(query: str) -> bool:
+    folded = fold_vietnamese(unicodedata.normalize("NFC", query)).casefold()
+    return any(phrase in folded for phrase in _FORM_REQUEST_PHRASES)
+
+
+def _without_forms(results: list[SearchResult], limit: int) -> list[SearchResult]:
+    return [result for result in results if not is_form_passage(result.chunk.content)][:limit]
 
 
 def deduplicate_passages(results: list[SearchResult]) -> list[SearchResult]:
