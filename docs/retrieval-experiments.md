@@ -744,8 +744,9 @@ from the raw file. Passages whose text did not change keep their embeddings.
 
 | Run | Result |
 | --- | --- |
-| First (`dcc164f`) | 13,536 passages embedded in 53 minutes. Passages 62,666 to 64,546, all embedded. The labels from `rechunk_outdated` are confirmed: Decree 117/2022 Art 8 has 1 passage and 884 are appendix; Circular 80/2021 Art 89 has 1 and 576 are appendix. 392 passages still held TCVN3 |
-| Dry run of the second | 35 documents, 909 passages, no OCR. 320 of the 392 are Decree 78/2003, a PDF named `.rtf`; most others mix fonts within a line. 212 PDFs with OCR noise are rejected. No Unicode word was harmed |
+| First (`dcc164f`) | Embedding took 53 minutes. Passages 62,666 to 64,546, all embedded. The labels from `rechunk_outdated` are confirmed: Decree 117/2022 Art 8 has 1 passage and 884 are appendix; Circular 80/2021 Art 89 has 1 and 576 are appendix. 392 passages still held TCVN3 |
+| Second (`18cb525`) | 35 documents, in 9 minutes with no OCR. 64,595 passages, all embedded. 3 passages match TCVN3 words, all OCR noise in PDFs (130/2025, 90/2026). Nothing is left to select |
+| Its dry run | 35 documents, 909 passages, no OCR. 320 of the 392 are Decree 78/2003, a PDF named `.rtf`; most others mix fonts within a line. 212 PDFs with OCR noise are rejected. No Unicode word was harmed |
 
 The first attempt at this second fix turned `hành` back into `hµnh`, since `µ` was treated as a
 symbol; the dry run caught this. `DOCUMENT_NUMBER_MISMATCH` went from 55 to 61 documents, which is
