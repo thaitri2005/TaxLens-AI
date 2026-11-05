@@ -622,8 +622,8 @@ than four blanks stay in.
 
 Vector search now orders by `distance + 0`, which stops PostgreSQL from using the HNSW index. The
 index returns at most `hnsw.ef_search` rows (40 by default) and applies filters afterwards, so using
-it could return fewer candidates than asked for, without any error. pgvector 0.8.2 on Azure offers no
-`hnsw.iterative_scan` setting here, so raising the limit would not have solved filtering.
+it could return fewer candidates than asked for, without any error. The alternatives, a higher
+`hnsw.ef_search` or iterative scans, stay approximate, and exact search keeps results reproducible.
 
 The semantic report matches `semantic-asof-v1.2` in every case field, and 50 rows come back even when
 sequential scans are discouraged. The cost is a scan of every embedding, about 0.5 s per question
@@ -661,7 +661,7 @@ The only provision any of them gained at K = 10 is L3's Decree 181/2025 Art 29(1
 
 **Focused queries help only part of the middle group.** The existing issue queries find both A2
 provisions (ranks 3 and 6), and the other 12 stay outside their top 200. Those queries were written
-before the gold answers were consulted, and they name the visible issues, not the unstated steps.
+before these results, and they name the visible issues, not the unstated steps.
 
 **What follows.** Half of the 14 cannot be reached by better matching of the question's words. That
 needs a step that works out what law the question depends on, such as a model proposing the legal
