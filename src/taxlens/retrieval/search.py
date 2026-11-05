@@ -176,21 +176,38 @@ def semantic_search_chunks(
         return []
     active_filters = filters or SearchFilters()
     distance = DocumentEmbedding.embedding.cosine_distance(query_vector)
-    score: Any = (1 - distance).label("score")
-    statement = (
-        _base_statement(score)
-        .join(DocumentEmbedding, DocumentEmbedding.document_chunk_id == DocumentChunk.id)
-        .where(
-            DocumentEmbedding.model_id == provider.model_id,
-            DocumentEmbedding.model_revision == provider.model_revision,
-            DocumentEmbedding.dimensions == provider.dimensions,
-        )
+    candidates = select(
+        DocumentEmbedding.document_chunk_id.label("chunk_id"), distance.label("distance")
+    ).where(
+        DocumentEmbedding.model_id == provider.model_id,
+        DocumentEmbedding.model_revision == provider.model_revision,
+        DocumentEmbedding.dimensions == provider.dimensions,
     )
-    statement = _apply_filters(statement, active_filters)
-    # "+ 0" keeps this an exact scan. The HNSW index returns at most hnsw.ef_search rows (40 by
-    # default) and applies filters afterwards, so using it could silently shorten this list.
+    if active_filters != SearchFilters():
+        candidates = _apply_filters(
+            _joined_to_documents(
+                candidates.join(
+                    DocumentChunk, DocumentChunk.id == DocumentEmbedding.document_chunk_id
+                ),
+                DocumentChunk.document_version_id,
+            ),
+            active_filters,
+        )
     fetched = limit * 2 if exclude_forms else limit
-    rows = session.execute(statement.order_by(distance + 0, DocumentChunk.id).limit(fetched)).all()
+    # Choosing the nearest passages from ids and distances alone keeps text and embeddings out
+    # of the sort. "+ 0" keeps this an exact scan: the HNSW index returns at most
+    # hnsw.ef_search rows (40 by default) and filters afterwards, which could shorten the list.
+    nearest = (
+        candidates.order_by(distance + 0, DocumentEmbedding.document_chunk_id)
+        .limit(fetched)
+        .subquery("nearest")
+    )
+    score: Any = (1 - nearest.c.distance).label("score")
+    rows = session.execute(
+        _base_statement(score)
+        .join(nearest, nearest.c.chunk_id == DocumentChunk.id)
+        .order_by(nearest.c.distance, DocumentChunk.id)
+    ).all()
     results = _to_semantic_results(rows)
     return _without_forms(results, limit) if exclude_forms else results
 
@@ -369,18 +386,20 @@ def _postgresql_keyword_statement(query: str, filters: SearchFilters, limit: int
         *_term_matches(accented_vector, config, accented_terms, EXACT_MATCH_WEIGHT),
     ).subquery("term_matches")
     matched = (
-        select(term_matches.c.chunk_id, func.sum(term_matches.c.weight).label("match_score"))
-        .group_by(term_matches.c.chunk_id)
+        select(
+            term_matches.c.chunk_id,
+            term_matches.c.version_id,
+            func.sum(term_matches.c.weight).label("match_score"),
+        )
+        .group_by(term_matches.c.chunk_id, term_matches.c.version_id)
         .subquery("matched")
     )
-    eligible = _apply_filters(
-        select(matched.c.chunk_id, matched.c.match_score)
-        .join(DocumentChunk, DocumentChunk.id == matched.c.chunk_id)
-        .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
-        .join(LegalDocument, DocumentVersion.document_id == LegalDocument.id)
-        .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id),
-        filters,
-    ).cte("eligible")
+    eligible_chunks = select(matched.c.chunk_id, matched.c.match_score)
+    if filters != SearchFilters():
+        eligible_chunks = _apply_filters(
+            _joined_to_documents(eligible_chunks, matched.c.version_id), filters
+        )
+    eligible = eligible_chunks.cte("eligible")
     last_kept_match_score = (
         select(eligible.c.match_score)
         .order_by(eligible.c.match_score.desc())
@@ -403,14 +422,16 @@ def _postgresql_keyword_statement(query: str, filters: SearchFilters, limit: int
 
 def _term_matches(vector: Any, config: Any, terms: list[str], weight: float) -> list[Any]:
     return [
-        select(DocumentChunk.id.label("chunk_id"), literal(weight).label("weight")).where(
-            vector.op("@@")(func.websearch_to_tsquery(config, term))
-        )
+        select(
+            DocumentChunk.id.label("chunk_id"),
+            DocumentChunk.document_version_id.label("version_id"),
+            literal(weight).label("weight"),
+        ).where(vector.op("@@")(func.websearch_to_tsquery(config, term)))
         for term in terms
     ]
 
 
-def _fallback_keyword_statement(query: str, filters: SearchFilters, limit: int) -> Select[Any]:
+def _fallback_keyword_statement(query: str, filters: SearchFilters, limit: int) -> Any:
     score: Any = literal_column("1.0").label("score")
     normalized_query = f"%{query.lower()}%"
     statement = _base_statement(score).where(
@@ -432,7 +453,15 @@ def _base_statement(score: Any) -> Select[Any]:
     )
 
 
-def _apply_filters(statement: Select[Any], filters: SearchFilters) -> Select[Any]:
+def _joined_to_documents(statement: Any, version_id: Any) -> Any:
+    return (
+        statement.join(DocumentVersion, version_id == DocumentVersion.id)
+        .join(LegalDocument, DocumentVersion.document_id == LegalDocument.id)
+        .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
+    )
+
+
+def _apply_filters(statement: Any, filters: SearchFilters) -> Any:
     if filters.document_number is not None:
         statement = statement.where(
             LegalDocument.document_number.ilike(f"%{filters.document_number}%")
