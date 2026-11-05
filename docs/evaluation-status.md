@@ -10,8 +10,7 @@ the dated record behind each figure is in
   differences, so wins and losses are given with every comparison.
 - The keyword term limit was the largest problem found. Removing it nearly tripled hybrid recall
   at K = 10, from 0.15 to 0.41. It went live on 05/11/2026.
-- A hybrid search now takes about 1.5 s a question in the code on `main`, and results are unchanged.
-  [What is live](#what-is-live) lists what still waits for a release.
+- A hybrid search now takes about 1.5 s a question, timed from a laptop, with unchanged results.
 - Hybrid and keyword search are now close, and these cases cannot separate them. Issue-guided
   retrieval has fallen behind both.
 - **Most essential provisions are still missed:** 20 of hybrid's at K = 10. 14 of those are nowhere
@@ -22,16 +21,9 @@ the dated record behind each figure is in
 
 ## What is live
 
-The site runs `158c4c2`, released 05/11/2026. `main` is ahead of it.
-
-| Change | On the site | On `main` |
-| --- | --- | --- |
-| Every term of a long question is searched | Yes | Yes |
-| Keyword query that counts matches from the indexes (migration `20261105_0006`) | Yes | Yes |
-| Forms left out of search | No | Yes |
-| Vector search kept exact | No | Yes |
-| Faster vector and keyword queries | No | Yes |
-| Unused HNSW index dropped, 121 MB (migration `20261105_0007`) | No | Yes |
+The site runs `34d9ac4`, released 05/11/2026, with migration `20261105_0007` applied. Everything
+on this page is live: every term of a long question is searched, forms are left out, vector search
+is exact, and the unused HNSW index is gone, taking the database from 605 MB to 485 MB.
 
 Airflow is off, so the corpus is not being updated. All times here were measured from a laptop, and
 none on the site. Answer quality has not been evaluated since the limit was removed.
@@ -106,9 +98,9 @@ limit of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-t
 | The ministry's expiry dates | Hybrid gets the same recall as the full filter at K = 10 and 20, and part of it at K = 5, without inference | The conservative version of the filter |
 | Two missing circulars | A7 and L2 found; A4 not, since Art 40(3) is worded differently from the question | Loaded |
 | Why 14 provisions are not retrieved | 7 need an unstated legal step, 6 share words but the facts bury them, 1 is worded differently. Term weighting and expanding abbreviations reach none of them | Grouping not reviewed by an expert. Points to working out the legal issues first |
-| Leaving forms out of search | No recall gain, and 1 rank moved by one. Forms leave the top 50 entirely (22 before) | In the code, not yet released. Kept for what readers and the model see |
-| Keeping vector search exact | Same results; rules out silently returning at most 40 candidates | In the code, not yet released |
-| Making search faster | A hybrid search takes 1.5 s, against 2.8 s, with identical results: keyword 1.3 s, vector 0.2 s. Drops an unused 121 MB index | In the code, not yet released. Timed from a laptop |
+| Leaving forms out of search | No recall gain, and 1 rank moved by one. Forms leave the top 50 entirely (22 before) | Live. Kept for what readers and the model see |
+| Keeping vector search exact | Same results; rules out silently returning at most 40 candidates | Live |
+| Making search faster | A hybrid search takes 1.5 s, against 2.8 s, with identical results: keyword 1.3 s, vector 0.2 s. Drops an unused 121 MB index | Live. Timed from a laptop |
 | Split-syllable repair | Almost no rank changed | Kept for correct text, not a retrieval gain |
 | Following one legal reference | Reaches 1 of 20 missed provisions at K = 10, at document level only | Not worth building now |
 
@@ -116,8 +108,8 @@ limit of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-t
 
 In suggested order:
 
-1. Run **Release and deploy**, then time search on the site and evaluate answers with `evaluate_qa.py`,
-   which needs Hugging Face credits.
+1. Time search on the site, whose page ranks the top 200 rather than the top 50 timed here, and
+   evaluate answers with `evaluate_qa.py`, which needs Hugging Face credits.
 2. Add more gold cases, since 12 cannot separate most methods and the limit result needs independent
    evidence.
 3. Plan a step that works out which legal issues a question depends on, since 7 of the 14

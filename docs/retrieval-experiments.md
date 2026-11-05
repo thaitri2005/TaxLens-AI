@@ -688,8 +688,8 @@ questions, from a laptop 58 ms from the database, with forms left out:
   which was 430,000 buffer reads. It now carries the version id along, and joins only when a filter
   needs it.
 - **The HNSW index** is dropped by migration `20261105_0007`. It had been scanned once, in a test,
-  and held 121 MB of a 605 MB database. This takes effect at the next release, and also makes
-  inserting embeddings cheaper.
+  and held 121 MB of a 605 MB database, which is now 485 MB. This also makes inserting embeddings
+  cheaper.
 
 The keyword, hybrid, semantic, and filtered hybrid reports all match the earlier ones in every case
 field, so results are unchanged.
