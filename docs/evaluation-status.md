@@ -89,6 +89,7 @@ of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-term-li
 | Why 14 provisions are not retrieved | 7 need an unstated legal step, 6 share words but the facts bury them, 1 is worded differently. Term weighting and expanding abbreviations reach none of them | Grouping not reviewed by an expert. Points to working out the legal issues first |
 | Leaving forms out of search | No recall gain, and 1 rank moved by one. Forms leave the top 50 entirely (22 before) | In the code, not yet released. Kept for what readers and the model see |
 | Keeping vector search exact | Same results; rules out silently returning at most 40 candidates | In the code, not yet released |
+| Making search faster | A hybrid search takes 1.5 s, against 2.8 s, with identical results. Drops an unused 121 MB index | In the code, not yet released |
 | Split-syllable repair | Almost no rank changed | Kept for correct text, not a retrieval gain |
 | Following one legal reference | Reaches 1 of 20 missed provisions at K = 10, at document level only | Not worth building now |
 

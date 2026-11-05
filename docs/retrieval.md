@@ -137,7 +137,7 @@ For a query:
    ahead of `thuê` (rent) although both fold to `thue`.
 4. Term matches are counted from the indexes, and the tie-breaker, which is always below 1, is
    calculated only for chunks that can still reach the top results. A long question matches
-   almost every chunk, so reading them all took about 17 s; this takes about 2 s
+   almost every chunk, so reading them all took about 17 s; this takes about 1.3 s
    ([measured](retrieval-experiments.md#query-time)).
 
 ## 4. Semantic retrieval and fusion
@@ -152,9 +152,10 @@ cannot be loaded, search and Q&A fall back to keyword retrieval instead of faili
 When a question names exactly one document number (`32/2025/TT-BTC`, `48/2024/QH15`,
 `18/VBHN-BTC`), retrieval is restricted to that document.
 
-Vector search always scans every embedding (it orders by `distance + 0`), because the HNSW index
-returns at most `hnsw.ef_search` rows and filters them afterwards, which could silently shorten
-the candidate list.
+Vector search always scans every embedding, which is exact and takes about 0.2 s at this size. An
+HNSW index returns at most `hnsw.ef_search` rows and filters them afterwards, which could silently
+shorten the candidate list, so the query orders by `distance + 0` and the index was dropped
+(migration `20261105_0007`). Reconsider this if the corpus grows far beyond its current size.
 
 Printed forms are left out of keyword and hybrid results unless the question asks for one
 (`mẫu số`, `biểu mẫu`, `mẫu biểu`, `mẫu đơn`, `tờ khai`). A passage with four or more blank-field

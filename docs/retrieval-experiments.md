@@ -21,6 +21,7 @@ their comparisons between methods no longer hold as they stand. Evaluation-statu
 | 05/11/2026 | Why 14 provisions are not retrieved | [Diagnosis](#why-14-provisions-are-not-retrieved-05112026) |
 | 05/11/2026 | Leaving forms out of search | [Plan](#leaving-forms-out-of-search-plan-05112026), [results](#leaving-forms-out-of-search-results-05112026) |
 | 05/11/2026 | Keeping vector search exact | [Change](#keeping-vector-search-exact-05112026) |
+| 05/11/2026 | Making search faster | [Results](#making-search-faster-05112026) |
 | 05/11/2026 | Removing the keyword term limit | [Plan](#removing-the-keyword-term-limit-plan-05112026), [results](#removing-the-keyword-term-limit-results-05112026) |
 
 The issue-guided plan below was written before any result was seen, so the comparison
@@ -668,6 +669,35 @@ needs a step that works out what law the question depends on, such as a model pr
 issues, or following a curated map from a topic to its general rules. Any of these needs its own plan
 and new cases. Some of the 7 may also be stricter than a retriever should be held to (A7's effective
 date, A6's definitions), which is a question for the expert review of alternative evidence sets.
+
+## Making search faster (05/11/2026)
+
+A full hybrid search went from 2.8 s to 1.5 s a question. Median and slowest over the 12 gold
+questions, from a laptop 58 ms from the database, with forms left out:
+
+| Step | Before | After |
+| --- | --- | --- |
+| Keyword | 1.9 s, 2.6 s | 1.3 s, 2.1 s |
+| Vector | 0.8 s, 2.3 s | 0.2 s, 0.3 s |
+| **Hybrid, end to end** | **2.8 s, 3.5 s** | **1.5 s, 2.4 s** |
+
+- **Vector search** chose its nearest passages while carrying their text and embeddings, so the sort
+  spilled up to 96 MB to disk. It now chooses from ids and distances, then fetches those passages.
+- **Keyword search** joined about 61,000 matches to chunks and documents one index lookup at a time,
+  which was 430,000 buffer reads. It now carries the version id along, and joins only when a filter
+  needs it.
+- **The HNSW index** is dropped by migration `20261105_0007`. It had been scanned once, in a test,
+  and held 121 MB of a 605 MB database. This takes effect at the next release, and also makes
+  inserting embeddings cheaper.
+
+The keyword, hybrid, semantic, and filtered hybrid reports all match the earlier ones in every case
+field, so results are unchanged.
+
+**Not done.** Most remaining keyword time is one index scan per term, about 48 for the longest
+question. Raising `work_mem` gave no real gain when tested before these changes. Scanning only rare
+terms would change results. Running the two searches at once would save at most 0.2 s. The largest
+wait a user sees is the cold start after idle, up to a minute, and avoiding it means keeping a replica
+running at a cost, which is a budget decision.
 
 ## Changes
 
