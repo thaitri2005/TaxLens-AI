@@ -298,6 +298,65 @@ az containerapp show  -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler --query
 Pause the daily DAG while a long backfill runs, so its processing and embedding do not
 compete for the API's memory and CPU, and unpause it afterwards.
 
+## Building corpus-v2
+
+Adds the 975 selected documents ([rules](corpus-inclusion.md)) through the existing Airflow apps, so
+no new Azure resources are needed. Existing documents are not OCR'd again, apart from 10 listed ones.
+
+Expect 20+ hours, with the site slow meanwhile, since jobs share the API's vCPU. Do not release while
+it runs. Trigger each action from the Airflow UI, **Trigger DAG w/ config** on
+`taxlens_corpus_maintenance`, and wait for each to finish:
+
+```powershell
+az containerapp start -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler
+az containerapp start -g taxlens-dev-rg -n taxlens-dev-airflow-web
+az containerapp show -g taxlens-dev-rg -n taxlens-dev-airflow-web --query properties.configuration.ingress.fqdn -o tsv
+```
+
+Leave `tax_regulation_discovery_daily` **paused**: it would add documents to the corpus being built.
+
+| Step | Config | What it does |
+| --- | --- | --- |
+| 1 | `{"action": "collect_selected_dry_run"}` | Counts what would be collected (935 from the portal). Changes nothing |
+| 2 | `{"action": "collect_selected", "limit": 20, "rounds": 1}` | The test: 20 documents, timed from the task log |
+| 3 | `{"action": "rechunk_outdated"}` | Relabels appendix text from stored text, with no OCR, and embeds about 18,000 passages |
+| 4 | `{"action": "reextract_listed"}` | Re-OCRs the 10 documents with garbled text layers (399 pages) |
+| 5 | `{"action": "collect_selected", "limit": 100, "rounds": 10}` | The full run. Safe to re-trigger: documents already held are skipped |
+
+Then stop both apps with `az containerapp stop`, since the scheduler costs money while it runs. The
+40 ministry documents need a Vietnamese connection:
+
+```powershell
+python scripts/collect_sources.py --source mof --selected data/evaluation/corpus/selected-v2.json --limit 40
+```
+
+Note the start time: Azure keeps 7 days of point-in-time restore, which is the way back. Afterwards
+check the result, freeze `corpus-v2`, and repeat the baselines.
+
+## Costs
+
+October 2026: $17.76 for the subscription, by the Cost Management API.
+
+| Resource | Cost | Note |
+| --- | --- | --- |
+| `taxlensdevacr` | $9.03 | Basic includes 10 GB, and it held 82 GB of old images. Delete old tags |
+| `CreditScorecardWOEIV` (another project) | $5.16 | A container registry in `docker-fastapi-credit-scorecard` |
+| `taxlens-dev-api`, `-web` | $2.00 | Scale to zero when idle |
+| `taxlens-dev-airflow-*` | $1.29 | Free while stopped. Keep them stopped between runs |
+| Storage, Key Vault | $0.28 | |
+| PostgreSQL, Log Analytics | $0.00 | The database is not billed at present; check before relying on that |
+
+To keep only the 3 newest images of each repository, after checking the list:
+
+```bash
+for repo in taxlens-api taxlens-web taxlens-airflow; do
+  az acr repository show-tags -n taxlensdevacr --repository "$repo" --orderby time_desc -o tsv | tail -n +4 |
+    while read -r tag; do az acr repository delete -n taxlensdevacr --image "$repo:$tag" --yes; done
+done
+```
+
+A deleted image cannot be rolled back to, though it can be rebuilt from its commit.
+
 ## Airflow from the command line
 
 `az containerapp exec` passes the command split on spaces and does not honour quotes, so

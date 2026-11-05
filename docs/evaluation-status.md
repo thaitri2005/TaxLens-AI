@@ -117,7 +117,6 @@ In suggested order:
 4. Have a tax expert review the inferred rules, the 178 documents the ministry lists as in force
    but our list ends, the alternative valid evidence sets, and whether Circular 80/2021 Art 40(3)
    still applied on A4's date.
-5. Fix the article labels of forms, so that a form in Circular 80/2021 no longer reads as Art 89.
-   This needs reprocessing and a new corpus version. Search already leaves forms out unless asked.
-6. Decide on `corpus-v2`, because more passages add competition for the top ranks. It needs a
-   database backup, Airflow, and a go-ahead.
+5. Build `corpus-v2`, following the [runbook](operations.md#building-corpus-v2). The
+   [audit](retrieval-experiments.md#audit-before-corpus-v2-05112026) fixed what could have forced a
+   second pass, including the article labels of forms. These fixes are on `main`, not yet released.

@@ -22,6 +22,7 @@ their comparisons between methods no longer hold as they stand. Evaluation-statu
 | 05/11/2026 | Leaving forms out of search | [Plan](#leaving-forms-out-of-search-plan-05112026), [results](#leaving-forms-out-of-search-results-05112026) |
 | 05/11/2026 | Keeping vector search exact | [Change](#keeping-vector-search-exact-05112026) |
 | 05/11/2026 | Making search faster | [Results](#making-search-faster-05112026) |
+| 05/11/2026 | Audit before corpus-v2 | [Findings](#audit-before-corpus-v2-05112026) |
 | 05/11/2026 | Removing the keyword term limit | [Plan](#removing-the-keyword-term-limit-plan-05112026), [results](#removing-the-keyword-term-limit-results-05112026) |
 
 The issue-guided plan below was written before any result was seen, so the comparison
@@ -699,6 +700,55 @@ question. Raising `work_mem` gave no real gain when tested before these changes.
 terms would change results. Running the two searches at once would save at most 0.2 s. The largest
 wait a user sees is the cold start after idle, up to a minute, and avoiding it means keeping a replica
 running at a cost, which is a budget decision.
+
+## Audit before corpus-v2 (05/11/2026)
+
+Collecting `corpus-v2` is the expensive step, so everything that could force a second pass was
+checked first: all 2,022 stored texts, the database, and all 935 portal links in the selection.
+
+| Checked | Found | Done |
+| --- | --- | --- |
+| OCR model | Dropping the English model from `vie+eng` improves both accuracy and speed (below) | `OCR_LANGUAGE` is now `vie` |
+| OCR timeouts | A page over 90 s was left blank with no record, a real risk on a busy CPU | Timeout is 240 s, and failures are recorded as `OCR_PAGES_FAILED` |
+| Garbled text layers | 10 PDFs carry someone else's poor OCR as text (`hiQn gi6m tr6n s6 ti6n thu6`) and passed our check | Such pages are now OCR'd. 10 documents, 399 pages, are listed in `reextract-v2.json` |
+| Last-article labels | Everything after a document's signature was filed under its last article, for example 883 tariff passages under Decree 117/2022 Art 8 and 590 forms under Circular 80/2021 Art 89 | Chunker v4 labels this text as appendix |
+| Re-chunking cost | Re-chunking deleted every embedding, so any chunker change would have re-embedded the corpus | Unchanged passages now keep their embeddings |
+| Failed documents | 8: 7 are Excel workbooks filed as `.rtf`, and 1 is a 2-byte file | Left as they are. Old tariff tables; not worth a parser |
+| Selection links | All 935 reachable, 1.39 GB in total, largest 27 MB. The 40 ministry links can only be checked from Vietnam | Nothing needed |
+| Document numbers | 5 with stray spaces (`148/2013/TT- BTC`) are duplicates of documents also held under the clean number, so they can take two result slots | Left in place, since removing them deletes data. To be decided separately |
+| Embeddings | All passages embedded; 16 passages over 512 tokens by word count | Nothing needed |
+
+**OCR comparison.** Tesseract at 300 DPI, mode 6. "Word match" compares OCR of 8 born-digital pages
+with their text layer. "In vocabulary" is the share of words on 16 scanned pages from the selection
+that occur in our Word files, which needed no OCR.
+
+| Model | Word match | In vocabulary | Seconds a page |
+| --- | --- | --- | --- |
+| Fast, `vie+eng` (before) | 0.960 | 0.950 | 3.3-3.7 |
+| **Fast, `vie` (now)** | **0.975** | **0.965** | **2.6-2.8** |
+| Best, `vie+eng` | 0.967 | 0.956 | 7.5-9.2 |
+| Best, `vie` | 0.975 | 0.970 | 5.5-6.4 |
+
+The `best` model is more than twice as slow for almost nothing, so it is not used. Pages are few, and
+English-heavy pages may read worse without the English model. Without accents all reach 0.998, so
+keyword search, which ignores accents, gains little from any of this.
+
+**Tested on real files.** Decree 87/2025 and Circular 38/2017 go from 0.0% accented letters to 26-28%
+and read correctly. The dry run of chunker v4 over every stored text changes 1,370 documents, and
+17,977 passages need embedding again, of which 16,608 are newly labelled appendix text. No gold
+article is lost. 4 documents lose an article label (95/2018/TT-BTC, 206/2016/TT-BTC, 205/QĐ-TTG,
+01/2005/TT-BXD), and their text stays searchable as appendix. An early version mistook the words `nói
+nhận` in a sentence for a signature and dropped attached regulations; the dry run caught this.
+
+**Not done, on purpose.**
+
+- **Mass correction of OCR typos.** No dependable corrector exists for legal Vietnamese, and a model
+  rewriting statutes could change their meaning without anyone noticing. Search ignores accents, and
+  answers quote the source.
+- **Re-OCR of the 576 older scanned documents.** The gain is about 1.5 points of word match, at about
+  24,000 pages. New documents use the better setting, so the corpus has two OCR settings.
+- **A smaller passage size.** 16 passages exceed the embedding limit by word count, though Vietnamese
+  tokens run higher. Changing it means re-embedding everything, with no evidence that it would help.
 
 ## Changes
 

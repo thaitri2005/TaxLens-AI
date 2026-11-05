@@ -181,7 +181,6 @@ The database holds `corpus-v1.2`; `corpus-v2` is not started. Results so far sho
 documents do not by themselves make provisions retrievable. The keyword term limit is now gone, so
 this decision is open ([open work](evaluation-status.md#open-work)).
 
-1. Back up the database, start Airflow, collect and process the selection (`C2` and `C3`
-   first, or all 975), and freeze `corpus-v2`.
+1. Build it following the [runbook](operations.md#building-corpus-v2), and freeze `corpus-v2`.
 2. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
    coverage, and end to end.

@@ -30,8 +30,10 @@ flowchart LR
 
 The decision is made per page: a page keeps its PDF text layer when that text is usable
 (at least 40 non-space characters, at least 20% letters), and only the other pages are
-rendered and OCR'd with Tesseract `vie+eng`. In practice the government portal publishes
-scans, so nearly every page is OCR text.
+rendered and OCR'd with Tesseract `vie`. In practice the government portal publishes
+scans, so nearly every page is OCR text. A text layer is also distrusted when it has under 5%
+accented letters, syllables cut in two, or control characters, since some PDFs carry someone else's
+poor OCR. That page is OCR'd, and the result is kept only if it reads clearly more Vietnamese.
 
 OCR settings (`OCR_DPI`, `OCR_PAGE_SEGMENTATION_MODE`, `OCR_TIMEOUT_SECONDS`):
 
@@ -40,7 +42,9 @@ OCR settings (`OCR_DPI`, `OCR_PAGE_SEGMENTATION_MODE`, `OCR_TIMEOUT_SECONDS`):
 - **Page segmentation mode 6** (one uniform text block), which measured best.
 - **Grayscale** rendering and `OMP_THREAD_LIMIT=1`, since Tesseract's threads only contend
   on the API's single vCPU.
-- A page that times out is left empty instead of failing the whole document.
+- A page that takes over 240 s is left empty instead of failing the whole document, and is
+  recorded on the processing job as `OCR_PAGES_FAILED`.
+- **`vie` alone**, without `eng`: better and faster ([comparison](retrieval-experiments.md#audit-before-corpus-v2-05112026)).
 
 The `ocr_benchmark` action of the `taxlens_corpus_maintenance` DAG
 (`scripts/benchmark_ocr.py`) measures word error rate, with and without diacritics,
