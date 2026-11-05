@@ -554,7 +554,8 @@ query changed, recording commit `389b46b`. The regression set also matches betwe
 
 **On the database.** The index was built by hand on Azure with `CREATE INDEX CONCURRENTLY`, without
 recording the migration, because the live API would fail on a revision it does not know the next time
-it starts. The migration uses `IF NOT EXISTS`, so the next release records it and changes nothing.
+it starts. The migration uses `IF NOT EXISTS`, so the next release records it and changes nothing. Released on
+05/11/2026 as `158c4c2`, with the migration recorded.
 
 **Noticed in passing.** The vector search currently scans every embedding, which is exact. A simpler
 query on the same table used the HNSW index and returned only 40 rows, since `hnsw.ef_search` defaults
