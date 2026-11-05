@@ -120,5 +120,5 @@ In suggested order:
 5. Build `corpus-v2`, following the [runbook](operations.md#building-corpus-v2). The
    [audit](retrieval-experiments.md#audit-before-corpus-v2-05112026) fixed what could have forced a
    second pass, including the article labels of forms. [TCVN3 text](retrieval-experiments.md#tcvn3-text-left-unconverted-05112026)
-   in about 18% of passages was found later, so every result above was measured with it. It needs
-   a release and a repair before the build, and the baselines must be repeated afterwards.
+   in about 18% of passages was found later, so every result above was measured with it. It is
+   repaired before the build, and the baselines must be repeated afterwards.

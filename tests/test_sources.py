@@ -12,7 +12,11 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from taxlens.document_processing.formats import detect_format, extract_word_processor_text
-from taxlens.document_processing.legacy_text import convert_tcvn3, has_legacy_text
+from taxlens.document_processing.legacy_text import (
+    convert_tcvn3,
+    has_legacy_text,
+    text_layer_is_tcvn3,
+)
 from taxlens.document_processing.process import build_article_chunks, find_section_headings
 from taxlens.ingestion.connectors import ConnectorError, GovernmentPortalSearch, SourceDocument
 from taxlens.ingestion.mof import MofLegalDocumentConnector, MofSearchOptions
@@ -52,10 +56,33 @@ def test_unicode_text_with_only_shared_letters_or_symbols_is_kept() -> None:
     assert not has_legacy_text(text)
 
 
-def test_ocr_noise_in_a_unicode_document_is_not_converted() -> None:
-    text = "\n".join(["Căn cứ Luật Quản lý thuế"] * 20 + ["Ghi chú: Ch¬¬ ti¢p"])
+def test_ocr_noise_does_not_make_a_text_layer_tcvn3() -> None:
+    noisy = "\n".join(["Căn cứ Luật Quản lý thuế"] * 20 + ["Ghi chú: Ch¬¬ ti¢p"])
+    legacy = "\n".join(["ngµy 28 th¸ng 8 n¨m 1993 cña ChÝnh phñ"] * 20 + ["Căn cứ"])
 
-    assert convert_tcvn3(text) == text
+    assert not text_layer_is_tcvn3(noisy)
+    assert text_layer_is_tcvn3(legacy)
+
+
+def test_tcvn3_words_inside_a_unicode_line_are_converted() -> None:
+    # These files can change font within a line, and such lines can be all a document has.
+    line = "b) Doanh nghiệp dịch vụ bưu chÝnh cá nh©n khác"
+
+    assert convert_tcvn3(line) == "b) Doanh nghiệp dịch vụ bưu chính cá nhân khác"
+
+
+def test_marks_prove_tcvn3_only_where_unicode_does_not_use_them() -> None:
+    assert convert_tcvn3("Căn cứ hµnh chÝnh nµy vµ ®i") == "Căn cứ hành chính này và đi"
+
+
+def test_symbols_in_a_unicode_line_are_kept() -> None:
+    line = "Căn cứ 5 µg Vinamilk® 3 × 4 § 2 «Thông báo»"
+
+    assert convert_tcvn3(line) == line
+
+
+def test_minus_sign_standing_for_a_letter_is_converted() -> None:
+    assert convert_tcvn3("−u ®·i cña c¸c n−íc") == "ưu đãi của các nước"
 
 
 def test_tcvn3_mixed_with_unicode_lines_is_converted_line_by_line() -> None:

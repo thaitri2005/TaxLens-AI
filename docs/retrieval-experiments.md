@@ -724,9 +724,10 @@ these passages properly and the embedding model read them as noise. Most are old
 the gold set, which asks about current law, is not known until the baselines are repeated.
 
 **Fix.** A line now counts as TCVN3 only on characters Unicode Vietnamese does not use, and a line
-that cannot tell follows its nearest neighbour. A document is converted only if at least 10% of the
-lines that can tell are TCVN3, since OCR noise can look similar (`Ghi chú: ¬¬` came out as
-`Ghi chỳ: ơơ` in the first attempt).
+that cannot tell follows its nearest neighbour. Word and RTF files can change font within a line,
+so words proving to be TCVN3 are converted even in a Unicode line. OCR noise can look similar
+(`Ghi chú: ¬¬` came out as `Ghi chỳ: ơơ` in the first attempt), so a PDF's text layer is converted
+only if most of it is TCVN3, and OCR text never is.
 
 | Check | Result |
 | --- | --- |
@@ -738,10 +739,17 @@ Some files mix fonts within a line, and words such as `cã` can stay unconverted
 prove nothing alone. The 9,964 therefore came mostly from TCVN3, which splits into many more tokens than Vietnamese
 Unicode, so the passage size stays as it is.
 
-**Repair.** `reextract_legacy_text` reads every stored text and extracts the affected Word and RTF
-files again from the raw file, with no OCR. PDFs are left alone, because conversion could make a
-garbled text layer look like Vietnamese and pass the check for one; the job reports how many it
-skipped.
+**Repair.** `reextract_legacy_text` reads every stored text and extracts the affected documents again
+from the raw file. Passages whose text did not change keep their embeddings.
+
+| Run | Result |
+| --- | --- |
+| First (`dcc164f`) | 13,536 passages embedded in 53 minutes. Passages 62,666 to 64,546, all embedded. The labels from `rechunk_outdated` are confirmed: Decree 117/2022 Art 8 has 1 passage and 884 are appendix; Circular 80/2021 Art 89 has 1 and 576 are appendix. 392 passages still held TCVN3 |
+| Dry run of the second | 35 documents, 909 passages, no OCR. 320 of the 392 are Decree 78/2003, a PDF named `.rtf`; most others mix fonts within a line. 212 PDFs with OCR noise are rejected. No Unicode word was harmed |
+
+The first attempt at this second fix turned `hành` back into `hµnh`, since `µ` was treated as a
+symbol; the dry run caught this. `DOCUMENT_NUMBER_MISMATCH` went from 55 to 61 documents, which is
+to be checked after the build.
 
 ## Audit before corpus-v2 (05/11/2026)
 

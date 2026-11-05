@@ -62,7 +62,7 @@ def run_maintenance(params: dict[str, object], **_: object) -> None:
         run_api_job("/internal/airflow/embed")
         return
     if action == "reextract_legacy_text":
-        # Word and RTF files only, so no OCR. The second pass should report 0 documents.
+        # Reads existing text layers, so almost no OCR. The second pass should report 0.
         for _ in range(2):
             run_api_job(
                 "/internal/airflow/process", {"limit": 1000, "reextract_legacy_text": "true"}

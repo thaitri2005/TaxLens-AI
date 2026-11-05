@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from taxlens.config import get_settings
 from taxlens.document_processing.formats import detect_format, extract_word_processor_text
+from taxlens.document_processing.legacy_text import convert_tcvn3, text_layer_is_tcvn3
 from taxlens.document_processing.ocr import ocr_pages
 from taxlens.legal_data.document_numbers import find_document_numbers
 from taxlens.legal_data.models import (
@@ -171,6 +172,7 @@ def process_document_version(
 
     used_ocr = False
     failed_ocr_pages: list[int] = []
+    read_by_ocr: set[int] = set()
     try:
         pages = extract_pages(raw_content, version.raw_artifact_key)
         settings = get_settings()
@@ -199,7 +201,10 @@ def process_document_version(
                     _accented_letter_share(text) > 2 * _accented_letter_share(pages[index])
                 ):
                     pages[index] = text
+                    read_by_ocr.add(index)
             used_ocr = True
+        if raw_content.startswith(b"%PDF"):
+            _convert_tcvn3_text_layer(pages, read_by_ocr)
         if not _has_usable_text(pages):
             raise ValueError(
                 "No usable text found after Tesseract OCR"
@@ -361,6 +366,15 @@ def extract_pages(raw_content: bytes, artifact_key: str) -> list[str]:
     if document_format in ("doc", "rtf", "docx"):
         return [extract_word_processor_text(raw_content)]
     return [raw_content.decode("utf-8", errors="replace")]
+
+
+def _convert_tcvn3_text_layer(pages: list[str], read_by_ocr: set[int]) -> None:
+    """Runs after the checks on the text layer, which conversion could otherwise fool."""
+
+    layer = [index for index in range(len(pages)) if index not in read_by_ocr]
+    if text_layer_is_tcvn3("\n".join(pages[index] for index in layer)):
+        for index in layer:
+            pages[index] = convert_tcvn3(pages[index])
 
 
 def split_syllable_rate(pages: list[str]) -> float:

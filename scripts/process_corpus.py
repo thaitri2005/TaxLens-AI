@@ -5,10 +5,11 @@ import time
 import uuid
 from pathlib import Path
 
-from sqlalchemy import Select, exists, func, select
+from sqlalchemy import Row, Select, exists, func, select
 
 from taxlens.db import SessionLocal
-from taxlens.document_processing.legacy_text import has_legacy_text
+from taxlens.document_processing.formats import detect_format
+from taxlens.document_processing.legacy_text import has_legacy_text, text_layer_is_tcvn3
 from taxlens.document_processing.process import (
     CHUNKER_STAGE_SUFFIX,
     ProcessResult,
@@ -19,7 +20,6 @@ from taxlens.legal_data.models import DocumentVersion, LegalDocument, Processing
 from taxlens.storage.base import ObjectStorage
 from taxlens.storage.factory import get_object_storage
 
-WORD_PROCESSOR_SUFFIXES = (".doc", ".docx", ".rtf")
 
 
 def main() -> None:
@@ -52,7 +52,7 @@ def main() -> None:
     parser.add_argument(
         "--reextract-legacy-text",
         action="store_true",
-        help="Re-run extraction for Word and RTF documents whose stored text still holds TCVN3",
+        help="Re-run extraction for documents whose stored text still holds TCVN3",
     )
     parser.add_argument(
         "--retry-failed",
@@ -151,7 +151,8 @@ def _legacy_text_query(storage: ObjectStorage) -> Select[tuple[DocumentVersion]]
     """Versions to extract again, found by reading every stored text.
 
     They are extracted from the raw file because stored text can mix converted and unconverted
-    lines. PDFs are left out: conversion could make a garbled text layer look like Vietnamese.
+    lines. File names cannot be trusted: some named .rtf are PDFs. A PDF counts only if most of
+    its text is TCVN3, since OCR noise can look similar.
     """
 
     with SessionLocal() as session:
@@ -163,29 +164,27 @@ def _legacy_text_query(storage: ObjectStorage) -> Select[tuple[DocumentVersion]]
             ).where(DocumentVersion.normalized_artifact_key.is_not(None))
         ).all()
 
-    def holds_legacy_text(key: str) -> bool:
-        if not storage.exists(key):
+    def holds_legacy_text(row: Row[tuple[uuid.UUID, str, str]]) -> bool:
+        _, text_key, raw_key = row
+        if not storage.exists(text_key):
             return False
-        return has_legacy_text(storage.get_bytes(key).decode("utf-8", errors="replace"))
+        text = storage.get_bytes(text_key).decode("utf-8", errors="replace")
+        if not has_legacy_text(text):
+            return False
+        is_pdf = raw_key.lower().endswith(".pdf") or (
+            detect_format(storage.get_bytes(raw_key)) == "pdf"
+        )
+        return text_layer_is_tcvn3(text) if is_pdf else True
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
-        flags = list(pool.map(holds_legacy_text, [row[1] for row in rows]))
-    flagged = [row for row, flag in zip(rows, flags, strict=True) if flag]
-    selected = [row[0] for row in flagged if _is_word_processor_file(row[2])]
-    print(
-        f"Stored texts checked: {len(rows)}; holding TCVN3: {len(flagged)}; "
-        f"PDF or other, left alone: {len(flagged) - len(selected)}",
-        flush=True,
-    )
+        flags = list(pool.map(holds_legacy_text, rows))
+    selected = [row[0] for row, flag in zip(rows, flags, strict=True) if flag]
+    print(f"Stored texts checked: {len(rows)}; holding TCVN3: {len(selected)}", flush=True)
     return (
         select(DocumentVersion)
         .where(DocumentVersion.id.in_(selected))
         .order_by(DocumentVersion.created_at)
     )
-
-
-def _is_word_processor_file(key: str | None) -> bool:
-    return key is not None and key.lower().endswith(WORD_PROCESSOR_SUFFIXES)
 
 
 def _outdated_query() -> Select[tuple[DocumentVersion]]:
