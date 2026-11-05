@@ -369,7 +369,7 @@ def _postgresql_keyword_statement(query: str, filters: SearchFilters, limit: int
     )
 
 
-def _term_matches(vector: Any, config: Any, terms: list[str], weight: float) -> list[Select[Any]]:
+def _term_matches(vector: Any, config: Any, terms: list[str], weight: float) -> list[Any]:
     return [
         select(DocumentChunk.id.label("chunk_id"), literal(weight).label("weight")).where(
             vector.op("@@")(func.websearch_to_tsquery(config, term))
