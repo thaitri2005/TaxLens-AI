@@ -74,6 +74,7 @@ Each step skips work already done, so the commands can be rerun at any time.
 | `evaluate_tax_retrieval.py` | Runs the labelled retrieval evaluation and stores the report ([retrieval.md](retrieval.md#evaluation)). `--dataset data/evaluation/gold_set_v1.csv` runs the [gold set](retrieval.md#gold-set). |
 | `evaluate_retrieval.py` | Prints ranked results for one ad hoc `--query`. |
 | `evaluate_qa.py` | Runs the cheap, no-judge Q&A evaluation. |
+| `correct_document_numbers.py` | Moves documents stored under a wrong number to the right one, from the reviewed `number-corrections-v2.json`. A dry run unless `--apply` is given. |
 | `freeze_corpus.py` | Records the corpus for an experiment (`--output`) or checks it is unchanged (`--check`) ([retrieval.md](retrieval.md#controlled-experiments)). |
 | `annotation_agreement.py` | Cohen's kappa between two annotators' gold-set CSVs ([guideline](annotation-guideline.md#process)). |
 | `decompose_issues.py` | Stores each gold-set question's legal issues for issue-guided retrieval; needs `HF_TOKEN`, not the database ([plan](retrieval-experiments.md)). |
@@ -299,6 +300,9 @@ Pause the daily DAG while a long backfill runs, so its processing and embedding 
 compete for the API's memory and CPU, and unpause it afterwards.
 
 ## Building corpus-v2
+
+Done on 06/11/2026 ([record](retrieval-experiments.md#baselines-on-corpus-v2-06112026)). The steps
+are kept for a rebuild. It took 13.7 hours for the 10 rounds.
 
 Adds the 975 selected documents ([rules](corpus-inclusion.md)) through the existing Airflow apps, so
 no new Azure resources are needed. Existing documents are not OCR'd again, apart from 10 listed ones.

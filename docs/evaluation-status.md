@@ -1,11 +1,17 @@
 # Evaluation status
 
-Where retrieval evaluation stands as of 05/11/2026. This page is rewritten as things change;
+Where retrieval evaluation stands as of 06/11/2026. This page is rewritten as things change;
 the dated record behind each figure is in
 [retrieval-experiments.md](retrieval-experiments.md).
 
 ## Summary
 
+- **`corpus-v2` is built and frozen. Recall fell on it, because old documents that have ended
+  now crowd the top ranks.** Hybrid at K = 10 went from 0.41 to 0.30. A list of ended documents
+  rebuilt for `corpus-v2` brings it to 0.45, the same as on `corpus-v1.2`, but depends on
+  unvalidated rules and **is not on the site**, so the site searches ended documents too. Figures
+  in the rest of this summary are from `corpus-v1.2` unless marked. See
+  [the baselines](retrieval-experiments.md#baselines-on-corpus-v2-06112026).
 - Gold set: `gold-v1.0 --verified-only`, 12 scored cases. That is too few to show most
   differences, so wins and losses are given with every comparison.
 - The keyword term limit was the largest problem found. Removing it nearly tripled hybrid recall
@@ -25,7 +31,9 @@ The site runs `34d9ac4`, released 05/11/2026, with migration `20261105_0007` app
 on this page is live: every term of a long question is searched, forms are left out, vector search
 is exact, and the unused HNSW index is gone, taking the database from 605 MB to 485 MB.
 
-Airflow is off, so the corpus is not being updated. All times here were measured from a laptop, and
+**The site now searches `corpus-v2`**, since it shares the database, with the code of `18cb525`.
+The site's speed on the larger corpus has not been timed. Evaluation runs took 29 to 47 s a
+question for hybrid, against about 8 s on `corpus-v1.2`. Other times here were measured from a laptop, and
 none on the site. Answer quality has not been evaluated since the limit was removed.
 
 ## What the limit changed
@@ -54,19 +62,36 @@ K = 10. The article-level regression scores do not change.
 
 ## Corpora
 
-The database holds `corpus-v1.2`. Manifests are in `data/evaluation/corpus/`.
+The database holds `corpus-v2`. Manifests are in `data/evaluation/corpus/`.
 
 | Corpus | What it is | Documents | Passages | Fingerprint |
 | --- | --- | --- | --- | --- |
 | `corpus-v1` | Original frozen corpus | 2,026 | 61,208 | `317f5a0d` |
 | `corpus-v1.1` | With 8 PDFs reprocessed to repair split syllables | 2,026 | 61,204 | `cd396fa3` |
 | `corpus-v1.2` | With Circulars 80/2021 and 25/2018 added | 2,028 | 62,182 | `7df84879` |
-| `corpus-v2` | Selected, not collected: 975 more documents, about 20 hours ([rules](corpus-inclusion.md)) | | | |
+| `corpus-v2` | TCVN3 repaired, 943 documents added on balance, 41 numbers corrected ([rules](corpus-inclusion.md)) | 2,991 | 144,600 | `62b499cf` |
 
 A run against `corpus-v1` now stops at its corpus check. The 8 PDFs' earlier passages and
 embeddings are saved in `data/local/backups/corpus-v1-8pdfs.json`, which is not committed.
 
 ## Results
+
+Essential recall on `corpus-v2`, with `--as-of case`. Full coverage is in brackets where it is
+not 0. "Filter" uses the list rebuilt for `corpus-v2`; "old list" is the one built from
+`corpus-v1`, which does not cover the new documents.
+
+| Method | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| Keyword | 0.22 (0.08) | 0.30 (0.25) | 0.42 (0.25) |
+| Hybrid | 0.10 | 0.30 (0.08) | 0.41 (0.25) |
+| **Hybrid, filter** | **0.35 (0.17)** | **0.45 (0.25)** | **0.45 (0.25)** |
+| Hybrid, old list | 0.23 (0.08) | 0.35 (0.25) | 0.45 (0.25) |
+| Issue-guided | 0.04 | 0.10 | 0.15 |
+| Issue-guided, old list | 0.06 | 0.10 | 0.26 |
+
+Between keyword and hybrid there is no separation: at K = 10, 2 wins and 2 losses, p = 1.
+
+The same measure on `corpus-v1.2`, with TCVN3 text unconverted, for comparison.
 
 Essential recall over provisions held in the corpus, on `corpus-v1.2` with `--as-of case` and no
 term limit. Full coverage is in brackets where it is not 0.
@@ -117,8 +142,8 @@ In suggested order:
 4. Have a tax expert review the inferred rules, the 178 documents the ministry lists as in force
    but our list ends, the alternative valid evidence sets, and whether Circular 80/2021 Art 40(3)
    still applied on A4's date.
-5. Build `corpus-v2`, following the [runbook](operations.md#building-corpus-v2). The
-   [audit](retrieval-experiments.md#audit-before-corpus-v2-05112026) fixed what could have forced a
-   second pass, including the article labels of forms. [TCVN3 text](retrieval-experiments.md#tcvn3-text-left-unconverted-05112026)
-   in about 18% of passages was found later, so every result above was measured with it. It is
-   repaired before the build, and the baselines must be repeated afterwards.
+5. Decide how the site should treat ended documents. Without a filter they crowd out current law,
+   but the filter needs expert review first, and two of its rules are inferred.
+6. Make search faster on the larger corpus: 29 to 47 s a question in evaluation runs.
+7. Remove the near-identical second versions held under 9 document numbers, and settle
+   93/1998/QĐ/TCKT and 25/2026/TT-BTC, where the header and the portal disagree.

@@ -5,8 +5,9 @@ documents to add. `corpus-v1` closed its gaps with `collect_sources.py --cited-b
 collects what the gold set cites: those documents enter because they are the answers, and
 a non-tax law then has no similar documents around it. These rules replace that step.
 
-**Where this stands:** `corpus-v2` is selected but not collected. The selection is 975 new
-documents (420 `C2`, 251 `C3`, 304 `C4`), about 66,000 passages and 20 hours of processing.
+**Where this stands:** `corpus-v2` is built and frozen: 2,991 documents and 144,600 passages. The
+selection was 975 new documents (420 `C2`, 251 `C3`, 304 `C4`), of which 2 are absent
+([record](retrieval-experiments.md#baselines-on-corpus-v2-06112026)).
 Dated sections below are in the order the work was done, so later ones correct earlier
 counts. The corpora and results so far are summarized in
 [evaluation-status.md](evaluation-status.md).
@@ -177,10 +178,7 @@ per 1,000 words.
 
 ## To do
 
-The database holds `corpus-v1.2`; `corpus-v2` is not started. Results so far show that more
-documents do not by themselves make provisions retrievable. The keyword term limit is now gone, so
-this decision is open ([open work](evaluation-status.md#open-work)).
+The database holds `corpus-v2`, and retrieval baselines are repeated on it. Recall fell, so more
+documents have not made provisions easier to retrieve ([open work](evaluation-status.md#open-work)).
 
-1. Build it following the [runbook](operations.md#building-corpus-v2), and freeze `corpus-v2`.
-2. Repeat the baselines on `corpus-v2`, reporting coverage ceiling, retrieval given
-   coverage, and end to end.
+1. Report the coverage ceiling and end-to-end results, which need answer evaluation.

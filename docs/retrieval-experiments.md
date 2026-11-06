@@ -820,6 +820,61 @@ nhận` in a sentence for a signature and dropped attached regulations; the dry 
 - **A smaller passage size.** Few article passages exceed the embedding limit once TCVN3 is converted.
   Changing it means re-embedding everything, with no evidence that it would help.
 
+## Baselines on corpus-v2 (06/11/2026)
+
+**Build.** `collect_selected` ran 10 rounds in 13.7 hours (05/11 18:56 to 06/11 08:37 Vietnam
+time), then one more for what remained. 39 ministry documents were collected from a Vietnamese
+connection. Result: 2,991 documents, 3,000 versions, 144,600 passages, all embedded, fingerprint
+`62b499cf`. Of the 975 selected, 2 are absent: 56/2009/NĐ-CP, whose file on the portal is not a
+valid document, and 38/2015/TT-BTC, whose download failed. 9 documents failed extraction: the
+known 8 and 204/2004/NĐ-CP. The build added far more passages than the 46,932 estimated, because
+the estimate assumed 49 a law from the few held, and the 344 new laws average about 112.
+
+**Runs.** `gold-v1.0 --verified-only`, `--as-of case`, K = 5, 10, 20, reports `*-asof-v2` and
+`*-asof-repeals-v2`. The filter uses the list built from `corpus-v1`.
+
+| Essential recall | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| Keyword, `corpus-v1.2` | 0.22 | 0.42 | 0.42 |
+| Keyword, `corpus-v2` | 0.22 | 0.30 | 0.42 |
+| Hybrid, `corpus-v1.2` | 0.30 | 0.41 | 0.45 |
+| Hybrid, `corpus-v2` | 0.10 | 0.30 | 0.41 |
+| Hybrid with filter, `corpus-v1.2` | 0.38 | 0.45 | 0.45 |
+| Hybrid with filter, `corpus-v2` | 0.23 | 0.35 | 0.45 |
+| Issue-guided, `corpus-v1.2` | 0.10 | 0.17 | 0.28 |
+| Issue-guided, `corpus-v2` | 0.04 | 0.10 | 0.15 |
+| Issue-guided with filter, `corpus-v1.2` | 0.22 | 0.28 | 0.45 |
+| Issue-guided with filter, `corpus-v2` | 0.06 | 0.10 | 0.26 |
+| **Hybrid with the rebuilt list, `corpus-v2`** | **0.35** | **0.45** | **0.45** |
+
+**Why recall fell.** The saved reports show most essential provisions fell a few ranks rather than
+disappearing, and documents new to the corpus took 25 to 28% of the top 10. Those seen most are old
+circulars such as 32/2007, 129/2008 and 65/2013/TT-BTC, while the cases ask about 2025 and 2026.
+None of them was in the list built from `corpus-v1`. Rebuilding it (`repeals/corpus-v2.json`, then
+`corpus-v2-ministry.json`: 825 ended documents, against 321) moved 9 provisions up and none down:
+for example, 25/2018 Art 2 in A7 from rank 19 to 6, and 181/2025 Art 26(2) in L4 from 15 to 3.
+Recall at K = 10 returned to the `corpus-v1.2` figure of 0.45.
+
+**What this does not show.** The list has the inferred rules no expert has validated, and it was
+built after seeing that the old documents were the problem, on the same 12 cases, so new cases are
+needed. The explicit and ministry rules alone were not run. The filter lives only in the evaluation:
+the site does not use it. The TCVN3 repair and the appendix labels changed in the same step, and
+their share was not separated. The two corpora are not paired, so `compare_retrieval_runs.py`
+refuses them and no p-value is given. Issue-guided with the rebuilt list was not run, since it
+trails hybrid.
+
+**Duplicates.** Nine document numbers hold two versions, of which at least 8 came from the number
+corrections. Their opening 3,000 characters are 87 to 99% alike, so these are the same document,
+and both copies can appear in results. Nothing was deleted.
+
+**Number flags.** The 52 left were read: OCR misreads of a right number (`QHI5`, `434` for `134`),
+a shortened header, or a citation picked up as the header. Only 93/1998/QĐ/TCKT and 25/2026/TT-BTC
+stay unresolved.
+
+**Speed.** Hybrid took 350 to 562 s for 12 questions from a laptop, against about 100 s on
+`corpus-v1.2`. The database holds 965 MB on a server with 2 GB of memory. The site was not timed,
+as it needs a login.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that

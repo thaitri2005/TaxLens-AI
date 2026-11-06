@@ -21,9 +21,9 @@ As of October 2026 the ministry selection returns 928 in-force normative tax doc
 (858 circulars, 62 joint circulars, plus decrees, a law, and consolidated texts): 484 Word
 files and 444 PDFs. The portal's tax category holds about 1,500 documents from 1988.
 
-**Corpus now**: 2,028 documents and 62,182 passages, frozen as `corpus-v1.2`
-([evaluation status](evaluation-status.md#corpora)). Airflow is off, so nothing new is being
-collected.
+**Corpus now**: 2,991 documents and 144,600 passages, frozen as `corpus-v2`
+([evaluation status](evaluation-status.md#corpora)). Keep Airflow off and
+`tax_regulation_discovery_daily` paused, or the frozen corpus changes.
 
 **Corpus in October 2026**: 2,013 documents and 59,598 passages, all embedded and
 searchable except 8 documents whose processing failed. 785 come from the ministry
