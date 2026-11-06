@@ -81,5 +81,5 @@ In suggested order:
 6. Build answer evaluation with reviewed labels.
 7. Remove duplicates and settle the uncertain numbers.
 
-**Azure clean-up, for the owner:** delete old ACR images ([commands](operations.md#costs))
-and remove stale database firewall rules. Leave `CreditScorecardWOEIV` alone: it serves another live project.
+**Azure clean-up, for the owner:** remove stale database firewall rules. Leave `CreditScorecardWOEIV` in
+place: it serves another live project.

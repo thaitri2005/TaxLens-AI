@@ -135,7 +135,8 @@ otherwise use a pull request.
 3. Run **Release and deploy** on `main`. It builds images tagged with the SHA, then plans and applies Terraform.
    The API applies migrations when it starts.
 
-Untick `build` and enter an `image_tag` to roll back. Untick `apply` for a plan only. See what is live:
+Untick `build` and enter an `image_tag` to roll back. Only the 2 newest images are kept; anything older must
+be rebuilt from its commit. Untick `apply` for a plan only. See what is live:
 
 ```bash
 az containerapp show -g taxlens-dev-rg -n taxlens-dev-api --query "properties.template.containers[0].image" -o tsv
@@ -161,19 +162,20 @@ October 2026: $17.76.
 
 | Resource | Cost | Note |
 | --- | --- | --- |
-| `taxlensdevacr` | $9.03 | Basic includes 10 GB, and it held 82 GB of old images. Deleting them should save about $4 a month |
+| `taxlensdevacr` | $9.03 | Basic includes 10 GB, and it held 92 GB of old images, cleared on 06/11/2026. Should save about $4 a month |
 | `CreditScorecardWOEIV` (another project) | $5.16 | **Do not delete:** another project's live web app pulls from it. It holds one image |
 | `taxlens-dev-api`, `-web` | $2.00 | Scale to zero |
 | `taxlens-dev-airflow-*` | $1.29 | Free while stopped |
 | Storage, Key Vault | $0.28 | |
 | PostgreSQL, Log Analytics | $0.00 | Not billed at present; check before relying on that |
 
-Keep the 3 newest images of each repository, after checking the list. A deleted image can only be rebuilt from
-its commit:
+**Images clean themselves up.** After a release that builds and applies, `release.yml` keeps the 2 newest
+images of each TaxLens repository and deletes the rest. To do it by hand in Git Bash on Windows, strip
+carriage returns, or every delete fails:
 
 ```bash
 for repo in taxlens-api taxlens-web taxlens-airflow; do
-  az acr repository show-tags -n taxlensdevacr --repository "$repo" --orderby time_desc -o tsv | tail -n +4 |
+  az acr repository show-tags -n taxlensdevacr --repository "$repo" --orderby time_desc -o tsv | tr -d '\r' | tail -n +3 |
     while read -r tag; do az acr repository delete -n taxlensdevacr --image "$repo:$tag" --yes; done
 done
 ```

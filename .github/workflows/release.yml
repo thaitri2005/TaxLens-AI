@@ -160,3 +160,27 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         run: terraform apply -auto-approve tfplan
+
+  prune_images:
+    name: Keep the 2 newest images
+    needs: apply
+    # Only after a new image is live, so a rollback or preview never deletes anything.
+    if: ${{ !cancelled() && needs.apply.result == 'success' && inputs.build }}
+    runs-on: ubuntu-latest
+    # A failed clean-up must not make a good release look failed.
+    continue-on-error: true
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Delete older images
+        run: |
+          for repo in taxlens-api taxlens-web taxlens-airflow; do
+            az acr repository show-tags -n taxlensdevacr --repository "$repo" --orderby time_desc -o tsv |
+              tail -n +3 |
+              while read -r tag; do
+                az acr repository delete -n taxlensdevacr --image "$repo:$tag" --yes
+              done
+          done
