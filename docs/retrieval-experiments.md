@@ -702,6 +702,25 @@ terms would change results. Running the two searches at once would save at most 
 wait a user sees is the cold start after idle, up to a minute, and avoiding it means keeping a replica
 running at a cost, which is a budget decision.
 
+## Wrong document numbers corrected (06/11/2026)
+
+After the corpus-v2 build, 93 documents were flagged `DOCUMENT_NUMBER_MISMATCH`. Amending circulars
+had been filed under the number of the circular they amend, for example 135/2026/TT-BTC as
+152/2015/TT-BTC, so their passages cited the wrong law. This also kept some originals out, since
+collection skips numbers it holds, and made 4 selected documents look missing.
+
+Each number was checked against the document's header and the government portal, because either
+can be wrong: OCR reads 134 as 434, and the portal lists Decree 26/2009 as 26/2008.
+`scripts/correct_document_numbers.py` applied the 41 corrections listed in
+`data/evaluation/corpus/number-corrections-v2.json`: 18 wrong numbers and 23 written differently.
+Passages and embeddings did not change. Seven versions joined a document already held under the
+right number, so those numbers now hold two versions, which may be duplicates.
+
+The 52 flags left were not changed: mostly OCR misreads of a correct number. 93/1998/QĐ/TCKT and
+25/2026/TT-BTC are unresolved, as header and portal disagree or the portal gives no number.
+33/2023 became 124/2026 from a misread header and the date alone. 158/2025/TT-BTC, the real
+original, was collected. 56/2009/NĐ-CP could not be: the portal's file is not a Word document.
+
 ## TCVN3 text left unconverted (05/11/2026)
 
 Found after the audit, from `9964 truncated` in the log of `rechunk_outdated`. That count was far
