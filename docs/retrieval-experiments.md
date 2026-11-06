@@ -713,7 +713,7 @@ Each number was checked against the document's header and the government portal,
 can be wrong: OCR reads 134 as 434, and the portal lists Decree 26/2009 as 26/2008.
 `scripts/correct_document_numbers.py` applied the 41 corrections listed in
 `data/evaluation/corpus/number-corrections-v2.json`: 18 wrong numbers and 23 written differently.
-Passages and embeddings did not change. Seven versions joined a document already held under the
+Passages and embeddings did not change. Eight versions joined a document already held under the
 right number, so those numbers now hold two versions, which may be duplicates.
 
 The 52 flags left were not changed: mostly OCR misreads of a correct number. 93/1998/QĐ/TCKT and
