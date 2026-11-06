@@ -1,154 +1,85 @@
-# Evaluation status
+# Status
 
-Where retrieval evaluation stands as of 06/11/2026. This page is rewritten as things change;
-the dated record behind each figure is in
-[retrieval-experiments.md](retrieval-experiments.md).
-
-## Summary
-
-- **`corpus-v2` is built and frozen. Recall fell on it, because old documents that have ended
-  now crowd the top ranks.** Hybrid at K = 10 went from 0.41 to 0.30. A list of ended documents
-  rebuilt for `corpus-v2` brings it to 0.45, the same as on `corpus-v1.2`, but depends on
-  unvalidated rules and **is not on the site**, so the site searches ended documents too. Figures
-  in the rest of this summary are from `corpus-v1.2` unless marked. See
-  [the baselines](retrieval-experiments.md#baselines-on-corpus-v2-06112026).
-- Gold set: `gold-v1.0 --verified-only`, 12 scored cases. That is too few to show most
-  differences, so wins and losses are given with every comparison.
-- The keyword term limit was the largest problem found. Removing it nearly tripled hybrid recall
-  at K = 10, from 0.15 to 0.41. It went live on 05/11/2026.
-- A hybrid search now takes about 1.5 s a question, timed from a laptop, with unchanged results.
-- Hybrid and keyword search are now close, and these cases cannot separate them. Issue-guided
-  retrieval has fallen behind both.
-- **Most essential provisions are still missed:** 20 of hybrid's at K = 10. 14 of those are nowhere
-  near the top, and 7 need a legal step the question does not state, which better word matching
-  cannot reach.
-- More documents alone do not fix retrieval: adding the two missing circulars made only one of
-  three affected cases findable until the limit was removed.
+Where TaxLens stands as of 06/11/2026. Rewritten as things change. What has been tried is in
+[retrieval-experiments.md](retrieval-experiments.md): read it before running anything.
 
 ## What is live
 
-The site runs `34d9ac4`, released 05/11/2026, with migration `20261105_0007` applied. Everything
-on this page is live: every term of a long question is searched, forms are left out, vector search
-is exact, and the unused HNSW index is gone, taking the database from 605 MB to 485 MB.
-
-**The site now searches `corpus-v2`**, since it shares the database, with the code of `a9c4ac7`, released 06/11/2026.
-The site's speed has not been timed, as it needs a login. From a laptop, retrieval within an answer
-takes 3 to 6 s and the answer model 46 to 91 s. Since that release the site answers with
-`gemma-3-27b-it`, as the router no longer offers the old model: 3 of 3 questions returned 200 in the
-API log. After idling the API scales to zero, so the first question waits about 1 to 3 minutes while
-it starts and loads the embedding model. Other times here were measured from a laptop, and
-none on the site. Answer quality has only had the no-judge check on 5 questions, which cannot see
-whether the law cited still applies ([record](retrieval-experiments.md#answers-on-corpus-v2-06112026)).
-
-## What the limit changed
-
-From 17/10/2026, when the search overhaul added `MAX_KEYWORD_TERMS = 12`, until 05/11/2026, keyword
-search saw only the first 12 terms of a question. Before the overhaul it required every word of a
-question to appear in one passage, and returned nothing for most natural questions. So long
-questions had not had working keyword search at any point before this fix. This affected the live
-site's search and answers, and every gold-set experiment.
-
-It went unnoticed because the older regression set has short questions (at most 15 terms), while
-the gold questions have up to 40, and all 12 scored ones were cut. Keyword search scoring exactly 0
-on the gold set was the visible sign.
-
-| Earlier conclusion | Under the limit | Without it |
-| --- | --- | --- |
-| Baseline hybrid recall at K = 10 | 0.15 | 0.41 |
-| Keyword search alone | 0 at every K | 0.42 at K = 10, close to hybrid |
-| Issue-guided against hybrid at K = 10 | Ahead, 0.21 against 0.15 | Behind, 0.17 against 0.41 |
-| Filter for ended documents, hybrid at K = 10 | 0.15 to 0.26 | 0.41 to 0.45 |
-| L2 | Not found, though its circular was loaded | Found at rank 5 |
-
-**What this does not show.** The gain rests on 12 cases and repeats a result already seen. It
-measures retrieval, not answers, and more than half of the essential provisions are still missed at
-K = 10. The article-level regression scores do not change.
-
-## Corpora
-
-The database holds `corpus-v2`. Manifests are in `data/evaluation/corpus/`.
-
-| Corpus | What it is | Documents | Passages | Fingerprint |
-| --- | --- | --- | --- | --- |
-| `corpus-v1` | Original frozen corpus | 2,026 | 61,208 | `317f5a0d` |
-| `corpus-v1.1` | With 8 PDFs reprocessed to repair split syllables | 2,026 | 61,204 | `cd396fa3` |
-| `corpus-v1.2` | With Circulars 80/2021 and 25/2018 added | 2,028 | 62,182 | `7df84879` |
-| `corpus-v2` | TCVN3 repaired, 943 documents added on balance, 41 numbers corrected ([rules](corpus-inclusion.md)) | 2,991 | 144,600 | `62b499cf` |
-
-A run against `corpus-v1` now stops at its corpus check. The 8 PDFs' earlier passages and
-embeddings are saved in `data/local/backups/corpus-v1-8pdfs.json`, which is not committed.
+- **Site:** `a9c4ac7`, released 06/11/2026, answering with `google/gemma-3-27b-it`. All 3 questions in
+  the API log after the release returned 200.
+- **Corpus:** `corpus-v2`, frozen: 2,991 documents, 3,000 versions, 144,600 passages, all embedded.
+- **Airflow:** stopped. Keep it stopped, and the daily DAG paused, or the frozen corpus changes.
+- **Speed:** retrieval 3-6 s and the model 46-91 s, from a laptop. The first question after about 5
+  idle minutes also waits about 1-3 minutes for the API to start and load its model.
 
 ## Results
 
-Essential recall on `corpus-v2`, with `--as-of case`. Full coverage is in brackets where it is
-not 0. "Filter" uses the list rebuilt for `corpus-v2`; "old list" is the one built from
-`corpus-v1`, which does not cover the new documents.
+Essential recall on `corpus-v2`, 12 gold cases, full coverage in brackets where not 0. Too few cases
+to separate most methods.
 
 | Method | K = 5 | K = 10 | K = 20 |
 | --- | --- | --- | --- |
 | Keyword | 0.22 (0.08) | 0.30 (0.25) | 0.42 (0.25) |
-| Hybrid | 0.10 | 0.30 (0.08) | 0.41 (0.25) |
-| **Hybrid, filter** | **0.35 (0.17)** | **0.45 (0.25)** | **0.45 (0.25)** |
-| Hybrid, old list | 0.23 (0.08) | 0.35 (0.25) | 0.45 (0.25) |
+| Hybrid (what the site does) | 0.10 | 0.30 (0.08) | 0.41 (0.25) |
+| **Hybrid + filter for ended documents** | **0.35 (0.17)** | **0.45 (0.25)** | **0.45 (0.25)** |
 | Issue-guided | 0.04 | 0.10 | 0.15 |
-| Issue-guided, old list | 0.06 | 0.10 | 0.26 |
 
-Between keyword and hybrid there is no separation: at K = 10, 2 wins and 2 losses, p = 1.
+On `corpus-v1.2`, with TCVN3 unconverted: hybrid 0.30, 0.41, 0.45; with filter 0.38, 0.45, 0.45.
 
-The same measure on `corpus-v1.2`, with TCVN3 text unconverted, for comparison.
+**What these mean.** Adding documents lowered recall because old, ended documents crowd the top: new
+documents took 25-28% of the top 10. The filter restores it, but rests on 12 cases, was built after
+seeing the problem, and includes rules no legal expert has validated. The TCVN3 repair and appendix
+labels changed in the same step, and their effect was not separated.
 
-Essential recall over provisions held in the corpus, on `corpus-v1.2` with `--as-of case` and no
-term limit. Full coverage is in brackets where it is not 0.
+## Corpora
 
-| Method | K = 5 | K = 10 | K = 20 |
-| --- | --- | --- | --- |
-| Keyword | 0.22 (0.08) | 0.42 (0.25) | 0.42 (0.25) |
-| Semantic (no terms, so unaffected) | 0.11 | 0.13 | 0.30 (0.08) |
-| **Hybrid** | **0.30 (0.08)** | **0.41 (0.17)** | **0.45 (0.25)** |
-| Hybrid, filter | 0.41 (0.17) | 0.45 (0.25) | 0.45 (0.25) |
-| Hybrid, ministry dates only | 0.34 (0.08) | 0.45 (0.25) | 0.45 (0.25) |
-| Issue-guided | 0.10 | 0.17 | 0.28 |
-| Issue-guided, filter | 0.22 | 0.28 | 0.45 (0.17) |
-| Issue-guided, ministry dates only | 0.17 | 0.24 | 0.41 (0.08) |
+Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at the corpus check.
 
-"Filter" leaves out documents that had ended by the case date, including two inferred rules that no
-legal expert has validated. "Ministry dates only" leaves out that inference. Leaving forms out
-changes one figure among those measured: hybrid with the filter is 0.38 at K = 5. Figures under the
-limit of 12 are in [the results](retrieval-experiments.md#removing-the-keyword-term-limit-results-05112026).
+| Corpus | What it is | Documents | Passages | Fingerprint |
+| --- | --- | --- | --- | --- |
+| `corpus-v1` | Original | 2,026 | 61,208 | `317f5a0d` |
+| `corpus-v1.1` | 8 PDFs repaired | 2,026 | 61,204 | `cd396fa3` |
+| `corpus-v1.2` | Circulars 80/2021 and 25/2018 added | 2,028 | 62,182 | `7df84879` |
+| **`corpus-v2`** | [Rules](corpus-inclusion.md), TCVN3 repaired, 41 numbers corrected | 2,991 | 144,600 | `62b499cf` |
 
-## What each experiment found
+## Known problems
 
-| Experiment | Finding | Standing |
-| --- | --- | --- |
-| Keyword term limit | Hybrid at K = 10 rises from 0.15 to 0.41: 6 wins, 0 losses, p = 0.03. Keyword rises from 0 to 0.42: 8 wins, 0 losses, p = 0.008 | Live. Repeats a result already seen, so new cases are needed as independent evidence |
-| Query time | Keyword search takes 1.7 s a question as released, against 17 s with the old query and 7 s under the limit. Results are identical | Live. Timed from a laptop |
-| Issue-guided against hybrid | Hybrid is ahead without the limit: at K = 10 issue-guided wins 1, loses 5, p = 0.22. Taking turns between rankings pushes the question's own results down | Not worth using as it is; a different merge would need its own plan |
-| Filter for ended documents | Hybrid wins 3, loses 0 at K = 5, p = 0.25, and changes one case at K = 10. Removes no gold document | Smaller effect than before; the gain depends on unvalidated rules |
-| The ministry's expiry dates | Hybrid gets the same recall as the full filter at K = 10 and 20, and part of it at K = 5, without inference | The conservative version of the filter |
-| Two missing circulars | A7 and L2 found; A4 not, since Art 40(3) is worded differently from the question | Loaded |
-| Why 14 provisions are not retrieved | 7 need an unstated legal step, 6 share words but the facts bury them, 1 is worded differently. Term weighting and expanding abbreviations reach none of them | Grouping not reviewed by an expert. Points to working out the legal issues first |
-| Leaving forms out of search | No recall gain, and 1 rank moved by one. Forms leave the top 50 entirely (22 before) | Live. Kept for what readers and the model see |
-| Keeping vector search exact | Same results; rules out silently returning at most 40 candidates | Live |
-| Making search faster | A hybrid search takes 1.5 s, against 2.8 s, with identical results: keyword 1.3 s, vector 0.2 s. Drops an unused 121 MB index | Live. Timed from a laptop |
-| Split-syllable repair | Almost no rank changed | Kept for correct text, not a retrieval gain |
-| Following one legal reference | Reaches 1 of 20 missed provisions at K = 10, at document level only | Not worth building now |
+1. **The site can cite ended law.** The filter exists only in evaluation. Read by hand, answers cite
+   Decree 123/2008, Law 13/2008 and Circular 32/2011. Whether to apply it is undecided.
+2. **Most essential provisions are still missed.** About half of the hardest need a legal step the
+   question does not state ([diagnosis](retrieval-experiments.md#retrieval)).
+3. **Answers are slow,** and one took 91 s against the 90 s limit, so some may time out. Shortening
+   them was declined on 06/11/2026.
+4. **Answer quality is unmeasured:** only lexical checks on 5 questions, with no gold answers.
+5. **Duplicates:** 9 document numbers hold near-identical second versions, and 5 numbers with stray
+   spaces (`148/2013/TT- BTC`) duplicate clean ones. Both copies can appear in results. Nothing was
+   deleted.
+6. **Numbers still uncertain:** `93/1998/QĐ/TCKT` and `25/2026/TT-BTC`, where header and portal
+   disagree; `124/2026/TT-BTC` was inferred from a misread header and date. The other 50 flags in the
+   library are OCR misreads, shortened headers, or citations picked up as headers.
+7. **Failed or absent:** 9 documents have no text (7 Excel workbooks filed as `.rtf`, a 2-byte file,
+   `204/2004/NĐ-CP`). `56/2009/NĐ-CP` (invalid file on the portal) and `38/2015/TT-BTC` (download failed)
+   were not collected. Originals of some amendments, such as `68/2025` and `83/2024/TT-BTC`, are not
+   held.
+8. **Small text issues:** `191/2010/TT-BTC` keeps split syllables; words like `cã` can stay
+   unconverted in mixed-font lines; mislabelled numbers can recur, since collection trusts the listing
+   and only flags a mismatch.
 
-## Open work
+## To do
 
 In suggested order:
 
-1. Time search on the site, whose page ranks the top 200 rather than the top 50 timed here, and
-   evaluate answers with `evaluate_qa.py`, which needs Hugging Face credits.
-2. Add more gold cases, since 12 cannot separate most methods and the limit result needs independent
+1. Add gold cases, to at least 50: 12 cannot separate methods, and the best results need independent
    evidence.
-3. Plan a step that works out which legal issues a question depends on, since 7 of the 14
-   unretrieved provisions need one ([diagnosis](retrieval-experiments.md#why-14-provisions-are-not-retrieved-05112026)).
-4. Have a tax expert review the inferred rules, the 178 documents the ministry lists as in force
-   but our list ends, the alternative valid evidence sets, and whether Circular 80/2021 Art 40(3)
-   still applied on A4's date.
-5. Decide how the site should treat ended documents. Without a filter they crowd out current law,
-   but the filter needs expert review first, and two of its rules are inferred.
-6. Make answers faster: the model's 46 to 91 s sits at its 90 s limit. Find out why evaluation runs
-   took 29 to 47 s a question when retrieval within an answer takes 3 to 6 s.
-7. Remove the near-identical second versions held under 9 document numbers, and settle
-   93/1998/QĐ/TCKT and 25/2026/TT-BTC, where the header and the portal disagree.
+2. Have a tax expert review the filter's inferred rules, the 178 documents the ministry says are in
+   force but our list ends, and the alternative evidence sets.
+3. Decide on ended documents for the site. The cautious option is explicit repeals and ministry
+   dates, which needs one 6-minute run on `corpus-v2` first.
+4. Tell the professor: all earlier results were measured with the TCVN3 bug, and hybrid fell from 0.41
+   to 0.30 before the filter brought it to 0.45.
+5. Plan a step that works out which law a question depends on.
+6. Build answer evaluation with reviewed labels.
+7. Remove duplicates and settle the uncertain numbers.
+
+**Azure clean-up, for the owner:** delete old ACR images ([commands](operations.md#costs)), decide on
+the `CreditScorecardWOEIV` registry, and remove stale database firewall rules.

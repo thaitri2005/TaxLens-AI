@@ -1,18 +1,11 @@
 # Operations
 
-Running TaxLens locally, releasing it, and operating the Azure development environment
-(`taxlens-dev-rg`). Azure commands assume an authenticated Azure CLI (`az login`) and
-PowerShell unless shown otherwise.
+Running TaxLens locally, releasing it, and operating Azure (`taxlens-dev-rg`). Before any slow or paid run,
+read [what has been tried](retrieval-experiments.md).
 
 ## Local development
 
-### Prerequisites
-
-- Python 3.12
-- Docker Desktop with Docker Compose
-- Node.js 22, only to run the web app outside Docker
-
-### Start the stack
+Needs Python 3.12 and Docker Desktop; Node.js 22 only to run the web app outside Docker.
 
 ```powershell
 Copy-Item .env.example .env       # set AUTH_INITIAL_ADMIN_PASSWORD; HF_TOKEN for answers
@@ -21,24 +14,17 @@ docker compose exec -T api alembic upgrade head
 docker compose exec -T api python scripts/seed.py
 ```
 
-`seed.py` loads the sample documents in `data/seed` and creates the administrator from
-`AUTH_INITIAL_ADMIN_*`. It is safe to run again.
+Web <http://localhost:3000>, API <http://localhost:8000/docs>. Profiles: `airflow` (port 8080), `llmops`
+(MLflow, port 5000). Locally, files live under `data/local`. The API container has Tesseract and the
+embedding model, which a host environment usually lacks. A small corpus:
 
-| Service | URL |
-| --- | --- |
-| Web app | <http://localhost:3000> |
-| API and its OpenAPI docs | <http://localhost:8000/docs> |
-| Airflow (profile `airflow`) | <http://localhost:8080> |
-| MLflow (profile `llmops`) | <http://localhost:5000> |
+```powershell
+docker compose exec -T api python scripts/collect_sources.py --since-days 60 --limit 20
+docker compose exec -T api python scripts/process_corpus.py
+docker compose exec -T api python scripts/embed_corpus.py
+```
 
-Locally, documents and extracted text are stored under `data/local`
-(`OBJECT_STORAGE_BACKEND=local`). The API container includes Tesseract and the embedding
-model; a host Python environment usually has neither, which is why the commands below run
-inside the container.
-
-### Checks
-
-The checks CI runs:
+**Checks, as in CI.** The laptop's package versions differ from CI's, so read the whole output:
 
 ```powershell
 python -m pip install -e ".[dev]"
@@ -48,310 +34,142 @@ python -m pytest
 cd apps/web; npm ci; npm run build
 ```
 
-CI type-checks against the newest SQLAlchemy 2.x (2.1 at the time of writing), whose
-`Select` typing differs from 2.0. Type annotations on SQLAlchemy statements that must
-satisfy both are written as `Select[Any]`.
+CI type-checks against the newest SQLAlchemy 2.x; write statement annotations as `Select[Any]`.
 
-### Build a corpus
-
-Collect, process, and embed a small batch from the government portal:
-
-```powershell
-docker compose exec -T api python scripts/collect_sources.py --since-days 60 --limit 20
-docker compose exec -T api python scripts/process_corpus.py
-docker compose exec -T api python scripts/embed_corpus.py
-```
-
-Each step skips work already done, so the commands can be rerun at any time.
-
-### Scripts
+## Scripts
 
 | Script | Purpose |
 | --- | --- |
-| `collect_sources.py` | Lists tax documents from `--source government` (default), `mof`, or `all`, and downloads new ones. `--since-days` or `--from-year` sets the window, `--limit` caps downloads, `--dry-run` only counts. `--cited-by <gold set>` collects the documents a gold set cites, from any portal category. See [pipeline.md](pipeline.md). |
-| `process_corpus.py` | Extracts text (native or OCR) and chunks pending versions. `--rechunk-outdated` re-chunks from stored text after a chunker change; `--retry-failed` retries failed versions; `--reocr` OCRs again; `--all` reprocesses everything. |
-| `embed_corpus.py` | Embeds every passage without a current embedding, 500 at a time, printing progress. |
-| `evaluate_tax_retrieval.py` | Runs the labelled retrieval evaluation and stores the report ([retrieval.md](retrieval.md#evaluation)). `--dataset data/evaluation/gold_set_v1.csv` runs the [gold set](retrieval.md#gold-set). |
-| `evaluate_retrieval.py` | Prints ranked results for one ad hoc `--query`. |
-| `evaluate_qa.py` | Runs the cheap, no-judge Q&A evaluation. |
-| `correct_document_numbers.py` | Moves documents stored under a wrong number to the right one, from the reviewed `number-corrections-v2.json`. A dry run unless `--apply` is given. |
-| `freeze_corpus.py` | Records the corpus for an experiment (`--output`) or checks it is unchanged (`--check`) ([retrieval.md](retrieval.md#controlled-experiments)). |
-| `annotation_agreement.py` | Cohen's kappa between two annotators' gold-set CSVs ([guideline](annotation-guideline.md#process)). |
-| `decompose_issues.py` | Stores each gold-set question's legal issues for issue-guided retrieval; needs `HF_TOKEN`, not the database ([plan](retrieval-experiments.md)). |
-| `compare_retrieval_runs.py` | Paired wins, losses, and sign test between two saved retrieval reports. Refuses reports from different corpora. |
-| `diagnose_retrieval_misses.py` | Gives each essential provision a saved run missed one cause ([experiments](retrieval-experiments.md)). |
-| `measure_reference_reachability.py` | Upper limit of following one legal reference from a saved run's top passages. |
-| `extract_repeals.py`, `add_ministry_expiry.py` | Build the lists of ended documents in `data/evaluation/repeals/`, used with `--repeals` and `--repeal-rules`. |
-| `list_cited_candidates.py`, `list_portal_candidates.py`, `complete_portal_candidates.py`, `resolve_cited_candidates.py`, `select_corpus_v2.py` | Build the `corpus-v2` candidate lists and selection ([rules](corpus-inclusion.md)). |
-| `benchmark_ocr.py` | Word error rate of OCR settings against a born-digital PDF. |
-| `prune_non_tax_documents.py` | Lists, or with `--apply` deletes, documents whose titles are not about tax. |
-| `seed.py` | Sample documents and the initial administrator. |
-| `ingest_manifest.py`, `repair_document_metadata.py` | Ingest or repair the hand-picked documents in `data/corpus/tax_documents.json`. |
-| `ingest_sources.py`, `discover_sources.py` | Earlier single-page connectors, kept for ingesting one explicit official URL. `collect_sources.py` replaces them for collection. |
+| `collect_sources.py` | List and download documents ([pipeline](pipeline.md#running-it)) |
+| `process_corpus.py` | Extract and chunk. `--rechunk-outdated`, `--retry-failed`, `--reocr`, `--reextract-legacy-text`, `--all` |
+| `embed_corpus.py` | Embed passages without a current embedding |
+| `evaluate_tax_retrieval.py`, `evaluate_retrieval.py`, `evaluate_qa.py` | Retrieval evaluation, one ad hoc query, answer evaluation ([retrieval](retrieval.md#evaluation)) |
+| `freeze_corpus.py`, `compare_retrieval_runs.py` | Record or check a corpus; paired comparison of two reports |
+| `extract_repeals.py`, `add_ministry_expiry.py` | Build lists of ended documents |
+| `correct_document_numbers.py` | Apply `number-corrections-v2.json`. A dry run unless `--apply` |
+| `decompose_issues.py`, `diagnose_retrieval_misses.py`, `measure_reference_reachability.py` | Experiment tools |
+| `annotation_agreement.py` | Cohen's kappa between annotators |
+| `list_cited_candidates.py`, `list_portal_candidates.py`, `complete_portal_candidates.py`, `resolve_cited_candidates.py`, `select_corpus_v2.py` | Build a corpus selection |
+| `benchmark_ocr.py`, `prune_non_tax_documents.py` | OCR comparison; delete non-tax documents with `--apply` |
+| `seed.py`, `ingest_manifest.py`, `repair_document_metadata.py`, `ingest_sources.py`, `discover_sources.py` | Sample data and older one-off ingestion |
 
-### Airflow and MLflow
+## Laptop access to Azure
+
+The database allows listed IPs only, and the laptop's IP changes often. Check first:
 
 ```powershell
-docker compose --profile airflow up -d airflow-postgres airflow-init airflow-scheduler airflow-webserver
-docker compose --profile llmops up -d mlflow
+$ip = (Invoke-RestMethod https://api.ipify.org)
+az postgres flexible-server firewall-rule list -g taxlens-dev-rg --server-name taxlens-dev-pg -o table
+az postgres flexible-server firewall-rule create -g taxlens-dev-rg --server-name taxlens-dev-pg --name laptop-N --start-ip-address $ip --end-ip-address $ip
 ```
 
-The DAGs call the local API's internal job endpoints exactly as in Azure; see
-[pipeline.md](pipeline.md#airflow).
-
-### Answers
-
-Q&A needs `HF_TOKEN` with Hugging Face inference credits, or any OpenAI-compatible
-endpoint through `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, and an empty
-`HF_CHAT_ROUTING_POLICY`. Without one, search and the library work and every question
-returns `PROVIDER_UNAVAILABLE`.
-
-### API overview
-
-All endpoints except `/health`, `/ready`, and the internal ones require the signed
-identity the web proxy adds ([architecture.md](architecture.md#authentication)); use the web app,
-or the OpenAPI page with a test identity, to call them.
-
-| Endpoint | Purpose |
-| --- | --- |
-| `GET /search?q=…&mode=hybrid&limit=10&offset=0` | Ranked passages, a page at a time (`offset` up to 200); filter by `kind` (a document kind such as `circular`) as well as the fields below. The Search tab also calls `GET /documents?q=…` to list documents whose number or title matches. Filters: `document_number`, `document_type`, `source_name`, `legal_status`, `issuing_agency`, `effective_from`, `effective_to`. |
-| `POST /questions` | Cited answer to `{"question": "…"}`. |
-| `GET /documents/overview`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/chunks` | Document library ([architecture.md](architecture.md#document-library)). |
-| `GET /evaluation/retrieval/latest` | The latest retrieval evaluation report. |
-| `/admin/*` | Account management, and `GET /admin/documents/export`: a CSV of every collected document's metadata (administrators). |
-| `/internal/airflow/*` | Background jobs for Airflow, with `X-TaxLens-Internal-Token`. |
-
-## Contributing
-
-`main` is protected by a ruleset: changes arrive through a pull request, the **Backend
-checks**, **Frontend build**, and **Terraform validation** jobs must pass, and the branch
-must be up to date with `main`. Force pushes and deleting `main` are blocked. The
-repository owner is on the bypass list and may push directly; run the checks below
-before doing so, because a direct push skips the pull-request gate.
+Note `--server-name`. A connection timeout usually means a missing rule. Then, in the same terminal:
 
 ```powershell
-git switch main; git pull                     # always start from the latest main
-git switch -c fix/short-description
-# ...change, then run the checks in "Local development"...
-git push -u origin fix/short-description      # open the pull request from the link printed
+pip install -e ".[cloud]"
+$env:DATABASE_HOST = "taxlens-dev-pg.postgres.database.azure.com"
+$env:DATABASE_USER = "taxlensadmin"
+$env:DATABASE_PASSWORD = "<PostgreSQL admin password>"
+$env:DATABASE_SSL_MODE = "require"
+$env:OBJECT_STORAGE_BACKEND = "azure_blob"
+$env:AZURE_STORAGE_CONNECTION_STRING = (az storage account show-connection-string -g taxlens-dev-rg -n taxlensdevartifacts -o tsv)
 ```
-
-Keep pull requests small and focused, and delete the branch after merging.
-
-## Release
-
-1. Merge to `main` and wait for **CI** to pass (backend checks, web build, Terraform
-   validation).
-2. Run **Release and deploy** on `main`. It builds the API, web, and Airflow images tagged
-   with the commit SHA, then plans and applies the Terraform update with those images (the
-   plan is in the run summary). If the `azure-deploy` environment requires a reviewer,
-   approve it when the run pauses. The API applies database migrations itself after it
-   starts.
-
-Do not run `alembic upgrade` on the Azure database before the release that contains the migration:
-the running image does not know the new revision and cannot start again if it scales down. To
-prepare an index ahead of a release, build it by hand with `CREATE INDEX CONCURRENTLY IF NOT EXISTS`
-and write the migration with `IF NOT EXISTS`, as `20261105_0006` does.
-
-The same workflow has two options:
-
-- **Roll back or redeploy**: untick `build` and enter an existing `image_tag` (a commit
-  SHA that was released before).
-- **Preview only**: untick `apply` to see the Terraform plan without changing anything.
-
-Before deploying, check that no Airflow run is in progress: a deploy restarts the API and
-kills its jobs. Check which image is live with:
-
-```powershell
-az containerapp show -g taxlens-dev-rg -n taxlens-dev-api --query "properties.template.containers[0].image" -o tsv
-```
-
-After a deploy, sign in and open each tab once. The first request after idle wakes the API
-and can take a minute; the page says so.
-
-### GitHub Actions
-
-| Workflow | Trigger | What it does |
-| --- | --- | --- |
-| **CI** (`ci.yml`) | Pull requests and pushes to `main` | Ruff, MyPy, and Pytest; a production Next.js build with test-only placeholder secrets; Terraform init, format, and validate without a backend. |
-| **Release and deploy** (`release.yml`) | Manual | Three jobs: build and push the images (`azure-release` environment); Terraform plan with temporary variables from GitHub secrets, shown in the run summary; apply the plan (`azure-deploy` environment). Options: `build`, `apply`, `image_tag`. |
-
-The release signs in to Azure with OIDC and needs these secrets:
-
-- `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
-- for deploys: `TF_VAR_POSTGRES_ADMIN_PASSWORD`, `TF_VAR_HF_TOKEN`,
-  `TF_VAR_AUTH_INTERNAL_TOKEN`, `TF_VAR_NEXTAUTH_SECRET`, `TF_VAR_AIRFLOW_ADMIN_PASSWORD`,
-  `TF_VAR_AIRFLOW_INTERNAL_TOKEN`, and optionally `TF_VAR_POSTGRES_ALLOWED_IP` to keep the
-  developer PostgreSQL firewall rule.
-
-The OIDC principal needs `Storage Blob Data Contributor` on the Terraform state storage
-account, `Contributor` and `User Access Administrator` on `taxlens-dev-rg`, and
-`Key Vault Secrets Officer` on `taxlensdevkv`. Developer access is kept separately for
-emergency recovery.
-
-### Terraform
-
-Terraform for the development environment in `taxlens-dev-rg`. What it creates is described in
-[architecture.md](architecture.md#azure-deployment).
-
-| File | Contents |
-| --- | --- |
-| `main.tf` | Resource group, Log Analytics, storage (Blob containers, Airflow log share), Container Registry, PostgreSQL with `vector`, Key Vault and secrets, managed identity and RBAC, API and web Container Apps |
-| `airflow.tf` | Airflow metadata database, scheduler and webserver Container Apps (when `airflow_enabled`) |
-| `variables.tf`, `outputs.tf`, `versions.tf` | Inputs, outputs, providers, and the remote state backend |
-
-#### Normal use
-
-Deployments run through GitHub Actions (**Release and deploy**), which
-supplies the image tags and secrets; see [Release](#release). Run
-Terraform locally only to inspect or recover.
-
-#### Local use
-
-Requires Terraform 1.8+ and the Azure CLI. State is in the private `terraform-state`
-container of `taxlensdevartifacts`, authenticated with Azure AD; your identity needs
-`Storage Blob Data Contributor` on that account.
-
-```powershell
-az login
-terraform init
-terraform plan
-```
-
-Put inputs in an ignored `terraform.tfvars` (never commit it):
-
-```hcl
-subscription_id         = "<subscription id>"
-postgres_admin_password = "<password>"
-postgres_allowed_ip     = ""            # your public IP for laptop runs, or empty
-hf_token                = "<Hugging Face token>"
-auth_internal_token     = "<random secret>"
-nextauth_secret         = "<random secret>"
-api_image               = "taxlensdevacr.azurecr.io/taxlens-api:<commit sha>"
-web_image               = "taxlensdevacr.azurecr.io/taxlens-web:<commit sha>"
-airflow_enabled         = true
-airflow_image           = "taxlensdevacr.azurecr.io/taxlens-airflow:<commit sha>"
-airflow_admin_password  = "<password>"
-airflow_internal_token  = "<random secret>"
-```
-
-Review every plan before `terraform apply`. State contains secret values, which is why it
-is kept only in the private backend.
-
-For a laptop collection run, prefer a temporary firewall rule with the Azure CLI
-([below](#ministry-of-finance-from-a-laptop-in-vietnam)) over changing `postgres_allowed_ip`.
 
 ## Growing the corpus
 
-### Government portal (from Azure)
+**This changes the frozen corpus,** so freeze a new version and repeat baselines afterwards.
 
-Run the `taxlens_corpus_maintenance` DAG with `backfill_dry_run` to see how many documents
-are missing, then `backfill_corpus` until none remain. Each run collects up to 300.
+**Airflow on and off.** The scheduler costs money while running, so keep both apps stopped between runs. The
+site works without them:
 
-### Ministry of Finance (from a laptop in Vietnam)
-
-The Ministry's site rejects connections from Azure ([design decision](architecture.md#collect-the-ministry-of-finance-database-from-a-machine-in-vietnam)).
-
-1. Allow your public IP on the PostgreSQL server:
-
-   ```powershell
-   $ip = (Invoke-RestMethod https://api.ipify.org)
-   az postgres flexible-server firewall-rule create -g taxlens-dev-rg --server-name taxlens-dev-pg --name laptop --start-ip-address $ip --end-ip-address $ip
-   ```
-
-2. In one terminal, install the cloud extras, point the settings at Azure, and run:
-
-   ```powershell
-   pip install -e ".[cloud]"
-   $env:DATABASE_HOST = "taxlens-dev-pg.postgres.database.azure.com"
-   $env:DATABASE_USER = "taxlensadmin"
-   $env:DATABASE_PASSWORD = "<PostgreSQL admin password>"
-   $env:DATABASE_SSL_MODE = "require"
-   $env:OBJECT_STORAGE_BACKEND = "azure_blob"
-   $env:AZURE_STORAGE_CONNECTION_STRING = (az storage account show-connection-string -g taxlens-dev-rg -n taxlensdevartifacts -o tsv)
-   python scripts/collect_sources.py --source mof --from-year 1990 --dry-run
-   python scripts/collect_sources.py --source mof --from-year 1990 --limit 300
-   ```
-
-   The script stops within seconds if the database or storage is unreachable, so a
-   missing setting never wastes the ten-minute listing. The listing is cached for 24 hours
-   (`--refresh-listing` to fetch it again).
-
-3. Run the maintenance DAG with `process_and_embed`.
-4. Remove the firewall rule:
-   `az postgres flexible-server firewall-rule delete -g taxlens-dev-rg --server-name taxlens-dev-pg --name laptop --yes`.
-
-### Stopping Airflow to save cost
-
-The Airflow scheduler is the only always-on Container App. When no collection is needed,
-stop both Airflow apps; the site keeps working, but **the daily DAG does not run** while the
-scheduler is stopped, and a stopped app stays stopped until started again:
-
-```powershell
-az containerapp stop  -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler
-az containerapp stop  -g taxlens-dev-rg -n taxlens-dev-airflow-web
-az containerapp start -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler   # and -web for the UI
-az containerapp show  -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler --query properties.runningStatus -o tsv
-```
-
-### During long backfills
-
-Pause the daily DAG while a long backfill runs, so its processing and embedding do not
-compete for the API's memory and CPU, and unpause it afterwards.
-
-## Building corpus-v2
-
-Done on 06/11/2026 ([record](retrieval-experiments.md#baselines-on-corpus-v2-06112026)). The steps
-are kept for a rebuild. It took 13.7 hours for the 10 rounds.
-
-Adds the 975 selected documents ([rules](corpus-inclusion.md)) through the existing Airflow apps, so
-no new Azure resources are needed. Existing documents are not OCR'd again, apart from 10 listed ones.
-
-Expect about 15 hours, with the site slow meanwhile, since jobs share the API's vCPU. Do not release while
-it runs. Trigger each action from the Airflow UI, **Trigger DAG w/ config** on
-`taxlens_corpus_maintenance`, and wait for each to finish:
-
-```powershell
+```bash
 az containerapp start -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler
-az containerapp start -g taxlens-dev-rg -n taxlens-dev-airflow-web
-az containerapp show -g taxlens-dev-rg -n taxlens-dev-airflow-web --query properties.configuration.ingress.fqdn -o tsv
 ```
 
-Leave `tax_regulation_discovery_daily` **paused**: it would add documents to the corpus being built.
+```bash
+az containerapp start -g taxlens-dev-rg -n taxlens-dev-airflow-web
+```
 
-| Step | Config | What it does |
-| --- | --- | --- |
-| 1 | `{"action": "collect_selected_dry_run"}` | Counts what would be collected (935 from the portal). Changes nothing |
-| 2 | `{"action": "collect_selected", "limit": 20, "rounds": 1}` | The test: 20 documents, timed from the task log |
-| 3 | `{"action": "rechunk_outdated"}` | Relabels appendix text from stored text, with no OCR, and embeds about 18,000 passages |
-| 4 | `{"action": "reextract_listed"}` | Re-OCRs the 10 documents with garbled text layers (399 pages) |
-| 5 | `{"action": "reextract_legacy_text"}` | Converts [TCVN3 text](retrieval-experiments.md#tcvn3-text-left-unconverted-05112026) from the raw files, with no OCR. The second pass in the log should report 0 documents. Safe to repeat: it only touches documents still holding TCVN3 |
-| 6 | `{"action": "collect_selected", "limit": 100, "rounds": 10}` | The full run. Safe to re-trigger: documents already held are skipped |
+```bash
+az containerapp stop -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler
+```
 
-Then stop both apps with `az containerapp stop`, since the scheduler costs money while it runs. The
-40 ministry documents need a Vietnamese connection:
+```bash
+az containerapp stop -g taxlens-dev-rg -n taxlens-dev-airflow-web
+```
+
+**Government portal.** Trigger `taxlens_corpus_maintenance` from the Airflow UI with `backfill_dry_run`, then
+`backfill_corpus`, or `collect_selected` for a selection, such as
+`{"action": "collect_selected", "limit": 100, "rounds": 10}`. Keep the daily DAG paused, and do not release
+during a run. Azure keeps 7 days of point-in-time restore for the database.
+
+### Ministry of Finance from a laptop in Vietnam
+
+Set up [laptop access](#laptop-access-to-azure), then:
 
 ```powershell
-python scripts/collect_sources.py --source mof --selected data/evaluation/corpus/selected-v2.json --limit 40
+python scripts/collect_sources.py --source mof --from-year 1990 --dry-run
+python scripts/collect_sources.py --source mof --from-year 1990 --limit 300
 ```
 
-Note the start time: Azure keeps 7 days of point-in-time restore, which is the way back. Afterwards
-check the result, freeze `corpus-v2`, and repeat the baselines.
+Then run `process_and_embed` in Airflow.
+
+### Freezing a new corpus
+
+```powershell
+python scripts/freeze_corpus.py --label corpus-vN --output data/evaluation/corpus/corpus-vN.json
+python scripts/extract_repeals.py --output data/evaluation/repeals/corpus-vN.json
+```
+
+Check before freezing: failures, TCVN3 words, missing embeddings, and new `DOCUMENT_NUMBER_MISMATCH` flags,
+reading a sample of real text rather than only counts. `add_ministry_expiry.py` has fixed paths, so point it
+at the new list and manifest. Then repeat the baselines.
+
+## Release
+
+`main` is protected. The owner is on the bypass list and may push directly after running the checks;
+otherwise use a pull request.
+
+1. Wait for **CI** to pass. Do not release on a failure.
+2. Check no Airflow run is in progress, since a deploy kills its jobs.
+3. Run **Release and deploy** on `main`. It builds images tagged with the SHA, then plans and applies Terraform.
+   The API applies migrations when it starts.
+
+Untick `build` and enter an `image_tag` to roll back. Untick `apply` for a plan only. See what is live:
+
+```bash
+az containerapp show -g taxlens-dev-rg -n taxlens-dev-api --query "properties.template.containers[0].image" -o tsv
+```
+
+Do not run `alembic upgrade` on Azure before the release containing the migration: the running image would not
+know the revision and could not restart. To prepare an index, build it by hand with
+`CREATE INDEX CONCURRENTLY IF NOT EXISTS`, and write the migration with `IF NOT EXISTS`.
+
+**Secrets for the workflow:** `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`,
+`TF_VAR_POSTGRES_ADMIN_PASSWORD`, `TF_VAR_HF_TOKEN`, `TF_VAR_AUTH_INTERNAL_TOKEN`, `TF_VAR_NEXTAUTH_SECRET`,
+`TF_VAR_AIRFLOW_ADMIN_PASSWORD`, `TF_VAR_AIRFLOW_INTERNAL_TOKEN`, and optionally `TF_VAR_POSTGRES_ALLOWED_IP`. The
+OIDC principal needs `Storage Blob Data Contributor` on the state account, `Contributor` and
+`User Access Administrator` on the group, and `Key Vault Secrets Officer` on `taxlensdevkv`.
+
+**Terraform** deploys through the workflow. Locally, for inspection or recovery only: `az login`,
+`terraform init`, `terraform plan`, with inputs in an ignored `terraform.tfvars`. State holds secrets, and lives
+in the private `terraform-state` container.
 
 ## Costs
 
-October 2026: $17.76 for the subscription, by the Cost Management API.
+October 2026: $17.76.
 
 | Resource | Cost | Note |
 | --- | --- | --- |
-| `taxlensdevacr` | $9.03 | Basic includes 10 GB, and it held 82 GB of old images. Delete old tags |
-| `CreditScorecardWOEIV` (another project) | $5.16 | A container registry in `docker-fastapi-credit-scorecard` |
-| `taxlens-dev-api`, `-web` | $2.00 | Scale to zero when idle |
-| `taxlens-dev-airflow-*` | $1.29 | Free while stopped. Keep them stopped between runs |
+| `taxlensdevacr` | $9.03 | Basic includes 10 GB, and it held 82 GB of old images |
+| `CreditScorecardWOEIV` (another project) | $5.16 | Registry in `docker-fastapi-credit-scorecard` |
+| `taxlens-dev-api`, `-web` | $2.00 | Scale to zero |
+| `taxlens-dev-airflow-*` | $1.29 | Free while stopped |
 | Storage, Key Vault | $0.28 | |
-| PostgreSQL, Log Analytics | $0.00 | The database is not billed at present; check before relying on that |
+| PostgreSQL, Log Analytics | $0.00 | Not billed at present; check before relying on that |
 
-To keep only the 3 newest images of each repository, after checking the list:
+Keep the 3 newest images of each repository, after checking the list. A deleted image can only be rebuilt from
+its commit:
 
 ```bash
 for repo in taxlens-api taxlens-web taxlens-airflow; do
@@ -360,64 +178,32 @@ for repo in taxlens-api taxlens-web taxlens-airflow; do
 done
 ```
 
-A deleted image cannot be rolled back to, though it can be rebuilt from its commit.
-
-## Airflow from the command line
-
-`az containerapp exec` passes the command split on spaces and does not honour quotes, so
-JSON configuration cannot be passed directly. Simple commands work:
-
-```powershell
-az containerapp exec -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler --command "airflow dags pause tax_regulation_discovery_daily"
-az containerapp exec -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler --command "airflow dags unpause tax_regulation_discovery_daily"
-az containerapp exec -g taxlens-dev-rg -n taxlens-dev-airflow-scheduler --command "airflow dags list-runs -d taxlens_corpus_maintenance"
-```
-
-Trigger DAGs with configuration from the UI. Azure rate-limits `exec` sessions; after a
-`429 Too Many Requests`, wait the ten minutes it asks for. `exec` into the API fails with
-"Could not find a replica" while the API is scaled to zero.
-
 ## Logs
 
 | What | Where |
 | --- | --- |
-| A DAG task, including the job's output | Airflow UI → task → **Logs** |
-| API requests and job start/finish events | `az containerapp logs show -g taxlens-dev-rg -n taxlens-dev-api --type console --tail 300` |
-| The same, searchable and older | Log Analytics workspace, `ContainerAppConsoleLogs_CL` |
-| Raw Airflow task log files | `airflow-logs` file share in `taxlensdevartifacts` |
+| A DAG task's job output | Airflow UI → task → **Logs** |
+| API requests and job events | `az containerapp logs show -g taxlens-dev-rg -n taxlens-dev-api --type console --tail 300` |
+| Older and searchable | Log Analytics, `ContainerAppConsoleLogs_CL` and `ContainerAppSystemLogs_CL`, through `az rest` to `api.loganalytics.io` with a JSON body file |
+| Raw Airflow logs | `airflow-logs` share. Colons in run IDs are stored as U+F022, so use the File REST API with `%EF%80%A2` |
 
-API logs contain `job_started`, `job_completed`, and `job_failed` events with the job ID,
-exit code, and duration, never document text, queries, or secrets.
-
-The file share stores the colons in Airflow run IDs as the private-use character U+F022
-(the SMB mapping), so `az storage file list` cannot open run folders such as
-`run_id=manual__2026-10-20T02:23:38+07:00`. Use the File REST API with the character
-URL-encoded as `%EF%80%A2` and `+` as `%2B`:
-
-```bash
-sas=$(az storage share generate-sas --account-name taxlensdevartifacts -n airflow-logs \
-  --permissions rl --expiry "$(date -u -d '+1 hour' +%Y-%m-%dT%H:%MZ)" -o tsv \
-  --account-key "$(az storage account keys list -g taxlens-dev-rg -n taxlensdevartifacts --query '[0].value' -o tsv)")
-c=%EF%80%A2
-run="run_id=manual__2026-10-20T02${c}23${c}38%2B07${c}00"
-curl -s "https://taxlensdevartifacts.file.core.windows.net/airflow-logs/dag_id=taxlens_corpus_maintenance/$run/task_id=run_maintenance/attempt%3D1.log?$sas"
-```
+`az containerapp exec` splits on spaces, so trigger DAGs with config from the UI. It handles simple commands
+such as `airflow dags pause tax_regulation_discovery_daily`. It rate-limits with a 429, and fails with "Could
+not find a replica" while scaled to zero.
 
 ## Troubleshooting
 
 | Symptom | Cause | Action |
 | --- | --- | --- |
-| No new documents for days | The Airflow scheduler is stopped (`runningStatus` is `Stopped`) or the daily DAG is paused | Start the scheduler ([Stopping Airflow](#stopping-airflow-to-save-cost)) and unpause the DAG. |
-| Pages are slow for a minute, then fine | The API was scaled to zero | None; the web client retries while it starts. |
-| "Expired identity" | An API image from before October 2026 accepted identities for only 60 s, less than a cold start | Deploy a current release. |
-| A job fails with exit code -9 after about 21,600 s | Six-hour job limit | Rerun the action; finished work is kept. |
-| A job fails with exit code -9 earlier | Out of memory in the 2 GiB API container | Check that no other long job was running at the same time; rerun. |
-| Every answer is `PROVIDER_UNAVAILABLE`, with `chat_provider_error status=400` and "not supported by any provider" | The router no longer offers `HF_CHAT_MODEL`, as happened to Qwen3-4B-Instruct by 06/11/2026 | Choose a model listed at `https://router.huggingface.co/v1/models`. Avoid models that reason first: Qwen3.5-9B returned no usable answer at 1,400 tokens |
-| Every answer is `PROVIDER_UNAVAILABLE` | The Hugging Face account has no inference credits (`chat_provider_error status=402` in the API log) | Add credits, or point `HF_CHAT_BASE_URL` at another OpenAI-compatible endpoint. |
-| An occasional answer is `PROVIDER_UNAVAILABLE` | The provider took longer than `HF_CHAT_TIMEOUT_SECONDS` (90 s; `transport=ReadTimeout` in the log) | Ask again; if frequent, raise the timeout (it must stay under the 240-second ingress limit). |
-| Signing out opens `localhost` | The web app has no `NEXTAUTH_URL` (an image or Terraform state from before October 2026) | Deploy a current release. |
-| Collection logs "Government portal unavailable" | The portal timed out | A slow year is skipped after three attempts; the next run lists it again. |
-| Ministry collection: `ConnectTimeout` | Run from outside Vietnam | Run it from a Vietnamese network ([design decision](architecture.md#collect-the-ministry-of-finance-database-from-a-machine-in-vietnam)). |
-| Laptop run: "Cannot reach the database" | Settings not set in this terminal, or IP not allowed | Set the variables in the same window and add the firewall rule. |
-| Laptop run: "Cannot use azure_blob storage" | The Azure SDK is missing | `pip install -e ".[cloud]"`. |
-| A document stays `FAILED` | Extraction failed (broken file, unusable scan) | Run `retry_failed_documents` after fixing the cause; the error code is shown on the document page. |
+| "The service could not be reached" | The browser got no response; usually its own connection | Check the API log. If the question is absent or returned 200, retry on a steady connection |
+| "The API service could not be reached" | The web proxy could not reach the API | Read the API and system logs |
+| First question takes minutes | The API scaled to zero | Wait. Questions are not retried |
+| Every answer `PROVIDER_UNAVAILABLE`, status 400 "not supported by any provider" | The router dropped `HF_CHAT_MODEL` | Choose from `https://router.huggingface.co/v1/models`. Avoid reasoning models |
+| Every answer `PROVIDER_UNAVAILABLE`, status 402 | No credits | Add credits |
+| Occasional `PROVIDER_UNAVAILABLE`, `ReadTimeout` | Model over 90 s | Retry, or raise the timeout, staying under 240 s |
+| Laptop: `ConnectionTimeout` or "Cannot reach the database" | IP not allowed, settings not set, or no internet | [Laptop access](#laptop-access-to-azure) |
+| Laptop: "Cannot use azure_blob storage" | SDK missing | `pip install -e ".[cloud]"` |
+| Ministry: `ConnectTimeout` | Not on a Vietnamese network | Run from Vietnam |
+| Job exit code -9 | Six-hour limit or out of memory | Rerun |
+| Document stays `FAILED` | Broken file or unusable scan | Fix the cause, then `retry_failed_documents` |
+| No new documents for days | Airflow stopped or DAG paused. Currently intended | Start it only if the corpus should change |

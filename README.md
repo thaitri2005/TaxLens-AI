@@ -12,7 +12,7 @@ question.
 
 **Live development deployment:**
 [taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io](https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io)
-(sign-in required; the first page after idle takes up to a minute)
+(sign-in required; after idle, the first page takes up to a minute and the first question a few minutes)
 
 ![Ask TaxLens: a cited answer to a Vietnamese question](docs/assets/pic3.png)
 
@@ -30,12 +30,11 @@ question.
 - **Document library** (administrators): corpus statistics at a glance, search by number or title,
   filters by source, kind (law, decree, circular, …), and legal status, and paged
   browsing of documents and their passages. English and Vietnamese throughout.
-- **Historical corpus**: about 2,000 tax documents (62,182 passages) from the government
+- **Historical corpus**: 2,991 documents (144,600 passages) from the government
   portal and the Ministry of Finance database, including pre-Unicode Word files from the
   1990s.
-- **Automated pipeline**: Airflow collects new documents daily, extracts or OCRs them,
-  indexes them, and evaluates retrieval; maintenance actions handle backfills and
-  repairs, with live progress in the task log.
+- **Automated pipeline**: Airflow collects, extracts or OCRs, indexes, and evaluates, with
+  maintenance actions for backfills and repairs. It is stopped while the corpus is frozen.
 - **Accounts** with administrator and user roles; administrators can also download the
   list of collected documents as a spreadsheet.
 
@@ -94,7 +93,7 @@ flowchart LR
 5. **Answer**: the model answers from numbered passages or says they do not answer the
    question; facts not supported by their cited passage are removed.
 
-Method, thresholds, and measured results: [docs/retrieval.md](docs/retrieval.md).
+Method and thresholds: [docs/retrieval.md](docs/retrieval.md). Results: [docs/evaluation-status.md](docs/evaluation-status.md).
 
 ## Tech stack
 
@@ -105,7 +104,7 @@ Method, thresholds, and measured results: [docs/retrieval.md](docs/retrieval.md)
 | Search | PostgreSQL full-text search, pgvector |
 | Embeddings | `intfloat/multilingual-e5-small` on CPU, baked into the API image |
 | Answers | Hugging Face Inference Providers (OpenAI-compatible), LangGraph |
-| Documents | Tesseract (`vie` + `eng`), pypdf and pypdfium2, olefile (Word 97), RTF and DOCX parsers |
+| Documents | Tesseract (`vie`), pypdf and pypdfium2, olefile (Word 97), RTF and DOCX parsers |
 | Pipelines | Apache Airflow 2.10, MLflow (optional) |
 | Cloud | Azure Container Apps, PostgreSQL Flexible Server, Blob Storage, Key Vault, Container Registry, Log Analytics |
 | Delivery | Terraform, GitHub Actions with Azure OIDC |
@@ -143,7 +142,7 @@ More in [docs/operations.md](docs/operations.md#local-development).
 ## Deploy and operate
 
 1. Merge a pull request into `main` (protected; see
-   [contributing](docs/operations.md#contributing)); **CI** runs backend checks, the web
+   [release](docs/operations.md#release)); **CI** runs backend checks, the web
    build, and Terraform validation.
 2. Run **Release and deploy** on `main`. It builds the API, web, and Airflow images tagged
    with the commit SHA, then plans and applies the Terraform update with them. The API
@@ -160,13 +159,13 @@ returns `PROVIDER_UNAVAILABLE`; search and the library still work.
 
 | Document | Contents |
 | --- | --- |
-| [architecture.md](docs/architecture.md) | Components, data model, request path, document library, background jobs, authentication, Azure resources, design decisions |
-| [pipeline.md](docs/pipeline.md) | Official sources, what is collected, the daily and maintenance Airflow DAGs |
+| [architecture.md](docs/architecture.md) | Components, data model, authentication, background jobs, Azure, design decisions |
+| [pipeline.md](docs/pipeline.md) | Sources, what is collected, Airflow DAGs |
 | [retrieval.md](docs/retrieval.md) | Extraction, chunking, search, evidence gate, answer validation, evaluation |
-| [operations.md](docs/operations.md) | Local development, contributing, release, backfills, laptop collection, logs, troubleshooting |
-| [evaluation-status.md](docs/evaluation-status.md) | Start here for evaluation: current corpus, results, findings, open work |
-| [retrieval-experiments.md](docs/retrieval-experiments.md) | Dated plans and results of each retrieval experiment |
-| [corpus-inclusion.md](docs/corpus-inclusion.md) | Rules for what enters the corpus, candidates, and the `corpus-v2` selection |
+| [operations.md](docs/operations.md) | Local development, laptop access, growing the corpus, release, costs, logs, troubleshooting |
+| [evaluation-status.md](docs/evaluation-status.md) | **Start here:** what is live, results, known problems, to do |
+| [retrieval-experiments.md](docs/retrieval-experiments.md) | **Already tried:** read before any run, so nothing is paid for twice |
+| [corpus-inclusion.md](docs/corpus-inclusion.md) | Rules for what enters the corpus |
 | [annotation-guideline.md](docs/annotation-guideline.md) | How to label cases for the evaluation gold set |
 
 ## Limitations
@@ -180,10 +179,9 @@ TaxLens is a development-stage research tool, **not legal or tax advice**.
 - Most government PDFs are scans, so OCR errors affect search and quotations.
 - Government-portal documents have no recorded legal status (`DISCOVERED`) unless the
   Ministry of Finance record exists; answers flag this.
-- About a third of passages exceed the embedding model's 512-token input, so their
-  semantic vector covers only the start; keyword search sees the full text.
-- New Ministry of Finance documents need a manual laptop run; the government portal is
-  collected daily.
+- Old documents that have ended can crowd out current law and appear in answers, since most
+  have no recorded status. See [known problems](docs/evaluation-status.md#known-problems).
+- The corpus is frozen, so new documents are not collected until it is deliberately updated.
 - Development-scale Azure resources scale to zero, so the first request after idle is
   slow.
 

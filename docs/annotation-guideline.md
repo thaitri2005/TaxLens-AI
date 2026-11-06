@@ -1,6 +1,6 @@
 # TaxLens – Annotation Guideline v1 (21/10/2026)
 
-The gold set lives in `data/evaluation/gold_set_v1.csv`; how it is scored is in [retrieval.md](retrieval.md#gold-set).
+The gold set lives in `data/evaluation/gold_set_v1.csv`; how it is scored is in [retrieval.md](retrieval.md#evaluation).
 
 **Summary (5 lines)**
 1. Each case = one taxpayer situation + one date + the full list of laws needed to answer it.
