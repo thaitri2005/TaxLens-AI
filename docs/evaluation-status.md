@@ -31,11 +31,12 @@ The site runs `34d9ac4`, released 05/11/2026, with migration `20261105_0007` app
 on this page is live: every term of a long question is searched, forms are left out, vector search
 is exact, and the unused HNSW index is gone, taking the database from 605 MB to 485 MB.
 
-**The site now searches `corpus-v2`**, since it shares the database, with the code of `18cb525`.
+**The site now searches `corpus-v2`**, since it shares the database, with the code of `a9c4ac7`, released 06/11/2026.
 The site's speed has not been timed, as it needs a login. From a laptop, retrieval within an answer
-takes 3 to 6 s and the answer model 46 to 91 s. **Answers need a release:** the router no longer
-offers the old model, so the site is expected to fail every answer until `gemma-3-27b-it` is
-released. Other times here were measured from a laptop, and
+takes 3 to 6 s and the answer model 46 to 91 s. Since that release the site answers with
+`gemma-3-27b-it`, as the router no longer offers the old model: 3 of 3 questions returned 200 in the
+API log. After idling the API scales to zero, so the first question waits about 1 to 3 minutes while
+it starts and loads the embedding model. Other times here were measured from a laptop, and
 none on the site. Answer quality has only had the no-judge check on 5 questions, which cannot see
 whether the law cited still applies ([record](retrieval-experiments.md#answers-on-corpus-v2-06112026)).
 
