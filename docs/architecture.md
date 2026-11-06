@@ -113,7 +113,7 @@ evaluation data. Dependencies install from `requirements/api-runtime.txt` before
 
 **Configuration:** secrets come from Key Vault; the rest are environment variables from Terraform, with
 defaults in `src/taxlens/config.py`. The API sets no `HF_CHAT_*` values, so **the model is the code default**,
-and `.env` affects only local runs. Default: `google/gemma-3-27b-it`, `fastest` routing, 90 s timeout, 2,000
+and `.env` affects only local runs. Default: `openai/gpt-oss-120b`, `fastest` routing, 90 s timeout, 3,000
 output tokens. Any OpenAI-compatible endpoint works, with an empty routing policy.
 
 **Networking:** only the web app is public. PostgreSQL allows Azure services, plus developer IPs. This is a

@@ -1,4 +1,5 @@
 import logging
+import threading
 import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
@@ -22,6 +23,7 @@ from taxlens.api.routes.questions import router as questions_router
 from taxlens.api.routes.search import router as search_router
 from taxlens.config import get_settings
 from taxlens.db import database_is_ready
+from taxlens.retrieval.embeddings import get_available_embedding_provider
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +37,11 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         start_migrations()
     else:
         mark_migrations_skipped()
+    if settings.app_env == "production":
+        # Load the model before the first question arrives, instead of making it wait.
+        threading.Thread(
+            target=get_available_embedding_provider, name="embedding-preload", daemon=True
+        ).start()
     yield
 
 

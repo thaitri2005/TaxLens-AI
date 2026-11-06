@@ -161,8 +161,8 @@ October 2026: $17.76.
 
 | Resource | Cost | Note |
 | --- | --- | --- |
-| `taxlensdevacr` | $9.03 | Basic includes 10 GB, and it held 82 GB of old images |
-| `CreditScorecardWOEIV` (another project) | $5.16 | Registry in `docker-fastapi-credit-scorecard` |
+| `taxlensdevacr` | $9.03 | Basic includes 10 GB, and it held 82 GB of old images. Deleting them should save about $4 a month |
+| `CreditScorecardWOEIV` (another project) | $5.16 | **Do not delete:** another project's live web app pulls from it. It holds one image |
 | `taxlens-dev-api`, `-web` | $2.00 | Scale to zero |
 | `taxlens-dev-airflow-*` | $1.29 | Free while stopped |
 | Storage, Key Vault | $0.28 | |

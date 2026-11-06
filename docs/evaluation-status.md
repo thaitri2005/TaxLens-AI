@@ -5,12 +5,12 @@ Where TaxLens stands as of 06/11/2026. Rewritten as things change. What has been
 
 ## What is live
 
-- **Site:** `a9c4ac7`, released 06/11/2026, answering with `google/gemma-3-27b-it`. All 3 questions in
-  the API log after the release returned 200.
+- **Site:** `a9c4ac7`, answering with `google/gemma-3-27b-it`. **The faster model
+  `openai/gpt-oss-120b` is in the code and needs a release.**
 - **Corpus:** `corpus-v2`, frozen: 2,991 documents, 3,000 versions, 144,600 passages, all embedded.
 - **Airflow:** stopped. Keep it stopped, and the daily DAG paused, or the frozen corpus changes.
-- **Speed:** retrieval 3-6 s and the model 46-91 s, from a laptop. The first question after about 5
-  idle minutes also waits about 1-3 minutes for the API to start and load its model.
+- **Speed:** a whole answer takes 4-9 s on the new model, from a laptop, against 49-97 s. The first
+  question after about 5 idle minutes also waits for the API to start, about 1 minute or more.
 
 ## Results
 
@@ -48,8 +48,8 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
    Decree 123/2008, Law 13/2008 and Circular 32/2011. Whether to apply it is undecided.
 2. **Most essential provisions are still missed.** About half of the hardest need a legal step the
    question does not state ([diagnosis](retrieval-experiments.md#retrieval)).
-3. **Answers are slow,** and one took 91 s against the 90 s limit, so some may time out. Shortening
-   them was declined on 06/11/2026.
+3. **Answer model trade-offs:** the faster model costs about $0.002 an answer, against $0.0003, and can
+   mislabel a document's type. It depends on Groq and Cerebras staying on the router.
 4. **Answer quality is unmeasured:** only lexical checks on 5 questions, with no gold answers.
 5. **Duplicates:** 9 document numbers hold near-identical second versions, and 5 numbers with stray
    spaces (`148/2013/TT- BTC`) duplicate clean ones. Both copies can appear in results. Nothing was
@@ -81,5 +81,5 @@ In suggested order:
 6. Build answer evaluation with reviewed labels.
 7. Remove duplicates and settle the uncertain numbers.
 
-**Azure clean-up, for the owner:** delete old ACR images ([commands](operations.md#costs)), decide on
-the `CreditScorecardWOEIV` registry, and remove stale database firewall rules.
+**Azure clean-up, for the owner:** delete old ACR images ([commands](operations.md#costs))
+and remove stale database firewall rules. Leave `CreditScorecardWOEIV` alone: it serves another live project.

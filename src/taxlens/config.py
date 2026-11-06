@@ -34,10 +34,10 @@ class Settings(BaseSettings):
     ocr_timeout_seconds: float = 240.0
     hf_token: str | None = None
     hf_chat_base_url: str = "https://router.huggingface.co/v1"
-    hf_chat_model: str = "google/gemma-3-27b-it"
+    hf_chat_model: str = "openai/gpt-oss-120b"
     hf_chat_routing_policy: str = "fastest"
     hf_chat_timeout_seconds: float = 90.0
-    hf_chat_max_output_tokens: int = 2000
+    hf_chat_max_output_tokens: int = 3000
     hf_chat_temperature: float = 0.1
     qa_min_semantic_score: float = 0.80
     qa_min_fact_support: float = 0.5

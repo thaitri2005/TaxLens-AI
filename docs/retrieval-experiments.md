@@ -53,8 +53,10 @@ out the law a question depends on.
 | Exact vector search (`distance + 0`) | HNSW could silently return at most 40 candidates | **Live** |
 | Raising `work_mem` | No real gain | Do not repeat |
 | Scanning only rare terms; running both searches at once | First changes results; second saves at most 0.2 s | Not done |
-| Shorter answers, to cut the model's 46-91 s | Would be about 25-30 s | **Declined by the owner, 06/11/2026** |
-| Faster cheap models | One call each: gemma-3-27b 16 tokens/s, gemma-3-12b 21, Llama 3.1-8B 22. About 25% at best | Not worth switching |
+| Shorter answers, to cut the model's 46-91 s | Would be about 25-30 s | Not needed after the model change |
+| Faster cheap models on ordinary providers | One call each: gemma-3-27b 16 tokens/s, gemma-3-12b 21-28, Llama 3.1-8B 22. About 25-70% at best | Not worth switching |
+| **Hardware providers (Groq, Cerebras)** | gpt-oss-120b: 300-790 tokens/s. A whole answer takes 4-9 s, against 49-97 s | **Current** |
+| Loading the embedding model at startup | Moves its load away from the first question. Not measured separately | **Current** |
 
 ## Answer models
 
@@ -62,11 +64,16 @@ out the law a question depends on.
 | --- | --- |
 | `Qwen/Qwen3-4B-Instruct-2507` | Gone from the router by 06/11/2026: status 400 |
 | `Qwen/Qwen3.5-9B` | Failed all 5 questions. It reasons at length first, likely using up the tokens (not confirmed). Avoid reasoning models |
-| **`google/gemma-3-27b-it`** | **Current.** 5 of 5 answered, chosen as cheap and suitable, not by comparison. About $0.01 for 5 questions |
+| `google/gemma-3-27b-it` | 5 of 5 answered, but 46-91 s in the model. About $0.0003 an answer |
+| `google/gemma-3-12b-it` | 46 s on one question at 28 tokens/s |
+| `openai/gpt-oss-20b` on Groq | 3-4 s, but one of 2 ran out of 2,000 tokens while reasoning. Cheaper than 120b; not chosen |
+| **`openai/gpt-oss-120b`, `fastest` routing, 3,000 tokens** | **Current.** 5 of 5 answered through the app in 3.8-8.6 s, with 1.4-1.9 s in the model. About $0.002 an answer, by list price. It reasons first, and output reached 2,069 tokens, so 2,000 is too low |
 
-Answer run on `corpus-v2`: faithfulness and citation completeness 1.0, relevancy 0.75-0.93, context
-precision 1.0 on 4 of 5. These checks are lexical and cannot see if an answer is right. Read by hand,
-answers can rest on ended law (Decree 123/2008, Law 13/2008, Circular 32/2011).
+Answer run on `corpus-v2` with gpt-oss-120b: faithfulness and citation completeness 1.0, relevancy
+0.67-0.93, context precision 1.0 on 3 of 5. These checks are lexical and cannot see if an answer is
+right. Read by hand, answers can rest on ended law (Decree 123/2008, Law 13/2008, Circular 32/2011) and
+can mislabel a document's type ("Nghị định 68/2019/TT-BTC", which is a circular). Both models were read
+only briefly, so quality was not compared.
 
 ## Text and corpus
 
