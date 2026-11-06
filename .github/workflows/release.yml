@@ -183,4 +183,17 @@ jobs:
               while read -r tag; do
                 az acr repository delete -n taxlensdevacr --image "$repo:$tag" --yes
               done
+            # Each image is an index pointing at untagged manifests, which hold the actual data:
+            # keep those of the remaining images, and delete the ones left behind.
+            keep=$(az acr repository show-tags -n taxlensdevacr --repository "$repo" -o tsv |
+              while read -r tag; do
+                az acr manifest show -r taxlensdevacr -n "$repo:$tag" --query "manifests[].digest" -o tsv
+              done)
+            # 2 images with 2 manifests each. Anything less means a lookup failed: delete nothing.
+            if [ "$(echo "$keep" | grep -c sha256)" -lt 4 ]; then echo "Skipping $repo"; continue; fi
+            az acr manifest list-metadata -r taxlensdevacr -n "$repo" --query "[?tags==null].digest" -o tsv |
+              grep -vxFf <(echo "$keep") |
+              while read -r digest; do
+                az acr repository delete -n taxlensdevacr --image "$repo@$digest" --yes
+              done
           done
