@@ -112,6 +112,6 @@ From a laptop against Azure, on `corpus-v2`. The database is 965 MB on 2 GB of m
 Hybrid baselines take 29-47 s a question although retrieval inside an answer takes 3-6 s. This is
 unexplained.
 
-**Things that wasted runs:** a laptop IP change (check `curl https://api.ipify.org` against the
+**Things that wasted runs:** Windows carriage returns in `az` output in Git Bash (use `tr -d '\r'`), a laptop IP change (check `curl https://api.ipify.org` against the
 firewall first), internet drops (runs start over, so use a steady connection), and short `timeout`
 values that killed a run and lost its output.

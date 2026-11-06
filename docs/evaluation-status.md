@@ -5,9 +5,11 @@ Where TaxLens stands as of 06/11/2026. Rewritten as things change. What has been
 
 ## What is live
 
-- **Site:** `a9c4ac7`, answering with `google/gemma-3-27b-it`. **The faster model
-  `openai/gpt-oss-120b` is in the code and needs a release.**
+- **Site:** `05136e5`, released 06/11/2026, answering with `openai/gpt-oss-120b`. Tested through the
+  app from a laptop; no question has been logged on the site since this release. Later commits change
+  only the release workflow, docs, and `.env.example`.
 - **Corpus:** `corpus-v2`, frozen: 2,991 documents, 3,000 versions, 144,600 passages, all embedded.
+- **Access:** Tri, and Le Hung as a collaborator ([what each can reach](operations.md#access)).
 - **Airflow:** stopped. Keep it stopped, and the daily DAG paused, or the frozen corpus changes.
 - **Speed:** a whole answer takes 4-9 s on the new model, from a laptop, against 49-97 s. The first
   question after about 5 idle minutes also waits for the API to start, about 1 minute or more.
@@ -81,5 +83,6 @@ In suggested order:
 6. Build answer evaluation with reviewed labels.
 7. Remove duplicates and settle the uncertain numbers.
 
-**Azure clean-up, for the owner:** remove stale database firewall rules. Leave `CreditScorecardWOEIV` in
+**Azure clean-up, for the owner:** remove stale database firewall rules. Old images are cleared: the
+registry went from 92 GB to 4.3 GB, and each release now keeps the 2 newest. Leave `CreditScorecardWOEIV` in
 place: it serves another live project.

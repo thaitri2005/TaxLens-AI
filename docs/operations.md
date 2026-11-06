@@ -53,6 +53,25 @@ CI type-checks against the newest SQLAlchemy 2.x; write statement annotations as
 | `benchmark_ocr.py`, `prune_non_tax_documents.py` | OCR comparison; delete non-tax documents with `--apply` |
 | `seed.py`, `ingest_manifest.py`, `repair_document_metadata.py`, `ingest_sources.py`, `discover_sources.py` | Sample data and older one-off ingestion |
 
+## Access
+
+GitHub access does not carry over: Azure, the database, and the site are each granted separately.
+
+| Person | Azure | Database | Stored files |
+| --- | --- | --- | --- |
+| Tri (owner) | Full | Admin login | Everything |
+| Le Hung | `Reader` on `taxlens-dev-rg` | Own login: read and write, no `user_accounts`, no schema changes | Read: `raw-documents`, `normalized-text` |
+
+**To add someone:** invite them in Entra ID (Users, Invite external user), and assign roles by Object ID,
+since a guest's sign-in name is not their email. Scope roles to `taxlens-dev-rg`, never the subscription, which
+also holds another project. Grant storage roles per container, never on the account, because `terraform-state`
+holds secrets in readable form. Give each person their own database login and firewall rule.
+
+**Secrets.** `.env` (ignored by git) holds production values under `AZURE_*` names that nothing reads, and
+`.env.example` lists every field with placeholders. Also in `infra/terraform/terraform.tfvars` and Key Vault
+`taxlensdevkv`. Storage and Log Analytics keys are not copied; fetch them from Azure when needed. `.env` is
+not in git, so keep a copy in a password manager. Never share it with a collaborator.
+
 ## Laptop access to Azure
 
 The database allows listed IPs only, and the laptop's IP changes often. Check first:
@@ -63,7 +82,14 @@ az postgres flexible-server firewall-rule list -g taxlens-dev-rg --server-name t
 az postgres flexible-server firewall-rule create -g taxlens-dev-rg --server-name taxlens-dev-pg --name laptop-N --start-ip-address $ip --end-ip-address $ip
 ```
 
-Note `--server-name`. A connection timeout usually means a missing rule. Then, in the same terminal:
+Note `--server-name`. A connection timeout usually means a missing rule. Connect to the database with Docker, if
+`psql` is not installed:
+
+```powershell
+docker run -it --rm postgres:16 psql "host=taxlens-dev-pg.postgres.database.azure.com dbname=taxlens user=USER sslmode=require"
+```
+
+For scripts, set these in the same terminal:
 
 ```powershell
 pip install -e ".[cloud]"
@@ -163,15 +189,17 @@ October 2026: $17.76.
 | Resource | Cost | Note |
 | --- | --- | --- |
 | `taxlensdevacr` | $9.03 | Basic includes 10 GB, and it held 92 GB of old images, cleared on 06/11/2026. Should save about $4 a month |
-| `CreditScorecardWOEIV` (another project) | $5.16 | **Do not delete:** another project's live web app pulls from it. It holds one image |
+| `CreditScorecardWOEIV` (another project) | $5.16 | **Do not delete:** another project's live web app pulls `credit-risk-api:latest` from it. Its old images are cleared; it was under the included 10 GB, so this saves nothing |
 | `taxlens-dev-api`, `-web` | $2.00 | Scale to zero |
 | `taxlens-dev-airflow-*` | $1.29 | Free while stopped |
 | Storage, Key Vault | $0.28 | |
 | PostgreSQL, Log Analytics | $0.00 | Not billed at present; check before relying on that |
 
 **Images clean themselves up.** After a release that builds and applies, `release.yml` keeps the 2 newest
-images of each TaxLens repository and deletes the rest. To do it by hand in Git Bash on Windows, strip
-carriage returns, or every delete fails:
+images of each TaxLens repository and deletes the rest, and skips a repository if a lookup fails. Deleting a
+tag leaves its data behind in untagged manifests, and **the kept images depend on some untagged manifests**, so
+never delete all untagged ones. The first automatic run will be the next release, so check its log. To delete
+old tags by hand in Git Bash on Windows, strip carriage returns, or every delete fails:
 
 ```bash
 for repo in taxlens-api taxlens-web taxlens-airflow; do
