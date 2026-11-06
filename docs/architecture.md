@@ -341,7 +341,7 @@ environment variable set by Terraform.
 | --- | --- |
 | `DATABASE_*`, `DATABASE_SSL_MODE=require` | PostgreSQL connection |
 | `OBJECT_STORAGE_BACKEND=azure_blob`, `AZURE_STORAGE_ACCOUNT_URL`, `AZURE_STORAGE_CONTAINER`, `AZURE_STORAGE_NORMALIZED_CONTAINER` | Blob Storage through the managed identity |
-| `HF_TOKEN` (secret), `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, `HF_CHAT_ROUTING_POLICY`, `HF_CHAT_TIMEOUT_SECONDS`, `HF_CHAT_MAX_OUTPUT_TOKENS` | Answer model: by default `Qwen/Qwen3-4B-Instruct-2507` through the Hugging Face router's `fastest` provider, 90-second timeout, up to 2,000 output tokens. Any OpenAI-compatible endpoint works; set an empty routing policy for non-Hugging Face endpoints. |
+| `HF_TOKEN` (secret), `HF_CHAT_BASE_URL`, `HF_CHAT_MODEL`, `HF_CHAT_ROUTING_POLICY`, `HF_CHAT_TIMEOUT_SECONDS`, `HF_CHAT_MAX_OUTPUT_TOKENS` | Answer model: by default `google/gemma-3-27b-it` through the Hugging Face router's `fastest` provider, 90-second timeout, up to 2,000 output tokens. Any OpenAI-compatible endpoint works; set an empty routing policy for non-Hugging Face endpoints. |
 | `AUTH_INTERNAL_TOKEN` (secret), `NEXTAUTH_SECRET` (secret) | Web-to-API identity signing and Auth.js sessions |
 | `NEXTAUTH_URL` | The web app's public address, which Auth.js uses for sign-in and sign-out redirects; set by Terraform from the Container Apps domain |
 | `AIRFLOW_INTERNAL_TOKEN` (secret) | Airflow-to-API job calls |

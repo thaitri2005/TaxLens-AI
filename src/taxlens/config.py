@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     ocr_timeout_seconds: float = 240.0
     hf_token: str | None = None
     hf_chat_base_url: str = "https://router.huggingface.co/v1"
-    hf_chat_model: str = "Qwen/Qwen3-4B-Instruct-2507"
+    hf_chat_model: str = "google/gemma-3-27b-it"
     hf_chat_routing_policy: str = "fastest"
     hf_chat_timeout_seconds: float = 90.0
     hf_chat_max_output_tokens: int = 2000

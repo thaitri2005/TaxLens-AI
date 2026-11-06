@@ -412,6 +412,7 @@ curl -s "https://taxlensdevartifacts.file.core.windows.net/airflow-logs/dag_id=t
 | "Expired identity" | An API image from before October 2026 accepted identities for only 60 s, less than a cold start | Deploy a current release. |
 | A job fails with exit code -9 after about 21,600 s | Six-hour job limit | Rerun the action; finished work is kept. |
 | A job fails with exit code -9 earlier | Out of memory in the 2 GiB API container | Check that no other long job was running at the same time; rerun. |
+| Every answer is `PROVIDER_UNAVAILABLE`, with `chat_provider_error status=400` and "not supported by any provider" | The router no longer offers `HF_CHAT_MODEL`, as happened to Qwen3-4B-Instruct by 06/11/2026 | Choose a model listed at `https://router.huggingface.co/v1/models`. Avoid models that reason first: Qwen3.5-9B returned no usable answer at 1,400 tokens |
 | Every answer is `PROVIDER_UNAVAILABLE` | The Hugging Face account has no inference credits (`chat_provider_error status=402` in the API log) | Add credits, or point `HF_CHAT_BASE_URL` at another OpenAI-compatible endpoint. |
 | An occasional answer is `PROVIDER_UNAVAILABLE` | The provider took longer than `HF_CHAT_TIMEOUT_SECONDS` (90 s; `transport=ReadTimeout` in the log) | Ask again; if frequent, raise the timeout (it must stay under the 240-second ingress limit). |
 | Signing out opens `localhost` | The web app has no `NEXTAUTH_URL` (an image or Terraform state from before October 2026) | Deploy a current release. |

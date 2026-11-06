@@ -875,6 +875,34 @@ stay unresolved.
 `corpus-v1.2`. The database holds 965 MB on a server with 2 GB of memory. The site was not timed,
 as it needs a login.
 
+## Answers on corpus-v2 (06/11/2026)
+
+**The configured model is gone.** With Qwen3-4B-Instruct all 5 questions in `qa.json` failed with
+status 400, "not supported by any provider you have enabled". The site has no override, so it is
+expected to fail too; its logs were not checked. Qwen3.5-9B also failed all 5: it reasons before
+answering, and within 1,400 output tokens returned nothing usable (the likely cause, not
+confirmed). `google/gemma-3-27b-it` does not reason first and became the default. It was the
+cheapest suitable model tried, not the result of a comparison.
+
+**Run.** The same calls as `evaluate_qa.py`, once, on `corpus-v2`, with retrieval limit 3:
+
+| Measure | Result |
+| --- | --- |
+| Answered | 5 of 5 |
+| Faithfulness, citation completeness | 1.0, 1.0 |
+| Answer relevancy | 0.75 to 0.93 |
+| Context precision | 1.0 on 4, 0.33 on 1 |
+| Time in retrieval and the rest | 3.1 to 5.8 s |
+| Time in the model | 45.6 to 91.2 s, about 1,500 tokens in and 700 to 1,300 out |
+
+**What this does not show.** These measures have no judge and no gold answers: they cannot tell if
+an answer is right or the law still applies. Reading the answers shows they can rest on ended law:
+the VAT deduction answer cites Decree 123/2008 and Law 13/2008, and the invoice contents answer
+cites Circular 32/2011. This fits the [crowding found above](#baselines-on-corpus-v2-06112026).
+The model took 91 s on one question, past the 90 s limit, so
+some answers on the site may time out. The 3 to 6 s is not comparable with the 29 to 47 s a question
+of the evaluation runs, whose difference was not explained.
+
 ## Changes
 
 - `issues-v1` → `issues-v2` (before any retrieval run): v1 wrote whole questions that

@@ -32,9 +32,12 @@ on this page is live: every term of a long question is searched, forms are left 
 is exact, and the unused HNSW index is gone, taking the database from 605 MB to 485 MB.
 
 **The site now searches `corpus-v2`**, since it shares the database, with the code of `18cb525`.
-The site's speed on the larger corpus has not been timed. Evaluation runs took 29 to 47 s a
-question for hybrid, against about 8 s on `corpus-v1.2`. Other times here were measured from a laptop, and
-none on the site. Answer quality has not been evaluated since the limit was removed.
+The site's speed has not been timed, as it needs a login. From a laptop, retrieval within an answer
+takes 3 to 6 s and the answer model 46 to 91 s. **Answers need a release:** the router no longer
+offers the old model, so the site is expected to fail every answer until `gemma-3-27b-it` is
+released. Other times here were measured from a laptop, and
+none on the site. Answer quality has only had the no-judge check on 5 questions, which cannot see
+whether the law cited still applies ([record](retrieval-experiments.md#answers-on-corpus-v2-06112026)).
 
 ## What the limit changed
 
@@ -144,6 +147,7 @@ In suggested order:
    still applied on A4's date.
 5. Decide how the site should treat ended documents. Without a filter they crowd out current law,
    but the filter needs expert review first, and two of its rules are inferred.
-6. Make search faster on the larger corpus: 29 to 47 s a question in evaluation runs.
+6. Make answers faster: the model's 46 to 91 s sits at its 90 s limit. Find out why evaluation runs
+   took 29 to 47 s a question when retrieval within an answer takes 3 to 6 s.
 7. Remove the near-identical second versions held under 9 document numbers, and settle
    93/1998/QĐ/TCKT and 25/2026/TT-BTC, where the header and the portal disagree.
