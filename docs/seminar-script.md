@@ -15,7 +15,7 @@ also carry an "If asked" line with the finer research details. Figures come from
 | 4 | One API And One Database… (architecture, end of Part 1) | Tri | 0:35 | 5:45 |
 | 5 | Problem: One Tax Question Can Need Several Laws (start of Part 2) | Hung | 1:00 | 6:45 |
 | 6 | The Benchmark | Hung | 1:00 | 7:45 |
-| 7 | Two Measures: Recall@10 and Coverage@10 (graph) | Hung | 0:35 | 8:20 |
+| 7 | Coverage@10: Is Every Essential Provision In The Top 10? (graph) | Hung | 0:35 | 8:20 |
 | 8 | Coverage Failure vs Retrieval Failure | Hung | 0:40 | 9:00 |
 | 9 | Even Our Best Search Finds Under Half… | Hung | 1:15 | 10:15 |
 | 10 | Why Is So Much Missing? | Hung | 1:30 | 11:45 |
@@ -110,18 +110,17 @@ with three dates and two answers.
 
 We have 16 cases and 12 are scored. We run the question, take the top 10 passages, and count how
 many essential provisions are there. For the bottled drink that is 1 of 3, so 0.33. That is recall
-at 10. The next slide shows it beside our second measure, Coverage at 10.
+at 10. The next slide shows our stricter measure, Coverage at 10.
 
-## 7. The two measures (Hung, 0:35)
+## 7. Coverage at 10 (Hung, 0:35)
 
-Here are the two measures on our 12 cases. Each bar is one case with our best setup: the share of
-its essential provisions found in the top 10. Recall at 10 is the average of the bars, 0.45. It
-gives part credit: the bottled drink, A1, gets 0.33 for one of three.
+Recall at 10 gives part credit. Coverage at 10 does not: a case counts only if every essential
+provision is in the top 10. Here are our 12 cases with our best setup. Each square is one essential
+provision, and a filled square means it was found. Only three cases have every square filled, so
+Coverage at 10 is 3 of 12, or 0.25. The bottled drink, A1, has one of three, so it does not count.
 
-Coverage at 10 is stricter. A case counts only if every essential provision is in the top 10. Three
-bars reach 1, so 3 of 12, which is 0.25. An answer needs every provision, so this is the measure
-that matters most. On the right, the same two measures by method: the search on the live site fully
-covers 1 case of 12.
+An answer needs every provision, so this is the measure that matters most. On the right, the same
+measure by method: the search on the live site fully covers 1 case of 12.
 
 ## 8. Coverage or retrieval? (Hung, 0:40)
 
