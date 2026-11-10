@@ -1,8 +1,8 @@
 # Seminar script, 11 Nov 2026
 
 Draft script for two speakers in a 15-minute slot, in two parts: Tri presents Part 1, engineering
-(slides 1-4, about 5:45 with a 4-minute live demo) and Hung presents Part 2, research (slides 5-13,
-about 8:40). Khai does not speak, and joins for questions. That leaves about 0:35 of slack. Times
+(slides 1-4, about 5:45 with a 4-minute live demo) and Hung presents Part 2, research (slides 5-14,
+about 9:00). Khai does not speak, and joins for questions. That leaves about 0:15 of slack. Times
 are targets. The deck keeps its current slides and all their content; the two glossary slides and the screenshot slide sit in backup. The speaker notes in Canva
 also carry an "If asked" line with the finer research details. Figures come from
 [evaluation-status.md](evaluation-status.md) and [retrieval-experiments.md](retrieval-experiments.md).
@@ -14,14 +14,15 @@ also carry an "If asked" line with the finer research details. Figures come from
 | 3 | An Answer Is Only As Good As The Passages… | Tri | 0:50 | 5:10 |
 | 4 | One API And One Database… (architecture, end of Part 1) | Tri | 0:35 | 5:45 |
 | 5 | Problem: One Tax Question Can Need Several Laws (start of Part 2) | Hung | 1:00 | 6:45 |
-| 6 | The Benchmark, Recall@10 and Coverage@10 | Hung | 1:15 | 8:00 |
-| 7 | Coverage Failure vs Retrieval Failure | Hung | 0:40 | 8:40 |
-| 8 | Even Our Best Search Finds Under Half… | Hung | 1:15 | 9:55 |
-| 9 | Why Is So Much Missing? | Hung | 1:30 | 11:25 |
-| 10 | Splitting The Question Into Legal Issues… | Hung | 1:00 | 12:25 |
-| 11 | Next Test | Hung | 0:50 | 13:15 |
-| 12 | We Can Now Measure Search… | Hung | 0:45 | 14:00 |
-| 13 | Four Decisions Where Your View Would Help Most | Hung, then all | 0:25 | 14:25 |
+| 6 | The Benchmark | Hung | 1:00 | 7:45 |
+| 7 | Two Measures: Recall@10 and Coverage@10 (graph) | Hung | 0:35 | 8:20 |
+| 8 | Coverage Failure vs Retrieval Failure | Hung | 0:40 | 9:00 |
+| 9 | Even Our Best Search Finds Under Half… | Hung | 1:15 | 10:15 |
+| 10 | Why Is So Much Missing? | Hung | 1:30 | 11:45 |
+| 11 | Splitting The Question Into Legal Issues… | Hung | 1:00 | 12:45 |
+| 12 | Next Test | Hung | 0:50 | 13:35 |
+| 13 | We Can Now Measure Search… | Hung | 0:45 | 14:20 |
+| 14 | Four Decisions Where Your View Would Help Most | Hung, then all | 0:25 | 14:45 |
 
 ## Before the talk
 
@@ -32,7 +33,7 @@ also carry an "If asked" line with the finer research details. Figures come from
   fails, show them and say when they were taken.
 - Rehearse the bottled-drink question. What the site returns for it is not recorded in the
   repository, so the script below does not assume a particular answer.
-- If the demo passes 4:30, stop it and go to slide 3. Slide 4 can be cut to its first two sentences and slide 7 to one.
+- If the demo passes 4:30, stop it and go to slide 3. Slide 4 can be cut to its first two sentences and slide 8 to one.
 
 ## 1. Title (Tri, 0:20)
 
@@ -100,7 +101,7 @@ Search finds the first step, around rank 5 to 10. It does not find the second or
 top 200. The question says sugar and VAT rate; nothing in it mentions a temporary reduction. Miss
 any one of the three and the answer is wrong or incomplete. So how do we measure this?
 
-## 6. The benchmark and the two measures (Hung, 1:15)
+## 6. The benchmark (Hung, 1:00)
 
 We built an answer key from real tax-authority letters. For each case we list the
 provisions a correct answer needs, mark each one essential or supporting, and fix an as-of date,
@@ -109,21 +110,27 @@ with three dates and two answers.
 
 We have 16 cases and 12 are scored. We run the question, take the top 10 passages, and count how
 many essential provisions are there. For the bottled drink that is 1 of 3, so 0.33. That is recall
-at 10, averaged over the cases.
+at 10. The next slide shows it beside our second measure, Coverage at 10.
 
-Our second measure is stricter. Coverage at 10 asks: are all the essential provisions of a case in
-the top 10? A case scores 1 only if every one is there, and Coverage at 10 is the share of cases
-that do. The bottled drink scores 0. An answer needs every provision, so this is the measure that
-matters most.
+## 7. The two measures (Hung, 0:35)
 
-## 7. Coverage or retrieval? (Hung, 0:40)
+Here are the two measures on our 12 cases. Each bar is one case with our best setup: the share of
+its essential provisions found in the top 10. Recall at 10 is the average of the bars, 0.45. It
+gives part credit: the bottled drink, A1, gets 0.33 for one of three.
+
+Coverage at 10 is stricter. A case counts only if every essential provision is in the top 10. Three
+bars reach 1, so 3 of 12, which is 0.25. An answer needs every provision, so this is the measure
+that matters most. On the right, the same two measures by method: the search on the live site fully
+covers 1 case of 12.
+
+## 8. Coverage or retrieval? (Hung, 0:40)
 
 A provision can be missed because the law is not in our collection, or because it is there and
 search does not find it. We wrote rules for which documents enter the corpus before checking the
 answer key, and the corpus grew to 2,991 documents. All 30 essential provisions are now in it. So
 from here on, a miss is a search problem, not a data problem.
 
-## 8. Results (Hung, 1:15)
+## 9. Results (Hung, 1:15)
 
 Recall at 10, left to right. We started at 0.15, which turned out to be a bug: keyword search kept
 only the first 12 words of a question. Fixing it gave 0.41. Adding documents dropped it to 0.30,
@@ -137,7 +144,7 @@ earlier were measured with a text-encoding bug, now repaired.
 Now Coverage at 10. Even at our best it is 0.25: only 3 of 12 cases have every essential provision
 in the top 10. The search on the live site covers 1 of 12. Why?
 
-## 9. Why so much is missing (Hung, 1:30)
+## 10. Why so much is missing (Hung, 1:30)
 
 In the top 10 we miss 20 essential provisions. Five are found just below rank 10,
 and one sits in no passage. The other 14 are not even in the top 200, so taking more results would
@@ -151,7 +158,7 @@ This is the main finding. Better word matching cannot fix these seven, because t
 contain the words. Something has to work out which law the question depends on. One caution: the
 grouping is our own reading, not a legal expert's.
 
-## 10. What we tried, and why it lost (Hung, 1:00)
+## 11. What we tried, and why it lost (Hung, 1:00)
 
 Our first attempt was issue-guided retrieval. A small language model splits the question into legal
 issues; we search once per issue and merge the lists by taking turns.
@@ -161,20 +168,20 @@ result from rank 5 to rank 16. More important, the small model's issues were all
 asked whether the drink is a special-consumption good, so the hidden step stayed hidden. This
 version lost; the idea was not really tested.
 
-## 11. Next test (Hung, 0:50)
+## 12. Next test (Hung, 0:50)
 
 So the next experiment is an oracle test. We write the missing legal issues by hand for three cases,
 before looking at any result and without naming any document. Do the hard provisions then reach the
 top 10? If yes, the weak part is finding the issues. If no, the weak part is search itself. Either
 answer tells us what to build. This is a plan: nothing has been run yet.
 
-## 12. Summary (Hung, 0:45)
+## 13. Summary (Hung, 0:45)
 
 To sum up. We can now measure whether search finds the laws an answer needs. Our best setup fully
 covers 3 of 12 cases, a Coverage at 10 of 0.25. Half of the provisions that cannot be found need a legal step the question
 never states. Our first fix lost, and the oracle test will tell us why.
 
-## 13. Four decisions (Hung, then all, 0:25)
+## 14. Four decisions (Hung, then all, 0:25)
 
 We would like your view on four decisions: the ended-law filter, our essential labels, the number of
 cases, and who should write the oracle issues. Thank you. We are happy to take questions.
