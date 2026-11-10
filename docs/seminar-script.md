@@ -1,9 +1,9 @@
 # Seminar script, 11 Nov 2026
 
-Draft script for three presenters in a 15-minute slot, in two parts: Part 1, engineering (slides
-1-4, about 5:45 with a 4-minute live demo) and Part 2, research (slides 5-13, about 8:25). That
-leaves about 0:50 of slack. Times are targets. The deck keeps its current slides and all their
-content; the two glossary slides and the screenshot slide sit in backup. The speaker notes in Canva
+Draft script for two speakers in a 15-minute slot, in two parts: Tri presents Part 1, engineering
+(slides 1-4, about 5:45 with a 4-minute live demo) and Hung presents Part 2, research (slides 5-13,
+about 8:25). Khai does not speak, and joins for questions. That leaves about 0:50 of slack. Times
+are targets. The deck keeps its current slides and all their content; the two glossary slides and the screenshot slide sit in backup. The speaker notes in Canva
 also carry an "If asked" line with the finer research details. Figures come from
 [evaluation-status.md](evaluation-status.md) and [retrieval-experiments.md](retrieval-experiments.md).
 
@@ -13,15 +13,15 @@ also carry an "If asked" line with the finer research details. Figures come from
 | 2 | TaxLens Answers Tax Questions… + live demo | Tri | 4:00 | 4:20 |
 | 3 | An Answer Is Only As Good As The Passages… | Tri | 0:50 | 5:10 |
 | 4 | One API And One Database… (architecture, end of Part 1) | Tri | 0:35 | 5:45 |
-| 5 | Problem: One Tax Question Can Need Several Laws (start of Part 2) | Tri | 1:00 | 6:45 |
+| 5 | Problem: One Tax Question Can Need Several Laws (start of Part 2) | Hung | 1:00 | 6:45 |
 | 6 | The Benchmark | Hung | 1:00 | 7:45 |
 | 7 | Coverage Failure vs Retrieval Failure | Hung | 0:40 | 8:25 |
 | 8 | Even Our Best Search Finds Under Half… | Hung | 1:15 | 9:40 |
-| 9 | Why Is So Much Missing? | Khai | 1:30 | 11:10 |
-| 10 | Splitting The Question Into Legal Issues… | Khai | 1:00 | 12:10 |
-| 11 | Next Test | Khai | 0:50 | 13:00 |
-| 12 | We Can Now Measure Search… | Khai | 0:45 | 13:45 |
-| 13 | Four Decisions Where Your View Would Help Most | Khai, then all | 0:25 | 14:10 |
+| 9 | Why Is So Much Missing? | Hung | 1:30 | 11:10 |
+| 10 | Splitting The Question Into Legal Issues… | Hung | 1:00 | 12:10 |
+| 11 | Next Test | Hung | 0:50 | 13:00 |
+| 12 | We Can Now Measure Search… | Hung | 0:45 | 13:45 |
+| 13 | Four Decisions Where Your View Would Help Most | Hung, then all | 0:25 | 14:10 |
 
 ## Before the talk
 
@@ -87,20 +87,22 @@ runs the long jobs: collecting, OCR and embedding. Airflow starts those jobs and
 Everything is stored in one PostgreSQL database with full-text search and pgvector, plus Blob Storage
 for the files. The answer model is hosted, reached through Hugging Face.
 
-## 5. One question, three laws (Tri, 1:00)
+That was the engineering. Hung will take the research.
 
-That was the engineering. Now the research question: does search find every law an answer needs?
+## 5. One question, three laws (Hung, 1:00)
+
+Thank you, Tri. Now the research question: does search find every law an answer needs?
 Back to the bottled drink. First, the special consumption tax law says a drink with more than
 5 grams of sugar per 100 millilitres is a special-consumption good. Second, a decree excludes such
 goods from the temporary 8% VAT rate. Third, the VAT law gives the normal rate, 10%.
 
 Search finds the first step, around rank 5 to 10. It does not find the second or the third in the
 top 200. The question says sugar and VAT rate; nothing in it mentions a temporary reduction. Miss
-any one of the three and the answer is wrong or incomplete. Hung will show how we measure this.
+any one of the three and the answer is wrong or incomplete. So how do we measure this?
 
 ## 6. The benchmark (Hung, 1:00)
 
-Thank you, Tri. We built an answer key from real tax-authority letters. For each case we list the
+We built an answer key from real tax-authority letters. For each case we list the
 provisions a correct answer needs, mark each one essential or supporting, and fix an as-of date,
 because the same facts can have a different answer in a different year. The table shows one case
 with three dates and two answers.
@@ -127,12 +129,11 @@ Three cautions. Twelve cases is small, so most differences are not significant. 
 partly inferred and not checked by an expert, so it is not on the live site. And results we reported
 earlier were measured with a text-encoding bug, now repaired.
 
-Even at our best, only 3 of 12 cases have every essential provision in the top 10. Khai will explain
-why.
+Even at our best, only 3 of 12 cases have every essential provision in the top 10. Why?
 
-## 9. Why so much is missing (Khai, 1:30)
+## 9. Why so much is missing (Hung, 1:30)
 
-Thank you, Hung. In the top 10 we miss 20 essential provisions. Five are found just below rank 10,
+In the top 10 we miss 20 essential provisions. Five are found just below rank 10,
 and one sits in no passage. The other 14 are not even in the top 200, so taking more results would
 not help.
 
@@ -144,7 +145,7 @@ This is the main finding. Better word matching cannot fix these seven, because t
 contain the words. Something has to work out which law the question depends on. One caution: the
 grouping is our own reading, not a legal expert's.
 
-## 10. What we tried, and why it lost (Khai, 1:00)
+## 10. What we tried, and why it lost (Hung, 1:00)
 
 Our first attempt was issue-guided retrieval. A small language model splits the question into legal
 issues; we search once per issue and merge the lists by taking turns.
@@ -154,20 +155,20 @@ result from rank 5 to rank 16. More important, the small model's issues were all
 asked whether the drink is a special-consumption good, so the hidden step stayed hidden. This
 version lost; the idea was not really tested.
 
-## 11. Next test (Khai, 0:50)
+## 11. Next test (Hung, 0:50)
 
 So the next experiment is an oracle test. We write the missing legal issues by hand for three cases,
 before looking at any result and without naming any document. Do the hard provisions then reach the
 top 10? If yes, the weak part is finding the issues. If no, the weak part is search itself. Either
 answer tells us what to build. This is a plan: nothing has been run yet.
 
-## 12. Summary (Khai, 0:45)
+## 12. Summary (Hung, 0:45)
 
 To sum up. We can now measure whether search finds the laws an answer needs. Our best setup fully
 covers 3 of 12 cases. Half of the provisions that cannot be found need a legal step the question
 never states. Our first fix lost, and the oracle test will tell us why.
 
-## 13. Four decisions (Khai, then all, 0:25)
+## 13. Four decisions (Hung, then all, 0:25)
 
 We would like your view on four decisions: the ended-law filter, our essential labels, the number of
 cases, and who should write the oracle issues. Thank you. We are happy to take questions.
