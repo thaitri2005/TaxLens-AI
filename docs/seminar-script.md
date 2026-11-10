@@ -2,7 +2,7 @@
 
 Draft script for two speakers in a 15-minute slot, in two parts: Tri presents Part 1, engineering
 (slides 1-4, about 5:45 with a 4-minute live demo) and Hung presents Part 2, research (slides 5-13,
-about 8:25). Khai does not speak, and joins for questions. That leaves about 0:50 of slack. Times
+about 8:40). Khai does not speak, and joins for questions. That leaves about 0:35 of slack. Times
 are targets. The deck keeps its current slides and all their content; the two glossary slides and the screenshot slide sit in backup. The speaker notes in Canva
 also carry an "If asked" line with the finer research details. Figures come from
 [evaluation-status.md](evaluation-status.md) and [retrieval-experiments.md](retrieval-experiments.md).
@@ -14,14 +14,14 @@ also carry an "If asked" line with the finer research details. Figures come from
 | 3 | An Answer Is Only As Good As The Passages… | Tri | 0:50 | 5:10 |
 | 4 | One API And One Database… (architecture, end of Part 1) | Tri | 0:35 | 5:45 |
 | 5 | Problem: One Tax Question Can Need Several Laws (start of Part 2) | Hung | 1:00 | 6:45 |
-| 6 | The Benchmark | Hung | 1:00 | 7:45 |
-| 7 | Coverage Failure vs Retrieval Failure | Hung | 0:40 | 8:25 |
-| 8 | Even Our Best Search Finds Under Half… | Hung | 1:15 | 9:40 |
-| 9 | Why Is So Much Missing? | Hung | 1:30 | 11:10 |
-| 10 | Splitting The Question Into Legal Issues… | Hung | 1:00 | 12:10 |
-| 11 | Next Test | Hung | 0:50 | 13:00 |
-| 12 | We Can Now Measure Search… | Hung | 0:45 | 13:45 |
-| 13 | Four Decisions Where Your View Would Help Most | Hung, then all | 0:25 | 14:10 |
+| 6 | The Benchmark, Recall@10 and Coverage@10 | Hung | 1:15 | 8:00 |
+| 7 | Coverage Failure vs Retrieval Failure | Hung | 0:40 | 8:40 |
+| 8 | Even Our Best Search Finds Under Half… | Hung | 1:15 | 9:55 |
+| 9 | Why Is So Much Missing? | Hung | 1:30 | 11:25 |
+| 10 | Splitting The Question Into Legal Issues… | Hung | 1:00 | 12:25 |
+| 11 | Next Test | Hung | 0:50 | 13:15 |
+| 12 | We Can Now Measure Search… | Hung | 0:45 | 14:00 |
+| 13 | Four Decisions Where Your View Would Help Most | Hung, then all | 0:25 | 14:25 |
 
 ## Before the talk
 
@@ -100,7 +100,7 @@ Search finds the first step, around rank 5 to 10. It does not find the second or
 top 200. The question says sugar and VAT rate; nothing in it mentions a temporary reduction. Miss
 any one of the three and the answer is wrong or incomplete. So how do we measure this?
 
-## 6. The benchmark (Hung, 1:00)
+## 6. The benchmark and the two measures (Hung, 1:15)
 
 We built an answer key from real tax-authority letters. For each case we list the
 provisions a correct answer needs, mark each one essential or supporting, and fix an as-of date,
@@ -110,6 +110,11 @@ with three dates and two answers.
 We have 16 cases and 12 are scored. We run the question, take the top 10 passages, and count how
 many essential provisions are there. For the bottled drink that is 1 of 3, so 0.33. That is recall
 at 10, averaged over the cases.
+
+Our second measure is stricter. Coverage at 10 asks: are all the essential provisions of a case in
+the top 10? A case scores 1 only if every one is there, and Coverage at 10 is the share of cases
+that do. The bottled drink scores 0. An answer needs every provision, so this is the measure that
+matters most.
 
 ## 7. Coverage or retrieval? (Hung, 0:40)
 
@@ -129,7 +134,8 @@ Three cautions. Twelve cases is small, so most differences are not significant. 
 partly inferred and not checked by an expert, so it is not on the live site. And results we reported
 earlier were measured with a text-encoding bug, now repaired.
 
-Even at our best, only 3 of 12 cases have every essential provision in the top 10. Why?
+Now Coverage at 10. Even at our best it is 0.25: only 3 of 12 cases have every essential provision
+in the top 10. The search on the live site covers 1 of 12. Why?
 
 ## 9. Why so much is missing (Hung, 1:30)
 
@@ -165,7 +171,7 @@ answer tells us what to build. This is a plan: nothing has been run yet.
 ## 12. Summary (Hung, 0:45)
 
 To sum up. We can now measure whether search finds the laws an answer needs. Our best setup fully
-covers 3 of 12 cases. Half of the provisions that cannot be found need a legal step the question
+covers 3 of 12 cases, a Coverage at 10 of 0.25. Half of the provisions that cannot be found need a legal step the question
 never states. Our first fix lost, and the oracle test will tell us why.
 
 ## 13. Four decisions (Hung, then all, 0:25)
