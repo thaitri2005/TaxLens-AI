@@ -15,9 +15,9 @@ also carry an "If asked" line with the finer research details. Figures come from
 | 4 | One API And One Database… (architecture, end of Part 1) | Tri | 0:35 | 5:45 |
 | 5 | Problem: One Tax Question Can Need Several Laws (start of Part 2) | Hung | 1:00 | 6:45 |
 | 6 | The Benchmark | Hung | 1:00 | 7:45 |
-| 7 | Full Coverage@10: 1 If Every Essential Provision Is In The Top 10, Else 0 (graph) | Hung | 0:35 | 8:20 |
-| 8 | Coverage Failure vs Retrieval Failure | Hung | 0:40 | 9:00 |
-| 9 | Even Our Best Search Finds Under Half… | Hung | 1:15 | 10:15 |
+| 7 | Coverage Failure vs Retrieval Failure | Hung | 0:40 | 8:25 |
+| 8 | Even Our Best Search Finds Under Half… | Hung | 1:05 | 9:30 |
+| 9 | Full coverage@10: 1 If Every Essential Provision Is In The Top 10, Else 0 (graph) | Hung | 0:45 | 10:15 |
 | 10 | Why Is So Much Missing? | Hung | 1:30 | 11:45 |
 | 11 | Splitting The Question Into Legal Issues… | Hung | 1:00 | 12:45 |
 | 12 | Next Test | Hung | 0:50 | 13:35 |
@@ -33,7 +33,7 @@ also carry an "If asked" line with the finer research details. Figures come from
   fails, show them and say when they were taken.
 - Rehearse the bottled-drink question. What the site returns for it is not recorded in the
   repository, so the script below does not assume a particular answer.
-- If the demo passes 4:30, stop it and go to slide 3. Slide 4 can be cut to its first two sentences and slide 8 to one.
+- If the demo passes 4:30, stop it and go to slide 3. Slide 4 can be cut to its first two sentences and slide 7 to one.
 
 ## 1. Title (Tri, 0:20)
 
@@ -110,39 +110,39 @@ with three dates and two answers.
 
 We have 16 cases and 12 are scored. We run the question, take the top 10 passages, and count how
 many essential provisions are there. For the bottled drink that is 1 of 3, so 0.33. That is recall
-at 10. The next slide shows our stricter measure, Full Coverage at 10.
+at 10, averaged over the cases.
 
-## 7. Full Coverage at 10 (Hung, 0:35)
-
-Recall at 10 gives part credit. Full Coverage at 10 does not. For each case it is 1 if every
-essential provision is in the top 10, and 0 otherwise. Here are our 12 cases with our best setup.
-Each square is one essential provision, and a filled square means it was found. Only three cases
-have every square filled, so only 3 of 12 score 1. The bottled drink, A1, has one of three, so it
-scores 0.
-
-An answer needs every provision, so this is the measure that matters most. On the right, the number
-of cases that score 1, by method: with the search on the live site, 1 case of 12.
-
-## 8. Coverage or retrieval? (Hung, 0:40)
+## 7. Coverage or retrieval? (Hung, 0:40)
 
 A provision can be missed because the law is not in our collection, or because it is there and
 search does not find it. We wrote rules for which documents enter the corpus before checking the
 answer key, and the corpus grew to 2,991 documents. All 30 essential provisions are now in it. So
 from here on, a miss is a search problem, not a data problem.
 
-## 9. Results (Hung, 1:15)
+## 8. Results (Hung, 1:05)
 
-Recall at 10, left to right. We started at 0.15, which turned out to be a bug: keyword search kept
-only the first 12 words of a question. Fixing it gave 0.41. Adding documents dropped it to 0.30,
-because old laws that have ended crowded the top 10. A filter that hides ended laws brought it to
-0.45, our best result.
+Recall at 10. On the old corpus we started at 0.15, which turned out to be a bug: keyword search
+kept only the first 12 words of a question. Fixing it gave 0.41. On the new corpus, with more
+documents, it dropped to 0.30, because old laws that have ended crowded the top 10. A filter that
+hides ended laws brought it to 0.45, our best result.
 
 Three cautions. Twelve cases is small, so most differences are not significant. The filter is
 partly inferred and not checked by an expert, so it is not on the live site. And results we reported
 earlier were measured with a text-encoding bug, now repaired.
 
-Now Full Coverage at 10. Even at our best, only 3 of 12 cases score 1, with every essential
-provision in the top 10. With the search on the live site it is 1 of 12. Why?
+Recall at 10 gives part credit. The next slide shows a stricter measure.
+
+## 9. Full coverage at 10 (Hung, 0:45)
+
+Full coverage at 10 gives no part credit. For each case it is 1 if every essential provision is in
+the top 10, and 0 otherwise. Here are our 12 cases with our best setup, the new corpus with the
+ended-law filter. Each square is one essential provision, and a filled square means it was found.
+Only three cases have every square filled, so three score 1 and nine score 0. The mean is 0.25. The
+bottled drink, A1, has one of three, so it scores 0.
+
+An answer needs every provision, so this is the measure that matters most. On the right, the same
+measure by method: the search on the live site scores 0.08, which is 1 case of 12. So even at our
+best, 9 of 12 cases miss something. Why?
 
 ## 10. Why so much is missing (Hung, 1:30)
 
@@ -178,7 +178,7 @@ answer tells us what to build. This is a plan: nothing has been run yet.
 ## 13. Summary (Hung, 0:45)
 
 To sum up. We can now measure whether search finds the laws an answer needs. Our best setup fully
-covers 3 of 12 cases. Half of the provisions that cannot be found need a legal step the question
+covers 3 of 12 cases, a Full coverage at 10 of 0.25. Half of the provisions that cannot be found need a legal step the question
 never states. Our first fix lost, and the oracle test will tell us why.
 
 ## 14. Four decisions (Hung, then all, 0:25)
