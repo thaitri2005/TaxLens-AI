@@ -1,6 +1,6 @@
 # Status
 
-Where TaxLens stands as of 06/11/2026. Rewritten as things change. What has been tried is in
+Where TaxLens stands as of 23/11/2026. Rewritten as things change. What has been tried is in
 [retrieval-experiments.md](retrieval-experiments.md): read it before running anything.
 
 ## What is live
@@ -69,20 +69,25 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
 
 ## To do
 
-In suggested order:
+Ranked by worth for the effort, done one at a time from the top. Effort: S = hours, M = a day or two,
+L = more. Mark each done here when finished.
 
-1. Add gold cases, to at least 50: 12 cannot separate methods, and the best results need independent
-   evidence.
-2. Have a tax expert review the filter's inferred rules, the 178 documents the ministry says are in
-   force but our list ends, and the alternative evidence sets.
-3. Decide on ended documents for the site. The cautious option is explicit repeals and ministry
-   dates, which needs one 6-minute run on `corpus-v2` first.
-4. Tell the professor: all earlier results were measured with the TCVN3 bug, and hybrid fell from 0.41
-   to 0.30 before the filter brought it to 0.45.
-5. Plan a step that works out which law a question depends on.
-6. Build answer evaluation with reviewed labels.
-7. Remove duplicates and settle the uncertain numbers.
+| # | Task | Effort | Why |
+| --- | --- | --- | --- |
+| 1 | Run the cautious filter (explicit repeals + ministry dates) on `corpus-v2` | S, free, ~6 min | Decides what can go on the site without inferred rules |
+| 2 | Handle ended documents on the site: filter or a "may have ended" badge, pointing to the replacing law where known | M, needs a release | The site cites Decree 123/2008, Law 13/2008, Circular 32/2011 |
+| 3 | Find why evaluation takes 29-47 s a question when an answer's retrieval takes 3-6 s | S-M, free | Makes every later run 5-10× cheaper |
+| 4 | Grade answers against the gold answers already in the gold set | M, ~$0.05 | Answer quality is unmeasured |
+| 5 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
+| 6 | Draft new gold cases for Hung and an expert to verify, to at least 50, some held out | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
+| 7 | Remove the 14 duplicate documents, settle the 3 uncertain numbers, freeze `corpus-v2.1` | M, free | Both copies appear in results |
+| 8 | Set up ESLint for the web app and run it in CI | S | No lint config exists; CI only builds the web app |
+| 9 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, after 6 | Weak top-5 recall; cannot reach the 14 never-found provisions |
+| 10 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, after 6 | Half the hardest misses need it |
+| 11 | Split the 800-line `page.tsx` and add web tests | M | Maintainability only |
 
-**Azure clean-up, for the owner:** remove stale database firewall rules. Old images are cleared: the
-registry went from 92 GB to 4.3 GB, and each release now keeps the 2 newest. Leave `CreditScorecardWOEIV` in
-place: it serves another live project.
+**For people, not code:** a tax expert reviews the filter's inferred rules and the 178 documents the
+ministry says are in force but our list ends; tell the professor that all earlier results had the TCVN3
+bug (hybrid fell from 0.41 to 0.30 before the filter brought it to 0.45); the owner removes stale
+database firewall rules (old images are cleared; leave `CreditScorecardWOEIV`, which serves another
+project); install `gh` on the laptop; delete the merged local branches.
