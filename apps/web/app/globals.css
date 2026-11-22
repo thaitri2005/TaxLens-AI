@@ -92,6 +92,7 @@ footer { display:flex; justify-content:space-between; width:min(100% - 48px,1080
 .status-expired { color:#8d473e; background:#fae9e5; }
 .status-partially_expired,.status-not_yet_effective { color:#765c2f; background:#fcf5e8; }
 .version-card .status-tag { justify-self:start; }
+.document-ending { margin:-15px 0 25px; }
 .skeleton-row { height:50px; border-top:1px solid var(--line); background:linear-gradient(90deg,#f6f8f7 25%,#edf2f0 50%,#f6f8f7 75%); background-size:200% 100%; animation:shimmer 1.4s infinite linear; }
 .skeleton-row:first-child { border-top:0; }
 @keyframes shimmer { from { background-position:200% 0; } to { background-position:-200% 0; } }

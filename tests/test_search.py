@@ -124,6 +124,34 @@ def test_citation_builder_uses_stored_provenance_and_noop_reranker_preserves_ord
     assert reranked.results == results[:1]
 
 
+def test_search_current_on_leaves_out_only_confirmed_endings_by_that_date() -> None:
+    engine = _create_engine_with_search_data()
+    on = SearchFilters(current_on=date(2026, 1, 1))
+    with Session(engine) as session:
+        legacy = session.scalars(
+            select(LegalDocument).where(LegalDocument.document_number == "02/2024/TT-BTC")
+        ).one()
+
+        def numbers() -> set[str]:
+            return {result.document.document_number for result in search_chunks(session, "VAT", on)}
+
+        assert numbers() == {"31/2025/TT-BTC", "02/2024/TT-BTC"}
+        legacy.ended_on, legacy.end_basis = date(2025, 7, 1), "explicit"
+        session.flush()
+        assert numbers() == {"31/2025/TT-BTC"}
+        legacy.end_basis = "ministry"
+        session.flush()
+        assert numbers() == {"31/2025/TT-BTC"}
+        legacy.end_basis = "guidance"  # inferred: kept, and flagged where shown
+        session.flush()
+        assert numbers() == {"31/2025/TT-BTC", "02/2024/TT-BTC"}
+        legacy.end_basis, legacy.ended_on = "explicit", date(2026, 7, 1)  # ends later
+        session.flush()
+        assert numbers() == {"31/2025/TT-BTC", "02/2024/TT-BTC"}
+        citation = build_citation(search_chunks(session, "Superseded VAT", on)[0])
+        assert (citation.ended_on, citation.end_basis) == (date(2026, 7, 1), "explicit")
+
+
 def _create_engine_with_search_data():
     engine = create_engine(
         "sqlite+pysqlite://",

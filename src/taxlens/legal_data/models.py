@@ -61,6 +61,12 @@ class LegalDocument(Base):
     title: Mapped[str] = mapped_column(Text)
     document_type: Mapped[str] = mapped_column(String(50))
     issuing_agency: Mapped[str | None] = mapped_column(String(255))
+    # When the whole document stops applying, and why (a rule in taxlens.retrieval.repeals).
+    # Loaded from a committed repeal list by scripts/apply_document_endings.py.
+    ended_on: Mapped[date | None] = mapped_column(Date)
+    end_basis: Mapped[str | None] = mapped_column(String(20))
+    # The document that ends it (explicit), or that it guided or amended (inferred rules).
+    ended_by: Mapped[str | None] = mapped_column(String(100))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now(), onupdate=func.now()

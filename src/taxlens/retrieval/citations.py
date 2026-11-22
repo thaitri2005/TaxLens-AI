@@ -23,6 +23,10 @@ class Citation:
     source_url: str | None
     excerpt: str | None = None
     """Verbatim source text most relevant to the query, when a query is given."""
+    ended_on: date | None = None
+    end_basis: str | None = None
+    ended_by: str | None = None
+    """The document's recorded ending (``LegalDocument``), if any."""
 
 
 def build_citation(result: SearchResult, query: str | None = None) -> Citation:
@@ -44,4 +48,7 @@ def build_citation(result: SearchResult, query: str | None = None) -> Citation:
         source_artifact_key=result.version.raw_artifact_key,
         source_url=result.source_url,
         excerpt=build_excerpt(result.chunk.content, query) if query else None,
+        ended_on=result.document.ended_on,
+        end_basis=result.document.end_basis,
+        ended_by=result.document.ended_by,
     )

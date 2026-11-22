@@ -1,8 +1,10 @@
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import date
 from enum import StrEnum
 
+from taxlens.retrieval.repeals import ending_note, today_in_vietnam
 from taxlens.retrieval.search import SearchResult
 
 # Statuses that mean a provision no longer states the current rule.
@@ -35,7 +37,9 @@ class EvidenceAssessment:
 
 
 def assess_evidence(
-    results: Sequence[SearchResult], min_semantic_score: float | None = None
+    results: Sequence[SearchResult],
+    min_semantic_score: float | None = None,
+    today: date | None = None,
 ) -> EvidenceAssessment:
     if not results:
         return EvidenceAssessment(
@@ -105,12 +109,33 @@ def assess_evidence(
             "The legal status of at least one cited document has not been verified; confirm "
             "it is still in force."
         )
+    notes.extend(_ending_notes(current, today or today_in_vietnam()))
     return EvidenceAssessment(
         status=EvidenceStatus.SUFFICIENT,
         reason="Retrieved evidence has a consistent legal status and structural locators.",
         results=tuple(current),
         notes=tuple(notes),
     )
+
+
+def _ending_notes(results: Sequence[SearchResult], today: date) -> list[str]:
+    """A note for each cited document recorded as ended, possibly ended, or ending later."""
+
+    notes: dict[object, str] = {}
+    for result in results:
+        document = result.document
+        if document.id in notes:
+            continue
+        note = ending_note(
+            document.document_number,
+            document.ended_on,
+            document.end_basis,
+            document.ended_by,
+            today,
+        )
+        if note is not None:
+            notes[document.id] = note
+    return list(notes.values())
 
 
 def _has_structural_locator(result: SearchResult) -> bool:

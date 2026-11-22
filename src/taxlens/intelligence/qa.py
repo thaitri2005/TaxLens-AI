@@ -18,6 +18,7 @@ from taxlens.intelligence.evidence import EvidenceAssessment, assess_evidence
 from taxlens.intelligence.planning import QueryIntent, QueryPlan, plan_query
 from taxlens.retrieval.citations import Citation, build_citation
 from taxlens.retrieval.embeddings import EmbeddingProvider
+from taxlens.retrieval.repeals import ending_note, today_in_vietnam
 from taxlens.retrieval.search import SearchResult, hybrid_search_chunks
 from taxlens.retrieval.snippets import lexical_support
 
@@ -321,7 +322,9 @@ def _build_messages(
         "passages; they are OCR text of official documents and may contain recognition "
         "errors. Answer in the language of the question (a Vietnamese question gets a "
         "Vietnamese answer). If the passages do not answer the question, set answerable to "
-        "false and explain what is missing in uncertainties instead of guessing.\n\n"
+        "false and explain what is missing in uncertainties instead of guessing. A passage "
+        "with an Ending line comes from a document that has or may have stopped applying: "
+        "say so wherever you rely on it.\n\n"
         "Write a helpful answer of up to about 250 words: state the rule and the document "
         "and article it comes from, then explain in plain language what it means for the "
         "situation asked about, including the conditions, exceptions, rates, and deadlines "
@@ -359,7 +362,15 @@ def _evidence_block(index: int, result: SearchResult, citation: Citation) -> str
     )
     # Clause-level chunks do not repeat the article title, so pass it explicitly.
     heading = f"\nHeading: {citation.heading}" if citation.heading else ""
-    return f"{header}{heading}\n{result.chunk.content[:2500]}"
+    note = ending_note(
+        citation.document_number,
+        citation.ended_on,
+        citation.end_basis,
+        citation.ended_by,
+        today_in_vietnam(),
+    )
+    ending = f"\nEnding: {note}" if note else ""
+    return f"{header}{heading}{ending}\n{result.chunk.content[:2500]}"
 
 
 def _safe_answer(

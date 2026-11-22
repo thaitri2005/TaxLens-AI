@@ -20,7 +20,8 @@ such statement is kept, so the filter errs towards keeping.
 import re
 from collections.abc import Collection, Iterable, Mapping
 from dataclasses import dataclass
-from datetime import date
+from datetime import UTC, date, datetime, timedelta, timezone
+from enum import StrEnum
 
 from taxlens.retrieval.text import fold_vietnamese
 
@@ -58,6 +59,10 @@ _AMENDS = re.compile(r"\bsua doi\b")
 
 
 RULES = ("explicit", "guidance", "amendment", "ministry")
+# Endings the site acts on: a document's own statement, or the ministry's record.
+CONFIRMED_RULES = ("explicit", "ministry")
+# Endings the site only flags, until a legal expert validates the rules.
+INFERRED_RULES = ("guidance", "amendment")
 
 
 @dataclass(frozen=True)
@@ -66,6 +71,66 @@ class Repeal:
     ended_on: date
     rule: str
     by: str
+
+
+class EndState(StrEnum):
+    ENDED = "ENDED"
+    """A confirmed rule ended it on or before the date."""
+    MAY_HAVE_ENDED = "MAY_HAVE_ENDED"
+    """Only an inferred rule says it ended on or before the date."""
+    ENDS_LATER = "ENDS_LATER"
+    """It is recorded to end after the date."""
+
+
+def ending_note(
+    document_number: str,
+    ended_on: date | None,
+    basis: str | None,
+    ended_by: str | None,
+    on: date,
+) -> str | None:
+    """One sentence on a document's recorded ending as of ``on``, for answers and prompts."""
+
+    state = end_state(ended_on, basis, on)
+    if state is None or ended_on is None:
+        return None
+    when = ended_on.strftime("%d/%m/%Y")
+    if state is EndState.ENDS_LATER:
+        return f"{document_number} is recorded to stop applying on {when}."
+    if state is EndState.ENDED:
+        source = (
+            f"ended by {ended_by}"
+            if basis == "explicit" and ended_by
+            else "according to the Ministry of Finance's record"
+        )
+        return (
+            f"{document_number} stopped applying on {when} ({source}); its text states the law "
+            "before that date only."
+        )
+    relation = "guides" if basis == "guidance" else "amends"
+    return (
+        f"{document_number} may have stopped applying on {when}: it {relation} "
+        f"{ended_by or 'a document'}, which ended then. Confirm it still applies."
+    )
+
+
+_VIETNAM = timezone(timedelta(hours=7))
+
+
+def today_in_vietnam() -> date:
+    """Today's date where the law applies (UTC+7, no daylight saving)."""
+
+    return datetime.now(UTC).astimezone(_VIETNAM).date()
+
+
+def end_state(ended_on: date | None, basis: str | None, on: date) -> EndState | None:
+    """Whether a document with this recorded ending had ended by ``on``; None if never."""
+
+    if ended_on is None or basis is None:
+        return None
+    if ended_on > on:
+        return EndState.ENDS_LATER
+    return EndState.ENDED if basis in CONFIRMED_RULES else EndState.MAY_HAVE_ENDED
 
 
 def ended_documents(

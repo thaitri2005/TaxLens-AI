@@ -16,6 +16,7 @@ from taxlens.legal_data.models import (
     SourceRecord,
 )
 from taxlens.retrieval.embeddings import EmbeddingProvider
+from taxlens.retrieval.repeals import CONFIRMED_RULES
 from taxlens.retrieval.reranking import NoOpReranker, Reranker
 from taxlens.retrieval.text import fold_vietnamese
 
@@ -112,6 +113,9 @@ class SearchFilters:
     document_types: tuple[str, ...] | None = None
     # Leaves out these document numbers, such as documents that had ended by a case's date.
     excluded_document_numbers: tuple[str, ...] = ()
+    # Leaves out documents whose confirmed ending (CONFIRMED_RULES) falls on or before this
+    # date. Endings that are only inferred are kept, and flagged where they are shown.
+    current_on: date | None = None
 
 
 @dataclass(frozen=True)
@@ -485,6 +489,15 @@ def _apply_filters(statement: Any, filters: SearchFilters) -> Any:
     if filters.excluded_document_numbers:
         statement = statement.where(
             LegalDocument.document_number.not_in(filters.excluded_document_numbers)
+        )
+    if filters.current_on is not None:
+        statement = statement.where(
+            or_(
+                LegalDocument.ended_on.is_(None),
+                LegalDocument.end_basis.is_(None),
+                LegalDocument.end_basis.not_in(CONFIRMED_RULES),
+                LegalDocument.ended_on > filters.current_on,
+            )
         )
     if filters.as_of is not None:
         known_start = func.coalesce(DocumentVersion.effective_date, DocumentVersion.issue_date)

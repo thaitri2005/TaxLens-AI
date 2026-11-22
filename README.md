@@ -88,8 +88,9 @@ flowchart LR
    at most 1,500 characters with article, clause, and page.
 3. **Retrieval**: diacritic-insensitive keyword ranking over every term of the question
    and `multilingual-e5-small` semantic search, combined by reciprocal rank fusion.
-4. **Evidence gate**: superseded and unlocated passages are set aside, and clearly
-   unrelated questions are refused before any model call.
+4. **Evidence gate**: documents with a confirmed end are left out, those that may have ended
+   are flagged, unlocated passages are set aside, and clearly unrelated questions are refused
+   before any model call.
 5. **Answer**: the model answers from numbered passages or says they do not answer the
    question; facts not supported by their cited passage are removed.
 
@@ -179,8 +180,9 @@ TaxLens is a development-stage research tool, **not legal or tax advice**.
 - Most government PDFs are scans, so OCR errors affect search and quotations.
 - Government-portal documents have no recorded legal status (`DISCOVERED`) unless the
   Ministry of Finance record exists; answers flag this.
-- Old documents that have ended can crowd out current law and appear in answers, since most
-  have no recorded status. See [known problems](docs/evaluation-status.md#known-problems).
+- Ended documents are recognised only when a later document in the corpus repeals them or
+  the Ministry of Finance records their expiry. Documents that may have ended by inference are
+  flagged, not left out. See [ended documents](docs/retrieval.md#ended-documents).
 - The corpus is frozen, so new documents are not collected until it is deliberately updated.
 - Development-scale Azure resources scale to zero, so the first request after idle is
   slow.

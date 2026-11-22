@@ -37,7 +37,8 @@ Dependencies point one way: `api` → `intelligence` → `retrieval` → `legal_
 
 ## Data model
 
-- **`legal_documents`**: one row per document number, with title, type, and agency.
+- **`legal_documents`**: one row per document number, with title, type, and agency, and its recorded
+  ending (`ended_on`, `end_basis`, `ended_by`; see [ended documents](retrieval.md#ended-documents)).
 - **`source_records`**: where a file came from, and the source's ID, which prevents repeat downloads.
 - **`document_versions`**: one file, by content hash, with dates and status (`EFFECTIVE`, `EXPIRED`,
   `DISCOVERED`). A number can hold several.

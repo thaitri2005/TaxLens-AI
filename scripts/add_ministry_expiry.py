@@ -1,31 +1,40 @@
 """Add the Ministry of Finance's expiry dates to the repeal list.
 
-    python scripts/add_ministry_expiry.py
+    python scripts/add_ministry_expiry.py --corpus corpus-v2
 
-Offline. Reads repeals/corpus-v1.json, corpus/mof-status.json, and the corpus manifest;
-writes repeals/corpus-v1-ministry.json. An expiry date from year 2900 is a placeholder.
+Offline. Reads repeals/<corpus>.json (from extract_repeals.py), corpus/mof-status.json, and
+the corpus manifest; writes repeals/<corpus>-ministry.json. An expiry date from year 2900
+is a placeholder.
 """
 
+import argparse
 import json
 from pathlib import Path
 
 from taxlens.retrieval.repeals import normalize
 
-REPEALS = Path("data/evaluation/repeals/corpus-v1.json")
-STATUS = Path("data/evaluation/corpus/mof-status.json")
-MANIFEST = Path("data/evaluation/corpus/corpus-v1.json")
-OUTPUT = Path("data/evaluation/repeals/corpus-v1-ministry.json")
+EVALUATION = Path("data/evaluation")
+STATUS = EVALUATION / "corpus" / "mof-status.json"
 EXPIRED = "Hết hiệu lực"
 
 
 def main() -> None:
-    stored = json.loads(REPEALS.read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--corpus", required=True, help="Corpus name, such as corpus-v2")
+    parser.add_argument("--output", type=Path, help="Default: repeals/<corpus>-ministry.json")
+    arguments = parser.parse_args()
+    output = arguments.output or EVALUATION / "repeals" / f"{arguments.corpus}-ministry.json"
+
+    stored = json.loads(
+        (EVALUATION / "repeals" / f"{arguments.corpus}.json").read_text(encoding="utf-8")
+    )
     repeals = dict(stored["repeals"])
     status = {
         normalize(number): record
         for number, record in json.loads(STATUS.read_text(encoding="utf-8"))["records"].items()
     }
-    versions = json.loads(MANIFEST.read_text(encoding="utf-8"))["versions"]
+    manifest = EVALUATION / "corpus" / f"{arguments.corpus}.json"
+    versions = json.loads(manifest.read_text(encoding="utf-8"))["versions"]
     added = earlier = 0
     for number in sorted({version["document_number"] for version in versions}):
         record = status.get(normalize(number))
@@ -53,7 +62,7 @@ def main() -> None:
     rules: dict[str, int] = {}
     for repeal in repeals.values():
         rules[repeal["rule"]] = rules.get(repeal["rule"], 0) + 1
-    OUTPUT.write_text(
+    output.write_text(
         json.dumps(
             {**stored, "ended_count": len(repeals), "rules": rules, "repeals": repeals},
             ensure_ascii=False,

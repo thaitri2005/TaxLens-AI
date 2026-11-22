@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from taxlens.intelligence.evidence import EvidenceStatus, assess_evidence
 from taxlens.intelligence.planning import QueryIntent, plan_query
@@ -74,6 +75,30 @@ def test_evidence_assessment_flags_conflicting_known_statuses_within_a_document(
     pending = _result(legal_status="NOT_YET_EFFECTIVE", article_number="1", document_id=document_id)
 
     assert assess_evidence([effective, pending]).status is EvidenceStatus.CONFLICTING_VERSIONS
+
+
+def test_query_planner_keeps_ended_documents_only_when_the_question_names_documents() -> None:
+    today = date(2026, 1, 1)
+
+    assert plan_query("Thuế suất thuế GTGT là bao nhiêu?", today).filters.current_on == today
+    assert plan_query("Nội dung của 31/2025/TT-BTC là gì?", today).filters.current_on is None
+    assert plan_query("31/2025/TT-BTC và 02/2024/TT-BTC khác gì?", today).filters.current_on is None
+
+
+def test_evidence_notes_each_cited_document_that_has_or_may_have_ended() -> None:
+    first = _result(legal_status="EFFECTIVE", article_number="1")
+    first.document.ended_on, first.document.end_basis = date(2025, 7, 1), "guidance"
+    first.document.ended_by = "13/2008/QH12"
+    same_document = _result("EFFECTIVE", "2", document_id=first.document.id)
+    same_document.document.ended_on, same_document.document.end_basis = date(2025, 7, 1), "guidance"
+    current = _result(legal_status="EFFECTIVE", article_number="3")
+
+    notes = assess_evidence([first, same_document, current], today=date(2026, 1, 1)).notes
+
+    assert [note for note in notes if "may have stopped applying" in note] == [
+        "31/2025/TT-BTC may have stopped applying on 01/07/2025: it guides 13/2008/QH12, which "
+        "ended then. Confirm it still applies."
+    ]
 
 
 def _result(

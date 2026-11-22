@@ -5,7 +5,10 @@ import { signOut, useSession } from "next-auth/react";
 
 type View = "search" | "ask" | "documents";
 type Language = "en" | "vi";
-type Citation = {
+// A document's recorded ending (see taxlens.retrieval.repeals): explicit and ministry
+// endings are confirmed, guidance and amendment endings are only inferred.
+type Ending = { ended_on?: string | null; end_basis?: string | null; ended_by?: string | null };
+type Citation = Ending & {
   document_number: string;
   title?: string;
   heading?: string | null;
@@ -17,7 +20,7 @@ type Citation = {
   source_url: string | null;
 };
 type SearchHit = { chunk_id: string; snippet: string; content: string; fused_score: number; citation: Citation };
-type Document = { id: string; document_number: string; title: string; document_type: string; kind: string; issuing_agency: string | null; source_name: string | null };
+type Document = Ending & { id: string; document_number: string; title: string; document_type: string; kind: string; issuing_agency: string | null; source_name: string | null };
 type DocumentListItem = Document & { legal_status: string | null; issue_date: string | null; preview: string | null };
 type DocumentPage = { total: number; items: DocumentListItem[] };
 type CountByValue = { value: string; count: number };
@@ -115,6 +118,12 @@ const COPY = {
       NOT_YET_EFFECTIVE: "Not yet in force", DISCOVERED: "Status not recorded", UNKNOWN: "Status unknown",
     } as Record<string, string>,
     sourceNames: { "government-portal": "Government portal", "mof-vbpq": "Ministry of Finance" } as Record<string, string>,
+    endings: {
+      ended: (date: string) => `Ended ${date}`, mayHaveEnded: (date: string) => `May have ended ${date}`,
+      endsLater: (date: string) => `Ends ${date}`, by: (number: string) => `by ${number}`,
+      ministryRecord: "Ministry of Finance record",
+      guides: (number: string) => `guides ${number}, which ended`, amends: (number: string) => `amends ${number}, which ended`,
+    },
     working: "Working…", evidencePassage: "evidence passage", evidencePassages: "evidence passages", relevantPassage: "Relevant passage",
     noResults: "No matching passages", broaden: "Try a broader Vietnamese or English query.",
     matchingDocuments: "Matching documents", matchingPassages: "Matching passages",
@@ -169,6 +178,12 @@ const COPY = {
       NOT_YET_EFFECTIVE: "Chưa có hiệu lực", DISCOVERED: "Chưa ghi nhận hiệu lực", UNKNOWN: "Không xác định",
     } as Record<string, string>,
     sourceNames: { "government-portal": "Cổng TTĐT Chính phủ", "mof-vbpq": "Bộ Tài chính" } as Record<string, string>,
+    endings: {
+      ended: (date: string) => `Hết hiệu lực từ ${date}`, mayHaveEnded: (date: string) => `Có thể đã hết hiệu lực từ ${date}`,
+      endsLater: (date: string) => `Sẽ hết hiệu lực từ ${date}`, by: (number: string) => `theo ${number}`,
+      ministryRecord: "theo dữ liệu Bộ Tài chính",
+      guides: (number: string) => `hướng dẫn ${number}, đã hết hiệu lực`, amends: (number: string) => `sửa đổi ${number}, đã hết hiệu lực`,
+    },
     working: "Đang xử lý…", evidencePassage: "đoạn trích", evidencePassages: "đoạn trích", relevantPassage: "Đoạn trích liên quan",
     noResults: "Không tìm thấy đoạn phù hợp", broaden: "Hãy thử câu hỏi rộng hơn bằng tiếng Việt hoặc tiếng Anh.",
     matchingDocuments: "Văn bản phù hợp", matchingPassages: "Đoạn trích phù hợp",
@@ -241,6 +256,28 @@ function formatDate(isoDate: string) {
   return isoDate.split("-").reverse().join("/");
 }
 
+const CONFIRMED_ENDINGS = ["explicit", "ministry"];
+
+function todayInVietnam() {
+  return new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+function EndingTag({ ending, copy }: { ending: Ending; copy: Copy }) {
+  if (!ending.ended_on || !ending.end_basis) return null;
+  const date = formatDate(ending.ended_on);
+  const later = ending.ended_on > todayInVietnam();
+  const confirmed = CONFIRMED_ENDINGS.includes(ending.end_basis);
+  const label = later ? copy.endings.endsLater(date) : confirmed ? copy.endings.ended(date) : copy.endings.mayHaveEnded(date);
+  const detail = ending.end_basis === "ministry" ? copy.endings.ministryRecord
+    : !ending.ended_by ? null
+    : ending.end_basis === "explicit" ? copy.endings.by(ending.ended_by)
+    : later ? null
+    : ending.end_basis === "guidance" ? copy.endings.guides(ending.ended_by) : copy.endings.amends(ending.ended_by);
+  return <span className={`status-tag ${confirmed && !later ? "status-expired" : "status-partially_expired"}`}>
+    {label}{detail ? ` · ${detail}` : ""}
+  </span>;
+}
+
 function documentListQuery(filters: DocumentFilters, pageIndex: number) {
   const params = new URLSearchParams({ limit: String(DOCUMENT_PAGE_SIZE), offset: String(pageIndex * DOCUMENT_PAGE_SIZE) });
   if (filters.q) params.set("q", filters.q);
@@ -255,6 +292,7 @@ function CitationLine({ citation, copy, number }: { citation: Citation; copy: Co
     <div className="citation">
       {number !== undefined && <span className="source-number">[{number}]</span>}
       <span className="tag">{citation.document_number}</span>
+      <EndingTag ending={citation} copy={copy} />
       <span>{locationLabel(citation, copy) || copy.sourcePassage}</span>
       {citation.heading && <span>{citation.heading}</span>}
       {citation.source_url && <a href={citation.source_url} target="_blank" rel="noreferrer">{copy.officialSource}</a>}
@@ -533,6 +571,7 @@ export default function Home() {
             <span className="document-row-meta">
               <span className="tag">{labelFor(copy.kinds, document.kind)}</span>
               {document.legal_status && <StatusTag status={document.legal_status} copy={copy} />}
+              <EndingTag ending={document} copy={copy} />
             </span>
             {document.preview && <span className="document-row-preview">{document.preview}</span>}
           </button>)}</div>
@@ -610,6 +649,7 @@ export default function Home() {
                 <span className="document-row-meta">
                   <span className="tag">{labelFor(copy.kinds, document.kind)}</span>
                   {document.legal_status && <StatusTag status={document.legal_status} copy={copy} />}
+                  <EndingTag ending={document} copy={copy} />
                   <span className="document-row-date">{document.issue_date ? formatDate(document.issue_date) : "—"}</span>
                 </span>
                 {document.preview && <span className="document-row-preview">{document.preview}</span>}
@@ -773,6 +813,7 @@ function DocumentDetailView({ detail, chunks, copy, numberFormat, onLoadMore, lo
   return <>
     <Heading eyebrow={copy.indexedSource} title={detail.document_number} chip={labelFor(copy.kinds, detail.kind)} />
     <p className="document-title">{detail.title}</p>
+    {detail.ended_on && <p className="document-ending"><EndingTag ending={detail} copy={copy} /></p>}
     <p className="document-source">
       {labelFor(copy.sourceNames, detail.source_name || "") || copy.sourceUnavailable} · {detail.issuing_agency || copy.agencyUnavailable}{" "}
       {detail.versions[0]?.source_url && <a href={detail.versions[0].source_url} target="_blank" rel="noreferrer">{copy.officialSource}</a>}

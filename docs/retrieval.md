@@ -63,6 +63,9 @@ the model cannot load, search falls back to keyword.
 - Vector search is exact (`distance + 0`). There is no HNSW index, since it could silently shorten the
   candidate list.
 - A question naming exactly one document number is restricted to that document.
+- A question naming no document number leaves out documents whose end is confirmed by today, Vietnam
+  time ([ended documents](#ended-documents)). A question that names documents keeps them, since it may
+  be about an old one.
 - Passages with four or more blank-field runs count as forms, and are left out unless the question asks
   for one (`mẫu số`, `biểu mẫu`, `mẫu biểu`, `mẫu đơn`, `tờ khai`).
 - The embedding model reads 512 tokens: 0.5% of article passages and 18% of other text exceed it, losing
@@ -82,13 +85,33 @@ Before any model call, the top passages (5 by default):
 | Versions with different known statuses | `CONFLICTING_VERSIONS` |
 | Otherwise | `SUFFICIENT`; `DISCOVERED` status is noted |
 
-This relies on recorded status, and most portal documents are `DISCOVERED`, so ended documents usually
-pass. The evaluation's filter for ended documents is separate and not on the site.
+Recorded status rarely helps, since most portal documents are `DISCOVERED`; ended documents are handled
+before the gate, by their recorded ending. Each cited document that has or may have ended, or is recorded
+to end later, gets a note among the answer's uncertainties.
+
+### Ended documents
+
+`legal_documents.ended_on`, `end_basis`, and `ended_by` hold one ending per document, loaded from a
+committed list (`data/evaluation/repeals/corpus-v2-ministry.json`) by `apply_document_endings.py`. The
+bases are the rules of `retrieval/repeals.py`, and the date is compared with today on every request, so a
+future ending takes effect by itself.
+
+| Basis | Meaning | Answers | Shown |
+| --- | --- | --- | --- |
+| `explicit` | A document in the corpus says this one ends; `ended_by` names it | Left out | "Ended", with the document |
+| `ministry` | The Ministry of Finance records it as expired | Left out | "Ended", Ministry of Finance record |
+| `guidance` | It guides a document that ended (`ended_by`) | Kept, noted | "May have ended" |
+| `amendment` | It amends a document that ended (`ended_by`) | Kept, noted | "May have ended" |
+
+Only the first two act, as no legal expert has validated the inferred rules. On `corpus-v2` that leaves
+out 697 documents and flags 128; in evaluation it gives 0.31, 0.42, 0.45, against 0.10, 0.30, 0.41 without
+it ([status](evaluation-status.md#results)). Search pages show the same tags but leave nothing out, since
+looking up an old document is a normal use.
 
 ## 6. Answers (`intelligence/qa.py`)
 
 A LangGraph graph: plan → retrieve → assess → generate → validate. The model gets numbered passages with
-document, status, article, clause, and pages, through the provider-neutral `ChatProvider`. It must answer
+document, status, article, clause, pages, and any ending note, through the provider-neutral `ChatProvider`. It must answer
 in the question's language, return `answerable: false` if the passages do not answer it, and give at
 most five confirmed facts, an answer of about 250 words, and one to four practical steps that add no new
 rules.

@@ -1,8 +1,10 @@
 import unicodedata
 from dataclasses import dataclass
+from datetime import date
 from enum import StrEnum
 
 from taxlens.legal_data.document_numbers import find_document_numbers
+from taxlens.retrieval.repeals import today_in_vietnam
 from taxlens.retrieval.search import SearchFilters
 
 
@@ -25,14 +27,17 @@ class QueryPlan:
 _UNSUPPORTED_QUERIES = {"chào", "chào bạn", "hello", "hi", "test"}
 
 
-def plan_query(query: str) -> QueryPlan:
+def plan_query(query: str, today: date | None = None) -> QueryPlan:
     normalized_query = " ".join(unicodedata.normalize("NFC", query).split())
     normalized_case = normalized_query.casefold()
     document_numbers = find_document_numbers(normalized_query)
     # Restricting retrieval to one document only makes sense when exactly one is named;
     # a question about several documents needs evidence from each of them.
+    # Answers state the law as it is today, so documents whose end is confirmed are left
+    # out; when the question names documents, they are kept and their endings noted.
     filters = SearchFilters(
-        document_number=document_numbers[0] if len(document_numbers) == 1 else None
+        document_number=document_numbers[0] if len(document_numbers) == 1 else None,
+        current_on=None if document_numbers else (today or today_in_vietnam()),
     )
 
     if not normalized_query or normalized_case in _UNSUPPORTED_QUERIES:

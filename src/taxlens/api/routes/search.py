@@ -40,6 +40,11 @@ class SearchCitation(BaseModel):
     source_artifact_key: str
     source_url: str | None
     excerpt: str | None = None
+    # The document's recorded ending: a date, a rule (CONFIRMED_RULES end it, the others
+    # only suggest it), and the related document. Empty when none is recorded.
+    ended_on: date | None = None
+    end_basis: str | None = None
+    ended_by: str | None = None
 
 
 class SearchHit(BaseModel):
@@ -141,4 +146,7 @@ def to_search_citation(citation: Citation) -> SearchCitation:
         source_artifact_key=citation.source_artifact_key,
         source_url=citation.source_url,
         excerpt=citation.excerpt,
+        ended_on=citation.ended_on,
+        end_basis=citation.end_basis,
+        ended_by=citation.ended_by,
     )

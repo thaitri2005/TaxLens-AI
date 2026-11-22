@@ -42,6 +42,9 @@ EXPORT_COLUMNS = (
     "issue_date",
     "effective_date",
     "legal_status",
+    "ended_on",
+    "end_basis",
+    "ended_by",
     "processing_status",
     "processing_error",
     "passages",
@@ -62,6 +65,9 @@ class DocumentSummary(BaseModel):
     kind: str
     issuing_agency: str | None
     source_name: str | None
+    ended_on: date | None = None
+    end_basis: str | None = None
+    ended_by: str | None = None
 
 
 class DocumentListItem(DocumentSummary):
@@ -372,6 +378,9 @@ def _document_summary(document: LegalDocument, source_name: str | None = None) -
         kind=document_kind(document.document_type),
         issuing_agency=document.issuing_agency,
         source_name=source_name,
+        ended_on=document.ended_on,
+        end_basis=document.end_basis,
+        ended_by=document.ended_by,
     )
 
 
@@ -522,6 +531,9 @@ def export_document_list(session: Session = Depends(get_db_session)) -> Response
             DocumentVersion.issue_date,
             DocumentVersion.effective_date,
             DocumentVersion.legal_status,
+            LegalDocument.ended_on,
+            LegalDocument.end_basis,
+            LegalDocument.ended_by,
             DocumentVersion.created_at,
         )
         .join(LegalDocument, DocumentVersion.document_id == LegalDocument.id)
@@ -572,6 +584,9 @@ def export_document_list(session: Session = Depends(get_db_session)) -> Response
                     row.issue_date,
                     row.effective_date,
                     row.legal_status,
+                    row.ended_on,
+                    row.end_basis,
+                    row.ended_by,
                     job_status,
                     error_code,
                     int(passages.get(row.id, 0)),

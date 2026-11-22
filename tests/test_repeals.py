@@ -122,3 +122,37 @@ def test_ended_documents_by_date_and_rule():
     assert ended_documents(stored, date(2025, 7, 1)) == ("A", "B")
     assert ended_documents(stored, date(2025, 6, 30)) == ()
     assert ended_documents(stored, date(2026, 1, 1), {"explicit"}) == ("A", "C")
+
+
+def test_end_state_acts_on_confirmed_rules_and_flags_inferred_ones():
+    from taxlens.retrieval.repeals import EndState, end_state
+
+    on = date(2026, 1, 1)
+    assert end_state(None, None, on) is None
+    assert end_state(date(2025, 7, 1), "explicit", on) is EndState.ENDED
+    assert end_state(date(2025, 7, 1), "ministry", on) is EndState.ENDED
+    assert end_state(date(2025, 7, 1), "guidance", on) is EndState.MAY_HAVE_ENDED
+    assert end_state(date(2025, 7, 1), "amendment", on) is EndState.MAY_HAVE_ENDED
+    assert end_state(date(2026, 1, 1), "explicit", on) is EndState.ENDED
+    assert end_state(date(2026, 7, 1), "explicit", on) is EndState.ENDS_LATER
+
+
+def test_ending_note_names_the_basis():
+    from taxlens.retrieval.repeals import ending_note
+
+    on = date(2026, 1, 1)
+    assert ending_note("13/2008/QH12", None, None, None, on) is None
+    assert ending_note("13/2008/QH12", date(2025, 7, 1), "explicit", "48/2024/QH15", on) == (
+        "13/2008/QH12 stopped applying on 01/07/2025 (ended by 48/2024/QH15); its text states "
+        "the law before that date only."
+    )
+    assert "Ministry of Finance" in ending_note(
+        "02/2013/TT-BTC", date(2016, 6, 10), "ministry", None, on
+    )
+    assert ending_note("123/2008/NĐ-CP", date(2025, 7, 1), "guidance", "13/2008/QH12", on) == (
+        "123/2008/NĐ-CP may have stopped applying on 01/07/2025: it guides 13/2008/QH12, which "
+        "ended then. Confirm it still applies."
+    )
+    assert ending_note("7/2026/TT-BNV", date(2026, 7, 1), "explicit", "x", on) == (
+        "7/2026/TT-BNV is recorded to stop applying on 01/07/2026."
+    )

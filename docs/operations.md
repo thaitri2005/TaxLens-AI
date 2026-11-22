@@ -46,6 +46,7 @@ CI type-checks against the newest SQLAlchemy 2.x; write statement annotations as
 | `evaluate_tax_retrieval.py`, `evaluate_retrieval.py`, `evaluate_qa.py` | Retrieval evaluation, one ad hoc query, answer evaluation ([retrieval](retrieval.md#evaluation)) |
 | `freeze_corpus.py`, `compare_retrieval_runs.py` | Record or check a corpus; paired comparison of two reports |
 | `extract_repeals.py`, `add_ministry_expiry.py` | Build lists of ended documents |
+| `apply_document_endings.py` | Load a list of ended documents into the database, where search and answers use it. A dry run unless `--apply` |
 | `correct_document_numbers.py` | Apply `number-corrections-v2.json`. A dry run unless `--apply` |
 | `decompose_issues.py`, `diagnose_retrieval_misses.py`, `measure_reference_reachability.py` | Experiment tools |
 | `annotation_agreement.py` | Cohen's kappa between annotators |
@@ -145,11 +146,14 @@ Then run `process_and_embed` in Airflow.
 ```powershell
 python scripts/freeze_corpus.py --label corpus-vN --output data/evaluation/corpus/corpus-vN.json
 python scripts/extract_repeals.py --output data/evaluation/repeals/corpus-vN.json
+python scripts/add_ministry_expiry.py --corpus corpus-vN
+python scripts/apply_document_endings.py --repeals data/evaluation/repeals/corpus-vN-ministry.json --apply
 ```
 
 Check before freezing: failures, TCVN3 words, missing embeddings, and new `DOCUMENT_NUMBER_MISMATCH` flags,
-reading a sample of real text rather than only counts. `add_ministry_expiry.py` has fixed paths, so point it
-at the new list and manifest. Then repeat the baselines.
+reading a sample of real text rather than only counts. Run `apply_document_endings.py` without `--apply`
+first and read what it would change; the site uses the endings as soon as they are applied, with no
+restart. Then repeat the baselines.
 
 ## Release
 
