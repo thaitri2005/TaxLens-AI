@@ -5,7 +5,7 @@ Where TaxLens stands as of 23/11/2026. Rewritten as things change. What has been
 
 ## What is live
 
-- **Site:** `2669c02`, released 23/11/2026, answering with `openai/gpt-oss-120b`. Answers leave out
+- **Site:** `aa3c86a`, released 23/11/2026, answering with `openai/gpt-oss-120b`. Answers leave out
   documents whose end is confirmed and flag inferred endings ([ended documents](retrieval.md#ended-documents)):
   the `corpus-v2` list (rebuilt after the rule fix of item 3) is loaded, leaving out 711 documents and
   flagging 124 as of 23/11/2026. Checked on the 5 answer questions against the live database; the new
@@ -13,8 +13,9 @@ Where TaxLens stands as of 23/11/2026. Rewritten as things change. What has been
 - **Corpus:** `corpus-v2`, frozen: 2,991 documents, 3,000 versions, 144,600 passages, all embedded.
 - **Access:** Tri, and Le Hung as a collaborator ([what each can reach](operations.md#access)).
 - **Airflow:** stopped. Keep it stopped, and the daily DAG paused, or the frozen corpus changes.
-- **Speed:** a whole answer takes 4-9 s on the new model, from a laptop, against 49-97 s. The first
-  question after about 5 idle minutes also waits for the API to start, about 1 minute or more.
+- **Speed:** a warm answer takes about 5.5 s inside Azure: retrieval 4.0 s (keyword 3.1 s, vector
+  0.8 s) and the model 1.6 s, as the API now logs per request. The first question after 5 idle minutes
+  waits for the API to start: image pull 13 s, then startup and model load.
 
 ## Results
 
@@ -111,7 +112,7 @@ L = more. Mark each done here when finished.
 | ~~6~~ | **Done 23/11/2026,** released in `f0f72b6`: evidence is the first 5 located passages of 20. A1 now gets current law, and still refuses: the VAT-reduction decree is not retrieved | | [Answers](#answers) |
 | ~~7~~ | **Done 23/11/2026,** released in `f0f72b6`: answers use the period a question names. L2 now correct. Filtered searches resolve versions first (vector 10 s → 1.3 s) | | [Answers](#answers) |
 | ~~8~~ | **Done 23/11/2026,** released in `9f26f28`: the image holds only `model.safetensors`; 1.92 → 0.77 GB, image pull 35 s → 13 s on each cold start | | [Speed](retrieval-experiments.md#speed) |
-| 9 | Vector search with an HNSW index and pgvector 0.8 iterative scans, or `halfvec` storage; keep only if the retrieval evaluation is identical or better | M, free to test | The 308 MB embeddings do not fit the 256 MB cache, so a search takes 1-10 s |
+| 9 | Keyword search on long questions: 3.1 s of a 5.5 s answer for 29 terms. Look at fewer index scans per question without changing results; an HNSW index (pgvector 0.8.2 iterative scans) or `halfvec` would only help vector search, now 0.8 s warm | M, free to test | Retrieval is 70% of an answer |
 | 10 | Keep the API warm longer after use (scale-to-zero cooldown 5 → 30 min). Idle replicas are billed at a reduced rate: check the current price first | S, the owner decides on cost | The first question after 5 idle minutes waits about 70 s |
 | 11 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
 | 12 | Draft new gold cases for Hung and an expert to verify, to at least 50, some held out | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
