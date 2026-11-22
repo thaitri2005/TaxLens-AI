@@ -1,12 +1,15 @@
 """Answer the gold-set questions as the site does, and grade each answer against its gold answer.
 
     python scripts/grade_answers.py --output data/evaluation/runs/answers-gold-v1-NAME.json
+    python scripts/grade_answers.py --regrade REPORT --output REPORT
 
 Each case is answered by ``answer_question`` with the site's settings (5 passages, today's
 ended documents left out), then a judge model from another family compares the answer with
 the gold answer: ``correct``, ``partly``, ``wrong``, or ``refused`` (declined when an answer
 was expected). The judge is a model, not a tax expert: read its reasons, and record where you
-disagree. Costs about $0.002 an answer and much less a grade; run it once per change.
+disagree in the case's ``review``. ``--regrade`` grades again only the cases a report left
+``ungraded`` (the judge failed), without answering again. Answers cost about $0.002 each and
+grades much less; run once per change.
 """
 
 import argparse
@@ -25,7 +28,7 @@ from taxlens.intelligence.chat import (
     HuggingFaceChatProvider,
     get_chat_provider,
 )
-from taxlens.intelligence.qa import QuestionAnswer, answer_question
+from taxlens.intelligence.qa import answer_question
 from taxlens.retrieval.embeddings import get_embedding_provider
 
 VERDICTS = ("correct", "partly", "wrong", "refused")
@@ -50,45 +53,30 @@ def main() -> None:
     parser.add_argument("--dataset", type=Path, default=Path("data/evaluation/gold_set_v1.csv"))
     parser.add_argument("--judge-model", default="Qwen/Qwen3-235B-A22B-Instruct-2507")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--regrade", type=Path, help="A report whose ungraded cases to grade")
     arguments = parser.parse_args()
 
     settings = get_settings()
     judge = HuggingFaceChatProvider(
         settings.model_copy(update={"hf_chat_model": arguments.judge_model})
     )
-    rows = list(csv.DictReader(arguments.dataset.open(encoding="utf-8-sig")))
-    embedding_provider = get_embedding_provider()
-    reports: list[dict[str, Any]] = []
-    with SessionLocal() as session:
-        for row in rows:
-            started = time.perf_counter()
-            result = answer_question(
-                session, row["question"], get_chat_provider(), embedding_provider, retrieval_limit=5
-            )
-            seconds = round(time.perf_counter() - started, 1)
-            verdict, reason = _grade(judge, row, result)
-            reports.append(
-                {
-                    "case_id": row["case_id"],
-                    "case_type": row["case_type"],
-                    "uncertain": row["uncertain"] == "Y",
-                    "question": row["question"],
-                    "gold_answer": row["gold_answer"],
-                    "status": result.status.value,
-                    "answer": result.answer,
-                    "uncertainties": result.uncertainties,
-                    "cited_documents": [citation.document_number for citation in result.citations],
-                    "seconds": seconds,
-                    "verdict": verdict,
-                    "reason": reason,
-                }
-            )
-            print(f"{row['case_id']}: {result.status.value}, {verdict} ({seconds} s)", flush=True)
+    if arguments.regrade:
+        previous = json.loads(arguments.regrade.read_text(encoding="utf-8"))
+        answer_model, reports = previous["answer_model"], previous["cases"]
+        for report in reports:
+            if report["verdict"] == "ungraded":
+                report["verdict"], report["reason"] = _grade(judge, report)
+                print(f"{report['case_id']}: {report['verdict']}", flush=True)
+    else:
+        answer_model, reports = settings.hf_chat_model, _answer(arguments.dataset)
+        for report in reports:
+            report["verdict"], report["reason"] = _grade(judge, report)
+            print(f"{report['case_id']}: {report['status']}, {report['verdict']}", flush=True)
 
     counted = [report for report in reports if not report["uncertain"]]
     summary = {verdict: sum(r["verdict"] == verdict for r in counted) for verdict in VERDICTS}
     output = {
-        "answer_model": settings.hf_chat_model,
+        "answer_model": answer_model,
         "judge_model": arguments.judge_model,
         "dataset": str(arguments.dataset),
         "case_count": len(counted),
@@ -101,14 +89,41 @@ def main() -> None:
     print("summary:", summary)
 
 
-def _grade(
-    judge: HuggingFaceChatProvider, row: dict[str, str], result: QuestionAnswer
-) -> tuple[str, str]:
-    answer = result.answer or "(no answer)"
+def _answer(dataset: Path) -> list[dict[str, Any]]:
+    """Each gold case answered as the site answers it."""
+
+    rows = list(csv.DictReader(dataset.open(encoding="utf-8-sig")))
+    embedding_provider = get_embedding_provider()
+    reports: list[dict[str, Any]] = []
+    with SessionLocal() as session:
+        for row in rows:
+            started = time.perf_counter()
+            result = answer_question(
+                session, row["question"], get_chat_provider(), embedding_provider, retrieval_limit=5
+            )
+            reports.append(
+                {
+                    "case_id": row["case_id"],
+                    "case_type": row["case_type"],
+                    "uncertain": row["uncertain"] == "Y",
+                    "question": row["question"],
+                    "gold_answer": row["gold_answer"],
+                    "status": result.status.value,
+                    "answer": result.answer,
+                    "uncertainties": result.uncertainties,
+                    "cited_documents": [citation.document_number for citation in result.citations],
+                    "seconds": round(time.perf_counter() - started, 1),
+                }
+            )
+    return reports
+
+
+def _grade(judge: HuggingFaceChatProvider, report: dict[str, Any]) -> tuple[str, str]:
     content = (
-        f"Question: {row['question']}\n\nReference answer: {row['gold_answer']}\n\n"
-        f"Assistant status: {result.status.value}\nAssistant answer: {answer}\n"
-        f"Assistant uncertainties: {'; '.join(result.uncertainties) or 'none'}"
+        f"Question: {report['question']}\n\nReference answer: {report['gold_answer']}\n\n"
+        f"Assistant status: {report['status']}\n"
+        f"Assistant answer: {report['answer'] or '(no answer)'}\n"
+        f"Assistant uncertainties: {'; '.join(report['uncertainties']) or 'none'}"
     )
     try:
         response = judge.complete(

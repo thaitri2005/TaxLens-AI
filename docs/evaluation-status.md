@@ -39,6 +39,20 @@ trails the full filter by one provision at K = 5 and one at K = 10 (A1 ranks 11t
 filter removes a gold document. The TCVN3 repair and appendix labels changed in the same step, and their
 effect was not separated.
 
+## Answers
+
+The 16 gold questions answered as the site answers them on 23/11/2026, graded against the gold answers
+by `Qwen/Qwen3-235B-A22B-Instruct-2507` and read by hand (`answers-gold-v1-2026-11-23.json`, which
+records where the reader differs). Of 15 counted cases (L1 is uncertain):
+
+| Judge | Correct | Partly | Wrong | Refused |
+| --- | --- | --- | --- | --- |
+| Model | 9 | 1 | 3 | 2 |
+| Reader | 8 | 2 | 3 | 2 |
+
+Wrong: A7 and L2 apply today's rule to 2023-2024 facts; A9 rests on a 1998 circular. Refused: A1, where
+all 5 passages were old documents without locators, and R2. Neither grader is a tax expert.
+
 ## Corpora
 
 Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at the corpus check.
@@ -60,7 +74,9 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
    question does not state ([diagnosis](retrieval-experiments.md#retrieval)).
 3. **Answer model trade-offs:** the faster model costs about $0.002 an answer, against $0.0003, and can
    mislabel a document's type. It depends on Groq and Cerebras staying on the router.
-4. **Answer quality is unmeasured:** only lexical checks on 5 questions, with no gold answers.
+4. **Answers are right on 9 of 15 gold questions** (judge model, read by hand; [Answers](#answers)).
+   Failures: questions about a past date get today's law, and old documents without article
+   locators fill the 5 evidence passages, so the gate refuses or the model cites 1998 circulars.
 5. **Duplicates:** 9 document numbers hold near-identical second versions, and 5 numbers with stray
    spaces (`148/2013/TT- BTC`) duplicate clean ones. Both copies can appear in results. Nothing was
    deleted.
@@ -86,14 +102,16 @@ L = more. Mark each done here when finished.
 | ~~2~~ | **Done 23/11/2026,** released in `2669c02`: confirmed endings left out of answers, inferred ones flagged, tags in the app | | [Ended documents](retrieval.md#ended-documents) |
 | ~~3~~ | **Done 23/11/2026.** Lists split across passages, items after OCR page numbers, and "continues in force until" clauses are read; 29 more documents end, loaded on Azure. Recall unchanged | | [Already tried](retrieval-experiments.md#retrieval) |
 | ~~4~~ | **Done 23/11/2026.** Evaluation runs about 30% faster (TensorFlow no longer loaded, one count query per case); the rest is laptop round trips and a small database. Answers are not slowed by the new filter | | [Speed](retrieval-experiments.md#speed) |
-| 5 | Grade answers against the gold answers already in the gold set | M, ~$0.05 | Answer quality is unmeasured |
-| 6 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
-| 7 | Draft new gold cases for Hung and an expert to verify, to at least 50, some held out | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
-| 8 | Remove the 14 duplicate documents, settle the 3 uncertain numbers, freeze `corpus-v2.1` | M, free | Both copies appear in results |
-| 9 | Set up ESLint for the web app and run it in CI | S | No lint config exists; CI only builds the web app |
-| 10 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, after 7 | Weak top-5 recall; cannot reach the 14 never-found provisions |
-| 11 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, after 7 | Half the hardest misses need it |
-| 12 | Split the 800-line `page.tsx` and add web tests | M | Maintainability only |
+| ~~5~~ | **Done 23/11/2026.** `grade_answers.py`: 9 of 15 correct by the judge, 8 by the reader | | [Answers](#answers) |
+| 6 | Take the 5 evidence passages from those with an article or page locator, instead of refusing when the top 5 have none | S, needs a release | A1 refused although current law exists; old unlocated circulars crowd the top |
+| 7 | Answer by the date a question names ("Tháng 6/2023"): search and leave out ended documents as of that date | M, needs a release | A7 and L2 get today's rule for past facts |
+| 8 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
+| 9 | Draft new gold cases for Hung and an expert to verify, to at least 50, some held out | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
+| 10 | Remove the 14 duplicate documents, settle the 3 uncertain numbers, freeze `corpus-v2.1` | M, free | Both copies appear in results |
+| 11 | Set up ESLint for the web app and run it in CI | S | No lint config exists; CI only builds the web app |
+| 12 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, after 9 | Weak top-5 recall; cannot reach the 14 never-found provisions |
+| 13 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, after 9 | Half the hardest misses need it |
+| 14 | Split the 800-line `page.tsx` and add web tests | M | Maintainability only |
 
 **For people, not code:** a tax expert reviews the filter's inferred rules and the 178 documents the
 ministry says are in force but our list ends; tell the professor that all earlier results had the TCVN3
