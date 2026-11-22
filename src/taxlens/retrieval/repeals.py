@@ -6,8 +6,10 @@ that from their text. Matching runs on unaccented lowercase text because of OCR.
 
 Three rules, weakest last:
 - ``explicit``: a document says another one ends (``hết hiệu lực``, ``bãi bỏ``, ``thay
-  thế``). A statement about an article, clause, or form of it ends only that part and is
-  ignored.
+  thế``), or that it continues in force until a date (``tiếp tục có hiệu lực đến ngày``,
+  ending the next day). A statement about an article, clause, or form of it ends only that
+  part and is ignored. A list of ended documents split across passages is followed into
+  the passages of the same clause (``list_continuation_targets``).
 - ``guidance``: a document whose title says it guides or details a document that ended.
 - ``amendment``: a document whose title says it amends a document that ended.
 
@@ -43,7 +45,21 @@ _LIST_OPENER = re.compile(
     rf"(?:het hieu luc(?: thi hanh)?|bai bo|{_TYPE} nay thay the(?: cho)?)"
     rf"(?:\s+(?:cac|nhung) van ban(?: sau(?: day)?)?)?\s*:\s*"
 )
-_LIST_ITEM = re.compile(rf"^\W*(?:[a-z0-9][.)]\s*)?\W*{_NAMED}")
+# An item may start with a page number left by OCR ("16 j) Thông tư số ...").
+_LIST_ITEM = re.compile(rf"^\W*(?:\d{{1,3}}\W+)?(?:[a-z0-9][.)]\s*)?\W*{_NAMED}")
+# A numbered clause ("4. Thông tư này ...") ends a list.
+_NEXT_CLAUSE = re.compile(r"(?:^|\s)\d{1,2}\.\s+[a-z]")
+# "... tiếp tục có hiệu lực thi hành đến (hết) ngày 30 tháng 6 năm 2022": ends the next day.
+_CONTINUES_UNTIL = re.compile(
+    r"tiep tuc (?:co )?hieu luc(?: thi hanh)? (?:den|cho den) (?:het )?ngay\s+"
+    r"(?P<day>\d{1,2})\s*(?:/|-|thang)\s*(?P<month>\d{1,2})\s*(?:/|-|nam)\s*(?P<year>\d{4})"
+)
+_NAMED_PATTERN = re.compile(_NAMED)
+# Words just before a named document that mean only part of it is meant ("Điều 5 của").
+_PART_BEFORE = re.compile(
+    r"(?:\b(?:dieu|khoan|diem|muc|chuong|phu luc)\b[^,;]*|"
+    r"\b(?:dieu|khoan|diem)\b[^;]{0,30}\bcua\s*)$"
+)
 # Words before a document number that mean only a part of it is meant.
 _PART_OF = re.compile(
     r"\b(?:dieu|khoan|diem|muc|chuong|phu luc|mau(?: so)?|bieu mau|vi du|noi dung|quy dinh)\b"
@@ -165,11 +181,55 @@ def explicit_targets(text: str) -> set[str]:
                     targets.add(match["number"])
     opener = _LIST_OPENER.search(folded)
     if opener:
-        for item in re.split(r";\s*|\.\s+", folded[opener.end() :]):
-            item_match = _LIST_ITEM.match(item)
-            if item_match:
-                targets.add(item_match["number"])
+        targets |= _list_items(folded[opener.end() :])
     return targets
+
+
+def opens_list(text: str) -> bool:
+    """Whether this passage opens a list of ended documents."""
+
+    return _LIST_OPENER.search(normalize(text)) is not None
+
+
+def list_continuation_targets(text: str) -> set[str]:
+    """Numbers, folded, of list items at the start of a passage that continues a list.
+
+    Only meaningful for a passage of the same article and clause as one that opens a list
+    (``opens_list``), since passages are split by size.
+    """
+
+    folded = normalize(text)
+    if _LIST_OPENER.search(folded):
+        return set()
+    return _list_items(folded)
+
+
+def _list_items(folded_list: str) -> set[str]:
+    end = _NEXT_CLAUSE.search(folded_list)
+    targets: set[str] = set()
+    for item in re.split(r";\s*|\.\s+", folded_list[: end.start() if end else None]):
+        item_match = _LIST_ITEM.match(item)
+        if item_match:
+            targets.add(item_match["number"])
+    return targets
+
+
+def sunset_targets(text: str) -> dict[str, date]:
+    """Folded numbers of documents said to continue in force until a date, with the day after."""
+
+    found: dict[str, date] = {}
+    for sentence in re.split(r"(?<=[.;])\s", normalize(text)):
+        until = _CONTINUES_UNTIL.search(sentence)
+        if not until:
+            continue
+        try:
+            last_day = date(int(until["year"]), int(until["month"]), int(until["day"]))
+        except ValueError:
+            continue
+        for named in _NAMED_PATTERN.finditer(sentence[: until.start()]):
+            if not _PART_BEFORE.search(sentence[max(0, named.start() - 60) : named.start()]):
+                found[named["number"]] = last_day + timedelta(days=1)
+    return found
 
 
 def effective_date_in(text: str) -> date | None:

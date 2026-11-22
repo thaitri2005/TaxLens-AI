@@ -3,8 +3,9 @@
     python scripts/extract_repeals.py --output data/evaluation/repeals/corpus-v1.json
 
 An ended document's date is its repealer's recorded effective date, then the date stated
-in its last article that gives one, then its issue date; never before the issue date. The
-file is an input to frozen runs: make it once and commit it, as with issue decompositions.
+in its last article that gives one, then its issue date; never before the issue date. A
+document said to continue in force until a date ends the day after it instead. The file is
+an input to frozen runs: make it once and commit it, as with issue decompositions.
 """
 
 import argparse
@@ -16,7 +17,14 @@ from sqlalchemy import select
 
 from taxlens.db import SessionLocal
 from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
-from taxlens.retrieval.repeals import effective_date_in, explicit_targets, infer_repeals
+from taxlens.retrieval.repeals import (
+    effective_date_in,
+    explicit_targets,
+    infer_repeals,
+    list_continuation_targets,
+    opens_list,
+    sunset_targets,
+)
 
 
 def main() -> None:
@@ -25,6 +33,10 @@ def main() -> None:
     arguments = parser.parse_args()
 
     found: list[tuple[str, str]] = []
+    sunsets: list[tuple[str, str, date]] = []
+    # A list split by size continues in other passages of its clause, in no stored order.
+    list_opened: set[tuple[object, str | None, str | None]] = set()
+    continued: dict[tuple[object, str | None, str | None], set[tuple[str, str]]] = {}
     stated: dict[str, tuple[int, date]] = {}
     recorded: dict[str, date | None] = {}
     issued_on: dict[str, date | None] = {}
@@ -37,18 +49,26 @@ def main() -> None:
                 LegalDocument.document_number,
                 DocumentVersion.effective_date,
                 DocumentVersion.issue_date,
+                DocumentChunk.document_version_id,
                 DocumentChunk.article_number,
+                DocumentChunk.clause_number,
                 DocumentChunk.content,
             )
             .join(DocumentVersion, DocumentChunk.document_version_id == DocumentVersion.id)
             .join(LegalDocument, DocumentVersion.document_id == LegalDocument.id)
         )
-        for number, effective, issued, article, content in session.execute(
+        for number, effective, issued, version, article, clause, content in session.execute(
             statement.execution_options(yield_per=2000)
         ):
             recorded[number] = effective
             issued_on[number] = issued
             found.extend((target, number) for target in explicit_targets(content))
+            sunsets.extend((target, number, day) for target, day in sunset_targets(content).items())
+            part = (version, article, clause)
+            if opens_list(content):
+                list_opened.add(part)
+            elif items := list_continuation_targets(content):
+                continued.setdefault(part, set()).update((item, number) for item in items)
             own = effective_date_in(content)
             position = int(article) if article and article.isdigit() else -1
             if own and position >= stated.get(number, (-2,))[0]:
@@ -60,7 +80,11 @@ def main() -> None:
         chosen = recorded.get(by) or (own[1] if own else None) or issued
         return max(chosen, issued) if chosen and issued else chosen
 
+    for part, pairs in continued.items():
+        if part in list_opened:
+            found.extend(pairs)
     explicit = [(target, by, day) for target, by in found if (day := ended_on(by))]
+    explicit += sunsets
     repeals = infer_repeals(explicit, {number: title or "" for number, title in titles.items()})
     repeals = {number: repeal for number, repeal in repeals.items() if number in titles}
     rules: dict[str, int] = {}

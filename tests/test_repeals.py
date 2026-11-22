@@ -156,3 +156,40 @@ def test_ending_note_names_the_basis():
     assert ending_note("7/2026/TT-BNV", date(2026, 7, 1), "explicit", "x", on) == (
         "7/2026/TT-BNV is recorded to stop applying on 01/07/2026."
     )
+
+
+def test_list_split_across_passages_continues_to_the_next_clause():
+    from taxlens.retrieval.repeals import list_continuation_targets, opens_list
+
+    opening = "3. Các Thông tư sau đây hết hiệu lực thi hành:\na) Thông tư số 32/2011/TT-BTC;"
+    rest = (
+        "(được sửa đổi bởi Thông tư số 119/2014/TT-BTC);\n16\n"
+        "¡) Thông tư số 68/2019/TT-BTC ngày 30/9/2019;\n"
+        "k) Thông tư số 88/2020/TT-BTC sửa đổi Điều 26 Thông tư số 68/2019/TT-BTC.\n"
+        "4. Thông tư này gồm 2 Phụ lục: a) Thông tư số 99/2099/TT-BTC"
+    )
+    assert opens_list(opening) and not opens_list(rest)
+    assert list_continuation_targets(rest) == {"68/2019/tt-btc", "88/2020/tt-btc"}
+    assert list_continuation_targets(opening) == set()
+
+
+def test_continuing_in_force_until_a_date_ends_the_next_day():
+    from taxlens.retrieval.repeals import sunset_targets
+
+    text = (
+        "Nghị định số 51/2010/NĐ-CP, Nghị định số 04/2014/NĐ-CP sửa đổi một số điều của Nghị "
+        "định số 51/2010/NĐ-CP, Nghị định số 119/2018/NĐ-CP tiếp tục có hiệu lực thi hành "
+        "đến ngày 30 tháng 6 năm 2022."
+    )
+    assert sunset_targets(text) == {
+        "51/2010/nd-cp": date(2022, 7, 1),
+        "04/2014/nd-cp": date(2022, 7, 1),
+        "119/2018/nd-cp": date(2022, 7, 1),
+    }
+    assert (
+        sunset_targets(
+            "Điều 5 của Nghị định số 119/2018/NĐ-CP tiếp tục có hiệu lực đến hết ngày 30/6/2022."
+        )
+        == {}
+    )
+    assert sunset_targets("Nghị định số 119/2018/NĐ-CP tiếp tục có hiệu lực.") == {}
