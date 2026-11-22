@@ -262,6 +262,10 @@ function todayInVietnam() {
   return new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
+function hasConfirmedlyEnded(ending: Ending) {
+  return Boolean(ending.ended_on && ending.end_basis && CONFIRMED_ENDINGS.includes(ending.end_basis) && ending.ended_on <= todayInVietnam());
+}
+
 function EndingTag({ ending, copy }: { ending: Ending; copy: Copy }) {
   if (!ending.ended_on || !ending.end_basis) return null;
   const date = formatDate(ending.ended_on);
@@ -570,7 +574,7 @@ export default function Home() {
             <span className="document-row-title">{document.title}</span>
             <span className="document-row-meta">
               <span className="tag">{labelFor(copy.kinds, document.kind)}</span>
-              {document.legal_status && <StatusTag status={document.legal_status} copy={copy} />}
+              {document.legal_status && <StatusTag status={document.legal_status} ending={document} copy={copy} />}
               <EndingTag ending={document} copy={copy} />
             </span>
             {document.preview && <span className="document-row-preview">{document.preview}</span>}
@@ -648,7 +652,7 @@ export default function Home() {
                 <span className="document-row-title">{document.title}</span>
                 <span className="document-row-meta">
                   <span className="tag">{labelFor(copy.kinds, document.kind)}</span>
-                  {document.legal_status && <StatusTag status={document.legal_status} copy={copy} />}
+                  {document.legal_status && <StatusTag status={document.legal_status} ending={document} copy={copy} />}
                   <EndingTag ending={document} copy={copy} />
                   <span className="document-row-date">{document.issue_date ? formatDate(document.issue_date) : "—"}</span>
                 </span>
@@ -735,7 +739,10 @@ function FacetRow({ label, items, active, labels, format, onSelect }: {
   </div>;
 }
 
-function StatusTag({ status, copy }: { status: string; copy: Copy }) {
+// The ministry still lists some ended documents as in force; a confirmed ending that has
+// passed wins over that status, so the two tags never contradict each other.
+function StatusTag({ status, ending, copy }: { status: string; ending?: Ending; copy: Copy }) {
+  if (status === "EFFECTIVE" && ending && hasConfirmedlyEnded(ending)) return null;
   return <span className={`status-tag status-${status.toLowerCase()}`}>{labelFor(copy.legalStatuses, status)}</span>;
 }
 
@@ -819,7 +826,7 @@ function DocumentDetailView({ detail, chunks, copy, numberFormat, onLoadMore, lo
       {detail.versions[0]?.source_url && <a href={detail.versions[0].source_url} target="_blank" rel="noreferrer">{copy.officialSource}</a>}
     </p>
     <div className="version-grid">{detail.versions.map(version => <div className="version-card" key={version.id}>
-      <StatusTag status={version.legal_status} copy={copy} />
+      <StatusTag status={version.legal_status} ending={detail} copy={copy} />
       <strong>{copy.version} {version.issue_date ? formatDate(version.issue_date) : copy.dateUnavailable}</strong>
       <small>{copy.effective}{version.effective_date ? formatDate(version.effective_date) : copy.notRecorded}</small>
       <small>{version.processing_status || "NOT_PROCESSED"} · {numberFormat.format(version.chunk_count)} {copy.chunks}</small>

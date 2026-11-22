@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import lru_cache
+from time import perf_counter
 from typing import Any, TypedDict
 
 from langchain_core.prompts import PromptTemplate
@@ -145,6 +146,7 @@ def _retrieve_evidence_node(state: QuestionGraphState) -> dict[str, object]:
     if query_plan.intent is QueryIntent.UNSUPPORTED:
         return {"results": []}
     limit = state.get("retrieval_limit", 5)
+    started = perf_counter()
     candidates = hybrid_search_chunks(
         state["session"],
         query_plan.original_query,
@@ -156,6 +158,14 @@ def _retrieve_evidence_node(state: QuestionGraphState) -> dict[str, object]:
     # best located ones; old documents without articles would otherwise fill all the places
     # and make the gate refuse. With none located, the gate still refuses.
     located = [result for result in candidates if has_structural_locator(result)]
+    logger.info(
+        "retrieval_completed seconds=%.2f candidates=%d located=%d current_on=%s as_of=%s",
+        perf_counter() - started,
+        len(candidates),
+        len(located),
+        query_plan.filters.current_on,
+        query_plan.filters.as_of,
+    )
     return {"results": (located or candidates)[:limit]}
 
 

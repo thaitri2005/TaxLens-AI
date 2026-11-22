@@ -160,8 +160,9 @@ def keyword_search_chunks(
         return _without_forms(results, limit) if exclude_forms else results
     # The planner picks a sequential scan for common terms because it does not count the
     # cost of decompressing each stored vector; the GIN index is much faster for them.
+    version_ids = _eligible_version_ids(session, active_filters)
     session.execute(text("SET LOCAL enable_seqscan = off"))
-    statement = _postgresql_keyword_statement(normalized_query, active_filters, fetched)
+    statement = _postgresql_keyword_statement(normalized_query, version_ids, fetched)
     rows = session.execute(statement).all()
     session.execute(text("SET LOCAL enable_seqscan = on"))
     results = _to_keyword_results(rows)
@@ -187,16 +188,11 @@ def semantic_search_chunks(
         DocumentEmbedding.model_revision == provider.model_revision,
         DocumentEmbedding.dimensions == provider.dimensions,
     )
-    if active_filters != SearchFilters():
-        candidates = _apply_filters(
-            _joined_to_documents(
-                candidates.join(
-                    DocumentChunk, DocumentChunk.id == DocumentEmbedding.document_chunk_id
-                ),
-                DocumentChunk.document_version_id,
-            ),
-            active_filters,
-        )
+    version_ids = _eligible_version_ids(session, active_filters)
+    if version_ids is not None:
+        candidates = candidates.join(
+            DocumentChunk, DocumentChunk.id == DocumentEmbedding.document_chunk_id
+        ).where(DocumentChunk.document_version_id.in_(version_ids))
     fetched = limit * 2 if exclude_forms else limit
     # Choosing the nearest passages from ids and distances alone keeps text and embeddings out
     # of the sort. "+ 0" keeps this an exact scan: the HNSW index returns at most
@@ -364,7 +360,9 @@ def _is_stopword(term: str) -> bool:
     return term in _FOLDED_KEYWORD_STOPWORDS
 
 
-def _postgresql_keyword_statement(query: str, filters: SearchFilters, limit: int) -> Select[Any]:
+def _postgresql_keyword_statement(
+    query: str, version_ids: list[Any] | None, limit: int
+) -> Select[Any]:
     """Rank chunks by how many query terms they contain, ignoring diacritics.
 
     Matching any term (instead of websearch_to_tsquery's implicit AND) keeps natural
@@ -399,10 +397,8 @@ def _postgresql_keyword_statement(query: str, filters: SearchFilters, limit: int
         .subquery("matched")
     )
     eligible_chunks = select(matched.c.chunk_id, matched.c.match_score)
-    if filters != SearchFilters():
-        eligible_chunks = _apply_filters(
-            _joined_to_documents(eligible_chunks, matched.c.version_id), filters
-        )
+    if version_ids is not None:
+        eligible_chunks = eligible_chunks.where(matched.c.version_id.in_(version_ids))
     eligible = eligible_chunks.cte("eligible")
     last_kept_match_score = (
         select(eligible.c.match_score)
@@ -457,12 +453,23 @@ def _base_statement(score: Any) -> Select[Any]:
     )
 
 
-def _joined_to_documents(statement: Any, version_id: Any) -> Any:
-    return (
-        statement.join(DocumentVersion, version_id == DocumentVersion.id)
+def _eligible_version_ids(session: Session, filters: SearchFilters) -> list[Any] | None:
+    """Ids of the versions the filters keep, or None without filters.
+
+    Every filter is a property of a version, its document, or its source, and there are only
+    a few thousand versions. Resolving them first lets the passage searches run against a
+    plain list: joined into those scans, the ended-document and date filters led the planner
+    to plans three to five times slower (measured 23/11/2026).
+    """
+
+    if filters == SearchFilters():
+        return None
+    statement = (
+        select(DocumentVersion.id)
         .join(LegalDocument, DocumentVersion.document_id == LegalDocument.id)
         .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
     )
+    return list(session.scalars(_apply_filters(statement, filters)))
 
 
 def _apply_filters(statement: Any, filters: SearchFilters) -> Any:

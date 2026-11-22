@@ -25,3 +25,4 @@ infra/terraform/*.tfvars
 infra/terraform/.terraform-local/
 .DS_Store
 .vscode/
+*.tsbuildinfo

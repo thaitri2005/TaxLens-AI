@@ -63,9 +63,13 @@ the model cannot load, search falls back to keyword.
 - Vector search is exact (`distance + 0`). There is no HNSW index, since it could silently shorten the
   candidate list.
 - A question naming exactly one document number is restricted to that document.
-- A question naming no document number leaves out documents whose end is confirmed by today, Vietnam
-  time ([ended documents](#ended-documents)). A question that names documents keeps them, since it may
-  be about an old one.
+- A question naming no document number is answered for a period: the dates it names ("Tháng 6/2023",
+  "quý II/2025", "năm 2024", but not a document's issue date), or today, Vietnam time
+  (`intelligence/planning.py`). Documents whose end is confirmed by the period's start are left out
+  ([ended documents](#ended-documents)), and versions taking effect after its end; the model is told the
+  period. A question that names documents keeps them, since it may be about an old one.
+- Answers search 20 passages and keep the first 5 with an article, clause, section, or page, so old
+  documents without articles cannot fill every place.
 - Passages with four or more blank-field runs count as forms, and are left out unless the question asks
   for one (`mẫu số`, `biểu mẫu`, `mẫu biểu`, `mẫu đơn`, `tờ khai`).
 - The embedding model reads 512 tokens: 0.5% of article passages and 18% of other text exceed it, losing
@@ -73,7 +77,7 @@ the model cannot load, search falls back to keyword.
 
 ## 5. Evidence gate (`intelligence/evidence.py`)
 
-Before any model call, the top passages (5 by default):
+Before any model call, the selected passages (5 by default):
 
 | Check | Outcome |
 | --- | --- |

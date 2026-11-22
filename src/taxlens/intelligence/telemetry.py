@@ -15,8 +15,16 @@ class ModelCallTelemetry:
 
 
 def record_model_call(telemetry: ModelCallTelemetry) -> None:
+    # The values go in the message too: the plain log format the API writes drops extras.
     logger.info(
-        "model_call",
+        "model_call model=%s provider=%s latency_ms=%.0f input_tokens=%s output_tokens=%s "
+        "outcome=%s",
+        telemetry.model,
+        telemetry.provider,
+        telemetry.latency_ms,
+        telemetry.input_tokens,
+        telemetry.output_tokens,
+        telemetry.outcome,
         extra={
             "taxlens_model": telemetry.model,
             "taxlens_provider": telemetry.provider,

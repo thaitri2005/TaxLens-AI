@@ -111,7 +111,10 @@ def test_model_telemetry_is_structured_in_logs(caplog) -> None:
     )
 
     record = caplog.records[-1]
-    assert record.message == "model_call"
+    assert record.message == (
+        "model_call model=test-model provider=test-provider latency_ms=12 input_tokens=10 "
+        "output_tokens=5 outcome=success"
+    )
     assert record.taxlens_model == "test-model"
     assert record.taxlens_latency_ms == 12.35
     assert record.taxlens_output_tokens == 5

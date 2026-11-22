@@ -53,6 +53,11 @@ records where the reader differs). Of 15 counted cases (L1 is uncertain):
 Wrong: A7 and L2 apply today's rule to 2023-2024 facts; A9 rests on a 1998 circular. Refused: A1, where
 all 5 passages were old documents without locators, and R2. Neither grader is a tax expert.
 
+After items 6 and 7 (`answers-gold-v1-2026-11-23b.json`): still 9 of 15 by the judge. L2 is now correct.
+R1 and A4 got worse with the same evidence, so the model's conclusions vary between runs; with 15 cases a
+score can move by two without any change. A1 has current law among its passages but refuses, since the
+VAT-reduction decree is not retrieved.
+
 ## Corpora
 
 Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at the corpus check.
@@ -75,8 +80,8 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
 3. **Answer model trade-offs:** the faster model costs about $0.002 an answer, against $0.0003, and can
    mislabel a document's type. It depends on Groq and Cerebras staying on the router.
 4. **Answers are right on 9 of 15 gold questions** (judge model, read by hand; [Answers](#answers)).
-   Failures: questions about a past date get today's law, and old documents without article
-   locators fill the 5 evidence passages, so the gate refuses or the model cites 1998 circulars.
+   Dated questions and unlocated old documents are handled since `f0f72b6`; what remains is evidence that
+   is not retrieved (A1, A4, A9), and run-to-run variation of the model's conclusion.
 5. **Duplicates:** 9 document numbers hold near-identical second versions, and 5 numbers with stray
    spaces (`148/2013/TT- BTC`) duplicate clean ones. Both copies can appear in results. Nothing was
    deleted.
@@ -103,8 +108,8 @@ L = more. Mark each done here when finished.
 | ~~3~~ | **Done 23/11/2026.** Lists split across passages, items after OCR page numbers, and "continues in force until" clauses are read; 29 more documents end, loaded on Azure. Recall unchanged | | [Already tried](retrieval-experiments.md#retrieval) |
 | ~~4~~ | **Done 23/11/2026.** Evaluation runs about 30% faster (TensorFlow no longer loaded, one count query per case); the rest is laptop round trips and a small database. Answers are not slowed by the new filter | | [Speed](retrieval-experiments.md#speed) |
 | ~~5~~ | **Done 23/11/2026.** `grade_answers.py`: 9 of 15 correct by the judge, 8 by the reader | | [Answers](#answers) |
-| 6 | Take the 5 evidence passages from those with an article or page locator, instead of refusing when the top 5 have none | S, needs a release | A1 refused although current law exists; old unlocated circulars crowd the top |
-| 7 | Answer by the date a question names ("Tháng 6/2023"): search and leave out ended documents as of that date | M, needs a release | A7 and L2 get today's rule for past facts |
+| ~~6~~ | **Done 23/11/2026,** released in `f0f72b6`: evidence is the first 5 located passages of 20. A1 now gets current law, and still refuses: the VAT-reduction decree is not retrieved | | [Answers](#answers) |
+| ~~7~~ | **Done 23/11/2026,** released in `f0f72b6`: answers use the period a question names. L2 now correct. Filtered searches resolve versions first (vector 10 s → 1.3 s) | | [Answers](#answers) |
 | 8 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
 | 9 | Draft new gold cases for Hung and an expert to verify, to at least 50, some held out | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
 | 10 | Remove the 14 duplicate documents, settle the 3 uncertain numbers, freeze `corpus-v2.1` | M, free | Both copies appear in results |
