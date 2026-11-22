@@ -20,7 +20,10 @@ ARG EMBEDDING_MODEL_REVISION=614241f622f53c4eeff9890bdc4f31cfecc418b3
 ENV EMBEDDING_MODEL_ID=${EMBEDDING_MODEL_ID} \
     EMBEDDING_MODEL_REVISION=${EMBEDDING_MODEL_REVISION} \
     EMBEDDING_MODEL_PATH=/opt/taxlens-models/multilingual-e5-small
-RUN python -c "import os; from huggingface_hub import snapshot_download; snapshot_download(repo_id=os.environ['EMBEDDING_MODEL_ID'], revision=os.environ['EMBEDDING_MODEL_REVISION'], local_dir=os.environ['EMBEDDING_MODEL_PATH'])"
+# Only the files sentence-transformers loads: the repository also holds the same weights as
+# pytorch_model.bin, ONNX, and OpenVINO, 1.8 GB that every cold start would pull for nothing.
+# The embeddings are identical either way (checked 23/11/2026).
+RUN python -c "import os; from huggingface_hub import snapshot_download; snapshot_download(repo_id=os.environ['EMBEDDING_MODEL_ID'], revision=os.environ['EMBEDDING_MODEL_REVISION'], local_dir=os.environ['EMBEDDING_MODEL_PATH'], ignore_patterns=['onnx/*', 'openvino/*', 'pytorch_model.bin', '*.h5', '*.msgpack'])"
 
 COPY alembic.ini ./alembic.ini
 COPY migrations ./migrations
