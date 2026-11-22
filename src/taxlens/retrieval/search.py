@@ -167,7 +167,9 @@ def keyword_search_chunks(
     version_ids = _eligible_version_ids(session, active_filters)
     session.execute(text("SET LOCAL enable_seqscan = off"))
     statement = _postgresql_keyword_statement(normalized_query, version_ids, fetched)
+    started = perf_counter()
     rows = session.execute(statement).all()
+    logger.info("keyword_query rows=%d seconds=%.2f", len(rows), perf_counter() - started)
     session.execute(text("SET LOCAL enable_seqscan = on"))
     results = _to_keyword_results(rows)
     return _without_forms(results, limit) if exclude_forms else results
@@ -207,11 +209,13 @@ def semantic_search_chunks(
         .subquery("nearest")
     )
     score: Any = (1 - nearest.c.distance).label("score")
+    started = perf_counter()
     rows = session.execute(
         _base_statement(score)
         .join(nearest, nearest.c.chunk_id == DocumentChunk.id)
         .order_by(nearest.c.distance, DocumentChunk.id)
     ).all()
+    logger.info("semantic_query rows=%d seconds=%.2f", len(rows), perf_counter() - started)
     results = _to_semantic_results(rows)
     return _without_forms(results, limit) if exclude_forms else results
 
@@ -486,7 +490,12 @@ def _eligible_version_ids(session: Session, filters: SearchFilters) -> list[Any]
         .join(LegalDocument, DocumentVersion.document_id == LegalDocument.id)
         .outerjoin(SourceRecord, DocumentVersion.source_record_id == SourceRecord.id)
     )
-    return list(session.scalars(_apply_filters(statement, filters)))
+    started = perf_counter()
+    version_ids = list(session.scalars(_apply_filters(statement, filters)))
+    logger.info(
+        "eligible_versions count=%d seconds=%.2f", len(version_ids), perf_counter() - started
+    )
+    return version_ids
 
 
 def _apply_filters(statement: Any, filters: SearchFilters) -> Any:
