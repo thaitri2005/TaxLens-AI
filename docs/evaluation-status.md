@@ -117,7 +117,7 @@ L = more. Mark each done here when finished.
 | ~~11~~ | **Done 23/11/2026.** Questions, answers, and timings are logged in `question_logs`, and answers can be rated 👍/👎 with a comment; `export_question_log.py` lists rated and refused ones for review | | [Architecture](architecture.md) |
 | 12 | **Drafts ready, review waiting:** 18 cases in `gold_set_v1_drafts.csv` (CIT rates, PIT deductions and household business, late-payment interest, invoice timing, 0% VAT conditions, refund cap, a false premise, 3 leakage-free), each from the clause text and checked to parse. Hung or an expert must verify them before they count; then draft 16 more | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
 | 13 | Remove the 14 duplicate documents, settle the 3 uncertain numbers, freeze `corpus-v2.1` | M, free | Both copies appear in results |
-| 14 | Set up ESLint for the web app and run it in CI | S | No lint config exists; CI only builds the web app |
+| ~~14~~ | **Done 23/11/2026.** ESLint 9 with Next's `core-web-vitals` and `typescript` rules (`eslint.config.mjs`); CI runs `npm run lint` and `next build` lints too. Fixed 2 errors (page links in the admin view); 3 warnings remain (two `<img>` logos, one effect's dependency list) | | |
 | 15 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, after 12 | Weak top-5 recall; cannot reach the 14 never-found provisions |
 | 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, after 12 | Half the hardest misses need it |
 | 17 | Split the 800-line `page.tsx` and add web tests | M | Maintainability only |

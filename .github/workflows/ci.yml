@@ -42,6 +42,8 @@ jobs:
           cache-dependency-path: apps/web/package.json
       - name: Install frontend dependencies
         run: npm install
+      - name: Lint frontend
+        run: npm run lint
       - name: Build frontend
         env:
           API_ORIGIN: http://api:8000
