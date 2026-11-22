@@ -16,6 +16,7 @@ from sqlalchemy import or_, select
 
 from taxlens.db import SessionLocal
 from taxlens.legal_data.models import QuestionLog
+from taxlens.spreadsheets import spreadsheet_safe
 
 COLUMNS = (
     "asked_at",
@@ -54,8 +55,10 @@ def main() -> None:
         writer = csv.writer(handle)
         writer.writerow(COLUMNS)
         for entry in entries:
+            # Questions, comments, and answers are typed by users: never let one run as a formula.
             writer.writerow(
-                [
+                spreadsheet_safe(value)
+                for value in [
                     entry.created_at.isoformat(timespec="minutes"),
                     entry.question,
                     entry.status,

@@ -125,3 +125,14 @@ def test_a_failed_log_still_returns_the_answer(engine, monkeypatch) -> None:
     assert response.status_code == 200
     assert response.json()["status"] == "ANSWERED"
     assert response.json()["question_id"] is None
+
+
+def test_spreadsheet_cells_never_start_like_a_formula() -> None:
+    from taxlens.spreadsheets import spreadsheet_safe
+
+    assert spreadsheet_safe('=HYPERLINK("http://x")') == '\'=HYPERLINK("http://x")'
+    assert spreadsheet_safe("-1+2") == "'-1+2"
+    assert spreadsheet_safe("@SUM(A1)") == "'@SUM(A1)"
+    assert spreadsheet_safe("Thuế suất 10%") == "Thuế suất 10%"
+    assert spreadsheet_safe(None) == ""
+    assert spreadsheet_safe(3.5) == 3.5

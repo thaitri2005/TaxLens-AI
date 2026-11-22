@@ -22,6 +22,7 @@ from taxlens.legal_data.models import (
     SourceRecord,
 )
 from taxlens.retrieval.snippets import build_excerpt
+from taxlens.spreadsheets import spreadsheet_safe
 
 router = APIRouter(
     prefix="/documents", tags=["documents"], dependencies=[Depends(require_authenticated_user)]
@@ -543,8 +544,9 @@ def export_document_list(session: Session = Depends(get_db_session)) -> Response
 
     processing: dict[uuid.UUID, tuple[str, str | None]] = {}
     for version_id, job_status, error_code in session.execute(
-        select(ProcessingJob.document_version_id, ProcessingJob.status, ProcessingJob.error_code)
-        .order_by(ProcessingJob.updated_at.desc(), ProcessingJob.created_at.desc())
+        select(
+            ProcessingJob.document_version_id, ProcessingJob.status, ProcessingJob.error_code
+        ).order_by(ProcessingJob.updated_at.desc(), ProcessingJob.created_at.desc())
     ).all():
         processing.setdefault(version_id, (job_status, error_code))
     passages: dict[uuid.UUID, int] = {
@@ -571,7 +573,7 @@ def export_document_list(session: Session = Depends(get_db_session)) -> Response
         job_status, error_code = processing.get(row.id, ("NOT_PROCESSED", None))
         writer.writerow(
             [
-                _spreadsheet_safe(value)
+                spreadsheet_safe(value)
                 for value in (
                     row.document_number,
                     row.title,
@@ -602,13 +604,3 @@ def export_document_list(session: Session = Depends(get_db_session)) -> Response
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
-
-
-def _spreadsheet_safe(value: object) -> object:
-    """Keep spreadsheet programs from running a cell that starts like a formula."""
-
-    if value is None:
-        return ""
-    if isinstance(value, str) and value[:1] in ("=", "+", "@", "\t", "\r"):
-        return "'" + value
-    return value
