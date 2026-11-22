@@ -394,9 +394,14 @@ def main() -> None:
         "coverage_summary": coverage_summary,
         "cases": reports,
     }
-    persisted = persist_retrieval_report(output)
+    # Save locally before uploading, so a storage failure never loses a finished run.
     if arguments.output is not None:
         arguments.output.parent.mkdir(parents=True, exist_ok=True)
+        arguments.output.write_text(
+            json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    persisted = persist_retrieval_report(output)
+    if arguments.output is not None:
         arguments.output.write_text(
             json.dumps(persisted, ensure_ascii=False, indent=2), encoding="utf-8"
         )
