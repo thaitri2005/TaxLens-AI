@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 
 import pytest
@@ -181,6 +182,33 @@ def test_answer_question_recovers_complete_answer_from_truncated_json() -> None:
 def test_parse_generated_answer_rejects_truncated_json() -> None:
     with pytest.raises(ValueError, match="JSON"):
         parse_generated_answer('{"answer":"Incomplete', citation_count=1)
+
+
+def test_answer_question_takes_evidence_from_located_passages() -> None:
+    engine = _create_engine_with_evidence()
+    with Session(engine) as session:
+        version_id = session.query(DocumentChunk.document_version_id).scalar()
+        # An old document's text without article, clause, page, or heading, ranked first
+        # (the test database's keyword search orders by passage id).
+        session.add(
+            DocumentChunk(
+                id=uuid.UUID(int=0),
+                document_version_id=version_id,
+                content="Old VAT invoice requirements for taxpayers.",
+                token_count=6,
+            )
+        )
+        session.commit()
+    provider = FakeChatProvider(
+        '{"answer":"Requirements apply.","confirmed_facts":[{"text":"VAT invoice requirements '
+        'apply to taxpayers.","citation_numbers":[1]}],"uncertainties":[],"review_actions":[]}'
+    )
+
+    with Session(engine) as session:
+        answer = answer_question(session, "VAT invoice requirements", provider, retrieval_limit=1)
+
+    assert answer.status is AnswerStatus.ANSWERED
+    assert [citation.article_number for citation in answer.citations] == ["1"]
 
 
 def _create_engine_with_evidence():

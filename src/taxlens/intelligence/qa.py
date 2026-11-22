@@ -14,7 +14,11 @@ from sqlalchemy.orm import Session
 
 from taxlens.config import get_settings
 from taxlens.intelligence.chat import ChatMessage, ChatProvider, ChatProviderError, ChatRequest
-from taxlens.intelligence.evidence import EvidenceAssessment, assess_evidence
+from taxlens.intelligence.evidence import (
+    EvidenceAssessment,
+    assess_evidence,
+    has_structural_locator,
+)
 from taxlens.intelligence.planning import QueryIntent, QueryPlan, plan_query
 from taxlens.retrieval.citations import Citation, build_citation
 from taxlens.retrieval.embeddings import EmbeddingProvider
@@ -25,6 +29,9 @@ from taxlens.retrieval.snippets import lexical_support
 logger = logging.getLogger(__name__)
 EVIDENCE_CLAIM_MAX_LENGTH = 240
 MAX_PRACTICAL_ADVICE = 4
+
+# Candidates searched per evidence place, so unlocated passages can be passed over.
+LOCATED_CANDIDATE_FACTOR = 4
 
 
 class AnswerStatus(StrEnum):
@@ -137,14 +144,19 @@ def _retrieve_evidence_node(state: QuestionGraphState) -> dict[str, object]:
     query_plan = state["query_plan"]
     if query_plan.intent is QueryIntent.UNSUPPORTED:
         return {"results": []}
-    results = hybrid_search_chunks(
+    limit = state.get("retrieval_limit", 5)
+    candidates = hybrid_search_chunks(
         state["session"],
         query_plan.original_query,
         state.get("embedding_provider"),
         query_plan.filters,
-        limit=state.get("retrieval_limit", 5),
+        limit=limit * LOCATED_CANDIDATE_FACTOR,
     )
-    return {"results": results}
+    # Passages without an article, clause, or page cannot be cited, so the evidence is the
+    # best located ones; old documents without articles would otherwise fill all the places
+    # and make the gate refuse. With none located, the gate still refuses.
+    located = [result for result in candidates if has_structural_locator(result)]
+    return {"results": (located or candidates)[:limit]}
 
 
 def _assess_evidence_node(state: QuestionGraphState) -> dict[str, object]:
@@ -214,9 +226,7 @@ def _generate_answer_node(state: QuestionGraphState) -> dict[str, object]:
     except ValueError as error:
         recovered_answer = _recover_answer_text(completion.content)
         if recovered_answer:
-            result = _recovered_answer(
-                query_plan, evidence, results, citations, recovered_answer
-            )
+            result = _recovered_answer(query_plan, evidence, results, citations, recovered_answer)
         else:
             logger.warning("Unable to parse model answer: %s", error)
             result = _evidence_fallback_answer(query_plan, evidence, results, citations)

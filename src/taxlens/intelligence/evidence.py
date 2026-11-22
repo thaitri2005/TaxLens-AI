@@ -61,7 +61,7 @@ def assess_evidence(
         )
 
     notes: list[str] = []
-    located = [result for result in results if _has_structural_locator(result)]
+    located = [result for result in results if has_structural_locator(result)]
     if not located:
         return EvidenceAssessment(
             status=EvidenceStatus.INSUFFICIENT_STRUCTURAL_SUPPORT,
@@ -138,7 +138,7 @@ def _ending_notes(results: Sequence[SearchResult], today: date) -> list[str]:
     return list(notes.values())
 
 
-def _has_structural_locator(result: SearchResult) -> bool:
+def has_structural_locator(result: SearchResult) -> bool:
     # A section heading counts: older documents have sections instead of articles, and
     # Word documents have no page numbers.
     return any(
