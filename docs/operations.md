@@ -46,6 +46,8 @@ CI type-checks against the newest SQLAlchemy 2.x; write statement annotations as
 | `evaluate_tax_retrieval.py`, `evaluate_retrieval.py`, `evaluate_qa.py` | Retrieval evaluation, one ad hoc query, answer evaluation ([retrieval](retrieval.md#evaluation)) |
 | `freeze_corpus.py`, `compare_retrieval_runs.py` | Record or check a corpus; paired comparison of two reports |
 | `extract_repeals.py`, `add_ministry_expiry.py` | Build lists of ended documents |
+| `export_question_log.py` | Questions asked on the site, with answers and 👍/👎 ratings, to a CSV of gold-case candidates. Rated and refused ones unless `--all` |
+| `grade_answers.py` | Answer the gold questions as the site does and grade them against the gold answers (about $0.05 a run) |
 | `apply_document_endings.py` | Load a list of ended documents into the database, where search and answers use it. A dry run unless `--apply` |
 | `correct_document_numbers.py` | Apply `number-corrections-v2.json`. A dry run unless `--apply` |
 | `decompose_issues.py`, `diagnose_retrieval_misses.py`, `measure_reference_reachability.py` | Experiment tools |

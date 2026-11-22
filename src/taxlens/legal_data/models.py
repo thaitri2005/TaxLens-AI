@@ -3,11 +3,13 @@ from datetime import date, datetime
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
+    JSON,
     Date,
     DateTime,
     Float,
     ForeignKey,
     Integer,
+    SmallInteger,
     String,
     Text,
     UniqueConstraint,
@@ -156,3 +158,28 @@ class DocumentEmbedding(Base):
     content_hash: Mapped[str] = mapped_column(String(64))
     embedding: Mapped[list[float]] = mapped_column(Vector(384))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+
+
+class QuestionLog(Base):
+    """A question asked on the site, what it got back, and the asker's rating of it."""
+
+    __tablename__ = "question_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("user_accounts.id", ondelete="SET NULL"), index=True
+    )
+    question: Mapped[str] = mapped_column(Text)
+    intent: Mapped[str] = mapped_column(String(40))
+    status: Mapped[str] = mapped_column(String(40))
+    evidence_status: Mapped[str | None] = mapped_column(String(40))
+    answer: Mapped[str | None] = mapped_column(Text)
+    cited_documents: Mapped[list[str]] = mapped_column(JSON, default=list)
+    seconds: Mapped[float] = mapped_column(Float)
+    # 1 for a thumbs up, -1 for a thumbs down, None until the asker rates the answer.
+    rating: Mapped[int | None] = mapped_column(SmallInteger)
+    comment: Mapped[str | None] = mapped_column(Text)
+    rated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now(), index=True
+    )

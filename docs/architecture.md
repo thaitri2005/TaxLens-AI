@@ -39,6 +39,8 @@ Dependencies point one way: `api` → `intelligence` → `retrieval` → `legal_
 
 - **`legal_documents`**: one row per document number, with title, type, and agency, and its recorded
   ending (`ended_on`, `end_basis`, `ended_by`; see [ended documents](retrieval.md#ended-documents)).
+- **`question_logs`**: each question asked on the site, its status, answer, cited documents, and time
+  taken, with the asker's 👍/👎 and comment (`POST /questions/{id}/feedback`; only the asker can rate).
 - **`source_records`**: where a file came from, and the source's ID, which prevents repeat downloads.
 - **`document_versions`**: one file, by content hash, with dates and status (`EFFECTIVE`, `EXPIRED`,
   `DISCOVERED`). A number can hold several.

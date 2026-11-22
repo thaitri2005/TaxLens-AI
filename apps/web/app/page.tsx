@@ -60,6 +60,7 @@ type Answer = {
   review_actions: string[];
   practical_advice?: string[];
   disclaimer: string;
+  question_id?: string | null;
 };
 type SearchDocumentGroup = { document_number: string; title: string; hits: SearchHit[] };
 
@@ -118,6 +119,11 @@ const COPY = {
       NOT_YET_EFFECTIVE: "Not yet in force", DISCOVERED: "Status not recorded", UNKNOWN: "Status unknown",
     } as Record<string, string>,
     sourceNames: { "government-portal": "Government portal", "mof-vbpq": "Ministry of Finance" } as Record<string, string>,
+    feedback: {
+      question: "Was this answer right?", up: "Yes", down: "No", send: "Send",
+      placeholder: "What was wrong? (optional)", thanks: "Thanks: your rating helps test TaxLens.",
+      failed: "The rating could not be saved.",
+    },
     endings: {
       ended: (date: string) => `Ended ${date}`, mayHaveEnded: (date: string) => `May have ended ${date}`,
       endsLater: (date: string) => `Ends ${date}`, by: (number: string) => `by ${number}`,
@@ -178,6 +184,11 @@ const COPY = {
       NOT_YET_EFFECTIVE: "Chưa có hiệu lực", DISCOVERED: "Chưa ghi nhận hiệu lực", UNKNOWN: "Không xác định",
     } as Record<string, string>,
     sourceNames: { "government-portal": "Cổng TTĐT Chính phủ", "mof-vbpq": "Bộ Tài chính" } as Record<string, string>,
+    feedback: {
+      question: "Câu trả lời này có đúng không?", up: "Đúng", down: "Chưa đúng", send: "Gửi",
+      placeholder: "Sai ở đâu? (không bắt buộc)", thanks: "Cảm ơn: đánh giá của bạn giúp kiểm tra TaxLens.",
+      failed: "Không lưu được đánh giá.",
+    },
     endings: {
       ended: (date: string) => `Hết hiệu lực từ ${date}`, mayHaveEnded: (date: string) => `Có thể đã hết hiệu lực từ ${date}`,
       endsLater: (date: string) => `Sẽ hết hiệu lực từ ${date}`, by: (number: string) => `theo ${number}`,
@@ -612,7 +623,7 @@ export default function Home() {
         </form>
         <ResultState error={answerError} hasResults={answer !== null || answerBusy} emptyTitle={copy.askEmptyTitle} emptyText={copy.askEmptyText} />
         {answerBusy && <Empty title={copy.working} text="" />}
-        {answer && <AnswerCard answer={answer} copy={copy} />}
+        {answer && <AnswerCard key={answer.question_id ?? "answer"} answer={answer} copy={copy} />}
       </section>}
 
       {view === "documents" && <section className="view">
@@ -791,7 +802,38 @@ function AnswerCard({ answer, copy }: { answer: Answer; copy: Copy }) {
       <p className="eyebrow">{copy.sources}</p>
       {answer.citations.map((citation, index) => <CitationLine key={`${citation.document_number}-${index}`} citation={citation} copy={copy} number={index + 1} />)}
     </div>}
+    {answer.question_id && <AnswerFeedback questionId={answer.question_id} copy={copy} />}
     <p className="disclaimer">{answer.disclaimer}</p>
+  </div>;
+}
+
+// A thumbs up or down on an answer, stored with the question for the evaluation's gold set.
+function AnswerFeedback({ questionId, copy }: { questionId: string; copy: Copy }) {
+  const [rating, setRating] = useState<"up" | "down" | null>(null);
+  const [comment, setComment] = useState("");
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  async function send(choice: "up" | "down", note?: string) {
+    setError("");
+    try {
+      await request(`/questions/${questionId}/feedback`, { method: "POST", body: JSON.stringify({ rating: choice, comment: note || null }) });
+      setSent(true);
+    } catch (problem) {
+      setError(problem instanceof Error ? problem.message : copy.feedback.failed);
+    }
+  }
+
+  if (sent) return <p className="answer-feedback">{copy.feedback.thanks}</p>;
+  return <div className="answer-feedback">
+    <span>{copy.feedback.question}</span>
+    <button type="button" className={rating === "up" ? "selected" : ""} onClick={() => { setRating("up"); void send("up"); }}>👍 {copy.feedback.up}</button>
+    <button type="button" className={rating === "down" ? "selected" : ""} onClick={() => setRating("down")}>👎 {copy.feedback.down}</button>
+    {rating === "down" && <form onSubmit={event => { event.preventDefault(); void send("down", comment.trim()); }}>
+      <input value={comment} maxLength={1000} placeholder={copy.feedback.placeholder} onChange={event => setComment(event.target.value)} />
+      <button type="submit">{copy.feedback.send}</button>
+    </form>}
+    {error && <small>{error}</small>}
   </div>;
 }
 

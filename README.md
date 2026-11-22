@@ -25,6 +25,8 @@ question.
 - **Cited answers** in the language of the question, explained in plain language with
   practical next steps. Confirmed facts are checked against the passages they cite, and
   citations carry verbatim source excerpts.
+- **Feedback**: each answer can be rated 👍/👎 with a comment; questions and ratings are logged as
+  candidates for the evaluation's gold set.
 - **Explicit refusals**: out-of-scope questions, missing evidence, superseded-only
   evidence, and model failures each return their own status instead of a guess.
 - **Document library** (administrators): corpus statistics at a glance, search by number or title,
