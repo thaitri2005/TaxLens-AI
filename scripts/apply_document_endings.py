@@ -13,6 +13,7 @@ taxlens.retrieval.repeals (CONFIRMED_RULES, INFERRED_RULES), not here.
 
 import argparse
 import json
+import re
 from collections import Counter
 from datetime import date
 from pathlib import Path
@@ -91,7 +92,18 @@ def _document_number(by: str, by_folded: dict[str, str], unresolved: set[str]) -
     if found is not None:
         return found
     unresolved.add(by)
-    return by.upper() if by == by.lower() else by
+    return _official_spelling(by) if by == by.lower() else by
+
+
+# Parts of a document number that lose their accent or case when folded.
+_SPELLING = {"QD": "QĐ", "ND": "NĐ", "TTG": "TTg"}
+
+
+def _official_spelling(folded: str) -> str:
+    """``106/2007/qd-btc`` → ``106/2007/QĐ-BTC``, for a number not in the corpus."""
+
+    parts = re.split(r"([/-])", folded.upper())
+    return "".join(_SPELLING.get(part, part) for part in parts)
 
 
 if __name__ == "__main__":
