@@ -1,0 +1,19 @@
+{
+  "description": "Documents held twice in corpus-v2: keep one version under the number without stray spaces, remove the other. Version ids are prefixes, resolved within each number. Decided 23/11/2026 from text similarity, file type, OCR damage (share of one-letter tokens), source, and dates.",
+  "merges": [
+    {"number": "100/1999/TT-BTC", "keep": "9f254a26", "drop": "1170d0ac", "reason": "Both native text; keep the ministry's copy with status and dates"},
+    {"number": "112/2018/TT-BTC", "keep": "c1046279", "drop": "1f5dd081", "reason": "Both PDF; ministry copy has less OCR damage (0.008 against 0.029) and status"},
+    {"number": "114/2012/TT-BTC", "keep": "706f2bde", "drop": "94abbcc1", "reason": "Both Word; keep the ministry's copy (filed as '114 /2012/TT-BTC') under the clean number"},
+    {"number": "118/2011/TT-BTC", "keep": "f1cb0c77", "drop": "4abe0f53", "reason": "Both Word; the ministry record dates it 2012, a year after the number and the portal's date"},
+    {"number": "148/2013/TT-BTC", "keep": "a05752a2", "drop": "2fad9578", "reason": "Word over PDF; the Word copy was filed as '148/2013/TT- BTC'"},
+    {"number": "154/2013/TT-BTC", "keep": "e64e925a", "drop": "a6b87832", "reason": "Word over PDF (OCR damage 0.003 against 0.011)"},
+    {"number": "155/2011/TT-BTC", "keep": "eedc4527", "drop": "15bfaabe", "reason": "Both Word; keep the ministry's copy (filed as '155/2011/TT - BTC') under the clean number"},
+    {"number": "168/2010/TT-BTC", "keep": "fe1e9034", "drop": "d21395c8", "reason": "Word over PDF; the PDF record's issue date (28/02/2010) is wrong"},
+    {"number": "189/2016/TT-BTC", "keep": "82729209", "drop": "bf7d1553", "reason": "Both ministry PDFs; keep the one with slightly less OCR damage (0.014 against 0.015)"},
+    {"number": "191/2010/TT-BTC", "keep": "a147cc32", "drop": "3a985cbc", "reason": "Word over PDF with split syllables; the Word copy was filed as '191/2010/TT- BTC'"},
+    {"number": "211/2016/TT-BTC", "keep": "7b8df947", "drop": "0dac87c7", "reason": "Both ministry PDFs; keep the one with less OCR damage (0.011 against 0.013)"},
+    {"number": "244/2016/TT-BTC", "keep": "1af40315", "drop": "f873bfb5", "reason": "Both PDF with similar OCR (0.013, 0.010); keep the ministry's status and effective date"},
+    {"number": "273/2016/TT-BTC", "keep": "423f83f5", "drop": "f7a5d6c2", "reason": "Both ministry PDFs; keep the one with less OCR damage (0.009 against 0.010)"},
+    {"number": "45/2009/TT-BTC", "keep": "5889d657", "drop": "d917c90b", "reason": "Word over PDF; the Word copy was filed as '45/2009/TT- BTC'"}
+  ]
+}
