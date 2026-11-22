@@ -128,3 +128,39 @@ def _result(
         token_count=2,
     )
     return SearchResult(chunk=chunk, version=version, document=document)
+
+
+def test_query_planner_answers_by_the_period_a_question_names() -> None:
+    today = date(2026, 11, 23)
+
+    past = plan_query(
+        "Tháng 6/2023, công ty tôi nhập khẩu rồi xuất khẩu; có được hoàn thuế không?", today
+    )
+    span = plan_query(
+        "Thuế đầu vào phát sinh tháng 3/2024. Tháng 9/2025 công ty nộp hồ sơ hoàn thuế.", today
+    )
+    this_year = plan_query("Năm 2026, thuế suất thuế GTGT là bao nhiêu?", today)
+    undated = plan_query("Thuế suất thuế GTGT là bao nhiêu?", today)
+
+    assert (past.filters.current_on, past.filters.as_of) == (date(2023, 6, 1), date(2023, 6, 30))
+    assert (span.filters.current_on, span.filters.as_of) == (date(2024, 3, 1), date(2025, 9, 30))
+    assert (this_year.filters.current_on, this_year.filters.as_of) == (date(2026, 1, 1), None)
+    assert (undated.period, undated.filters.current_on, undated.filters.as_of) == (
+        None,
+        today,
+        None,
+    )
+
+
+def test_question_period_ignores_issue_dates_and_future_years() -> None:
+    from taxlens.intelligence.planning import QuestionPeriod, question_period
+
+    today = date(2026, 11, 23)
+    assert question_period("theo nghị định 123/2020/nđ-cp ngày 19/10/2020, hóa đơn", today) is None
+    assert question_period("năm 2030 thuế suất", today) is None
+    assert question_period("quý ii/2025 công ty", today) == QuestionPeriod(
+        date(2025, 4, 1), date(2025, 6, 30)
+    )
+    assert question_period("ngày 15 tháng 3 năm 2026", today) == QuestionPeriod(
+        date(2026, 3, 15), date(2026, 3, 15)
+    )

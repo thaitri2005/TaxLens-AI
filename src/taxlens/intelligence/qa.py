@@ -350,11 +350,18 @@ def _build_messages(
         "(string or null), uncertainties (array of strings), practical_advice (array of "
         "strings), and review_actions (array of strings)."
     )
+    period = query_plan.period
     user_prompt = PromptTemplate.from_template(
-        "Intent: {intent}\nQuestion: {question}\n\nEvidence:\n{evidence}"
+        "Intent: {intent}\nQuestion: {question}\n{period}\nEvidence:\n{evidence}"
     ).format(
         intent=query_plan.intent,
         question=query_plan.original_query,
+        period=(
+            f"The question concerns {period.start:%d/%m/%Y} to {period.end:%d/%m/%Y}: apply "
+            "the law in force then, and say when a passage took effect later.\n"
+            if period
+            else ""
+        ),
         evidence=evidence_blocks,
     )
     return [
