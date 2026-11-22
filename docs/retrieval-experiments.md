@@ -60,6 +60,8 @@ out the law a question depends on.
 | **Hardware providers (Groq, Cerebras)** | gpt-oss-120b: 300-790 tokens/s. A whole answer takes 4-9 s, against 49-97 s | **Current** |
 | Loading the embedding model at startup | Moves its load away from the first question. Not measured separately | **Current** |
 | Loading the model without TensorFlow (`USE_TF=0`, set in `embeddings.py`), and counting article parts in one query per case | Model load 42 s → 21 s where TensorFlow is installed; a cached hybrid run 273 s → 193 s, results identical case by case | **Current** |
+| Keyword query with no parallel worker (`SET LOCAL max_parallel_workers_per_gather = 0`); the database has one vCore | 29-term question 3.4 s → 2.4 s, identical results; evaluation identical case by case | **Current** |
+| Keyword query: filtering versions once after grouping (materialized) instead of in every term scan | 3.6 s → 3.9 s: grouping all passages costs more than the repeated version scans | Rejected |
 | **Smaller API image** (only `model.safetensors` of the 4 copies of the weights) | 1.92 → 0.77 GB compressed; image pull at cold start 35.1 s → 13.4 s. Embeddings identical | **Current** |
 | **Resolving filtered versions first** (`_eligible_version_ids`), instead of joining documents into the passage scans | With a question's period: vector 10.0 s → 1.3 s, keyword with `current_on` 11.1 s → 3.6 s (laptop, warm). Retrieval evaluation identical case by case | **Current** |
 | Filtering vector search (`current_on`, `as_of`) | Inside the database 3.0 s and 3.2 s, the exact scan of 144,600 embeddings either way; no filter 2.3 s from a laptop. The site's answers are not slowed by the ended-document filter | Nothing to fix |

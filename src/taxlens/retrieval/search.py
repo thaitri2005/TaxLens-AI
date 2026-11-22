@@ -162,15 +162,19 @@ def keyword_search_chunks(
         statement = _fallback_keyword_statement(normalized_query, active_filters, fetched)
         results = _to_keyword_results(session.execute(statement).all())
         return _without_forms(results, limit) if exclude_forms else results
-    # The planner picks a sequential scan for common terms because it does not count the
-    # cost of decompressing each stored vector; the GIN index is much faster for them.
     version_ids = _eligible_version_ids(session, active_filters)
+    # The planner picks a sequential scan for common terms because it does not count the
+    # cost of decompressing each stored vector; the GIN index is much faster for them. The
+    # database has one vCore, so a parallel worker only adds overhead: without it a 29-term
+    # question takes 2.4 s instead of 3.4 s, with the same results (measured 23/11/2026).
     session.execute(text("SET LOCAL enable_seqscan = off"))
+    session.execute(text("SET LOCAL max_parallel_workers_per_gather = 0"))
     statement = _postgresql_keyword_statement(normalized_query, version_ids, fetched)
     started = perf_counter()
     rows = session.execute(statement).all()
     logger.info("keyword_query rows=%d seconds=%.2f", len(rows), perf_counter() - started)
     session.execute(text("SET LOCAL enable_seqscan = on"))
+    session.execute(text("RESET max_parallel_workers_per_gather"))
     results = _to_keyword_results(rows)
     return _without_forms(results, limit) if exclude_forms else results
 
