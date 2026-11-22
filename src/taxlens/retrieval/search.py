@@ -1,8 +1,10 @@
+import logging
 import re
 import unicodedata
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
+from time import perf_counter
 from typing import Any, Literal
 
 from sqlalchemy import Select, func, literal, literal_column, or_, select, text, union_all
@@ -19,6 +21,8 @@ from taxlens.retrieval.embeddings import EmbeddingProvider
 from taxlens.retrieval.repeals import CONFIRMED_RULES
 from taxlens.retrieval.reranking import NoOpReranker, Reranker
 from taxlens.retrieval.text import fold_vietnamese
+
+logger = logging.getLogger(__name__)
 
 SearchMode = Literal["keyword", "semantic", "hybrid"]
 RRF_K = 60
@@ -221,7 +225,9 @@ def hybrid_search_chunks(
     candidate_limit: int = 50,
     reranker: Reranker | None = None,
 ) -> list[SearchResult]:
+    started = perf_counter()
     keyword_results = keyword_search_chunks(session, query, filters, candidate_limit)
+    keyword_seconds = perf_counter() - started
     if provider is None or session.get_bind().dialect.name != "postgresql":
         return (
             (reranker or NoOpReranker())
@@ -229,7 +235,10 @@ def hybrid_search_chunks(
             .results
         )
 
+    started = perf_counter()
     query_embedding = provider.embed_query(query)
+    embed_seconds = perf_counter() - started
+    started = perf_counter()
     semantic_results = semantic_search_chunks(
         session,
         query_embedding.vectors[0],
@@ -237,6 +246,14 @@ def hybrid_search_chunks(
         filters,
         candidate_limit,
         exclude_forms=not asks_for_form(query),
+    )
+    logger.info(
+        "hybrid_search keyword_seconds=%.2f embed_seconds=%.2f semantic_seconds=%.2f "
+        "keyword_terms=%d",
+        keyword_seconds,
+        embed_seconds,
+        perf_counter() - started,
+        len(keyword_terms(query)),
     )
     fused_results = fuse_ranked_results(keyword_results, semantic_results, candidate_limit)
     return (
