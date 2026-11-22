@@ -8,8 +8,8 @@ Where TaxLens stands as of 23/11/2026. Rewritten as things change. What has been
 - **Site:** `aa3c86a`, released 23/11/2026, answering with `openai/gpt-oss-120b`. Answers leave out
   documents whose end is confirmed and flag inferred endings ([ended documents](retrieval.md#ended-documents)):
   the `corpus-v2` list (rebuilt after the rule fix of item 3) is loaded, leaving out 711 documents and
-  flagging 124 as of 23/11/2026. Checked on the 5 answer questions against the live database; the new
-  tags in the app are not yet checked by eye.
+  flagging 124 as of 23/11/2026. Checked on the 5 answer questions against the live database, and the
+  tags by eye in the app ("Ended 01/07/2022 · by 78/2021/TT-BTC"; no "In force" beside them).
 - **Corpus:** `corpus-v2`, frozen: 2,991 documents, 3,000 versions, 144,600 passages, all embedded.
 - **Access:** Tri, and Le Hung as a collaborator ([what each can reach](operations.md#access)).
 - **Airflow:** stopped. Keep it stopped, and the daily DAG paused, or the frozen corpus changes.
