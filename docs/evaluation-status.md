@@ -110,7 +110,7 @@ L = more. Mark each done here when finished.
 | ~~5~~ | **Done 23/11/2026.** `grade_answers.py`: 9 of 15 correct by the judge, 8 by the reader | | [Answers](#answers) |
 | ~~6~~ | **Done 23/11/2026,** released in `f0f72b6`: evidence is the first 5 located passages of 20. A1 now gets current law, and still refuses: the VAT-reduction decree is not retrieved | | [Answers](#answers) |
 | ~~7~~ | **Done 23/11/2026,** released in `f0f72b6`: answers use the period a question names. L2 now correct. Filtered searches resolve versions first (vector 10 s → 1.3 s) | | [Answers](#answers) |
-| 8 | Smaller API image: bake only `model.safetensors` (2.28 → 0.49 GB of model files), so a cold start pulls less than half | S, needs a release | Cold start is about 70 s, 35 s of it the image pull |
+| ~~8~~ | **Done 23/11/2026,** released in `9f26f28`: the image holds only `model.safetensors`; 1.92 → 0.77 GB, image pull 35 s → 13 s on each cold start | | [Speed](retrieval-experiments.md#speed) |
 | 9 | Vector search with an HNSW index and pgvector 0.8 iterative scans, or `halfvec` storage; keep only if the retrieval evaluation is identical or better | M, free to test | The 308 MB embeddings do not fit the 256 MB cache, so a search takes 1-10 s |
 | 10 | Keep the API warm longer after use (scale-to-zero cooldown 5 → 30 min). Idle replicas are billed at a reduced rate: check the current price first | S, the owner decides on cost | The first question after 5 idle minutes waits about 70 s |
 | 11 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
