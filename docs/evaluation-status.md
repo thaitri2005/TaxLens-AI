@@ -24,14 +24,18 @@ to separate most methods.
 | Keyword | 0.22 (0.08) | 0.30 (0.25) | 0.42 (0.25) |
 | Hybrid (what the site does) | 0.10 | 0.30 (0.08) | 0.41 (0.25) |
 | **Hybrid + filter for ended documents** | **0.35 (0.17)** | **0.45 (0.25)** | **0.45 (0.25)** |
+| Hybrid + cautious filter (explicit repeals and ministry dates only) | 0.31 (0.08) | 0.42 (0.25) | 0.45 (0.25) |
 | Issue-guided | 0.04 | 0.10 | 0.15 |
 
 On `corpus-v1.2`, with TCVN3 unconverted: hybrid 0.30, 0.41, 0.45; with filter 0.38, 0.45, 0.45.
 
 **What these mean.** Adding documents lowered recall because old, ended documents crowd the top: new
 documents took 25-28% of the top 10. The filter restores it, but rests on 12 cases, was built after
-seeing the problem, and includes rules no legal expert has validated. The TCVN3 repair and appendix
-labels changed in the same step, and their effect was not separated.
+seeing the problem, and includes rules no legal expert has validated. The cautious filter needs no
+inferred rules and gets most of the gain (against no filter, K = 10: 4 cases up, 1 down, p = 0.38); it
+trails the full filter by one provision at K = 5 and one at K = 10 (A1 ranks 11th instead of 10th). Neither
+filter removes a gold document. The TCVN3 repair and appendix labels changed in the same step, and their
+effect was not separated.
 
 ## Corpora
 
@@ -47,7 +51,8 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
 ## Known problems
 
 1. **The site can cite ended law.** The filter exists only in evaluation. Read by hand, answers cite
-   Decree 123/2008, Law 13/2008 and Circular 32/2011. Whether to apply it is undecided.
+   Decree 123/2008, Law 13/2008 and Circular 32/2011. The cautious filter covers the last two, but
+   Decree 123/2008 is caught only by the inferred guidance rule (it guided Law 13/2008).
 2. **Most essential provisions are still missed.** About half of the hardest need a legal step the
    question does not state ([diagnosis](retrieval-experiments.md#retrieval)).
 3. **Answer model trade-offs:** the faster model costs about $0.002 an answer, against $0.0003, and can
@@ -74,8 +79,8 @@ L = more. Mark each done here when finished.
 
 | # | Task | Effort | Why |
 | --- | --- | --- | --- |
-| 1 | Run the cautious filter (explicit repeals + ministry dates) on `corpus-v2` | S, free, ~6 min | Decides what can go on the site without inferred rules |
-| 2 | Handle ended documents on the site: filter or a "may have ended" badge, pointing to the replacing law where known | M, needs a release | The site cites Decree 123/2008, Law 13/2008, Circular 32/2011 |
+| ~~1~~ | **Done 23/11/2026.** Cautious filter on `corpus-v2`: 0.31, 0.42, 0.45, against 0.35, 0.45, 0.45 for all rules | | See [Results](#results) |
+| 2 | Handle ended documents on the site: leave out what the cautious rules end (explicit repeals, ministry dates), and mark what only the inferred rules end (guidance, amendment) "may have ended", naming the replacing document | M, needs a release | The site cites Decree 123/2008, Law 13/2008, Circular 32/2011 |
 | 3 | Find why evaluation takes 29-47 s a question when an answer's retrieval takes 3-6 s | S-M, free | Makes every later run 5-10× cheaper |
 | 4 | Grade answers against the gold answers already in the gold set | M, ~$0.05 | Answer quality is unmeasured |
 | 5 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |

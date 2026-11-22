@@ -28,7 +28,8 @@ reports, and run paid or slow tests once.
 | The same, list built from `corpus-v1`, on `corpus-v2` | Hybrid 0.23, 0.35, 0.45. Issue-guided 0.06, 0.10, 0.26. The list misses the new documents | Superseded | `*-asof-repeals-v2` |
 | **The same, list rebuilt for `corpus-v2`** (825 ended documents) | **Hybrid 0.35, 0.45, 0.45.** 9 provisions up, none down. The list was built after seeing the problem, and includes unvalidated rules | Best result. Not on the site | `hybrid-asof-repeals-v2list` |
 | Filter, explicit statements only (`corpus-v1`, under the limit) | No provision gained | Stale. Not worth repeating alone | `*-repeals-explicit` |
-| Filter, explicit + ministry dates (`corpus-v1.2`) | Hybrid 0.34, 0.45, 0.45, needs no inference | The conservative option. **Untested on `corpus-v2`** (one run, about 6 minutes) | `*-ministry-nolimit` |
+| Filter, explicit + ministry dates (`corpus-v1.2`) | Hybrid 0.34, 0.45, 0.45, needs no inference | Superseded by the `corpus-v2` run below | `*-ministry-nolimit` |
+| **Filter, explicit + ministry dates, `corpus-v2`** (697 ended documents, `--repeal-rules explicit ministry`) | Hybrid 0.31, 0.42, 0.45. Against no filter, K = 10: 4 up, 1 down, p = 0.38. Against all rules: one provision behind at K = 5 and at K = 10. Removes no gold document. Misses Decree 123/2008, which only the guidance rule ends | **The cautious option for the site.** Do not rerun | `hybrid-asof-ministry-v2` |
 | Following one legal reference from top passages | Reaches 1 of 20 missed provisions, at document level | Not worth building | `reachability-*` |
 | Rare terms weigh more (IDF), and expanding abbreviations (`GTGT`) | Hybrid K = 5 falls to 0.10 with IDF; K = 10 gains one provision outside the hard 14. Neither reaches any of the 14 | Do not adopt | Exploratory, not kept |
 | Taking more candidates | The 14 hardest provisions rank 127 or worse in the vector list, 315 or worse by keyword | Would not help | Diagnosis below |
@@ -114,4 +115,6 @@ unexplained.
 
 **Things that wasted runs:** Windows carriage returns in `az` output in Git Bash (use `tr -d '\r'`), a laptop IP change (check `curl https://api.ipify.org` against the
 firewall first), internet drops (runs start over, so use a steady connection), and short `timeout`
-values that killed a run and lost its output.
+values that killed a run and lost its output. A missing `AZURE_STORAGE_CONNECTION_STRING` (set it with
+the database settings; [operations](operations.md#laptop-access-to-azure)): until 23/11/2026 the report was
+uploaded before it was saved, so the failed upload lost an 8-minute run. It is now saved first.
