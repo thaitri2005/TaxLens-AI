@@ -104,7 +104,7 @@ future ending takes effect by itself.
 | `amendment` | It amends a document that ended (`ended_by`) | Kept, noted | "May have ended" |
 
 Only the first two act, as no legal expert has validated the inferred rules. On `corpus-v2`, as of
-23/11/2026, that leaves out 694 documents (3 more end later) and flags 128; in evaluation it gives 0.31, 0.42, 0.45, against 0.10, 0.30, 0.41 without
+23/11/2026, that leaves out 711 documents (3 more end later) and flags 124; in evaluation it gives 0.31, 0.42, 0.45, against 0.10, 0.30, 0.41 without
 it ([status](evaluation-status.md#results)). Search pages show the same tags but leave nothing out, since
 looking up an old document is a normal use.
 

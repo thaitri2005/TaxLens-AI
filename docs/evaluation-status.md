@@ -7,8 +7,9 @@ Where TaxLens stands as of 23/11/2026. Rewritten as things change. What has been
 
 - **Site:** `2669c02`, released 23/11/2026, answering with `openai/gpt-oss-120b`. Answers leave out
   documents whose end is confirmed and flag inferred endings ([ended documents](retrieval.md#ended-documents)):
-  the `corpus-v2` list is loaded, leaving out 694 documents and flagging 128 as of 23/11/2026. Checked
-  on the 5 answer questions against the live database; the new tags in the app are not yet checked by eye.
+  the `corpus-v2` list (rebuilt after the rule fix of item 3) is loaded, leaving out 711 documents and
+  flagging 124 as of 23/11/2026. Checked on the 5 answer questions against the live database; the new
+  tags in the app are not yet checked by eye.
 - **Corpus:** `corpus-v2`, frozen: 2,991 documents, 3,000 versions, 144,600 passages, all embedded.
 - **Access:** Tri, and Le Hung as a collaborator ([what each can reach](operations.md#access)).
 - **Airflow:** stopped. Keep it stopped, and the daily DAG paused, or the frozen corpus changes.
@@ -51,9 +52,10 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
 
 ## Known problems
 
-1. **Ended law the list does not know.** Answers no longer use Law 13/2008 or Circular 32/2011, and flag
-   Decree 123/2008. But a document ends only if the corpus or the ministry says so: Circular 68/2019 and
-   Decree 119/2018, both ended in 2022, still appear in e-invoice answers unflagged.
+1. **Ended law the list does not know.** Answers no longer use Law 13/2008, Circular 32/2011, Circular
+   68/2019 or Decree 119/2018, and flag Decree 123/2008. A document still ends only if the corpus or the
+   ministry says so, and the rules read lists by their first number per item (`ø) Thông tư 19/2021 và
+   Thông tư 46/2024` ends only 19/2021).
 2. **Most essential provisions are still missed.** About half of the hardest need a legal step the
    question does not state ([diagnosis](retrieval-experiments.md#retrieval)).
 3. **Answer model trade-offs:** the faster model costs about $0.002 an answer, against $0.0003, and can
@@ -82,7 +84,7 @@ L = more. Mark each done here when finished.
 | --- | --- | --- | --- |
 | ~~1~~ | **Done 23/11/2026.** Cautious filter on `corpus-v2`: 0.31, 0.42, 0.45, against 0.35, 0.45, 0.45 for all rules | | See [Results](#results) |
 | ~~2~~ | **Done 23/11/2026,** released in `2669c02`: confirmed endings left out of answers, inferred ones flagged, tags in the app | | [Ended documents](retrieval.md#ended-documents) |
-| 3 | Find why ended documents such as Circular 68/2019 (ended by 78/2021) and Decree 119/2018 (by 123/2020) are missing from the list, fix the rule, and reload | S, free | They still appear in answers unflagged |
+| ~~3~~ | **Done 23/11/2026.** Lists split across passages, items after OCR page numbers, and "continues in force until" clauses are read; 29 more documents end, loaded on Azure. Recall unchanged | | [Already tried](retrieval-experiments.md#retrieval) |
 | 4 | Find why evaluation takes 29-47 s a question when an answer's retrieval takes 3-6 s | S-M, free | Makes every later run 5-10× cheaper |
 | 5 | Grade answers against the gold answers already in the gold set | M, ~$0.05 | Answer quality is unmeasured |
 | 6 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
