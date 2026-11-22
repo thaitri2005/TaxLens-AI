@@ -59,6 +59,8 @@ out the law a question depends on.
 | Faster cheap models on ordinary providers | One call each: gemma-3-27b 16 tokens/s, gemma-3-12b 21-28, Llama 3.1-8B 22. About 25-70% at best | Not worth switching |
 | **Hardware providers (Groq, Cerebras)** | gpt-oss-120b: 300-790 tokens/s. A whole answer takes 4-9 s, against 49-97 s | **Current** |
 | Loading the embedding model at startup | Moves its load away from the first question. Not measured separately | **Current** |
+| Loading the model without TensorFlow (`USE_TF=0`, set in `embeddings.py`), and counting article parts in one query per case | Model load 42 s → 21 s where TensorFlow is installed; a cached hybrid run 273 s → 193 s, results identical case by case | **Current** |
+| Filtering vector search (`current_on`, `as_of`) | Inside the database 3.0 s and 3.2 s, the exact scan of 144,600 embeddings either way; no filter 2.3 s from a laptop. The site's answers are not slowed by the ended-document filter | Nothing to fix |
 
 ## Answer models
 
@@ -103,7 +105,7 @@ From a laptop against Azure, on `corpus-v2`. The database is 965 MB on 2 GB of m
 | Run | Time | Credits |
 | --- | --- | --- |
 | Keyword baseline | About 100 s | None |
-| Hybrid baseline | 6-9 minutes | None |
+| Hybrid baseline | About 3.5 minutes (6-9 before 23/11/2026) | None |
 | Issue-guided baseline | 8-23 minutes | None |
 | `freeze_corpus.py` | 30 s | None |
 | `extract_repeals.py` | 100 s | None |
@@ -111,8 +113,11 @@ From a laptop against Azure, on `corpus-v2`. The database is 965 MB on 2 GB of m
 | Full collection build, 10 rounds of 100 | 13.7 hours | None |
 | OCR, embedding | About 2.5 s a page, 0.3 s a passage | None |
 
-Hybrid baselines take 29-47 s a question although retrieval inside an answer takes 3-6 s. This is
-unexplained.
+Why a hybrid baseline takes longer than an answer's 3-6 s of retrieval (measured 23/11/2026): about 35 s
+once per run (model load 21 s, corpus check 12 s), then per question keyword search 1.5-5 s and vector
+search 2-10 s. Each round trip from a laptop costs about 0.2 s, against about 1 ms inside Azure, and the
+1-vCore, 2 GB database answers the same query in 2-10 s depending on its cache. Its CPU credits stayed
+full, so it is not throttled. Running evaluations inside Azure would save the round trips only.
 
 **Things that wasted runs:** Windows carriage returns in `az` output in Git Bash (use `tr -d '\r'`), a laptop IP change (check `curl https://api.ipify.org` against the
 firewall first), internet drops (runs start over, so use a steady connection), and short `timeout`

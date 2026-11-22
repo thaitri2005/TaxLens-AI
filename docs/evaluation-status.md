@@ -85,7 +85,7 @@ L = more. Mark each done here when finished.
 | ~~1~~ | **Done 23/11/2026.** Cautious filter on `corpus-v2`: 0.31, 0.42, 0.45, against 0.35, 0.45, 0.45 for all rules | | See [Results](#results) |
 | ~~2~~ | **Done 23/11/2026,** released in `2669c02`: confirmed endings left out of answers, inferred ones flagged, tags in the app | | [Ended documents](retrieval.md#ended-documents) |
 | ~~3~~ | **Done 23/11/2026.** Lists split across passages, items after OCR page numbers, and "continues in force until" clauses are read; 29 more documents end, loaded on Azure. Recall unchanged | | [Already tried](retrieval-experiments.md#retrieval) |
-| 4 | Find why evaluation takes 29-47 s a question when an answer's retrieval takes 3-6 s | S-M, free | Makes every later run 5-10× cheaper |
+| ~~4~~ | **Done 23/11/2026.** Evaluation runs about 30% faster (TensorFlow no longer loaded, one count query per case); the rest is laptop round trips and a small database. Answers are not slowed by the new filter | | [Speed](retrieval-experiments.md#speed) |
 | 5 | Grade answers against the gold answers already in the gold set | M, ~$0.05 | Answer quality is unmeasured |
 | 6 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
 | 7 | Draft new gold cases for Hung and an expert to verify, to at least 50, some held out | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
