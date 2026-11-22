@@ -120,7 +120,7 @@ L = more. Mark each done here when finished.
 | ~~14~~ | **Done 23/11/2026.** ESLint 9 with Next's `core-web-vitals` and `typescript` rules (`eslint.config.mjs`); CI runs `npm run lint` and `next build` lints too. Fixed 2 errors (page links in the admin view); 3 warnings remain (two `<img>` logos, one effect's dependency list) | | |
 | 15 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, after 12 | Weak top-5 recall; cannot reach the 14 never-found provisions |
 | 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, after 12 | Half the hardest misses need it |
-| 17 | Split the 800-line `page.tsx` and add web tests | M | Maintainability only |
+| ~~17~~ | **Done 23/11/2026.** `page.tsx` (890 lines) split without code changes into `lib/` (types, copy, format, api) and `components/` (tags, answer, documents, layout); 12 Vitest tests for the helpers and tags run in CI (`npm test`) | | |
 
 **For people, not code:** a tax expert reviews the filter's inferred rules and the 178 documents the
 ministry says are in force but our list ends; tell the professor that all earlier results had the TCVN3

@@ -44,6 +44,8 @@ jobs:
         run: npm install
       - name: Lint frontend
         run: npm run lint
+      - name: Test frontend
+        run: npm test
       - name: Build frontend
         env:
           API_ORIGIN: http://api:8000
