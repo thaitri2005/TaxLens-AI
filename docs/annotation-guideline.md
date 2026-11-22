@@ -63,3 +63,8 @@ An amended provision and its amending provision count as **one** gold item, writ
 
 - Two people annotate at least 50 cases independently → report Cohen's kappa on E labels. The second annotator fills a copy of the CSV with the same columns (only their cases) without looking at the first; `python scripts/annotation_agreement.py <first.csv> <second.csv>` reports kappa over the E / S / not-listed label of every provision either listed, how often the E sets match exactly, and each disagreement to discuss.
 - Log `minutes_spent`; if the average exceeds 30 minutes per case, simplify before scaling up.
+- **Drafts** wait in `data/evaluation/gold_set_v1_drafts.csv` (`D` cases, drafted from the law text, all
+  `source_verified = N`, `uncertain = Y`, with what to check in `notes`). To promote one: read every cited
+  clause, correct the answer and labels, set `source_verified` and `uncertain`, give it the next free
+  `case_id`, and move the row into `gold_set_v1.csv`. `scripts/export_question_log.py` lists real
+  questions from the site to draft from.
