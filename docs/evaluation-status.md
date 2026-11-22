@@ -110,13 +110,16 @@ L = more. Mark each done here when finished.
 | ~~5~~ | **Done 23/11/2026.** `grade_answers.py`: 9 of 15 correct by the judge, 8 by the reader | | [Answers](#answers) |
 | ~~6~~ | **Done 23/11/2026,** released in `f0f72b6`: evidence is the first 5 located passages of 20. A1 now gets current law, and still refuses: the VAT-reduction decree is not retrieved | | [Answers](#answers) |
 | ~~7~~ | **Done 23/11/2026,** released in `f0f72b6`: answers use the period a question names. L2 now correct. Filtered searches resolve versions first (vector 10 s → 1.3 s) | | [Answers](#answers) |
-| 8 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
-| 9 | Draft new gold cases for Hung and an expert to verify, to at least 50, some held out | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
-| 10 | Remove the 14 duplicate documents, settle the 3 uncertain numbers, freeze `corpus-v2.1` | M, free | Both copies appear in results |
-| 11 | Set up ESLint for the web app and run it in CI | S | No lint config exists; CI only builds the web app |
-| 12 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, after 9 | Weak top-5 recall; cannot reach the 14 never-found provisions |
-| 13 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, after 9 | Half the hardest misses need it |
-| 14 | Split the 800-line `page.tsx` and add web tests | M | Maintainability only |
+| 8 | Smaller API image: bake only `model.safetensors` (2.28 → 0.49 GB of model files), so a cold start pulls less than half | S, needs a release | Cold start is about 70 s, 35 s of it the image pull |
+| 9 | Vector search with an HNSW index and pgvector 0.8 iterative scans, or `halfvec` storage; keep only if the retrieval evaluation is identical or better | M, free to test | The 308 MB embeddings do not fit the 256 MB cache, so a search takes 1-10 s |
+| 10 | Keep the API warm longer after use (scale-to-zero cooldown 5 → 30 min). Idle replicas are billed at a reduced rate: check the current price first | S, the owner decides on cost | The first question after 5 idle minutes waits about 70 s |
+| 11 | Log questions and add 👍/👎 to answers | M, needs a migration and release | Real questions become gold-case candidates |
+| 12 | Draft new gold cases for Hung and an expert to verify, to at least 50, some held out | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
+| 13 | Remove the 14 duplicate documents, settle the 3 uncertain numbers, freeze `corpus-v2.1` | M, free | Both copies appear in results |
+| 14 | Set up ESLint for the web app and run it in CI | S | No lint config exists; CI only builds the web app |
+| 15 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, after 12 | Weak top-5 recall; cannot reach the 14 never-found provisions |
+| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, after 12 | Half the hardest misses need it |
+| 17 | Split the 800-line `page.tsx` and add web tests | M | Maintainability only |
 
 **For people, not code:** a tax expert reviews the filter's inferred rules and the 178 documents the
 ministry says are in force but our list ends; tell the professor that all earlier results had the TCVN3
