@@ -563,6 +563,29 @@ def _passage_locators(
     are the numbers that start a line in its text.
     """
 
+    # One query for all the articles not yet counted: from a laptop each round trip to the
+    # database costs about 0.2 s, and a case can hold 20 such articles.
+    missing = {
+        (result.chunk.document_version_id, result.chunk.article_number)
+        for result in results
+        if result.chunk.clause_number is None and result.chunk.article_number is not None
+    } - part_counts.keys()
+    if missing:
+        counted = session.execute(
+            select(
+                DocumentChunk.document_version_id,
+                DocumentChunk.article_number,
+                func.count(DocumentChunk.id),
+            )
+            .where(
+                DocumentChunk.document_version_id.in_({version for version, _ in missing}),
+                DocumentChunk.article_number.in_({article for _, article in missing}),
+            )
+            .group_by(DocumentChunk.document_version_id, DocumentChunk.article_number)
+        ).all()
+        counts = {(version, article): int(count) for version, article, count in counted}
+        part_counts.update({key: counts.get(key, 0) for key in missing})
+
     locators = []
     for result in results:
         chunk = result.chunk
@@ -570,16 +593,6 @@ def _passage_locators(
         clauses: Any = chunk.clause_number
         if clauses is None and chunk.article_number is not None:
             key = (chunk.document_version_id, chunk.article_number)
-            if key not in part_counts:
-                part_counts[key] = (
-                    session.scalar(
-                        select(func.count(DocumentChunk.id)).where(
-                            DocumentChunk.document_version_id == chunk.document_version_id,
-                            DocumentChunk.article_number == chunk.article_number,
-                        )
-                    )
-                    or 0
-                )
             if part_counts[key] > 1:
                 clauses = frozenset(
                     match.group(1) for match in CLAUSE_PATTERN.finditer(chunk.content)

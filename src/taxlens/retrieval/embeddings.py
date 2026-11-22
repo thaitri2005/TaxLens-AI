@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import os
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -75,6 +76,9 @@ class LocalE5Embedder:
         return EmbeddingBatch(vectors=vectors, truncated_inputs=truncated_inputs)
 
     def _load_model(self, model_path: str) -> Any:
+        # The model runs on PyTorch. Where TensorFlow is also installed (some laptops),
+        # transformers would import it too, doubling the load to about 40 seconds.
+        os.environ.setdefault("USE_TF", "0")
         from sentence_transformers import SentenceTransformer
 
         model = SentenceTransformer(model_path, device="cpu", local_files_only=True)
