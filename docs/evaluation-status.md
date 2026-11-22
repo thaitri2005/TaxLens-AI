@@ -10,7 +10,8 @@ Where TaxLens stands as of 23/11/2026. Rewritten as things change. What has been
   the `corpus-v2` list (rebuilt after the rule fix of item 3) is loaded, leaving out 711 documents and
   flagging 124 as of 23/11/2026. Checked on the 5 answer questions against the live database, and the
   tags by eye in the app ("Ended 01/07/2022 · by 78/2021/TT-BTC"; no "In force" beside them).
-- **Corpus:** `corpus-v2`, frozen: 2,991 documents, 3,000 versions, 144,600 passages, all embedded.
+- **Corpus:** `corpus-v2.1`, frozen 23/11/2026: 2,986 documents, 2,986 versions, 144,279 passages, all
+  embedded. `corpus-v2` with 14 duplicates merged; recall is identical on all three baselines.
 - **Access:** Tri, and Le Hung as a collaborator ([what each can reach](operations.md#access)).
 - **Airflow:** stopped. Keep it stopped, and the daily DAG paused, or the frozen corpus changes.
 - **Speed:** a warm answer takes about 5.5 s inside Azure: retrieval 4.0 s (keyword 3.1 s, vector
@@ -68,7 +69,8 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
 | `corpus-v1` | Original | 2,026 | 61,208 | `317f5a0d` |
 | `corpus-v1.1` | 8 PDFs repaired | 2,026 | 61,204 | `cd396fa3` |
 | `corpus-v1.2` | Circulars 80/2021 and 25/2018 added | 2,028 | 62,182 | `7df84879` |
-| **`corpus-v2`** | [Rules](corpus-inclusion.md), TCVN3 repaired, 41 numbers corrected | 2,991 | 144,600 | `62b499cf` |
+| `corpus-v2` | [Rules](corpus-inclusion.md), TCVN3 repaired, 41 numbers corrected | 2,991 | 144,600 | `62b499cf` |
+| **`corpus-v2.1`** | 14 duplicates merged ([plan](../data/evaluation/corpus/merge-duplicates-v2.1.json)), date of 124/2026 set | 2,986 | 144,279 | `07175db6` |
 
 ## Known problems
 
@@ -83,11 +85,12 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
 4. **Answers are right on 9 of 15 gold questions** (judge model, read by hand; [Answers](#answers)).
    Dated questions and unlocated old documents are handled since `f0f72b6`; what remains is evidence that
    is not retrieved (A1, A4, A9), and run-to-run variation of the model's conclusion.
-5. **Duplicates:** 9 document numbers hold near-identical second versions, and 5 numbers with stray
-   spaces (`148/2013/TT- BTC`) duplicate clean ones. Both copies can appear in results. Nothing was
-   deleted.
-6. **Numbers still uncertain:** `93/1998/QĐ/TCKT` and `25/2026/TT-BTC`, where header and portal
-   disagree; `124/2026/TT-BTC` was inferred from a misread header and date. The other 50 flags in the
+5. **Duplicates merged in `corpus-v2.1`:** 14 numbers held two copies; the better one stays under the clean
+   number and the other is backed up in `removed-duplicates-v2.1.json`. 17 other numbers keep stray spaces
+   but have no twin.
+6. **Numbers still uncertain:** `93/1998/QĐ/TCKT`, whose header reads `91/1998/QĐ-BNN-BVTV` (wrong number
+   on the portal, or the wrong file), and `25/2026/TT-BTC`, whose OCR'd header reads `85/2026`; neither is
+   found online. `124/2026/TT-BTC` is confirmed (dated 22/08/2026 by LuatVietnam). The other 50 flags in the
    library are OCR misreads, shortened headers, or citations picked up as headers.
 7. **Failed or absent:** 9 documents have no text (7 Excel workbooks filed as `.rtf`, a 2-byte file,
    `204/2004/NĐ-CP`). `56/2009/NĐ-CP` (invalid file on the portal) and `38/2015/TT-BTC` (download failed)
@@ -116,10 +119,10 @@ L = more. Mark each done here when finished.
 | 10 | Keep the API warm longer after use: `cooldown_period_in_seconds = 1800` in the API template (`infra/terraform/main.tf`, default 300). An idle API replica (1 vCPU, 2 GiB) costs $0.000009 a second in East Asia, $0.032 an hour (retail price list, 23/11/2026): at most $0.016 per use, about $1 a month at two uses a day | S, **waiting for the owner** (cost) | The first question after 5 idle minutes waits for the API to start |
 | ~~11~~ | **Done 23/11/2026.** Questions, answers, and timings are logged in `question_logs`, and answers can be rated 👍/👎 with a comment; `export_question_log.py` lists rated and refused ones for review | | [Architecture](architecture.md) |
 | 12 | **Drafts ready, review waiting:** 18 cases in `gold_set_v1_drafts.csv` (CIT rates, PIT deductions and household business, late-payment interest, invoice timing, 0% VAT conditions, refund cap, a false premise, 3 leakage-free), each from the clause text and checked to parse. Hung or an expert must verify them before they count; then draft 16 more | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
-| 13 | Remove the 14 duplicate documents, settle the 3 uncertain numbers, freeze `corpus-v2.1` | M, free | Both copies appear in results |
+| ~~13~~ | **Done 23/11/2026.** 14 duplicates merged by `merge_duplicate_documents.py` (321 passages removed, backed up), `corpus-v2.1` frozen, ended-document list rebuilt and loaded, baselines identical; 124/2026 confirmed, 2 numbers left for someone with the originals | | [Corpora](#corpora) |
 | ~~14~~ | **Done 23/11/2026.** ESLint 9 with Next's `core-web-vitals` and `typescript` rules (`eslint.config.mjs`); CI runs `npm run lint` and `next build` lints too. Fixed 2 errors (page links in the admin view); 3 warnings remain (two `<img>` logos, one effect's dependency list) | | |
-| 15 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, after 12 | Weak top-5 recall; cannot reach the 14 never-found provisions |
-| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, after 12 | Half the hardest misses need it |
+| 15 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, **waits for item 12's reviewed cases** | Weak top-5 recall; cannot reach the 14 never-found provisions |
+| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, **waits for item 12's reviewed cases** | Half the hardest misses need it |
 | ~~17~~ | **Done 23/11/2026.** `page.tsx` (890 lines) split without code changes into `lib/` (types, copy, format, api) and `components/` (tags, answer, documents, layout); 12 Vitest tests for the helpers and tags run in CI (`npm test`) | | |
 
 **For people, not code:** a tax expert reviews the filter's inferred rules and the 178 documents the

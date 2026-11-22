@@ -96,7 +96,7 @@ to end later, gets a note among the answer's uncertainties.
 ### Ended documents
 
 `legal_documents.ended_on`, `end_basis`, and `ended_by` hold one ending per document, loaded from a
-committed list (`data/evaluation/repeals/corpus-v2-ministry.json`) by `apply_document_endings.py`. The
+committed list (`data/evaluation/repeals/corpus-v2.1-ministry.json`) by `apply_document_endings.py`. The
 bases are the rules of `retrieval/repeals.py`, and the date is compared with today on every request, so a
 future ending takes effect by itself.
 
@@ -139,13 +139,13 @@ Results are in [evaluation-status.md](evaluation-status.md), and past runs in
 | `tax_retrieval_current.json`, `tax_retrieval.json` | Older smoke sets |
 | `qa.json` | Five questions for `evaluate_qa.py` |
 | `issues/gold_set_v1.json` | Stored issue decompositions |
-| `repeals/corpus-v2-ministry.json` | Current list of ended documents |
+| `repeals/corpus-v2.1-ministry.json` | Current list of ended documents |
 
 Run a frozen comparison:
 
 ```powershell
-python scripts/freeze_corpus.py --check data/evaluation/corpus/corpus-v2.json
-python scripts/evaluate_tax_retrieval.py --dataset data/evaluation/gold_set_v1.csv --verified-only --corpus-manifest data/evaluation/corpus/corpus-v2.json --as-of case --ks 5 10 20 --mode hybrid --repeals data/evaluation/repeals/corpus-v2-ministry.json --output data/evaluation/runs/NAME.json
+python scripts/freeze_corpus.py --check data/evaluation/corpus/corpus-v2.1.json
+python scripts/evaluate_tax_retrieval.py --dataset data/evaluation/gold_set_v1.csv --verified-only --corpus-manifest data/evaluation/corpus/corpus-v2.1.json --as-of case --ks 5 10 20 --mode hybrid --repeals data/evaluation/repeals/corpus-v2.1-ministry.json --output data/evaluation/runs/NAME.json
 python scripts/compare_retrieval_runs.py data/evaluation/runs/A.json data/evaluation/runs/B.json
 ```
 
