@@ -1,7 +1,6 @@
 import importlib.util
 import re
 import uuid
-from datetime import date
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -17,7 +16,6 @@ from taxlens.intelligence.evidence import EvidenceStatus, assess_evidence
 from taxlens.legal_data.document_numbers import find_document_numbers, issuing_agency_for
 from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
 from taxlens.retrieval.search import (
-    SearchFilters,
     SearchResult,
     _postgresql_keyword_statement,
     asks_for_form,
@@ -53,7 +51,7 @@ def test_keyword_terms_drop_question_words_with_or_without_accents() -> None:
 
 def test_postgres_keyword_query_matches_folded_terms_and_rewards_exact_accents() -> None:
     sql = str(
-        _postgresql_keyword_statement("hóa đơn là gì", SearchFilters(), 5).compile(
+        _postgresql_keyword_statement("hóa đơn là gì", None, 5).compile(
             dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
         )
     )
@@ -68,13 +66,13 @@ def test_postgres_keyword_query_matches_folded_terms_and_rewards_exact_accents()
 
 def test_postgres_keyword_query_reads_only_chunks_that_can_reach_the_limit() -> None:
     sql = str(
-        _postgresql_keyword_statement("hóa đơn", SearchFilters(as_of=date(2024, 1, 1)), 5).compile(
+        _postgresql_keyword_statement("hóa đơn", [uuid.UUID(int=7)], 5).compile(
             dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
         )
     )
 
     # Filters apply before the cutoff, or filtered-out chunks would raise it and lose results.
-    assert sql.index("issue_date") < sql.index("OFFSET 4")
+    assert sql.index("version_id IN") < sql.index("OFFSET 4")
     assert "eligible.match_score > coalesce((SELECT eligible.match_score" in sql
     assert "- 1" in sql
 
