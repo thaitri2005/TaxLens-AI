@@ -129,3 +129,11 @@ html { -webkit-tap-highlight-color:transparent; }
   .tab { min-height:48px; }
 }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; } }
+/* Narrow phones: the 44px touch targets made the top bar wrap at 375px */
+.sign-out-button,.topbar-link { white-space:nowrap; }
+@media (max-width:480px) {
+  .topbar { padding:0 16px; }
+  .brand small { display:none; }
+  .topbar-actions { gap:6px; }
+  .language-toggle button { padding:0 8px; }
+}
