@@ -60,7 +60,7 @@ export function AnswerFeedback({ questionId, copy }: { questionId: string; copy:
     <button type="button" className={rating === "up" ? "selected" : ""} onClick={() => { setRating("up"); void send("up"); }}>👍 {copy.feedback.up}</button>
     <button type="button" className={rating === "down" ? "selected" : ""} onClick={() => setRating("down")}>👎 {copy.feedback.down}</button>
     {rating === "down" && <form onSubmit={event => { event.preventDefault(); void send("down", comment.trim()); }}>
-      <input value={comment} maxLength={1000} placeholder={copy.feedback.placeholder} onChange={event => setComment(event.target.value)} />
+      <input value={comment} maxLength={1000} aria-label={copy.feedback.placeholder} placeholder={copy.feedback.placeholder} onChange={event => setComment(event.target.value)} />
       <button type="submit">{copy.feedback.send}</button>
     </form>}
     {error && <small>{error}</small>}

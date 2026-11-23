@@ -5,7 +5,7 @@ Where TaxLens stands as of 23/11/2026. Rewritten as things change. What has been
 
 ## What is live
 
-- **Site:** `aa3c86a`, released 23/11/2026, answering with `openai/gpt-oss-120b`. Answers leave out
+- **Site:** `8d577e6`, released 23/11/2026 (questions logged and rated, keyword search 30% faster), answering with `openai/gpt-oss-120b`. Answers leave out
   documents whose end is confirmed and flag inferred endings ([ended documents](retrieval.md#ended-documents)):
   the `corpus-v2` list (rebuilt after the rule fix of item 3) is loaded, leaving out 711 documents and
   flagging 124 as of 23/11/2026. Checked on the 5 answer questions against the live database, and the
