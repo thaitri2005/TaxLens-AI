@@ -31,8 +31,11 @@ python -m pip install -e ".[dev]"
 python -m ruff check src tests scripts
 python -m mypy src
 python -m pytest
-cd apps/web; npm ci; npm run build
+cd apps/web; npm install; npm run lint; npm test; npm run build
 ```
+
+The web app has no lockfile, so CI and laptops both use `npm install`. `npm test` runs Vitest; `npm run lint`
+runs ESLint with Next's rules, and `next build` lints again.
 
 CI type-checks against the newest SQLAlchemy 2.x; write statement annotations as `Select[Any]`.
 
@@ -99,11 +102,16 @@ For scripts, set these in the same terminal:
 pip install -e ".[cloud]"
 $env:DATABASE_HOST = "taxlens-dev-pg.postgres.database.azure.com"
 $env:DATABASE_USER = "taxlensadmin"
-$env:DATABASE_PASSWORD = "<PostgreSQL admin password>"
+$env:DATABASE_PASSWORD = (az keyvault secret show --vault-name taxlensdevkv --name postgres-admin-password --query value -o tsv)
 $env:DATABASE_SSL_MODE = "require"
 $env:OBJECT_STORAGE_BACKEND = "azure_blob"
 $env:AZURE_STORAGE_CONNECTION_STRING = (az storage account show-connection-string -g taxlens-dev-rg -n taxlensdevartifacts -o tsv)
 ```
+
+In Git Bash, strip the carriage return from each `az` output (`| tr -d '\r'`). Without
+`AZURE_STORAGE_CONNECTION_STRING`, an evaluation still saves its report locally but cannot upload it. To
+answer questions from a laptop as the site does, also set `HF_CHAT_ROUTING_POLICY=fastest` and
+`HF_CHAT_MAX_OUTPUT_TOKENS=3000`, the site's defaults, if `.env` sets others.
 
 ## Growing the corpus
 
@@ -166,7 +174,16 @@ otherwise use a pull request.
 1. Wait for **CI** to pass. Do not release on a failure.
 2. Check no Airflow run is in progress, since a deploy kills its jobs.
 3. Run **Release and deploy** on `main`. It builds images tagged with the SHA, then plans and applies Terraform.
-   The API applies migrations when it starts.
+   The API applies migrations when it starts. From a terminal with the GitHub CLI:
+
+```bash
+gh workflow run release.yml --ref main
+gh run watch $(gh run list -w "Release and deploy" -L 1 --json databaseId -q '.[0].databaseId') --exit-status
+```
+
+   A change to Terraform settings alone needs no new images: add
+   `-f build=false -f image_tag=<full SHA of the live images>`.
+4. Check the live site: ask one question and read its timings in the API log ([logs](#logs)).
 
 Untick `build` and enter an `image_tag` to roll back. Only the 2 newest images are kept; anything older must
 be rebuilt from its commit. Untick `apply` for a plan only. See what is live:
@@ -191,13 +208,13 @@ in the private `terraform-state` container.
 
 ## Costs
 
-October 2026: $17.76.
+October 2026: $17.76. Answers cost about $0.002 each in model calls; a grading run of the gold set about $0.05.
 
 | Resource | Cost | Note |
 | --- | --- | --- |
 | `taxlensdevacr` | $9.03 | Basic includes 10 GB, and it held 92 GB of old images, cleared on 06/11/2026. Should save about $4 a month |
 | `CreditScorecardWOEIV` (another project) | $5.16 | **Do not delete:** another project's live web app pulls `credit-risk-api:latest` from it. Its old images are cleared; it was under the included 10 GB, so this saves nothing |
-| `taxlens-dev-api`, `-web` | $2.00 | Scale to zero |
+| `taxlens-dev-api`, `-web` | $2.00 | Scale to zero. The API now stays up 10 idle minutes after use, about $0.03 an idle hour |
 | `taxlens-dev-airflow-*` | $1.29 | Free while stopped |
 | Storage, Key Vault | $0.28 | |
 | PostgreSQL, Log Analytics | $0.00 | Not billed at present; check before relying on that |
@@ -222,6 +239,8 @@ done
 | A DAG task's job output | Airflow UI → task → **Logs** |
 | API requests and job events | `az containerapp logs show -g taxlens-dev-rg -n taxlens-dev-api --type console --tail 300` |
 | Older and searchable | Log Analytics, `ContainerAppConsoleLogs_CL` and `ContainerAppSystemLogs_CL`, through `az rest` to `api.loganalytics.io` with a JSON body file |
+| Timings of one answer | The lines `eligible_versions`, `keyword_query`, `semantic_query`, `hybrid_search`, `retrieval_completed`, `model_call`, and `question_logged` in the API log ([what each means](architecture.md#logging)) |
+| Questions and ratings | `question_logs` table; `python scripts/export_question_log.py --output question-log.csv` |
 | Raw Airflow logs | `airflow-logs` share. Colons in run IDs are stored as U+F022, so use the File REST API with `%EF%80%A2` |
 
 `az containerapp exec` splits on spaces, so trigger DAGs with config from the UI. It handles simple commands
@@ -234,7 +253,8 @@ not find a replica" while scaled to zero.
 | --- | --- | --- |
 | "The service could not be reached" | The browser got no response; usually its own connection | Check the API log. If the question is absent or returned 200, retry on a steady connection |
 | "The API service could not be reached" | The web proxy could not reach the API | Read the API and system logs |
-| First question takes minutes | The API scaled to zero | Wait. Questions are not retried |
+| First question takes about a minute | The API scaled to zero after 10 idle minutes | Wait. Questions are not retried |
+| Answers slow when warm | Usually retrieval | Read `hybrid_search` and `retrieval_completed` in the API log for the slow part |
 | Every answer `PROVIDER_UNAVAILABLE`, status 400 "not supported by any provider" | The router dropped `HF_CHAT_MODEL` | Choose from `https://router.huggingface.co/v1/models`. Avoid reasoning models |
 | Every answer `PROVIDER_UNAVAILABLE`, status 402 | No credits | Add credits |
 | Occasional `PROVIDER_UNAVAILABLE`, `ReadTimeout` | Model over 90 s | Retry, or raise the timeout, staying under 240 s |
@@ -243,4 +263,6 @@ not find a replica" while scaled to zero.
 | Ministry: `ConnectTimeout` | Not on a Vietnamese network | Run from Vietnam |
 | Job exit code -9 | Six-hour limit or out of memory | Rerun |
 | Document stays `FAILED` | Broken file or unusable scan | Fix the cause, then `retry_failed_documents` |
+| `gh` or `terraform` not found in Git Bash | Installed, but not on the shell's PATH | Call them by full path, e.g. `"/c/Program Files/GitHub CLI/gh.exe"` |
+| GitHub API answers 403 "rate limit exceeded" | Unauthenticated calls are limited to 60 an hour | Use `gh`, which is signed in |
 | No new documents for days | Airflow stopped or DAG paused. Currently intended | Start it only if the corpus should change |

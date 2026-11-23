@@ -24,32 +24,63 @@ src/taxlens/
   api/                  FastAPI app, routes, auth, job runner, startup migrations
   ingestion/            Source connectors, ingestion
   document_processing/  Format detection, Word/RTF/DOCX/PDF text, OCR, chunking
-  retrieval/            Keyword search, embeddings, fusion, snippets, repeals, issues
-  intelligence/         Query planning, evidence gate, LangGraph Q&A, validation
+  retrieval/            Keyword and vector search, fusion, snippets, citations, ended documents (repeals)
+  intelligence/         Query planning (period, filters), evidence gate, LangGraph Q&A, model calls
   legal_data/           SQLAlchemy models, document numbers and kinds
-  evaluation/           Metrics, gold set, comparisons, MLflow tracking
+  evaluation/           Metrics, gold set, comparisons, reports, MLflow tracking
   storage/              Local and Azure Blob storage behind one interface
+  spreadsheets.py       Formula-safe cells for CSV exports
+apps/web/
+  app/                  Pages (workspace, login, admin), Auth.js, the /api proxy
+  components/           Answer card and feedback, tags, document views, icons, layout
+  lib/                  Types, interface text (EN/VI), formatting, API calls
+  tests/                Vitest unit tests
 scripts/                Command-line jobs calling the same functions
 ```
 
 Dependencies point one way: `api` → `intelligence` → `retrieval` → `legal_data`, and `ingestion` and
 `document_processing` → `legal_data` + `storage`.
 
+## How a question is answered
+
+```mermaid
+flowchart LR
+    Q[Question] --> Plan["Plan: intent, named documents,<br/>period of the dates it names"]
+    Plan --> Versions["Versions in scope:<br/>not ended by the period,<br/>in force by its end"]
+    Versions --> KW[Keyword search]
+    Versions --> Vec[Vector search]
+    KW --> Fuse[Rank fusion, 20 passages]
+    Vec --> Fuse
+    Fuse --> Pick[First 5 with an article or page]
+    Pick --> Gate{Evidence gate}
+    Gate -->|enough| Model[Model, with ending notes]
+    Gate -->|not enough| Refuse[Status, closest passages]
+    Model --> Check[Check citations and grounding]
+    Check --> Log[(question_logs)]
+    Refuse --> Log
+```
+
+The period comes from the dates a question names ("Tháng 6/2023"), or today in Vietnam time. Ended
+documents and the filters are resolved to a list of version ids first, in one small query, and both
+searches run against that list ([why](#design-decisions)). Details and thresholds are in
+[retrieval.md](retrieval.md).
+
 ## Data model
 
 - **`legal_documents`**: one row per document number, with title, type, and agency, and its recorded
   ending (`ended_on`, `end_basis`, `ended_by`; see [ended documents](retrieval.md#ended-documents)).
-- **`question_logs`**: each question asked on the site, its status, answer, cited documents, and time
-  taken, with the asker's 👍/👎 and comment (`POST /questions/{id}/feedback`; only the asker can rate).
 - **`source_records`**: where a file came from, and the source's ID, which prevents repeat downloads.
 - **`document_versions`**: one file, by content hash, with dates and status (`EFFECTIVE`, `EXPIRED`,
-  `DISCOVERED`). A number can hold several.
+  `DISCOVERED`). A number can hold several, though `corpus-v2.1` holds one each.
 - **`processing_jobs`**: extraction status per version, error code, and chunker version.
 - **`document_chunks`**: passages up to 1,500 characters, with article, clause, pages, heading, and two
   `tsvector` columns.
 - **`document_embeddings`**: a 384-dimension vector per chunk and model revision, with its text hash.
+- **`question_logs`**: each question asked on the site, its status, answer, cited documents, and time
+  taken, with the asker's 👍/👎 and comment.
 
 Raw files and text are in Blob Storage at `source=<source>/year=<year>/document=<slug>/<sha256>.<ext>`.
+`corpus-v2.1` holds 2,986 documents and 144,279 passages, all embedded.
 
 ## Web and API
 
@@ -60,18 +91,26 @@ session and forwards with a signed identity. The client retries reads, never que
 
 - **Search tab:** `GET /documents?q=` for number or title matches (not accent-insensitive) and
   `GET /search` for passages, ten a page, over the top 200, with source, kind, and status chips.
+- **Ask tab:** `POST /questions` returns the answer and its log id; `POST /questions/{id}/feedback` records
+  👍/👎 and a comment, from the asker only.
 - **Documents tab:** administrators only. `GET /documents/overview`, `/documents`, `/documents/{id}`, and
   `/{id}/chunks`, all paged.
 - **Administrators:** accounts at `/admin`, and `GET /admin/documents/export` for a metadata CSV.
-- **Everything else:** `POST /questions`, `GET /evaluation/retrieval/latest`, `/health`, `/ready`, and
-  `/internal/airflow/*` with `X-TaxLens-Internal-Token`.
+- **Everything else:** `GET /evaluation/retrieval/latest`, `/health`, `/ready`, and `/internal/airflow/*`
+  with `X-TaxLens-Internal-Token`.
+
+**Interface.** English and Vietnamese, with the page language following the switch. Be Vietnam Pro and
+Source Serif 4 are self-hosted with their Vietnamese subsets (`next/font`), so both languages share one
+typeface. Every control has a visible focus ring and, on touch screens, a 44 px target; text meets WCAG AA
+contrast; a status line announces results to screen readers; icons are inline SVG. Citations, search
+results, and the library tag ended documents ("Ended 01/07/2022 · by 78/2021/TT-BTC").
 
 ## Authentication
 
 Username and password accounts, `admin` or `user`, with no public sign-up.
 
 - **Sign-in:** Auth.js sends credentials server-side to the API's internal login. Passwords use Argon2,
-  and failures are throttled per username.
+  and failures are throttled per username. The form posts, so a password never reaches a URL.
 - **Session:** encrypted HttpOnly cookie for 8 hours, then back to the login page.
 - **Signed identity:** the proxy removes any identity headers from the browser and adds user, role,
   timestamp, and an HMAC-SHA256 signature with `AUTH_INTERNAL_TOKEN`.
@@ -79,6 +118,22 @@ Username and password accounts, `admin` or `user`, with no public sign-up.
   limit, so a cold start is accepted), and that the account is active with the same role.
 - **Reach:** the proxy forwards only `documents`, `search`, `questions`, `evaluation`, and `admin`.
 - Questions are rate-limited per user in memory, which needs one API replica.
+
+## Logging
+
+The API writes plain-text logs to Log Analytics; each answer records where its time went:
+
+| Line | What it gives |
+| --- | --- |
+| `eligible_versions count= seconds=` | Versions in scope after the filters |
+| `keyword_query rows= seconds=`, `semantic_query rows= seconds=` | Each search's database time |
+| `hybrid_search keyword_seconds= embed_seconds= semantic_seconds= keyword_terms=` | The search as a whole |
+| `retrieval_completed seconds= candidates= located= current_on= as_of=` | Retrieval and the period used |
+| `model_call model= provider= latency_ms= input_tokens= output_tokens= outcome=` | The model call |
+| `question_logged id= status= seconds=`, `question_rated id= rating=` | The log entry and its rating |
+
+A warm answer takes about 5.5 s: retrieval about 4 s (keyword search the larger part) and the model about
+1.5 s. How to read the logs is in [operations.md](operations.md#logs).
 
 ## Background jobs
 
@@ -99,17 +154,19 @@ Resource group `taxlens-dev-rg`, East Asia, by Terraform in `infra/terraform`.
 | Resource | Name | Size |
 | --- | --- | --- |
 | Web | `taxlens-dev-web` | 0.25 vCPU, 0-1 replicas, public |
-| API | `taxlens-dev-api` | 1 vCPU, 2 GiB, 0-1 replicas, internal |
+| API | `taxlens-dev-api` | 1 vCPU, 2 GiB, 0-1 replicas, internal; scales to zero after 10 idle minutes |
 | Airflow scheduler | `taxlens-dev-airflow-scheduler` | 0.5 vCPU, 1 GiB, always on unless stopped |
 | Airflow webserver | `taxlens-dev-airflow-web` | 0.5 vCPU, 1 GiB, 0-1 replicas |
-| PostgreSQL | `taxlens-dev-pg` | `B_Standard_B1ms`, 32 GB, `vector`; databases `taxlens`, `airflow` |
+| PostgreSQL | `taxlens-dev-pg` | `B_Standard_B1ms` (1 vCore, 2 GB), 32 GB, pgvector 0.8; databases `taxlens`, `airflow` |
 | Storage | `taxlensdevartifacts` | `raw-documents`, `normalized-text`, `terraform-state`, `airflow-logs` |
-| Registry | `taxlensdevacr` | Basic |
+| Registry | `taxlensdevacr` | Basic; each release keeps the 2 newest images |
 | Key Vault | `taxlensdevkv` | Secrets, read by a managed identity |
-| Log Analytics | | Console logs of all apps |
+| Log Analytics | | Console and system logs of all apps |
 
-**Images** are tagged by commit SHA. The API image holds Tesseract, the pinned embedding model, scripts, and
-evaluation data. Dependencies install from `requirements/api-runtime.txt` before the source is copied.
+**Images** are tagged by commit SHA. The API image (0.77 GB) holds Tesseract, the pinned embedding model
+(its safetensors weights only), scripts, and evaluation data. Dependencies install from
+`requirements/api-runtime.txt` before the source is copied. A cold start pulls the image in about 13 s,
+then loads the model.
 
 **Startup:** the API applies Alembic migrations in a background thread. `/health` answers at once and
 `/ready` returns 503 until the schema is current.
@@ -123,6 +180,14 @@ output tokens. Any OpenAI-compatible endpoint works, with an empty routing polic
 development compromise. Production would need private endpoints, more API replicas with a shared rate
 limiter, and jobs moved out of the API process.
 
+## Delivery
+
+- **CI** (`.github/workflows/ci.yml`, every push): backend ruff, mypy, and pytest; web lint (ESLint with
+  Next's rules), Vitest, and the production build; Terraform format and validation.
+- **Release** (`release.yml`, run by hand on `main`): builds the API, web, and Airflow images, then plans and
+  applies Terraform. With `build` off and an `image_tag`, it applies settings or rolls back without
+  building. Steps are in [operations.md](operations.md#release).
+
 ## Design decisions
 
 | Decision | Why | Revisit when |
@@ -130,5 +195,10 @@ limiter, and jobs moved out of the API process.
 | Modular monolith | Thousands of documents and a few users do not justify services | Processing slows requests, or traffic outgrows one replica |
 | Long jobs in the API, polled by Airflow | The API image already has OCR and the model. Holding a request open failed at 240 s | Jobs near six hours; then use a Container Apps Job |
 | Ministry collected from a laptop in Vietnam | The site accepts Vietnamese IPs only, and Azure has no region there. No proxy to pay for, but it is manual | Updates must be automatic; then use a proxy in Vietnam |
-| PostgreSQL full-text + pgvector | One database to run | Search needs outgrow it |
-| Scale to zero, except the scheduler | Budget. The cost is a cold start | Budget allows a kept replica |
+| PostgreSQL full-text + pgvector, exact vector search | One database to run; an HNSW index could silently drop filtered results | Search needs outgrow it, or pgvector's iterative scans prove equal in evaluation |
+| Filters resolved to version ids before searching | Joined into the passage scans, the ended-document and date filters led to plans 3-5 times slower | The version count grows past a few tens of thousands |
+| Ended documents stored on `legal_documents`, compared with today per request | One list, loaded from a committed file; a future ending takes effect without a release | Endings come from a maintained source |
+| Only confirmed endings leave answers; inferred ones are flagged | No legal expert has validated the inference rules | An expert validates them |
+| Every question logged, with optional rating | Real questions are the cheapest source of gold cases | Privacy rules require less |
+| Self-hosted fonts with the Vietnamese subset | One typeface in both languages, no request to Google at runtime | Never, unless the design changes |
+| Scale to zero after 10 idle minutes, except the scheduler | Budget; an idle API costs about $0.03 an hour. The cost is a cold start of about a minute | Budget allows a kept replica |

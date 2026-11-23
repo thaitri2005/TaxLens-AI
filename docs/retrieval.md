@@ -54,6 +54,9 @@ Two generated `tsvector` columns, accented and unaccented, both GIN-indexed.
 3. Score: distinct terms matched, plus 0.5 for each that also matches with accents (so `thuế` beats
    `thuê`), plus a tie-breaker below 1 calculated only for passages that can still reach the top.
 
+Term matches are counted from the GIN indexes, one scan per term. The query runs without a parallel worker
+(the database has one vCore): a 29-term question takes about 2.4 s instead of 3.4 s, with identical results.
+
 ## 4. Semantic search and fusion
 
 `intfloat/multilingual-e5-small` (pinned, CPU, in the API image), with `passage:` and `query:` prefixes.
@@ -62,6 +65,9 @@ the model cannot load, search falls back to keyword.
 
 - Vector search is exact (`distance + 0`). There is no HNSW index, since it could silently shorten the
   candidate list.
+- Filters (ended documents, the period, a named document, chips) are first resolved to the versions they
+  keep, and both searches run against that list. Joined into the scans, they led PostgreSQL to plans 3-5
+  times slower.
 - A question naming exactly one document number is restricted to that document.
 - A question naming no document number is answered for a period: the dates it names ("Tháng 6/2023",
   "quý II/2025", "năm 2024", but not a document's issue date), or today, Vietnam time
@@ -107,15 +113,16 @@ future ending takes effect by itself.
 | `guidance` | It guides a document that ended (`ended_by`) | Kept, noted | "May have ended" |
 | `amendment` | It amends a document that ended (`ended_by`) | Kept, noted | "May have ended" |
 
-Only the first two act, as no legal expert has validated the inferred rules. On `corpus-v2`, as of
-23/11/2026, that leaves out 711 documents (3 more end later) and flags 124; in evaluation it gives 0.31, 0.42, 0.45, against 0.10, 0.30, 0.41 without
-it ([status](evaluation-status.md#results)). Search pages show the same tags but leave nothing out, since
+Only the first two act, as no legal expert has validated the inferred rules. On `corpus-v2.1`, as of
+23/11/2026, that leaves out 711 documents (3 more end later) and flags 123. In evaluation it gives recall
+0.31, 0.42, 0.45 at K = 5, 10, 20, against 0.10, 0.30, 0.41 without it ([status](evaluation-status.md#results)). Search pages show the same tags but leave nothing out, since
 looking up an old document is a normal use.
 
 ## 6. Answers (`intelligence/qa.py`)
 
 A LangGraph graph: plan → retrieve → assess → generate → validate. The model gets numbered passages with
-document, status, article, clause, pages, and any ending note, through the provider-neutral `ChatProvider`. It must answer
+document, status, article, clause, pages, and any ending note, and the period the question concerns,
+through the provider-neutral `ChatProvider`. It must answer
 in the question's language, return `answerable: false` if the passages do not answer it, and give at
 most five confirmed facts, an answer of about 250 words, and one to four practical steps that add no new
 rules.
@@ -126,6 +133,9 @@ removed and reported. Citations carry verbatim excerpts. Unparseable output is `
 and provider failures are `PROVIDER_UNAVAILABLE`.
 
 Grounding is lexical, so a misleading fact using the passage's words would pass.
+
+Every question is logged in `question_logs` with its status, answer, cited documents, and time, and the
+asker can rate the answer 👍/👎 with a comment ([architecture](architecture.md#logging)).
 
 ## Evaluation
 
@@ -139,6 +149,7 @@ Results are in [evaluation-status.md](evaluation-status.md), and past runs in
 | `tax_retrieval_current.json`, `tax_retrieval.json` | Older smoke sets |
 | `qa.json` | Five questions for `evaluate_qa.py` |
 | `issues/gold_set_v1.json` | Stored issue decompositions |
+| `gold_set_v1_drafts.csv` | 18 drafted cases waiting for an annotator; not scored ([guideline](annotation-guideline.md)) |
 | `repeals/corpus-v2.1-ministry.json` | Current list of ended documents |
 
 Run a frozen comparison:
@@ -161,6 +172,14 @@ effect after the case date (or filing date), using the issue date when no effect
 **Parsing gold provisions** (`evaluation/gold_set.py`): the cited provision comes before the first comma
 or parenthesis. An amended provision and its amendment count once. Short numbers complete from the corpus.
 Unreadable items go to `unparsed_provisions`. A passage with no clause number holds the whole article.
+
+**`grade_answers.py`** answers each gold question as the site does and has a judge model from another family
+(`Qwen/Qwen3-235B-A22B-Instruct-2507`) grade it against the gold answer: correct, partly, wrong, or
+refused. Read every reason and record disagreements in the report; `--regrade` fills grades the judge's
+rate limit dropped. About $0.05 a run. Latest: 9 of 15 correct ([answers](evaluation-status.md#answers)).
+
+**`export_question_log.py`** writes rated and refused questions from the site to a CSV, as gold-case
+candidates.
 
 **`evaluate_qa.py`** reports faithfulness, answer relevancy, context precision, and citation completeness.
 All are lexical. It needs `HF_TOKEN` and prints only at the end. MLflow logging is optional

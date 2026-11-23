@@ -6,13 +6,13 @@ What each working stint changed, newest first. Current state and the to-do list 
 
 ## 23/11/2026
 
-Live: code `02a3a36`, settings `62c7755`, corpus `corpus-v2.1`. To-do items 1-11, 13, 14, and 17 done;
+Live: code `76bfdfa`, corpus `corpus-v2.1`. To-do items 1-11, 13, 14, and 17 done;
 item 12 drafted and waiting for review; items 15-16 wait on it.
 
 ### For people using TaxLens
 
 - **Ended law.** Answers leave out documents that a later document repeals or that the Ministry of
-  Finance records as expired (711 today), and flag about 124 that may have ended by inference
+  Finance records as expired (711 today), and flag 123 that may have ended by inference
   ([ended documents](retrieval.md#ended-documents)). Answers no longer rest on Law 13/2008,
   Circular 32/2011, Circular 68/2019, or Decree 119/2018.
 - **Dated questions** ("Tháng 6/2023") are answered with the law of that period. Gold case L2 went from
@@ -70,10 +70,16 @@ checked in the live app at desktop and phone widths, in both languages, and by k
 ### Engineering
 
 - Each answer logs its timings (version list, keyword and vector queries, model, tokens) in the API logs.
-- Web: `page.tsx` split into `lib/` and `components/` without code changes; ESLint and 12 Vitest tests run
+- Web: `page.tsx` split into `lib/` and `components/` without code changes; ESLint and 14 Vitest tests run
   in CI. Backend tests 113 → 189.
 - Security: both CSV exports guard against formula injection (found by the automated review).
 - Releases run from the GitHub CLI; a settings-only release skips the image build.
+
+### Documentation
+
+- README rewritten around what TaxLens is for, with current results, features, and new screenshots.
+- [architecture.md](architecture.md) rewritten: how a question is answered, the question log, logging,
+  delivery, and the decisions taken this stint. Retrieval, operations, and pipeline docs brought up to date.
 
 ### Incidents
 

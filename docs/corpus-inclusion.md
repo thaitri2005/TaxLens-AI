@@ -1,8 +1,8 @@
 # Corpus inclusion rules
 
 Written before any candidate list, and without reading the gold set for documents to add, so documents
-do not enter because they are the answers. `corpus-v2` is built under these rules: results are in
-[evaluation-status.md](evaluation-status.md).
+do not enter because they are the answers. `corpus-v2` is built under these rules; `corpus-v2.1` is the same
+corpus with 14 duplicated documents merged. Results are in [evaluation-status.md](evaluation-status.md).
 
 ## Rules
 

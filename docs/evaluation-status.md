@@ -6,10 +6,11 @@ changed is in [changelog.md](changelog.md).
 
 ## What is live
 
-- **Site:** `8d577e6`, released 23/11/2026 (questions logged and rated, keyword search 30% faster), answering with `openai/gpt-oss-120b`. Answers leave out
+- **Site:** `76bfdfa`, released 23/11/2026 (questions logged and rated, keyword search 30% faster, the
+  accessible interface in both languages), answering with `openai/gpt-oss-120b`. Answers leave out
   documents whose end is confirmed and flag inferred endings ([ended documents](retrieval.md#ended-documents)):
-  the `corpus-v2` list (rebuilt after the rule fix of item 3) is loaded, leaving out 711 documents and
-  flagging 124 as of 23/11/2026. Checked on the 5 answer questions against the live database, and the
+  the `corpus-v2.1` list is loaded, leaving out 711 documents and
+  flagging 123 as of 23/11/2026. Checked on the 5 answer questions against the live database, and the
   tags by eye in the app ("Ended 01/07/2022 · by 78/2021/TT-BTC"; no "In force" beside them).
 - **Corpus:** `corpus-v2.1`, frozen 23/11/2026: 2,986 documents, 2,986 versions, 144,279 passages, all
   embedded. `corpus-v2` with 14 duplicates merged; recall is identical on all three baselines.
@@ -97,7 +98,11 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
    `204/2004/NĐ-CP`). `56/2009/NĐ-CP` (invalid file on the portal) and `38/2015/TT-BTC` (download failed)
    were not collected. Originals of some amendments, such as `68/2025` and `83/2024/TT-BTC`, are not
    held.
-8. **Small text issues:** `191/2010/TT-BTC` keeps split syllables; words like `cã` can stay
+8. **Old guidance can outrank current law** (seen on the live site, 23/11/2026). Asked when exporters get
+   a VAT refund, undated, the answer cited only circulars of 2009-2018 flagged "may have ended", not VAT Law
+   48/2024 or Circular 69/2025. Asked about 2017, it called `4/2009/TT-BTC` in force although it is flagged
+   as ended in 2009. Inferred endings only flag a document, and the model does not always heed the flag.
+9. **Small text issues:** `191/2010/TT-BTC` keeps split syllables; words like `cã` can stay
    unconverted in mixed-font lines; mislabelled numbers can recur, since collection trusts the listing
    and only flags a mismatch.
 

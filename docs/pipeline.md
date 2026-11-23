@@ -42,7 +42,8 @@ Each task asks the API to start a job (a script), then polls and prints its outp
 
 **Daily DAG `tax_regulation_discovery_daily`** (03:00 UTC): collect from the portal, process, re-chunk
 outdated versions, embed, evaluate. Later tasks run even if an earlier one fails. It changes the corpus, so
-keep it paused while the corpus is frozen.
+keep it paused while the corpus is frozen. It does not rebuild the list of ended documents: after new
+documents arrive, rebuild and apply it as in [freezing a new corpus](operations.md#freezing-a-new-corpus).
 
 **Maintenance DAG `taxlens_corpus_maintenance`**: no schedule. Trigger with config, one at a time.
 
