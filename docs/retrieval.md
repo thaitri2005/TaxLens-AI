@@ -178,6 +178,10 @@ effect after the case date (or filing date), using the issue date when no effect
 or parenthesis. An amended provision and its amendment count once. Short numbers complete from the corpus.
 Unreadable items go to `unparsed_provisions`. A passage with no clause number holds the whole article.
 
+`--reranker MODEL` reorders the top `--rerank-candidates` (100) hybrid passages with a cross-encoder
+(`retrieval/reranking.py`); `--rerank-fuse` fuses its order with the hybrid one, and `--rerank-cache FILE`
+keeps scores so a model is scored once. None is used by the site ([tried](retrieval-experiments.md#retrieval)).
+
 **`grade_answers.py`** answers each gold question as the site does and has a judge model from another family
 (`Qwen/Qwen3-235B-A22B-Instruct-2507`) grade it against the gold answer: correct, partly, wrong, or
 refused. Read every reason and record disagreements in the report; `--regrade` fills grades the judge's

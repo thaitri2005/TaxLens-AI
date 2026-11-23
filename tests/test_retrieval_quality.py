@@ -225,3 +225,42 @@ def test_keyword_terms_keep_legal_content_late_in_a_long_question() -> None:
 
 def test_keyword_terms_stay_bounded() -> None:
     assert len(keyword_terms(" ".join(f"term{i}" for i in range(200)))) == 64
+
+
+def test_cross_encoder_reranker_replaces_or_fuses_and_caches_scores() -> None:
+    from taxlens.retrieval.reranking import CrossEncoderReranker
+
+    def result(text: str) -> SearchResult:
+        document = LegalDocument(
+            id=uuid.uuid4(), document_number=text, title=text, document_type="TT"
+        )
+        version = DocumentVersion(
+            id=uuid.uuid4(),
+            document_id=document.id,
+            legal_status="EFFECTIVE",
+            raw_content_hash="b" * 64,
+            raw_artifact_key=f"raw/{text}.txt",
+        )
+        chunk = DocumentChunk(
+            id=uuid.uuid4(), document_version_id=version.id, content=text, token_count=1
+        )
+        return SearchResult(chunk=chunk, version=version, document=document)
+
+    class StubModel:
+        calls = 0
+
+        def predict(self, pairs, batch_size, show_progress_bar):  # type: ignore[no-untyped-def]
+            StubModel.calls += 1
+            return [{"a": 0.1, "b": 0.2, "c": 0.9}[passage] for _, passage in pairs]
+
+    candidates = [result("a"), result("b"), result("c")]
+    replace = CrossEncoderReranker("stub")
+    replace._model = StubModel()
+    assert [r.chunk.content for r in replace.rerank("q", candidates, 3).results] == ["c", "b", "a"]
+
+    fused = CrossEncoderReranker("stub", fuse=True, score_cache=replace.score_cache)
+    fused._model = StubModel()
+    # Hybrid order a, b, c and cross-encoder order c, b, a: each list's first beats b, second
+    # in both, and a and c tie (kept in hybrid order).
+    assert [r.chunk.content for r in fused.rerank("q", candidates, 3).results] == ["a", "c", "b"]
+    assert StubModel.calls == 1

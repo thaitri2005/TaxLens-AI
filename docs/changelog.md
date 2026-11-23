@@ -93,6 +93,12 @@ checked in the live app at desktop and phone widths, in both languages, and by k
 - The 18 draft cases, approved by the owner, joined the gold set (34 cases, 30 scored). Live retrieval
   scores 0.31, 0.47, 0.53 at K = 5, 10, 20; the reranker and law-step items are unblocked.
 
+### Reranker trial
+
+- Item 15 tried and rejected: no cross-encoder improved the top 5 or 10, and the one that reaches new
+  provisions in the top 20 is far too slow for the site's CPU. The evaluation keeps `--reranker`,
+  `--rerank-fuse`, and a score cache for future models.
+
 ### Documentation
 
 - README rewritten around what TaxLens is for, with current results, features, and new screenshots.

@@ -38,6 +38,7 @@ from taxlens.legal_data.models import (
 from taxlens.retrieval.embeddings import get_embedding_provider
 from taxlens.retrieval.issues import Issue, issue_guided_search
 from taxlens.retrieval.repeals import RULES, ended_documents
+from taxlens.retrieval.reranking import CrossEncoderReranker
 from taxlens.retrieval.search import (
     SearchFilters,
     SearchMode,
@@ -120,12 +121,49 @@ def main() -> None:
         help="Also write the report to this local JSON file",
     )
     parser.add_argument(
+        "--reranker",
+        default=None,
+        help="Hybrid only: reorder the fused candidates with this cross-encoder (Hugging Face id)",
+    )
+    parser.add_argument(
+        "--rerank-candidates",
+        type=int,
+        default=100,
+        help="With --reranker: fused candidates the cross-encoder reorders (default 100)",
+    )
+    parser.add_argument(
+        "--rerank-fuse",
+        action="store_true",
+        help="With --reranker: fuse its order with the hybrid order instead of replacing it",
+    )
+    parser.add_argument(
+        "--rerank-cache",
+        type=Path,
+        default=None,
+        help="With --reranker: JSON file of cross-encoder scores, read and extended",
+    )
+    parser.add_argument(
         "--corpus-manifest",
         type=Path,
         default=None,
         help="Stop unless the corpus still matches this frozen manifest (freeze_corpus.py)",
     )
     arguments = parser.parse_args()
+    if arguments.reranker and arguments.mode != "hybrid":
+        parser.error("--reranker needs --mode hybrid")
+    score_cache = (
+        json.loads(arguments.rerank_cache.read_text(encoding="utf-8"))
+        if arguments.rerank_cache and arguments.rerank_cache.exists()
+        else {}
+    )
+    reranker = (
+        CrossEncoderReranker(
+            arguments.reranker, fuse=arguments.rerank_fuse, score_cache=score_cache
+        )
+        if arguments.reranker
+        else None
+    )
+    rerank_candidates = arguments.rerank_candidates
     ks = [arguments.k] if arguments.k is not None else sorted(set(arguments.ks))
     if any(k < 1 for k in ks):
         parser.error("all K values must be at least 1")
@@ -259,7 +297,16 @@ def main() -> None:
                     max(ks),
                 )
             else:
-                results = _search(session, case["query"], provider, mode, filters, max(ks))
+                results = _search(
+                    session,
+                    case["query"],
+                    provider,
+                    mode,
+                    filters,
+                    max(ks),
+                    reranker,
+                    rerank_candidates,
+                )
             ranked_documents = _unique_document_numbers(results)
             metrics_by_k: dict[str, dict[str, Any]] = {}
             for k in ks:
@@ -354,6 +401,15 @@ def main() -> None:
             else None
         ),
         "as_of_filter": arguments.as_of,
+        "reranker": (
+            {
+                "model": arguments.reranker,
+                "candidates": arguments.rerank_candidates,
+                "fused": arguments.rerank_fuse,
+            }
+            if arguments.reranker
+            else None
+        ),
         "repeals": (
             {
                 "path": str(arguments.repeals),
@@ -395,6 +451,9 @@ def main() -> None:
         "cases": reports,
     }
     # Save locally before uploading, so a storage failure never loses a finished run.
+    if reranker is not None and arguments.rerank_cache is not None:
+        arguments.rerank_cache.parent.mkdir(parents=True, exist_ok=True)
+        arguments.rerank_cache.write_text(json.dumps(reranker.score_cache), encoding="utf-8")
     if arguments.output is not None:
         arguments.output.parent.mkdir(parents=True, exist_ok=True)
         arguments.output.write_text(
@@ -776,6 +835,8 @@ def _search(
     mode: SearchMode,
     filters: SearchFilters,
     limit: int,
+    reranker: CrossEncoderReranker | None = None,
+    rerank_candidates: int = 100,
 ) -> list[SearchResult]:
     if mode == "keyword":
         return keyword_search_chunks(session, query, filters, limit)
@@ -784,6 +845,10 @@ def _search(
     if mode == "semantic":
         query_vector = provider.embed_query(query).vectors[0]
         return semantic_search_chunks(session, query_vector, provider, filters, limit)
+    if reranker is not None:
+        return hybrid_search_chunks(
+            session, query, provider, filters, limit, rerank_candidates, reranker
+        )
     return hybrid_search_chunks(session, query, provider, filters, limit)
 
 
