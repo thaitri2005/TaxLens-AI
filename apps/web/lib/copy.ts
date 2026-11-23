@@ -39,7 +39,7 @@ export const COPY = {
       EFFECTIVE: "In force", PARTIALLY_EXPIRED: "Partly expired", EXPIRED: "Expired",
       NOT_YET_EFFECTIVE: "Not yet in force", DISCOVERED: "Status not recorded", UNKNOWN: "Status unknown",
     } as Record<string, string>,
-    sourceNames: { "government-portal": "Government portal", "mof-vbpq": "Ministry of Finance" } as Record<string, string>,
+    sourceNames: { "government-portal": "Government portal", "mof-vbpq": "Ministry of Finance", congbao: "Official Gazette" } as Record<string, string>,
     feedback: {
       question: "Was this answer right?", up: "Yes", down: "No", send: "Send",
       placeholder: "What was wrong? (optional)", thanks: "Thanks: your rating helps test TaxLens.",
@@ -109,7 +109,7 @@ export const COPY = {
       EFFECTIVE: "Còn hiệu lực", PARTIALLY_EXPIRED: "Hết hiệu lực một phần", EXPIRED: "Hết hiệu lực",
       NOT_YET_EFFECTIVE: "Chưa có hiệu lực", DISCOVERED: "Chưa ghi nhận hiệu lực", UNKNOWN: "Không xác định",
     } as Record<string, string>,
-    sourceNames: { "government-portal": "Cổng TTĐT Chính phủ", "mof-vbpq": "Bộ Tài chính" } as Record<string, string>,
+    sourceNames: { "government-portal": "Cổng TTĐT Chính phủ", "mof-vbpq": "Bộ Tài chính", congbao: "Công báo" } as Record<string, string>,
     feedback: {
       question: "Câu trả lời này có đúng không?", up: "Đúng", down: "Chưa đúng", send: "Gửi",
       placeholder: "Sai ở đâu? (không bắt buộc)", thanks: "Cảm ơn: đánh giá của bạn giúp kiểm tra TaxLens.",

@@ -60,3 +60,12 @@ describe("document endings", () => {
     expect(hasConfirmedlyEnded({})).toBe(false);
   });
 });
+
+describe("source names", () => {
+  it("names every source in the corpus in both languages", () => {
+    for (const source of ["government-portal", "mof-vbpq", "congbao"]) {
+      expect(COPY.en.sourceNames[source]).toBeTruthy();
+      expect(COPY.vi.sourceNames[source]).toBeTruthy();
+    }
+  });
+});
