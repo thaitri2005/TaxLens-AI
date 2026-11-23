@@ -51,7 +51,7 @@ flowchart LR
     Versions --> Vec[Vector search]
     KW --> Fuse[Rank fusion, 20 passages]
     Vec --> Fuse
-    Fuse --> Pick[First 5 with an article or page]
+    Fuse --> Pick[First 5 with an article or page,<br/>not-ended documents first]
     Pick --> Gate{Evidence gate}
     Gate -->|enough| Model[Model, with ending notes]
     Gate -->|not enough| Refuse[Status, closest passages]
@@ -128,7 +128,7 @@ The API writes plain-text logs to Log Analytics; each answer records where its t
 | `eligible_versions count= seconds=` | Versions in scope after the filters |
 | `keyword_query rows= seconds=`, `semantic_query rows= seconds=` | Each search's database time |
 | `hybrid_search keyword_seconds= embed_seconds= semantic_seconds= keyword_terms=` | The search as a whole |
-| `retrieval_completed seconds= candidates= located= current_on= as_of=` | Retrieval and the period used |
+| `retrieval_completed seconds= candidates= located= may_have_ended= current_on= as_of=` | Retrieval, the chosen passages that may have ended, and the period used |
 | `model_call model= provider= latency_ms= input_tokens= output_tokens= outcome=` | The model call |
 | `question_logged id= status= seconds=`, `question_rated id= rating=` | The log entry and its rating |
 
@@ -198,7 +198,8 @@ limiter, and jobs moved out of the API process.
 | PostgreSQL full-text + pgvector, exact vector search | One database to run; an HNSW index could silently drop filtered results | Search needs outgrow it, or pgvector's iterative scans prove equal in evaluation |
 | Filters resolved to version ids before searching | Joined into the passage scans, the ended-document and date filters led to plans 3-5 times slower | The version count grows past a few tens of thousands |
 | Ended documents stored on `legal_documents`, compared with today per request | One list, loaded from a committed file; a future ending takes effect without a release | Endings come from a maintained source |
-| Only confirmed endings leave answers; inferred ones are flagged | No legal expert has validated the inference rules | An expert validates them |
+| Only confirmed endings leave answers; inferred ones are flagged and used last | No legal expert has validated the inference rules; used first, they filled answers with replaced circulars (wrong answers 4 → 2 of 15 when used last) | An expert validates them |
+| No newest-first ranking | Tried as a third fused list: it lifted old circulars with no recorded ending as much as new law | A list of what replaced what is far more complete |
 | Every question logged, with optional rating | Real questions are the cheapest source of gold cases | Privacy rules require less |
 | Self-hosted fonts with the Vietnamese subset | One typeface in both languages, no request to Google at runtime | Never, unless the design changes |
 | Scale to zero after 10 idle minutes, except the scheduler | Budget; an idle API costs about $0.03 an hour. The cost is a cold start of about a minute | Budget allows a kept replica |

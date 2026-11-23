@@ -9,8 +9,8 @@ changed is in [changelog.md](changelog.md).
 - **Site:** `76bfdfa`, released 23/11/2026 (questions logged and rated, keyword search 30% faster, the
   accessible interface in both languages), answering with `openai/gpt-oss-120b`. Answers leave out
   documents whose end is confirmed and flag inferred endings ([ended documents](retrieval.md#ended-documents)):
-  the `corpus-v2.1` list is loaded, leaving out 711 documents and
-  flagging 123 as of 23/11/2026. Checked on the 5 answer questions against the live database, and the
+  the `corpus-v2.1` list (rebuilt 23/11/2026 to read runs of replaced documents) is loaded, leaving out
+  729 documents and flagging 127 as of 23/11/2026. Checked on the 5 answer questions against the live database, and the
   tags by eye in the app ("Ended 01/07/2022 · by 78/2021/TT-BTC"; no "In force" beside them).
 - **Corpus:** `corpus-v2.1`, frozen 23/11/2026: 2,986 documents, 2,986 versions, 144,279 passages, all
   embedded. `corpus-v2` with 14 duplicates merged; recall is identical on all three baselines.
@@ -31,6 +31,7 @@ to separate most methods.
 | Hybrid (what the site does) | 0.10 | 0.30 (0.08) | 0.41 (0.25) |
 | **Hybrid + filter for ended documents** | **0.35 (0.17)** | **0.45 (0.25)** | **0.45 (0.25)** |
 | Hybrid + cautious filter (explicit repeals and ministry dates only) | 0.31 (0.08) | 0.42 (0.25) | 0.45 (0.25) |
+| Hybrid + filter, all rules, `corpus-v2.1` list with runs read | 0.38 | 0.45 | 0.45 |
 | Issue-guided | 0.04 | 0.10 | 0.15 |
 
 On `corpus-v1.2`, with TCVN3 unconverted: hybrid 0.30, 0.41, 0.45; with filter 0.38, 0.45, 0.45.
@@ -62,6 +63,11 @@ R1 and A4 got worse with the same evidence, so the model's conclusions vary betw
 score can move by two without any change. A1 has current law among its passages but refuses, since the
 VAT-reduction decree is not retrieved.
 
+With documents that may have ended used last (`answers-gold-v1-2026-11-23c.json`, `e32fe74`): 8 correct,
+2 wrong, 5 refused, against 9, 4, 2. A4 and A9 refuse instead of answering wrongly. A6 refuses: its earlier
+correct answer rested on `26/2015/TT-BTC`, which guides a decree replaced on 15/12/2025, and the current
+rule is not retrieved. A wrong answer is worse than a refusal in a legal tool, so this is live.
+
 ## Corpora
 
 Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at the corpus check.
@@ -76,20 +82,22 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
 
 ## Known problems
 
-1. **Ended law the list does not know.** Answers no longer use Law 13/2008, Circular 32/2011, Circular
-   68/2019 or Decree 119/2018, and flag Decree 123/2008. A document still ends only if the corpus or the
-   ministry says so, and the rules read lists by their first number per item (`ø) Thông tư 19/2021 và
-   Thông tư 46/2024` ends only 19/2021).
+1. **Ended law the list does not know.** A document ends only if the corpus or the ministry says so.
+   Runs of replaced documents (`thay thế các Thông tư số X …, Y … và Z`) are read since `8829e78`, which
+   ended 33 more (59/2007, 79/2000, 26/2009, 45/2014 …) and confirmed 14 guesses, Decree 123/2008 among
+   them. Still unknown when the replacing document is not held: 194/2010/TT-BTC, replaced by 128/2013,
+   stays in force for the site.
 2. **Most essential provisions are still missed.** About half of the hardest need a legal step the
    question does not state ([diagnosis](retrieval-experiments.md#retrieval)).
 3. **Answer model trade-offs:** the faster model costs about $0.002 an answer, against $0.0003, and can
    mislabel a document's type. It depends on Groq and Cerebras staying on the router.
-4. **Answers are right on 9 of 15 gold questions** (judge model, read by hand; [Answers](#answers)).
-   Dated questions and unlocated old documents are handled since `f0f72b6`; what remains is evidence that
-   is not retrieved (A1, A4, A9), and run-to-run variation of the model's conclusion.
+4. **Answers are right on 8 of 15 gold questions, wrong on 2, refused on 5** (judge model;
+   [Answers](#answers)). What remains is evidence that is not retrieved (A1, A4, A6, A9), and run-to-run
+   variation of the model's conclusion.
 5. **Duplicates merged in `corpus-v2.1`:** 14 numbers held two copies; the better one stays under the clean
-   number and the other is backed up in `removed-duplicates-v2.1.json`. 17 other numbers keep stray spaces
-   but have no twin.
+   number and the other is backed up in `removed-duplicates-v2.1.json`. The 17 numbers with spaces are
+   written so on purpose: 1990s ministry numbers (`101 TC/TCT`) and consolidated texts told apart by year
+   (`18/VBHN-BTC (2026)`).
 6. **Numbers still uncertain:** `93/1998/QĐ/TCKT`, whose header reads `91/1998/QĐ-BNN-BVTV` (wrong number
    on the portal, or the wrong file), and `25/2026/TT-BTC`, whose OCR'd header reads `85/2026`; neither is
    found online. `124/2026/TT-BTC` is confirmed (dated 22/08/2026 by LuatVietnam). The other 50 flags in the
@@ -98,10 +106,12 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
    `204/2004/NĐ-CP`). `56/2009/NĐ-CP` (invalid file on the portal) and `38/2015/TT-BTC` (download failed)
    were not collected. Originals of some amendments, such as `68/2025` and `83/2024/TT-BTC`, are not
    held.
-8. **Old guidance can outrank current law** (seen on the live site, 23/11/2026). Asked when exporters get
-   a VAT refund, undated, the answer cited only circulars of 2009-2018 flagged "may have ended", not VAT Law
-   48/2024 or Circular 69/2025. Asked about 2017, it called `4/2009/TT-BTC` in force although it is flagged
-   as ended in 2009. Inferred endings only flag a document, and the model does not always heed the flag.
+8. **Old guidance could outrank current law** (seen on the live site, 23/11/2026). Asked when exporters
+   get a VAT refund, undated, the answer cited only 2009-2018 circulars flagged "may have ended"; asked
+   about 2017, it called `4/2009/TT-BTC` (flagged as ended in 2009) in force. Since `e32fe74`, documents
+   that may have ended by the question's date fill the evidence only after the others, and the prompt
+   forbids calling a document in force after its ending. Current law for the undated question (VAT Law
+   48/2024, rank 34) is still not retrieved: that is problem 2.
 9. **Small text issues:** `191/2010/TT-BTC` keeps split syllables; words like `cã` can stay
    unconverted in mixed-font lines; mislabelled numbers can recur, since collection trusts the listing
    and only flags a mismatch.
@@ -130,6 +140,7 @@ L = more. Mark each done here when finished.
 | 15 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, **waits for item 12's reviewed cases** | Weak top-5 recall; cannot reach the 14 never-found provisions |
 | 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, **waits for item 12's reviewed cases** | Half the hardest misses need it |
 | ~~17~~ | **Done 23/11/2026.** `page.tsx` (890 lines) split without code changes into `lib/` (types, copy, format, api) and `components/` (tags, answer, documents, layout); 12 Vitest tests for the helpers and tags run in CI (`npm test`) | | |
+| ~~18~~ | **Done 23/11/2026.** Known problems 1 and 8: runs of replaced documents read (33 more ended, recall with confirmed rules identical case by case, all rules 0.38 at K = 5), and documents that may have ended used last in answers (wrong 4 → 2, refused 2 → 5). A newest-first ranking was tried and rejected | | [Already tried](retrieval-experiments.md#retrieval) |
 
 ### For people, not code
 

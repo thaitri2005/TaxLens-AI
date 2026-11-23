@@ -75,7 +75,8 @@ the model cannot load, search falls back to keyword.
   ([ended documents](#ended-documents)), and versions taking effect after its end; the model is told the
   period. A question that names documents keeps them, since it may be about an old one.
 - Answers search 20 passages and keep the first 5 with an article, clause, section, or page, so old
-  documents without articles cannot fill every place.
+  documents without articles cannot fill every place. Passages of documents that may have ended by the
+  period's start (an inferred ending) come after the others and only fill places left over.
 - Passages with four or more blank-field runs count as forms, and are left out unless the question asks
   for one (`mẫu số`, `biểu mẫu`, `mẫu biểu`, `mẫu đơn`, `tờ khai`).
 - The embedding model reads 512 tokens: 0.5% of article passages and 18% of other text exceed it, losing
@@ -114,7 +115,10 @@ future ending takes effect by itself.
 | `amendment` | It amends a document that ended (`ended_by`) | Kept, noted | "May have ended" |
 
 Only the first two act, as no legal expert has validated the inferred rules. On `corpus-v2.1`, as of
-23/11/2026, that leaves out 711 documents (3 more end later) and flags 123. In evaluation it gives recall
+23/11/2026, that leaves out 729 documents (3 more end later) and flags 127; answers use a flagged
+document only when too few others are found. An explicit statement may end a run of documents ("thay
+thế các Thông tư số X ngày …, Thông tư số Y … và Thông tư số Z"): the run continues through items
+separated only by a date, an issuer, and a comma or "và", so a title or a part stops it. In evaluation it gives recall
 0.31, 0.42, 0.45 at K = 5, 10, 20, against 0.10, 0.30, 0.41 without it ([status](evaluation-status.md#results)). Search pages show the same tags but leave nothing out, since
 looking up an old document is a normal use.
 
@@ -122,7 +126,8 @@ looking up an old document is a normal use.
 
 A LangGraph graph: plan → retrieve → assess → generate → validate. The model gets numbered passages with
 document, status, article, clause, pages, and any ending note, and the period the question concerns,
-through the provider-neutral `ChatProvider`. It must answer
+through the provider-neutral `ChatProvider`. It is told never to call a document in force after its
+ending date, and to prefer passages without an ending and the later of two documents on one matter. It must answer
 in the question's language, return `answerable: false` if the passages do not answer it, and give at
 most five confirmed facts, an answer of about 250 words, and one to four practical steps that add no new
 rules.
@@ -176,7 +181,7 @@ Unreadable items go to `unparsed_provisions`. A passage with no clause number ho
 **`grade_answers.py`** answers each gold question as the site does and has a judge model from another family
 (`Qwen/Qwen3-235B-A22B-Instruct-2507`) grade it against the gold answer: correct, partly, wrong, or
 refused. Read every reason and record disagreements in the report; `--regrade` fills grades the judge's
-rate limit dropped. About $0.05 a run. Latest: 9 of 15 correct ([answers](evaluation-status.md#answers)).
+rate limit dropped. About $0.05 a run. Latest: 8 correct, 2 wrong, 5 refused of 15 ([answers](evaluation-status.md#answers)).
 
 **`export_question_log.py`** writes rated and refused questions from the site to a CSV, as gold-case
 candidates.

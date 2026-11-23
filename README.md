@@ -70,8 +70,8 @@ flowchart LR
 4. **Retrieval**: diacritic-insensitive keyword ranking over every term of the question and
    `multilingual-e5-small` vector search, combined by reciprocal rank fusion; the five best
    passages with an article or page become the evidence.
-5. **Evidence gate**: clearly unrelated questions are refused before any model call, and
-   documents that may have ended are noted.
+5. **Evidence gate**: clearly unrelated questions are refused before any model call; documents
+   that may have ended are used last, and noted.
 6. **Answer**: the model answers from numbered passages or says they do not answer the
    question; facts not supported by their cited passage are removed.
 
@@ -85,7 +85,7 @@ the clause:
 | Measure | Result |
 | --- | --- |
 | Essential provisions found in the top 5 / 10 / 20 passages | 0.31 / 0.42 / 0.45 (0.10 / 0.30 / 0.41 without leaving out ended law) |
-| Answers judged correct against the gold answers | 9 of 15 |
+| Answers to 15 gold questions, judged against the gold answers | 8 correct, 2 wrong, 5 refused |
 | Time for a warm answer | about 5.5 s (retrieval 4 s, model 1.5 s) |
 
 12 cases are too few to separate most methods, and neither grader is a tax expert. Details,
@@ -202,12 +202,12 @@ TaxLens is a development-stage research tool, **not legal or tax advice**.
   provincial documents are not collected.
 - Search finds what a question words. A rule it depends on but does not mention, such as late
   interest after a returned export, is often missed.
-- Answer accuracy is measured on few cases (9 of 15 correct), so it is a direction, not a
+- Answer accuracy is measured on few cases (8 of 15 correct, 2 wrong), so it is a direction, not a
   guarantee.
 - Most government PDFs are scans, so OCR errors affect search and quotations.
 - Ended documents are recognised only when a later document in the corpus repeals them or
   the Ministry of Finance records their expiry. Documents that may have ended by inference are
-  flagged, not left out, and an answer can still lean on them. See
+  flagged, not left out; answers use them only when too few other passages are found. See
   [ended documents](docs/retrieval.md#ended-documents).
 - The corpus is frozen, so new documents are not collected until it is deliberately updated.
 - Development-scale Azure resources scale to zero, so the first request after idle is

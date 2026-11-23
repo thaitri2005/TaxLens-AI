@@ -6,7 +6,7 @@ What each working stint changed, newest first. Current state and the to-do list 
 
 ## 23/11/2026
 
-Live: code `76bfdfa`, corpus `corpus-v2.1`. To-do items 1-11, 13, 14, and 17 done;
+Live: code `e32fe74`, corpus `corpus-v2.1`. To-do items 1-11, 13, 14, and 17 done;
 item 12 drafted and waiting for review; items 15-16 wait on it.
 
 ### For people using TaxLens
@@ -75,6 +75,19 @@ checked in the live app at desktop and phone widths, in both languages, and by k
 - Security: both CSV exports guard against formula injection (found by the automated review).
 - Releases run from the GitHub CLI; a settings-only release skips the image build.
 
+### Known problems fixed (later the same day)
+
+- **Ended law.** A run of replaced documents ("thay thế các Thông tư số X …, Y … và Z") now ends each
+  of them; 33 more documents end and 14 guesses are confirmed (729 left out today, 127 flagged). Gold
+  recall unchanged with confirmed rules; 0.38 at K = 5 with all rules, the best yet.
+- **Old guidance in answers.** Documents that may have ended by the question's date are used only
+  when too few others are found, and the model may not call a document in force after its ending.
+  Gold answers: wrong 4 → 2, refused 2 → 5, correct 9 → 8.
+- **Tried and dropped:** ranking newer documents higher. It lifted old circulars with no recorded
+  ending as much as current law.
+- Numbers with spaces (`101 TC/TCT`, `18/VBHN-BTC (2026)`) are how those documents are numbered, not
+  errors.
+
 ### Documentation
 
 - README rewritten around what TaxLens is for, with current results, features, and new screenshots.
@@ -91,6 +104,6 @@ checked in the live app at desktop and phone widths, in both languages, and by k
 
 ### Cost
 
-A few US cents in model calls (two grading runs, a handful of live questions). Evaluations and database
+A few US cents in model calls (three grading runs, a handful of live questions). Evaluations and database
 work are free. Releases and CI stay inside the free GitHub Actions minutes. The 10-minute cooldown adds at
 most about $0.005 per use.

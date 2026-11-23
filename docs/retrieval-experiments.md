@@ -31,6 +31,8 @@ reports, and run paid or slow tests once.
 | Filter, explicit + ministry dates (`corpus-v1.2`) | Hybrid 0.34, 0.45, 0.45, needs no inference | Superseded by the `corpus-v2` run below | `*-ministry-nolimit` |
 | **Filter, explicit + ministry dates, `corpus-v2`** (697 ended documents, `--repeal-rules explicit ministry`) | Hybrid 0.31, 0.42, 0.45. Against no filter, K = 10: 4 up, 1 down, p = 0.38. Against all rules: one provision behind at K = 5 and at K = 10. Removes no gold document. Misses Decree 123/2008, which only the guidance rule ends | **Live on the site** since 23/11/2026. Do not rerun | `hybrid-asof-ministry-v2` |
 | Explicit rule reading lists split across passages, items after an OCR page number (`16 ¡) Thông tư ...`), and "tiếp tục có hiệu lực đến ngày" (ends the next day) | 29 more documents end (68/2019, 119/2018, 51/2010, tariff circulars ended by 182/2015 and 193/2012, 80/2021 from 01/07/2026); 714 confirmed. Each new entry read against its source list. Recall identical, case by case | **Live.** The list is `corpus-v2-ministry.json` as of `3f38db7` | `hybrid-asof-ministry-v2b` |
+| Runs of replaced documents (`thay thế các Thông tư số X …, Y … và Z`; before, `các` broke the match and only the first number of a run or list item ended) | 33 more documents end, 14 guesses confirmed; the 30 new explicit entries each read against their sentence. Confirmed rules: 0.31, 0.42, 0.45, identical case by case. All rules: 0.38, 0.45, 0.45 (K = 5: A7, A8 up; K = 10: A1 up; none down) | **Live** (`8829e78`), list loaded on Azure | `hybrid-asof-ministry-v2.1-runs`, `hybrid-asof-allrules-v2.1-runs` |
+| Newest-first list as a third fused list (weights 0.5, 1.0; documents ended by the question's date get nothing) | On the live refund question it lifted 59/2007, 194/2010, and 90/2002 (no recorded ending) to the top; VAT Law 48/2024 stayed out of the top 5. On a 2017 question it did drop 4/2009 | **Rejected** before a gold run: age cannot tell a replaced circular from one still in force | Not kept |
 | Following one legal reference from top passages | Reaches 1 of 20 missed provisions, at document level | Not worth building | `reachability-*` |
 | Rare terms weigh more (IDF), and expanding abbreviations (`GTGT`) | Hybrid K = 5 falls to 0.10 with IDF; K = 10 gains one provision outside the hard 14. Neither reaches any of the 14 | Do not adopt | Exploratory, not kept |
 | Taking more candidates | The 14 hardest provisions rank 127 or worse in the vector list, 315 or worse by keyword | Would not help | Diagnosis below |
@@ -78,8 +80,9 @@ out the law a question depends on.
 | **`openai/gpt-oss-120b`, `fastest` routing, 3,000 tokens** | **Current.** 5 of 5 answered through the app in 3.8-8.6 s, with 1.4-1.9 s in the model. About $0.002 an answer, by list price. It reasons first, and output reached 2,069 tokens, so 2,000 is too low |
 
 **Graded against gold answers (23/11/2026):** 9 of 15 correct by a Qwen3-235B judge, 8 when read by
-hand; `grade_answers.py`, report `answers-gold-v1-2026-11-23.json`. Do not rerun without a change to
-answers or retrieval. The judge's provider allows 18 calls a minute; `--regrade` fills failed grades.
+hand; `grade_answers.py`, report `answers-gold-v1-2026-11-23.json`. With documents that may have ended
+used last in the evidence (`-23c`): 8 correct, 2 wrong, 5 refused, against 9, 4, 2. Do not rerun without
+a change to answers or retrieval. The judge's provider allows 18 calls a minute; `--regrade` fills failed grades.
 
 Answer run on `corpus-v2` with gpt-oss-120b: faithfulness and citation completeness 1.0, relevancy
 0.67-0.93, context precision 1.0 on 3 of 5. These checks are lexical and cannot see if an answer is
