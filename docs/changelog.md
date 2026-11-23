@@ -4,34 +4,55 @@ What each working stint changed, newest first. Current state and the to-do list 
 [evaluation-status.md](evaluation-status.md); every measurement is in
 [retrieval-experiments.md](retrieval-experiments.md).
 
-## 23/11/2026
+## 23/11/2026 (stint report)
 
-Live: code `e32fe74`, corpus `corpus-v2.1`. To-do items 1-11, 13, 14, and 17 done;
-item 12 drafted and waiting for review; items 15-16 wait on it.
+Live: release `7662082` (code as of `e32fe74`), corpus `corpus-v2.1`, endings list rebuilt 23/11/2026.
+To-do items 1-15, 17, and 18 done or decided; item 16 is next.
+
+### Conclusion
+
+1. **The site is now fast, careful about ended law, and accessible.** A warm answer takes about 5.5 s
+   instead of up to 62 s. Answers leave out 729 ended documents and use the 127 that may have ended only
+   as a last resort. Dated questions get the law of their date. The interface works by keyboard, screen
+   reader, and phone in both languages.
+2. **Finding the right provision is what limits quality.** On 30 scored gold cases, 31% of the essential
+   provisions are in the top 5 passages and 53% in the top 20. Answers to the first 15 questions: 8
+   correct, 2 wrong, 5 refused. Most wrong or refused answers traced so far lacked the governing
+   provision in their evidence; one (A7) applied today's rule to earlier facts.
+3. **Ranking tricks do not fix it.** Tried and measured: more candidates, rare-term weighting, issue
+   decomposition, newest-first ranking, and two cross-encoder rerankers. None raised the top 5 or 10.
+   About half of the misses need a legal step the question never states (which law decides a refund,
+   which decree sets a rate), so the next lever is item 16: work out the governing law first and search
+   for it as its own list.
+4. **Two things only people can unlock.** A tax expert validating the inferred ending rules would let the
+   all-rules filter go live (0.37 instead of 0.31 at K = 5, no case worse). 16 more gold cases would
+   reach 50 and separate methods more reliably.
+5. **Cost** stayed under $0.20 in model calls for the whole stint; everything else ran on the laptop or
+   inside free CI minutes.
 
 ### For people using TaxLens
 
-- **Ended law.** Answers leave out documents that a later document repeals or that the Ministry of
-  Finance records as expired (711 today), and flag 123 that may have ended by inference
-  ([ended documents](retrieval.md#ended-documents)). Answers no longer rest on Law 13/2008,
-  Circular 32/2011, Circular 68/2019, or Decree 119/2018.
-- **Dated questions** ("Tháng 6/2023") are answered with the law of that period. Gold case L2 went from
-  wrong to correct.
+- **Ended law.** Answers leave out documents that a later document repeals or the Ministry of Finance
+  records as expired (729 today), and use the 127 that may have ended by inference only when too few
+  others are found. Runs of replaced documents ("thay thế các Thông tư số X …, Y … và Z") are now read.
+  Answers no longer rest on Law 13/2008, Circulars 32/2011 and 68/2019, or Decrees 119/2018 and 123/2008.
+- **Dated questions** ("Tháng 6/2023") are answered with the law of that period, and the model may not
+  call a document in force after its ending. The 2017 export-refund question now cites 219/2013.
 - **Evidence** is the first 5 passages with an article or page, of 20, so old documents without articles
   no longer crowd out current law.
 - **Feedback.** Answers can be rated 👍/👎 with a comment; questions, answers, and timings are logged in
   `question_logs`.
 - **Tags** in citations, search, and the library: "Ended 01/07/2022 · by 78/2021/TT-BTC" or "May have
-  ended …", in English and Vietnamese; "In force" is no longer shown beside a passed ending.
+  ended …"; source names in full ("Official Gazette").
 
 ### Speed
 
 | | Before | After |
 | --- | --- | --- |
-| Warm answer to a dated question | 62 s at worst | about 5 s |
+| Warm answer to a dated question | 62 s at worst | about 5.5 s |
 | Image pull at cold start | 35 s (1.92 GB) | 13 s (0.77 GB) |
 | Keyword search, 29-term question | 11 s | 2.4 s |
-| Retrieval evaluation run | about 4.5 min | about 3.2 min |
+| Retrieval evaluation run (12 cases) | about 4.5 min | about 3.2 min |
 | API scale-to-zero after idle | 5 min | 10 min (owner's choice) |
 
 Causes found by measuring, not guessing: filters joined into the passage scans led to bad plans (now the
@@ -40,15 +61,22 @@ embedding model four times; TensorFlow loaded with the model on laptops.
 
 ### Quality and evaluation
 
-- `grade_answers.py` grades the site's answers against the gold answers: 9 of 15 by the judge model,
-  8 when read by hand ([answers](evaluation-status.md#answers)).
-- Cautious ended-document filter on the 12 gold cases: recall 0.31, 0.42, 0.45 at K = 5, 10, 20, against
-  0.10, 0.30, 0.41 without.
-- The explicit repeal rule now reads lists split across passages and "tiếp tục có hiệu lực đến ngày"
-  clauses: 29 more documents end.
-- `corpus-v2.1`: 14 duplicated documents merged by a reviewed plan, with a backup of what was removed;
-  recall unchanged. 124/2026/TT-BTC confirmed and dated.
-- 18 draft gold cases from the clause text in `gold_set_v1_drafts.csv`, unverified and not scored.
+| Measure | Start of stint | End of stint |
+| --- | --- | --- |
+| Gold cases (scored) | 16 (12) | 34 (30); the 18 new ones reviewed and approved by the owner |
+| Essential recall, top 5 / 10 / 20, as live | 0.10 / 0.30 / 0.41 (12 cases, no filter) | 0.31 / 0.47 / 0.53 (30 cases) |
+| Same, all ending rules | 0.35 / 0.45 / 0.45 (12) | 0.37 / 0.45 / 0.53 (30) |
+| Answers to 15 gold questions | not graded | 8 correct, 2 wrong, 5 refused |
+
+- `grade_answers.py` grades the site's answers against the gold answers with a judge model from another
+  family; the first run's grades were all read by hand.
+- `corpus-v2.1`: 14 duplicated documents merged by a reviewed plan, with a backup; 124/2026/TT-BTC
+  confirmed and dated.
+- The endings list grew to 859 entries; each new explicit ending was read against its source sentence.
+- **Tried and rejected** ([already tried](retrieval-experiments.md)): newest-first ranking (it lifted old
+  circulars with no recorded ending as much as new law); `bge-reranker-v2-m3` over the top 100 (0.31,
+  0.43, 0.58: reaches four never-found provisions at K = 20 but loses reworded cases, and would take
+  about 110 s a question on the site's CPU); a small multilingual reranker (worse alone and fused).
 
 ### UI and accessibility
 
@@ -58,52 +86,27 @@ checked in the live app at desktop and phone widths, in both languages, and by k
 - Visible 3px focus ring on every control, and a ring around the search and question boxes; a skip link.
 - Muted text contrast 3.8:1 → 5.2:1 (WCAG AA needs 4.5:1).
 - The page's `lang` follows EN/VI; language buttons report which is selected; tabs mark the current view;
-  search inputs are named; one polite status line announces "10 matching passages" or that an answer is
-  ready.
+  search inputs are named; one polite status line announces results.
 - SVG icons instead of glyphs and emoji; 44px touch targets on touch screens; the top bar stays on one
   line at 375px.
-- Be Vietnam Pro and Source Serif 4, self-hosted with the Vietnamese subset: Vietnamese now uses the
-  same typefaces as English instead of falling back to Arial (Inter was named but never loaded).
-- Login and admin forms post, so a submit before the page script loads never puts a password in the URL
-  (found by the automated security review).
+- Be Vietnam Pro and Source Serif 4, self-hosted with the Vietnamese subset (Inter was named but never
+  loaded, so Vietnamese fell back to Arial).
+- Login and admin forms post, so a submit before the page script loads never puts a password in the URL.
 
 ### Engineering
 
-- Each answer logs its timings (version list, keyword and vector queries, model, tokens) in the API logs.
-- Web: `page.tsx` split into `lib/` and `components/` without code changes; ESLint and 14 Vitest tests run
-  in CI. Backend tests 113 → 189.
-- Security: both CSV exports guard against formula injection (found by the automated review).
+- Each answer logs its timings, and how many chosen passages may have ended.
+- Web: `page.tsx` split into `lib/` and `components/`; ESLint and 14 Vitest tests run in CI. Backend
+  tests 113 → 194.
+- Security: CSV exports guard against formula injection (found by the automated review).
 - Releases run from the GitHub CLI; a settings-only release skips the image build.
-
-### Known problems fixed (later the same day)
-
-- **Ended law.** A run of replaced documents ("thay thế các Thông tư số X …, Y … và Z") now ends each
-  of them; 33 more documents end and 14 guesses are confirmed (729 left out today, 127 flagged). Gold
-  recall unchanged with confirmed rules; 0.38 at K = 5 with all rules, the best yet.
-- **Old guidance in answers.** Documents that may have ended by the question's date are used only
-  when too few others are found, and the model may not call a document in force after its ending.
-  Gold answers: wrong 4 → 2, refused 2 → 5, correct 9 → 8.
-- **Tried and dropped:** ranking newer documents higher. It lifted old circulars with no recorded
-  ending as much as current law.
-- Numbers with spaces (`101 TC/TCT`, `18/VBHN-BTC (2026)`) are how those documents are numbered, not
-  errors.
-
-### Gold set
-
-- The 18 draft cases, approved by the owner, joined the gold set (34 cases, 30 scored). Live retrieval
-  scores 0.31, 0.47, 0.53 at K = 5, 10, 20; the reranker and law-step items are unblocked.
-
-### Reranker trial
-
-- Item 15 tried and rejected: no cross-encoder improved the top 5 or 10, and the one that reaches new
-  provisions in the top 20 is far too slow for the site's CPU. The evaluation keeps `--reranker`,
-  `--rerank-fuse`, and a score cache for future models.
+- The retrieval evaluation can test any cross-encoder (`--reranker`, `--rerank-fuse`, `--rerank-cache`).
 
 ### Documentation
 
-- README rewritten around what TaxLens is for, with current results, features, and new screenshots.
-- [architecture.md](architecture.md) rewritten: how a question is answered, the question log, logging,
-  delivery, and the decisions taken this stint. Retrieval, operations, and pipeline docs brought up to date.
+- README rewritten around what TaxLens is for, with current results and new screenshots.
+- [architecture.md](architecture.md) rewritten; retrieval, operations, pipeline, status, and the
+  experiment record kept current with every change.
 
 ### Incidents
 
@@ -112,9 +115,11 @@ checked in the live app at desktop and phone widths, in both languages, and by k
 - One push failed CI after a signature change tested only in part; the full suite now runs before pushes.
 - One release failed at Azure sign-in (transient); the retry passed.
 - Polling CI through the unauthenticated GitHub API hit its hourly limit; the GitHub CLI is used instead.
+- One evaluation ran with the script's default (all ending rules) instead of the live setting; it was
+  kept as the all-rules figure and rerun.
 
 ### Cost
 
-A few US cents in model calls (three grading runs, a handful of live questions). Evaluations and database
-work are free. Releases and CI stay inside the free GitHub Actions minutes. The 10-minute cooldown adds at
-most about $0.005 per use.
+Under $0.20 in model calls (three grading runs, a few live questions). Evaluations, the reranker trial,
+and database work ran on the laptop for free; releases and CI stay inside the free GitHub Actions minutes.
+The 10-minute cooldown adds at most about $0.005 per use.
