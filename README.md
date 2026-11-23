@@ -79,17 +79,17 @@ Method and thresholds: [docs/retrieval.md](docs/retrieval.md).
 
 ## Results so far
 
-On 12 verified gold cases from tax-authority letters (`corpus-v2.1`), with documents labelled to
-the clause:
+On 30 scored gold cases (from tax-authority letters and reviewed law-text cases, `corpus-v2.1`),
+with documents labelled to the clause:
 
 | Measure | Result |
 | --- | --- |
-| Essential provisions found in the top 5 / 10 / 20 passages | 0.31 / 0.42 / 0.45 (0.10 / 0.30 / 0.41 without leaving out ended law) |
+| Essential provisions found in the top 5 / 10 / 20 passages | 0.31 / 0.47 / 0.53 |
 | Answers to 15 gold questions, judged against the gold answers | 8 correct, 2 wrong, 5 refused |
 | Time for a warm answer | about 5.5 s (retrieval 4 s, model 1.5 s) |
 
-12 cases are too few to separate most methods, and neither grader is a tax expert. Details,
-known problems, and what is next: [docs/evaluation-status.md](docs/evaluation-status.md).
+Answers were graded on the first 15 questions. 30 cases still separate only large differences,
+and neither grader is a tax expert. Details, known problems, and what is next: [docs/evaluation-status.md](docs/evaluation-status.md).
 
 ## Architecture
 

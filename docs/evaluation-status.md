@@ -22,7 +22,20 @@ changed is in [changelog.md](changelog.md).
 
 ## Results
 
-Essential recall on `corpus-v2`, 12 gold cases, full coverage in brackets where not 0. Too few cases
+**34 cases since 23/11/2026** (18 reviewed drafts added, `d568800`; 30 with essential provisions),
+`corpus-v2.1`, full coverage in brackets:
+
+| Method | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| **Hybrid + cautious filter (what the site does)** | **0.31 (0.20)** | **0.47 (0.37)** | **0.53 (0.43)** |
+| Hybrid + filter, all rules | 0.37 (0.27) | 0.45 (0.33) | 0.53 (0.43) |
+
+The first 12 cases score as before; the 18 new ones 0.31, 0.50, 0.58. All rules against cautious: K = 5,
+3 cases up (A7, A8, A13), none down; K = 10, A1 up and A18 down. Never found in the top 20: CIT Law
+67/2025 Art 10 (A10, A11, R4), Tax Administration Law 108/2025 Art 16 (A15, A16), Decree 181/2025 Art
+18 and 26 (A20, A22). Reports `hybrid-asof-*-v2.1-gold34`.
+
+Earlier, on `corpus-v2`, 12 gold cases, full coverage in brackets where not 0. Too few cases
 to separate most methods.
 
 | Method | K = 5 | K = 10 | K = 20 |
@@ -134,11 +147,11 @@ L = more. Mark each done here when finished.
 | ~~9~~ | **Done 23/11/2026.** Keyword search without a parallel worker on the 1-vCore database: 3.4 → 2.4 s, identical results. What remains is grouping about 750,000 term matches; faster needs an approximate method (with an evaluation) or a larger database | | [Speed](retrieval-experiments.md#speed) |
 | ~~10~~ | **Done 23/11/2026** (owner's choice: 10 minutes): the API stays up 10 idle minutes instead of 5 (`cooldown_period_in_seconds = 600`, `infra/terraform/main.tf`), about $0.005 more per use | | |
 | ~~11~~ | **Done 23/11/2026.** Questions, answers, and timings are logged in `question_logs`, and answers can be rated 👍/👎 with a comment; `export_question_log.py` lists rated and refused ones for review | | [Architecture](architecture.md) |
-| 12 | **Drafts ready, review waiting:** 18 cases in `gold_set_v1_drafts.csv` (CIT rates, PIT deductions and household business, late-payment interest, invoice timing, 0% VAT conditions, refund cap, a false premise, 3 leakage-free), each from the clause text and checked to parse. Hung or an expert must verify them before they count; then draft 16 more | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
+| ~~12~~ | **Done 23/11/2026.** The 18 drafts, reviewed and approved by the owner, are A10-A23, R4-R5, L5-L6 (`d568800`); 30 scored cases. Drafting 16 more would bring the set to 50 | | [Results](#results) |
 | ~~13~~ | **Done 23/11/2026.** 14 duplicates merged by `merge_duplicate_documents.py` (321 passages removed, backed up), `corpus-v2.1` frozen, ended-document list rebuilt and loaded, baselines identical; 124/2026 confirmed, 2 numbers left for someone with the originals | | [Corpora](#corpora) |
 | ~~14~~ | **Done 23/11/2026.** ESLint 9 with Next's `core-web-vitals` and `typescript` rules (`eslint.config.mjs`); CI runs `npm run lint` and `next build` lints too. Fixed 2 errors (page links in the admin view); 3 warnings remain (two `<img>` logos, one effect's dependency list) | | |
-| 15 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, **waits for item 12's reviewed cases** | Weak top-5 recall; cannot reach the 14 never-found provisions |
-| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, **waits for item 12's reviewed cases** | Half the hardest misses need it |
+| 15 | Try a reranker over the top 100 (e.g. `bge-reranker-v2-m3`) | M, unblocked | Weak top-5 recall; 7 new cases have provisions never in the top 20 |
+| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, unblocked | Half the hardest misses need it |
 | ~~17~~ | **Done 23/11/2026.** `page.tsx` (890 lines) split without code changes into `lib/` (types, copy, format, api) and `components/` (tags, answer, documents, layout); 12 Vitest tests for the helpers and tags run in CI (`npm test`) | | |
 | ~~18~~ | **Done 23/11/2026.** Known problems 1 and 8: runs of replaced documents read (33 more ended, recall with confirmed rules identical case by case, all rules 0.38 at K = 5), and documents that may have ended used last in answers (wrong 4 → 2, refused 2 → 5). A newest-first ranking was tried and rejected | | [Already tried](retrieval-experiments.md#retrieval) |
 
@@ -146,9 +159,8 @@ L = more. Mark each done here when finished.
 
 Waiting on a person (23/11/2026); code items above that depend on one say so.
 
-1. **Review the 18 draft gold cases** in `data/evaluation/gold_set_v1_drafts.csv` (Le Hung or a tax
-   expert), following [the guideline](annotation-guideline.md); then draft 16 more. Unblocks items 15-16
-   and an independent test of the ended-document filter.
+1. ~~Review the 18 draft gold cases~~ **done 23/11/2026** by the owner. A tax expert's second reading would
+   still strengthen them, and 16 more cases would reach 50.
 2. **Check two document numbers against the originals:** `93/1998/QĐ/TCKT` (its header reads
    `91/1998/QĐ-BNN-BVTV`) and `25/2026/TT-BTC` (its OCR'd header reads `85/2026`).
 3. **Tax expert:** review the inferred ending rules (guidance, amendment) and the 178 documents the

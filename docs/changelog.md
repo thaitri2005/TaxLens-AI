@@ -88,6 +88,11 @@ checked in the live app at desktop and phone widths, in both languages, and by k
 - Numbers with spaces (`101 TC/TCT`, `18/VBHN-BTC (2026)`) are how those documents are numbered, not
   errors.
 
+### Gold set
+
+- The 18 draft cases, approved by the owner, joined the gold set (34 cases, 30 scored). Live retrieval
+  scores 0.31, 0.47, 0.53 at K = 5, 10, 20; the reranker and law-step items are unblocked.
+
 ### Documentation
 
 - README rewritten around what TaxLens is for, with current results, features, and new screenshots.

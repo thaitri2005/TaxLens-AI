@@ -10,7 +10,7 @@ reports, and run paid or slow tests once.
 
 ## How to read the figures
 
-- Figures are essential recall at K = 5, 10 and 20 on the same 12 scored gold cases
+- Figures are essential recall at K = 5, 10 and 20 on the same 12 scored gold cases (30 from 23/11/2026, `-gold34` reports)
   (`gold-v1.0 --verified-only`, `--as-of case`). Differences of a case or two prove little.
 - Everything dated before 05/11/2026 ran with keyword search cut to 12 terms, and everything before
   06/11/2026 with unconverted TCVN3 text. Old comparisons between methods do not stand; the verdicts
