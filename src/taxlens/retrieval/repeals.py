@@ -33,7 +33,17 @@ _TYPE = r"(?:thong tu(?: lien tich| lien bo)?|nghi dinh|luat|phap lenh|nghi quye
 _NAMED = rf"{_TYPE}\s+(?:so\s+)?(?:\d+\s+)?(?P<number>{_NUMBER})"
 # The ending verb, then the document it ends.
 _ENDS_NEXT = re.compile(
-    rf"(?:\bbai bo\s+|{_TYPE} nay thay the\s+(?:cho\s+)?|\bthay the\s+|\bbai bo cac\s+){_NAMED}"
+    rf"(?:\bbai bo\s+(?:cac\s+)?|{_TYPE} nay thay the\s+(?:cho\s+)?(?:cac\s+)?"
+    rf"|\bthay the\s+(?:cho\s+)?(?:cac\s+)?){_NAMED}"
+)
+# What may stand between two documents of one run ("Thông tư số X ngày 15 tháng 12 năm 2005
+# của Bộ Tài chính, Thông tư số Y"): a date, an issuer, then a comma or "và". Anything else,
+# such as a title ("hướng dẫn Nghị định số Z"), ends the run.
+_RUN_GAP = re.compile(
+    r"\s*(?:ngay\s+\d{1,2}\s*(?:/|-|thang)\s*\d{1,2}\s*(?:/|-|nam)\s*\d{4}\s*)?"
+    r"(?:cua\s+(?:bo truong\s+)?(?:bo tai chinh|chinh phu|thu tuong chinh phu|quoc hoi"
+    r"|uy ban thuong vu quoc hoi|tong cuc thue|tong cuc hai quan)\s*)?"
+    r"(?:,\s*(?:va\s+)?|va\s+)(?:cac\s+)?"
 )
 # The document, then the ending verb in the same sentence.
 _ENDS_PREVIOUS = re.compile(
@@ -175,10 +185,13 @@ def explicit_targets(text: str) -> set[str]:
     for sentence in re.split(r"(?<=[.;])\s", folded):
         if _STILL_APPLIES.search(sentence):
             continue
-        for pattern in (_ENDS_NEXT, _ENDS_PREVIOUS):
-            for match in pattern.finditer(sentence):
-                if not _PART_OF.search(sentence[: match.start("number")]):
-                    targets.add(match["number"])
+        for match in _ENDS_NEXT.finditer(sentence):
+            if not _PART_OF.search(sentence[: match.start("number")]):
+                targets.add(match["number"])
+                targets |= _run_after(sentence, match.end())
+        for match in _ENDS_PREVIOUS.finditer(sentence):
+            if not _PART_OF.search(sentence[: match.start("number")]):
+                targets.add(match["number"])
     opener = _LIST_OPENER.search(folded)
     if opener:
         targets |= _list_items(folded[opener.end() :])
@@ -211,7 +224,23 @@ def _list_items(folded_list: str) -> set[str]:
         item_match = _LIST_ITEM.match(item)
         if item_match:
             targets.add(item_match["number"])
+            targets |= _run_after(item, item_match.end())
     return targets
+
+
+def _run_after(text: str, position: int) -> set[str]:
+    """Numbers of the documents that continue a run from ``position`` ("X, Y và Z")."""
+
+    numbers: set[str] = set()
+    while True:
+        gap = _RUN_GAP.match(text, position)
+        if not gap:
+            return numbers
+        named = _NAMED_PATTERN.match(text, gap.end())
+        if not named:
+            return numbers
+        numbers.add(named["number"])
+        position = named.end()
 
 
 def sunset_targets(text: str) -> dict[str, date]:

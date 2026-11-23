@@ -193,3 +193,43 @@ def test_continuing_in_force_until_a_date_ends_the_next_day():
         == {}
     )
     assert sunset_targets("Nghị định số 119/2018/NĐ-CP tiếp tục có hiệu lực.") == {}
+
+
+def test_a_run_of_replaced_documents_ends_each_of_them() -> None:
+    text = (
+        "1. Thông tư này có hiệu lực thi hành sau 45 ngày kể từ ngày ký, thay thế các Thông tư "
+        "số 112/2005/TT-BTC ngày 15 tháng 12 năm 2005, Thông tư số 59/2007/TT-BTC ngày 14 tháng "
+        "6 năm 2007 và Thông tư số 05/2009/TT-BTC ngày 13 tháng 01 năm 2009 của Bộ Tài chính."
+    )
+    assert explicit_targets(text) == {"112/2005/tt-btc", "59/2007/tt-btc", "05/2009/tt-btc"}
+    assert explicit_targets("Bãi bỏ Thông tư số 19/2021/TT-BTC và Thông tư số 46/2024/TT-BTC.") == {
+        "19/2021/tt-btc",
+        "46/2024/tt-btc",
+    }
+
+
+def test_a_run_stops_at_a_title_or_a_part() -> None:
+    title = (
+        "Thông tư này thay thế Thông tư số 28/2011/TT-BTC ngày 28/02/2011 của Bộ Tài chính "
+        "hướng dẫn thi hành Nghị định số 85/2007/NĐ-CP."
+    )
+    assert explicit_targets(title) == {"28/2011/tt-btc"}
+    part = (
+        "Thông tư này thay thế Thông tư số 28/2011/TT-BTC, "
+        "khoản 2 Điều 3 Thông tư số 1/2020/TT-BTC."
+    )
+    assert explicit_targets(part) == {"28/2011/tt-btc"}
+    related = (
+        "thay thế các nội dung có liên quan tại Thông tư số 112/2005/TT-BTC ngày 15/12/2005, "
+        "Thông tư số 59/2007/TT-BTC của Bộ Tài chính"
+    )
+    assert not explicit_targets(related)
+
+
+def test_a_list_item_naming_two_documents_ends_both() -> None:
+    from taxlens.retrieval.repeals import list_continuation_targets
+
+    rest = (
+        "đ) Thông tư số 19/2021/TT-BTC và Thông tư số 46/2024/TT-BTC; e) Thông tư số 1/2020/TT-BTC."
+    )
+    assert list_continuation_targets(rest) == {"19/2021/tt-btc", "46/2024/tt-btc", "1/2020/tt-btc"}
