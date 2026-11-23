@@ -124,7 +124,8 @@ html { -webkit-tap-highlight-color:transparent; }
 .chat-bar button:hover:not(:disabled) { background:var(--teal-dark); }
 .stat-card strong,.document-row-number,.score { font-variant-numeric:tabular-nums; }
 @media (pointer:coarse) {
-  .language-toggle button,.pager button,.facet-chip,.answer-feedback button,.link-button { min-height:44px; min-width:44px; }
+  .language-toggle button,.pager button,.facet-chip,.answer-feedback button,.link-button,.sign-out-button,.topbar-link,.back-button { min-height:44px; min-width:44px; }
+  .topbar-link { display:inline-flex; align-items:center; }
   .chat-bar button { width:44px; height:44px; }
   .tab { min-height:48px; }
 }

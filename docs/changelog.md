@@ -50,6 +50,23 @@ embedding model four times; TensorFlow loaded with the model on laptops.
   recall unchanged. 124/2026/TT-BTC confirmed and dated.
 - 18 draft gold cases from the clause text in `gold_set_v1_drafts.csv`, unverified and not scored.
 
+### UI and accessibility
+
+Audited against the Vercel web interface guidelines and the ui-ux-pro-max accessibility rules, then
+checked in the live app at desktop and phone widths, in both languages, and by keyboard:
+
+- Visible 3px focus ring on every control, and a ring around the search and question boxes; a skip link.
+- Muted text contrast 3.8:1 → 5.2:1 (WCAG AA needs 4.5:1).
+- The page's `lang` follows EN/VI; language buttons report which is selected; tabs mark the current view;
+  search inputs are named; one polite status line announces "10 matching passages" or that an answer is
+  ready.
+- SVG icons instead of glyphs and emoji; 44px touch targets on touch screens; the top bar stays on one
+  line at 375px.
+- Be Vietnam Pro and Source Serif 4, self-hosted with the Vietnamese subset: Vietnamese now uses the
+  same typefaces as English instead of falling back to Arial (Inter was named but never loaded).
+- Login and admin forms post, so a submit before the page script loads never puts a password in the URL
+  (found by the automated security review).
+
 ### Engineering
 
 - Each answer logs its timings (version list, keyword and vector queries, model, tokens) in the API logs.
