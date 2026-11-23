@@ -164,3 +164,55 @@ def test_question_period_ignores_issue_dates_and_future_years() -> None:
     assert question_period("ngày 15 tháng 3 năm 2026", today) == QuestionPeriod(
         date(2026, 3, 15), date(2026, 3, 15)
     )
+
+
+def test_evidence_prefers_documents_not_ended_by_the_question_date() -> None:
+    import uuid
+    from datetime import date
+
+    from taxlens.intelligence.qa import prefer_not_ended
+    from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
+    from taxlens.retrieval.search import SearchResult
+
+    def result(number: str, ended_on: date | None) -> SearchResult:
+        document = LegalDocument(
+            id=uuid.uuid4(),
+            document_number=number,
+            title=number,
+            document_type="TT",
+            ended_on=ended_on,
+            end_basis="guidance" if ended_on else None,
+        )
+        version = DocumentVersion(
+            id=uuid.uuid4(),
+            document_id=document.id,
+            legal_status="EFFECTIVE",
+            raw_content_hash="a" * 64,
+            raw_artifact_key=f"raw/{number}.txt",
+        )
+        chunk = DocumentChunk(
+            id=uuid.uuid4(), document_version_id=version.id, content=number, token_count=1
+        )
+        return SearchResult(chunk=chunk, version=version, document=document)
+
+    old = result("4/2009/TT-BTC", date(2009, 4, 20))
+    later = result("28/2011/TT-BTC", date(2020, 7, 1))
+    current = result("219/2013/TT-BTC", None)
+    ranked = [old, later, current]
+
+    def numbers(results: list[SearchResult]) -> list[str]:
+        return [r.document.document_number for r in results]
+
+    # A question about 2017: only the document ended in 2009 moves last.
+    assert numbers(prefer_not_ended(ranked, date(2017, 1, 1))) == [
+        "28/2011/TT-BTC",
+        "219/2013/TT-BTC",
+        "4/2009/TT-BTC",
+    ]
+    # Today both flagged documents follow the one with no ending, in their order.
+    assert numbers(prefer_not_ended(ranked, date(2026, 11, 23))) == [
+        "219/2013/TT-BTC",
+        "4/2009/TT-BTC",
+        "28/2011/TT-BTC",
+    ]
+    assert numbers(prefer_not_ended(ranked, None)) == numbers(ranked)

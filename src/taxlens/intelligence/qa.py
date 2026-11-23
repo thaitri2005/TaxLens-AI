@@ -3,6 +3,7 @@ import logging
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from datetime import date
 from enum import StrEnum
 from functools import lru_cache
 from time import perf_counter
@@ -158,15 +159,36 @@ def _retrieve_evidence_node(state: QuestionGraphState) -> dict[str, object]:
     # best located ones; old documents without articles would otherwise fill all the places
     # and make the gate refuse. With none located, the gate still refuses.
     located = [result for result in candidates if has_structural_locator(result)]
+    chosen = prefer_not_ended(located or candidates, query_plan.filters.current_on)
     logger.info(
-        "retrieval_completed seconds=%.2f candidates=%d located=%d current_on=%s as_of=%s",
+        "retrieval_completed seconds=%.2f candidates=%d located=%d may_have_ended=%d "
+        "current_on=%s as_of=%s",
         perf_counter() - started,
         len(candidates),
         len(located),
+        sum(1 for result in chosen[:limit] if _ended_by(result, query_plan.filters.current_on)),
         query_plan.filters.current_on,
         query_plan.filters.as_of,
     )
-    return {"results": (located or candidates)[:limit]}
+    return {"results": chosen[:limit]}
+
+
+def prefer_not_ended(results: Sequence[SearchResult], on: date | None) -> list[SearchResult]:
+    """Results in their order, those of documents that may have ended by ``on`` last.
+
+    Search already leaves out confirmed endings; this demotes the inferred ones, which are
+    not validated by an expert and so stay searchable and flagged. They are still used when
+    too few other passages are found.
+    """
+
+    if on is None:
+        return list(results)
+    return [r for r in results if not _ended_by(r, on)] + [r for r in results if _ended_by(r, on)]
+
+
+def _ended_by(result: SearchResult, on: date | None) -> bool:
+    ended_on = result.document.ended_on
+    return on is not None and ended_on is not None and ended_on <= on
 
 
 def _assess_evidence_node(state: QuestionGraphState) -> dict[str, object]:
@@ -344,7 +366,9 @@ def _build_messages(
         "Vietnamese answer). If the passages do not answer the question, set answerable to "
         "false and explain what is missing in uncertainties instead of guessing. A passage "
         "with an Ending line comes from a document that has or may have stopped applying: "
-        "say so wherever you rely on it.\n\n"
+        "say so wherever you rely on it, and never call it in force for a time after its "
+        "ending date. Prefer passages without an Ending line, and the later of two documents "
+        "on the same matter.\n\n"
         "Write a helpful answer of up to about 250 words: state the rule and the document "
         "and article it comes from, then explain in plain language what it means for the "
         "situation asked about, including the conditions, exceptions, rates, and deadlines "

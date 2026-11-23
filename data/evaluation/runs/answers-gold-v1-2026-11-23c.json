@@ -1,0 +1,409 @@
+{
+  "answer_model": "openai/gpt-oss-120b",
+  "judge_model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+  "dataset": "data\\evaluation\\gold_set_v1.csv",
+  "case_count": 15,
+  "summary": {
+    "correct": 8,
+    "partly": 0,
+    "wrong": 2,
+    "refused": 5
+  },
+  "note": "Cases marked uncertain are graded but left out of the summary.",
+  "cases": [
+    {
+      "case_id": "A1",
+      "case_type": "answerable",
+      "uncertain": false,
+      "question": "Tháng 3/2026, công ty tôi bán nước ngọt đóng chai có hàm lượng đường khoảng 8g/100ml. Thuế suất thuế GTGT là bao nhiêu?",
+      "gold_answer": "10% (sugary drinks >5g/100ml are special-consumption goods, which are excluded from the temporary 8% rate in 2026)",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "answer": null,
+      "uncertainties": [
+        "The retrieved passages do not answer this question.",
+        "Không có thông tin trong các đoạn trích về mức thuế suất GTGT (thuế giá trị gia tăng) áp dụng cho nước giải khát.",
+        "Cần tham khảo Luật Thuế Giá trị gia tăng hoặc các nghị định, thông tư hướng dẫn về mức thuế suất GTGT cho hàng hóa thực phẩm, đồ uống.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force."
+      ],
+      "cited_documents": [
+        "51/2022/NĐ-CP",
+        "66/2025/QH15",
+        "360/2025/NĐ-CP",
+        "144/2024/NĐ-CP",
+        "69/2010/TT-BTC"
+      ],
+      "seconds": 6.9,
+      "verdict": "refused",
+      "reason": "The assistant did not provide an answer and instead stated insufficient evidence, while the reference expects a clear conclusion on the VAT rate based on established rules for sugary drinks in 2026."
+    },
+    {
+      "case_id": "A2",
+      "case_type": "answerable",
+      "uncertain": false,
+      "question": "Tháng 3/2026, công ty tôi (nộp thuế GTGT theo phương pháp khấu trừ) mua gỗ keo rừng trồng chỉ qua sơ chế thông thường rồi bán lại cho một công ty khác. Công ty tôi có phải kê khai, nộp thuế GTGT không?",
+      "gold_answer": "No need to declare and pay VAT (trading stage, from 1/1/2026); 'ordinary processing' is defined by Decree 181 Art 4(1) and Circular 84/2025",
+      "status": "ANSWERED",
+      "answer": "Theo khoản 1b sau khoản 1 Điều 4 của Nghị định 181/2025/NĐ‑CP được sửa đổi, bổ sung bởi Nghị định 359/2025/NĐ‑CP, doanh nghiệp mua sản phẩm cây trồng, rừng trồng chưa chế biến hoặc chỉ qua sơ chế thông thường và bán cho doanh nghiệp, hợp tác xã, liên hiệp hợp tác xã khác không phải kê khai, tính nộp thuế GTGT; doanh nghiệp được khấu trừ thuế GTGT đầu vào. Vì công ty bạn mua gỗ keo rừng trồng (sản phẩm rừng chưa chế biến) và bán lại cho một công ty khác (đối tượng là doanh nghiệp), nên không cần kê khai, nộp thuế GTGT cho giao dịch này, nhưng vẫn được khấu trừ thuế GTGT đầu vào.",
+      "uncertainties": [
+        "Cần xác nhận rằng gỗ keo rừng trồng thực sự được xem là \"sản phẩm rừng trồng chưa chế biến hoặc chỉ qua sơ chế thông thường\" theo quy định.",
+        "Cần chắc chắn người mua là doanh nghiệp (không phải hộ, cá nhân) để áp dụng miễn thuế.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force."
+      ],
+      "cited_documents": [
+        "359/2025/NĐ-CP",
+        "861/TCT",
+        "121/2026/TT-BTC",
+        "861/TC/TCT",
+        "149/2025/QH15"
+      ],
+      "seconds": 5.4,
+      "verdict": "correct",
+      "reason": "The assistant correctly concludes that the company does not need to declare or pay VAT, aligning with the reference answer, and cites the relevant legal basis. The uncertainties mentioned do not contradict the conclusion but highlight prudent verification points."
+    },
+    {
+      "case_id": "A3",
+      "case_type": "answerable",
+      "uncertain": false,
+      "question": "Tháng 3/2026, công ty tôi có nhà máy thủy điện nhỏ bán điện trên thị trường điện theo hợp đồng mua bán điện. Thời điểm xác định thuế GTGT và thời điểm khai thuế là khi nào?",
+      "gold_answer": "Timing follows Decree 181 Art 16(2)(a) (payment reconciliation date for market generators); declaration per Tax Administration Law 38/2019 Art 44(1)(a)",
+      "status": "ANSWERED",
+      "answer": "Theo Nghị định 181/2025/NĐ‑CP, đối với hoạt động bán điện của các công ty phát điện trên thị trường điện, thời điểm xác định thuế GTGT được xác định dựa trên thời điểm đối chiếu dữ liệu thanh toán giữa đơn vị vận hành hệ thống điện và thị trường, đơn vị phát điện và đơn vị mua điện theo quy định của Bộ Công Thương, hoặc hợp đồng mua bán điện đã được Bộ Công Thương hướng dẫn, phê duyệt, nhưng không được vượt quá ngày cuối cùng của thời hạn kê khai, nộp thuế của tháng phát sinh nghĩa vụ thuế. Do đó, trong tháng 3/2026, thời điểm xác định thuế GTGT là ngày hoàn thành đối chiếu dữ liệu (hoặc ngày hợp đồng được phê duyệt) nhưng không muộn hơn ngày 31 / 3/2026. Khi đã xác định thời điểm này, công ty phải kê khai và nộp thuế GTGT không quá ngày cuối cùng của thời hạn kê khai, tức là cuối tháng 3/2026 (theo quy định này).",
+      "uncertainties": [
+        "Các quy định chi tiết về ngày cụ thể nộp tờ khai (ví dụ: ngày 20 của tháng sau) không được nêu trong các đoạn trích, vì vậy không thể khẳng định ngày nộp thực tế nếu không có tài liệu bổ sung.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force.",
+        "80/2021/TT-BTC stopped applying on 01/07/2026 (ended by 89/2026/TT-BTC); its text states the law before that date only."
+      ],
+      "cited_documents": [
+        "181/2025/NĐ-CP",
+        "45/2009/TT-BTC",
+        "45/2009/TT-BTC",
+        "80/2021/TT-BTC",
+        "72/2025/NĐ-CP"
+      ],
+      "seconds": 4.9,
+      "verdict": "correct",
+      "reason": "The assistant correctly identifies the timing of VAT determination and declaration based on payment reconciliation date as per Decree 181 Art 16(2)(a), aligning with the reference, and correctly links declaration to the end of the tax period as per Tax Administration Law Art 44(1)(a), without contradicting the reference."
+    },
+    {
+      "case_id": "A4",
+      "case_type": "answerable",
+      "uncertain": false,
+      "question": "Tháng 2/2026, công ty tôi đã được hoàn thuế GTGT cho một lô hàng xuất khẩu, nhưng khách hàng nước ngoài trả lại lô hàng. Công ty phải xử lý về thuế thế nào?",
+      "gold_answer": "File a supplementary return; repay the refunded amount for the returned goods; pay late-payment interest from the date the State Treasury paid the refund (or offset it)",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "answer": null,
+      "uncertainties": [
+        "The retrieved passages do not answer this question.",
+        "Không có đoạn nào trong các tài liệu được cung cấp quy định về việc hoàn hoặc điều chỉnh lại thuế GTGT đã được hoàn cho hàng xuất khẩu khi hàng được trả lại.",
+        "Cần tham khảo các quy định của Luật Thuế Giá trị gia tăng và Thông tư hướng dẫn (ví dụ: Thông tư 133/2016/TT-BTC) để biết cách xử lý khi hàng xuất khẩu được trả lại và cần điều chỉnh lại khoản hoàn thuế GTGT.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force."
+      ],
+      "cited_documents": [
+        "194/2010/TT-BTC",
+        "194/2010/TT-BTC",
+        "194/2010/TT-BTC",
+        "194/2010/TT-BTC",
+        "194/2010/TT-BTC"
+      ],
+      "seconds": 4.5,
+      "verdict": "refused",
+      "reason": "The assistant did not provide an answer and instead stated insufficient evidence, while the reference expects a specific tax treatment response."
+    },
+    {
+      "case_id": "A5",
+      "case_type": "answerable",
+      "uncertain": false,
+      "question": "Tháng 5/2026, công ty tôi mua hàng hóa trị giá trên 5 triệu đồng theo hình thức trả góp. Đến hạn thanh toán trong hợp đồng mà chưa có chứng từ thanh toán không dùng tiền mặt. Thuế GTGT đầu vào đã khấu trừ xử lý thế nào? Nếu sau đó có chứng từ thì sao?",
+      "gold_answer": "Reduce the deducted input VAT for the part without non-cash proof, in the period the payment falls due; once proof is obtained, declare the deduction again",
+      "status": "ANSWERED",
+      "answer": "Theo Nghị định 144/2026/NĐ-CP (điểm g khoản 2 Điều 26) – là văn bản mới nhất, đối với hàng hoá, dịch vụ mua trả chậm, trả góp có giá trị từ 5 triệu đồng trở lên, doanh nghiệp được khấu trừ thuế GTGT đầu vào dựa trên hợp đồng mua bán, hoá đơn và chứng từ thanh toán không dùng tiền mặt. \n- Nếu đến thời điểm thanh toán theo hợp đồng (hoặc phụ lục hợp đồng) mà doanh nghiệp **chưa có** chứng từ thanh toán không dùng tiền mặt, doanh nghiệp phải kê khai và **giảm** số thuế GTGT đầu vào được khấu trừ cho phần giá trị chưa có chứng từ trong kỳ tính thuế phát sinh nghĩa vụ thanh toán. \n- Khi sau này doanh nghiệp **có** chứng từ thanh toán không dùng tiền mặt, doanh nghiệp được kê khai, khấu trừ lại số thuế GTGT đầu vào cho phần giá trị đã có chứng từ trong kỳ tính thuế có chứng từ.",
+      "uncertainties": [
+        "Thời hạn cụ thể để nộp tờ khai điều chỉnh giảm (kỳ tính thuế nào) không được nêu chi tiết trong đoạn trích; cần tham khảo quy định chung về thời hạn nộp tờ khai thuế GTGT (thường là cuối kỳ tính thuế).",
+        "Cách thức nộp tờ khai bổ sung khi có chứng từ sau này (mẫu tờ khai, quy trình) không được mô tả trong các đoạn trích.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force."
+      ],
+      "cited_documents": [
+        "181/2025/NĐ-CP",
+        "181/2025/NĐ-CP",
+        "144/2026/NĐ-CP",
+        "181/2025/NĐ-CP",
+        "31/2013/QH13"
+      ],
+      "seconds": 12.4,
+      "verdict": "correct",
+      "reason": "The assistant's conclusion matches the reference: it correctly states that input VAT must be reduced when non-cash payment proof is missing at the due date, and can be re-claimed once the proof is obtained. The additional details and uncertainties mentioned do not contradict the reference answer."
+    },
+    {
+      "case_id": "A6",
+      "case_type": "answerable",
+      "uncertain": false,
+      "question": "Năm 2026, Công ty A ký hợp đồng trồng trọt, chăn nuôi cho Công ty B: A nhận tiền công từ B hoặc bán lại sản phẩm thu hoạch cho B. Các khoản này có chịu thuế GTGT không?",
+      "gold_answer": "Not subject to VAT (treated as self-produced products sold)",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "answer": null,
+      "uncertainties": [
+        "The retrieved passages do not answer this question.",
+        "Không có đoạn nào trong các tài liệu cung cấp quy định về việc áp dụng thuế GTGT đối với tiền công thực hiện dịch vụ trồng trọt, chăn nuôi hoặc việc bán sản phẩm thu hoạch trong hợp đồng giữa Công ty A và Công ty B.",
+        "Cần tham chiếu Luật Thuế Giá trị gia tăng và các thông tư hướng dẫn để xác định liệu các khoản tiền công và doanh thu bán sản phẩm nông nghiệp có chịu thuế GTGT hay không.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force.",
+        "111/2013/TT-BTC stopped applying on 01/07/2026 (ended by 87/2026/TT-BTC); its text states the law before that date only."
+      ],
+      "cited_documents": [
+        "96/1999/TT-BTC",
+        "89/99/TT-BTC",
+        "111/2013/TT-BTC",
+        "07/2022/QH15",
+        "69/2025/TT-BTC"
+      ],
+      "seconds": 5.0,
+      "verdict": "refused",
+      "reason": "The assistant did not provide an answer and instead stated insufficient evidence, while the reference expects a conclusion that the income is not subject to VAT."
+    },
+    {
+      "case_id": "A7",
+      "case_type": "answerable",
+      "uncertain": false,
+      "question": "Công ty tôi nhập khẩu hàng hóa rồi xuất khẩu sang nước khác; thuế GTGT đầu vào phát sinh tháng 3/2024. Tháng 9/2025 công ty mới nộp hồ sơ hoàn thuế. Có được hoàn không, và áp dụng quy định nào?",
+      "gold_answer": "Refundable under Circular 25/2018 Art 2; when filing after 1/7/2025 the company may choose the refund policy in force for the month/quarter requested; procedure follows tax administration law",
+      "status": "ANSWERED",
+      "answer": "Công ty không được hoàn thuế GTGT cho hàng nhập khẩu rồi xuất khẩu sang nước khác. Quy định này nằm trong Thông tư 48/2024/QH15, Điều 15, khoản a). Theo đó, nếu hàng hóa nhập khẩu sau đó xuất khẩu sang nước khác thì \"trừ trường hợp hàng hóa nhập khẩu sau đó xuất khẩu sang nước khác\" – nghĩa là không được áp dụng hoàn thuế. Vì thuế GTGT đầu vào phát sinh vào tháng 3/2024 và đề nghị hoàn vào tháng 9/2025 vẫn nằm trong khoảng thời gian liên tục chưa được hoàn, nhưng ngoại lệ trên đã ngăn cản quyền lợi hoàn thuế.",
+      "uncertainties": [
+        "Không có thông tin cụ thể về số tiền thuế GTGT đầu vào thực tế (có đạt mức 300 triệu đồng hay không).",
+        "Không rõ công ty đã thực hiện hạch toán riêng theo tỷ lệ doanh thu xuất khẩu, nếu có thì có thể ảnh hưởng đến việc tính thuế được hoàn.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force.",
+        "130/2016/TT-BTC may have stopped applying on 01/07/2025: it guides 100/2016/NĐ-CP, which ended then. Confirm it still applies.",
+        "26/2015/TT-BTC may have stopped applying on 15/12/2025: it guides 12/2015/NĐ-CP, which ended then. Confirm it still applies."
+      ],
+      "cited_documents": [
+        "48/2024/QH15",
+        "130/2016/TT-BTC",
+        "47/2011/TT-BTC",
+        "26/2015/TT-BTC",
+        "181/2025/NĐ-CP"
+      ],
+      "seconds": 5.4,
+      "verdict": "wrong",
+      "reason": "The assistant incorrectly states that the company is not eligible for VAT refund based on a misinterpretation of the law, while the reference answer confirms the refund is possible under Circular 25/2018 Art 2. The assistant cites a non-existent legal document (Thông tư 48/2024/QH15), which is a serious error, as QH15 refers to the National Assembly, not a circular."
+    },
+    {
+      "case_id": "A8",
+      "case_type": "answerable",
+      "uncertain": false,
+      "question": "Tháng 3/2026, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
+      "gold_answer": "No - imported goods that are then exported to another country are excluded from the export refund",
+      "status": "ANSWERED",
+      "answer": "Theo quy định hiện hành, để được hoàn thuế GTGT đối với xuất khẩu doanh nghiệp phải có số thuế GTGT đầu vào chưa được khấu trừ hết từ 300 triệu đồng trở lên. Tuy nhiên, trường hợp hàng hoá nhập khẩu rồi xuất khẩu sang nước khác bị loại trừ khỏi quyền hoàn thuế. Vì công ty bạn nhập khẩu hàng rồi xuất khẩu sang nước thứ ba, nên không đủ điều kiện để yêu cầu hoàn thuế GTGT, trừ khi hàng hoá đó được coi là nguyên liệu nhập khẩu để sản xuất, gia công (trường hợp này không nằm trong ngoại lệ).",
+      "uncertainties": [
+        "Không rõ hàng hoá nhập khẩu có phải là nguyên liệu để sản xuất, gia công (trường hợp không bị loại trừ) hay là hàng hoá đã hoàn thiện để xuất khẩu.",
+        "Chưa biết doanh nghiệp đã thực hiện việc hạch toán riêng thuế đầu vào cho hàng hoá xuất khẩu hay chưa, điều này ảnh hưởng tới việc tính toán số thuế còn lại.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force."
+      ],
+      "cited_documents": [
+        "48/2024/QH15",
+        "181/2025/NĐ-CP",
+        "181/2025/NĐ-CP",
+        "194/2010/TT-BTC",
+        "31/2013/QH13"
+      ],
+      "seconds": 4.7,
+      "verdict": "correct",
+      "reason": "The assistant correctly concludes that the company is not eligible for VAT refund because imported goods directly exported to a third country are excluded, which aligns with the reference answer. The mention of possible exceptions does not contradict the main conclusion, as the scenario described does not meet those exceptions."
+    },
+    {
+      "case_id": "A9",
+      "case_type": "answerable",
+      "uncertain": false,
+      "question": "Năm 2024, công ty tôi làm theo văn bản hướng dẫn của cơ quan thuế, kê khai một sản phẩm từ quả dừa là hàng không chịu thuế GTGT. Nay cơ quan thuế xác định sản phẩm này chịu thuế 10% và truy thu. Truy thu từ khi nào, có bị phạt và tính tiền chậm nộp không?",
+      "gold_answer": "Arrears run from the effective date of the legal documents; no administrative penalty and no late-payment interest if the company followed the authority's written guidance",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "answer": null,
+      "uncertainties": [
+        "The retrieved passages do not answer this question.",
+        "Không có thông tin trong các đoạn trích về thời điểm bắt đầu truy thu (từ ngày nào) khi thuế GTGT được xác định là phải nộp.",
+        "Không có quy định cụ thể về mức phạt hoặc lãi chậm nộp đối với thuế GTGT trong các đoạn trích được cung cấp.",
+        "Các quy định về phạt chậm nộp 0,1% mỗi ngày trong đoạn [2] chỉ áp dụng cho phụ thu, không phải thuế GTGT.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force.",
+        "219/2013/TT-BTC stopped applying on 01/07/2025 (ended by 69/2025/TT-BTC); its text states the law before that date only."
+      ],
+      "cited_documents": [
+        "219/2013/TT-BTC",
+        "34/2004/TT-BTC",
+        "194/2010/TT-BTC",
+        "47/2011/TT-BTC",
+        "24/2007/NĐ-CP"
+      ],
+      "seconds": 42.0,
+      "verdict": "refused",
+      "reason": "The assistant did not provide an answer and instead listed uncertainties, effectively refusing to respond to the question despite the reference answer being clear and actionable."
+    },
+    {
+      "case_id": "R1",
+      "case_type": "conditional",
+      "uncertain": false,
+      "question": "Tháng 3/2026, công ty tôi bán hàng cho một công ty nước ngoài nhưng giao hàng trực tiếp cho một doanh nghiệp khác tại Việt Nam theo chỉ định của bên mua. Có được áp dụng thuế suất 0% và hoàn thuế không?",
+      "gold_answer": "PASS if the answer is conditional (lists conditions, depends on customs procedure/documents) or asks for facts; FAIL if a flat yes/no",
+      "status": "ANSWERED",
+      "answer": "Theo quy định hiện hành, thuế suất 0% chỉ áp dụng cho hàng hoá xuất khẩu được tiêu dùng ngoài lãnh thổ Việt Nam (Điều 9, QH15/2024, khoản a) và cho hàng hoá xuất khẩu theo quy định của Nghị định 158/2003, khoản a). Trong trường hợp công ty bán hàng cho khách hàng nước ngoài nhưng giao hàng trực tiếp cho doanh nghiệp tại Việt Nam, hàng hoá được tiêu dùng trong nước, vì vậy không đáp ứng điều kiện “tiêu dùng ở ngoài Việt Nam”. Do đó không được áp dụng thuế suất 0% và không đủ điều kiện để yêu cầu hoàn thuế nhập khẩu theo Thông tư 194/2010, vì các quy định hoàn thuế chỉ áp dụng cho nguyên liệu, vật tư nhập khẩu dùng để sản xuất và xuất khẩu hàng hoá.",
+      "uncertainties": [
+        "Không có quy định cụ thể trong các tài liệu được cung cấp về trường hợp bán cho khách hàng nước ngoài nhưng giao hàng cho doanh nghiệp nội địa; cần xác nhận với cơ quan thuế nếu có quy định mới hoặc hướng dẫn chi tiết.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force."
+      ],
+      "cited_documents": [
+        "48/2024/QH15",
+        "194/2010/TT-BTC",
+        "158/2003/NĐ-CP",
+        "74/TCT",
+        "57/CTN"
+      ],
+      "seconds": 5.4,
+      "verdict": "wrong",
+      "reason": "The reference expects a conditional answer or a request for more information, but the assistant gives a definitive 'no' without acknowledging uncertainty or listing conditions under which the outcome might differ. The assistant also incorrectly conflates VAT zero-rating with import tax refunds, which is not directly relevant to the question."
+    },
+    {
+      "case_id": "R2",
+      "case_type": "conditional",
+      "uncertain": false,
+      "question": "Năm 2026, công ty tôi bán nước giải khát. Thuế suất thuế GTGT là bao nhiêu?",
+      "gold_answer": "PASS if it says the rate depends on the product (sugar content / special-consumption status: 10% or 8%) and asks or answers by case; FAIL if one number only",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "answer": null,
+      "uncertainties": [
+        "The retrieved passages do not answer this question.",
+        "Không có đoạn nào nêu rõ mức thuế suất GTGT cho hàng hóa là nước giải khát.",
+        "Cần biết quy định cụ thể của Luật Thuế GTGT hoặc Thông tư hướng dẫn áp dụng mức thuế suất cho loại hàng này vào năm 2026.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force."
+      ],
+      "cited_documents": [
+        "84/2026/TT-BTC",
+        "89/2026/TT-BTC",
+        "18/VBHN-BTC (2026)",
+        "236/2025/NĐ-CP",
+        "236/2025/NĐ-CP"
+      ],
+      "seconds": 3.0,
+      "verdict": "refused",
+      "reason": "The assistant did not provide an answer and instead stated insufficient evidence, which aligns with the reference's expectation to avoid giving a single rate without clarification on product type or regulations for 2026."
+    },
+    {
+      "case_id": "R3",
+      "case_type": "false premise",
+      "uncertain": false,
+      "question": "Theo Nghị định 999/2026/NĐ-CP mới ban hành, hàng nông sản xuất khẩu được hoàn thuế GTGT trong 3 ngày làm việc. Công ty tôi cần chuẩn bị hồ sơ gì?",
+      "gold_answer": "PASS if it says it cannot find/verify this decree; FAIL if it describes its content",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "answer": null,
+      "uncertainties": [
+        "No legal evidence matched the query and selected filters."
+      ],
+      "cited_documents": [],
+      "seconds": 0.4,
+      "verdict": "correct",
+      "reason": "The assistant correctly refused to answer due to insufficient evidence, as the decree mentioned (999/2026/NĐ-CP) cannot be verified, which aligns with the reference's PASS condition."
+    },
+    {
+      "case_id": "L1",
+      "case_type": "leakage-free",
+      "uncertain": true,
+      "question": "Tháng 3/2026, công ty tôi bán nước ngọt đóng chai có hàm lượng đường khoảng 4g/100ml. Thuế suất thuế GTGT là bao nhiêu?",
+      "gold_answer": "8% (not a special-consumption good, so the temporary reduction applies)",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "answer": null,
+      "uncertainties": [
+        "The retrieved passages do not answer this question.",
+        "The provided passages describe the definition and special consumption tax (thuế tiêu thụ đặc biệt) for beverages with sugar content above 5 g/100 ml, but they do not contain any information about the applicable value‑added tax (VAT) rate for soft drinks, regardless of sugar content.",
+        "There is no passage that states the VAT rate for beverages (nước giải khát) or any rule that differentiates VAT rates based on sugar content. Therefore the VAT rate for a drink with 4 g/100 ml cannot be determined from the given evidence.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force."
+      ],
+      "cited_documents": [
+        "51/2022/NĐ-CP",
+        "66/2025/QH15",
+        "360/2025/NĐ-CP",
+        "144/2024/NĐ-CP",
+        "69/2010/TT-BTC"
+      ],
+      "seconds": 3.4,
+      "verdict": "refused",
+      "reason": "The assistant did not provide an answer and instead stated insufficient evidence, while the reference answer provides a clear conclusion of 8% VAT rate based on general rules for non-special-consumption goods with temporary reduction."
+    },
+    {
+      "case_id": "L2",
+      "case_type": "leakage-free",
+      "uncertain": false,
+      "question": "Tháng 6/2023, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
+      "gold_answer": "Yes, can be refunded if conditions are met (old rule: Circular 25/2018 Art 2)",
+      "status": "ANSWERED",
+      "answer": "Doanh nghiệp nhập khẩu hàng hoá rồi xuất khẩu sang nước thứ ba và còn lại số thuế GTGT đầu vào chưa khấu trừ trên 300 triệu đồng được phép yêu cầu hoàn thuế GTGT cho kỳ kê khai (theo tháng hoặc quý). Quy định này được nêu trong Nghị định 146/2017/NĐ‑CP và được xác nhận lại trong Thông tư 25/2018/TT‑BTC (cũng như trong Thông tư 219/2013/TT‑BTC trước khi hết hạn). Doanh nghiệp phải hạch toán riêng phần thuế GTGT đầu vào dùng cho hàng xuất khẩu; nếu không thể hạch toán riêng, phải tính phần thuế dựa trên tỷ lệ doanh thu xuất khẩu trên tổng doanh thu. Khi đáp ứng các điều kiện trên, số thuế chưa khấu trừ từ 300 triệu đồng trở lên sẽ được hoàn trong kỳ kê khai tương ứng.",
+      "uncertainties": [
+        "Thời hạn nộp hồ sơ hoàn thuế (thường là trong vòng 180 ngày kể từ ngày nộp tờ khai GTGT) không được nêu trong các đoạn trích; cần kiểm tra quy định hiện hành của cơ quan thuế.",
+        "Công ty có thực hiện việc hạch toán riêng phần thuế GTGT đầu vào cho hàng xuất khẩu hay chưa; nếu chưa, cần xác định tỷ lệ doanh thu xuất khẩu để tính số thuế được hoàn.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force.",
+        "219/2013/TT-BTC stopped applying on 01/07/2025 (ended by 69/2025/TT-BTC); its text states the law before that date only.",
+        "146/2017/NĐ-CP may have stopped applying on 15/12/2025: it amends 12/2015/NĐ-CP, which ended then. Confirm it still applies.",
+        "25/2018/TT-BTC may have stopped applying on 15/12/2025: it guides 146/2017/NĐ-CP, which ended then. Confirm it still applies.",
+        "26/2015/TT-BTC may have stopped applying on 15/12/2025: it guides 12/2015/NĐ-CP, which ended then. Confirm it still applies."
+      ],
+      "cited_documents": [
+        "219/2013/TT-BTC",
+        "146/2017/NĐ-CP",
+        "219/2013/TT-BTC",
+        "25/2018/TT-BTC",
+        "26/2015/TT-BTC"
+      ],
+      "seconds": 5.0,
+      "verdict": "correct",
+      "reason": "The assistant correctly concludes that the company can be refunded VAT if conditions are met, aligning with the reference answer. It also correctly references the relevant regulations, including Circular 25/2018, and explains the key requirements such as input VAT tracking and the 300 million VND threshold."
+    },
+    {
+      "case_id": "L3",
+      "case_type": "leakage-free",
+      "uncertain": false,
+      "question": "Tháng 8/2025, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
+      "gold_answer": "No (new rule from 1/7/2025 excludes imported-then-exported goods)",
+      "status": "ANSWERED",
+      "answer": "Theo Điều 15, khoản a) Thông tư 48/2024/QH15, doanh nghiệp được hoàn thuế GTGT trong tháng hoặc quý khi có số thuế GTGT đầu vào chưa khấu trừ hết từ 300 triệu đồng trở lên, **trừ trường hợp hàng hóa nhập khẩu sau đó xuất khẩu sang nước khác**. Vì công ty bạn nhập khẩu hàng và xuất khẩu sang nước thứ ba, trường hợp này nằm trong ngoại lệ nên không được hưởng hoàn thuế GTGT dù số thuế chưa khấu trừ còn >300 triệu đồng.",
+      "uncertainties": [
+        "Nếu có các hàng hóa xuất khẩu khác (không phải hàng nhập khẩu) trong cùng kỳ, doanh nghiệp có thể được hoàn cho phần đó; câu hỏi không cung cấp thông tin này.",
+        "Có thể có quy định mới sau ngày 15/12/2025 (điểm kết thúc của một số văn bản cũ), nhưng đến tháng 8/2025 Thông tư 48/2024/QH15 vẫn còn hiệu lực.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force.",
+        "26/2015/TT-BTC may have stopped applying on 15/12/2025: it guides 12/2015/NĐ-CP, which ended then. Confirm it still applies.",
+        "146/2017/NĐ-CP may have stopped applying on 15/12/2025: it amends 12/2015/NĐ-CP, which ended then. Confirm it still applies.",
+        "25/2018/TT-BTC may have stopped applying on 15/12/2025: it guides 146/2017/NĐ-CP, which ended then. Confirm it still applies.",
+        "1 statement(s) from the model were omitted because the cited passages do not contain them."
+      ],
+      "cited_documents": [
+        "26/2015/TT-BTC",
+        "48/2024/QH15",
+        "146/2017/NĐ-CP",
+        "25/2018/TT-BTC",
+        "181/2025/NĐ-CP"
+      ],
+      "seconds": 4.5,
+      "verdict": "correct",
+      "reason": "The assistant correctly concludes that the company is not eligible for VAT refund because the goods are imported and then exported, which is explicitly excluded under the new rule. This matches the reference answer's conclusion."
+    },
+    {
+      "case_id": "L4",
+      "case_type": "leakage-free",
+      "uncertain": false,
+      "question": "Tháng 5/2026, công ty tôi mua hàng hóa trị giá 3 triệu đồng (đã gồm thuế) theo hình thức trả góp và trả bằng tiền mặt. Thuế GTGT đầu vào có được khấu trừ không?",
+      "gold_answer": "Yes - the non-cash payment requirement applies only from 5 million VND (incl. VAT), so no reduction is needed",
+      "status": "ANSWERED",
+      "answer": "Có, công ty được khấu trừ thuế GTGT đầu vào cho khoản mua hàng trị giá 3 triệu đồng (đã bao gồm thuế) dù trả bằng tiền mặt và theo hình thức trả góp. Vì giá trị mỗi lần mua dưới ngưỡng 5 triệu đồng, quy định không yêu cầu chứng từ thanh toán không dùng tiền mặt để được khấu trừ.",
+      "uncertainties": [
+        "Cần xác nhận rằng hợp đồng trả góp đã được lập bằng văn bản, dù không bắt buộc chứng từ thanh toán không dùng tiền mặt vì giá trị dưới 5 triệu đồng.",
+        "Xác nhận rằng khoản thanh toán tiền mặt đã được ghi nhận đầy đủ trong sổ kế toán và có chứng từ (biên lai, phiếu thu) để chứng minh.",
+        "The legal status of at least one cited document has not been verified; confirm it is still in force."
+      ],
+      "cited_documents": [
+        "48/2024/QH15",
+        "181/2025/NĐ-CP",
+        "181/2025/NĐ-CP",
+        "144/2026/NĐ-CP",
+        "181/2025/NĐ-CP"
+      ],
+      "seconds": 7.0,
+      "verdict": "correct",
+      "reason": "The assistant correctly concludes that input VAT is deductible because the transaction value is below the 5 million VND threshold, so non-cash payment is not required. The additional notes on documentation do not contradict the conclusion and align with the reference answer."
+    }
+  ]
+}
