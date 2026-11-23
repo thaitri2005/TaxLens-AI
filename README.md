@@ -12,7 +12,7 @@ question.
 
 **Live development deployment:**
 [taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io](https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io)
-(sign-in required; after idle, the first page takes up to a minute and the first question a few minutes)
+(sign-in required; after 10 idle minutes the API scales to zero, and the first question waits about a minute)
 
 ![Ask TaxLens: a cited answer to a Vietnamese question](docs/assets/pic3.png)
 

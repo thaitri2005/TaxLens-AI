@@ -15,7 +15,7 @@ Where TaxLens stands as of 23/11/2026. Rewritten as things change. What has been
 - **Access:** Tri, and Le Hung as a collaborator ([what each can reach](operations.md#access)).
 - **Airflow:** stopped. Keep it stopped, and the daily DAG paused, or the frozen corpus changes.
 - **Speed:** a warm answer takes about 5.5 s inside Azure: retrieval 4.0 s (keyword 3.1 s, vector
-  0.8 s) and the model 1.6 s, as the API now logs per request. The first question after 5 idle minutes
+  0.8 s) and the model 1.6 s, as the API now logs per request. The first question after 10 idle minutes
   waits for the API to start: image pull 13 s, then startup and model load.
 
 ## Results
@@ -116,7 +116,7 @@ L = more. Mark each done here when finished.
 | ~~7~~ | **Done 23/11/2026,** released in `f0f72b6`: answers use the period a question names. L2 now correct. Filtered searches resolve versions first (vector 10 s → 1.3 s) | | [Answers](#answers) |
 | ~~8~~ | **Done 23/11/2026,** released in `9f26f28`: the image holds only `model.safetensors`; 1.92 → 0.77 GB, image pull 35 s → 13 s on each cold start | | [Speed](retrieval-experiments.md#speed) |
 | ~~9~~ | **Done 23/11/2026.** Keyword search without a parallel worker on the 1-vCore database: 3.4 → 2.4 s, identical results. What remains is grouping about 750,000 term matches; faster needs an approximate method (with an evaluation) or a larger database | | [Speed](retrieval-experiments.md#speed) |
-| 10 | Keep the API warm longer after use: `cooldown_period_in_seconds = 1800` in the API template (`infra/terraform/main.tf`, default 300). An idle API replica (1 vCPU, 2 GiB) costs $0.000009 a second in East Asia, $0.032 an hour (retail price list, 23/11/2026): at most $0.016 per use, about $1 a month at two uses a day | S, **waiting for the owner** (cost) | The first question after 5 idle minutes waits for the API to start |
+| ~~10~~ | **Done 23/11/2026** (owner's choice: 10 minutes): the API stays up 10 idle minutes instead of 5 (`cooldown_period_in_seconds = 600`, `infra/terraform/main.tf`), about $0.005 more per use | | |
 | ~~11~~ | **Done 23/11/2026.** Questions, answers, and timings are logged in `question_logs`, and answers can be rated 👍/👎 with a comment; `export_question_log.py` lists rated and refused ones for review | | [Architecture](architecture.md) |
 | 12 | **Drafts ready, review waiting:** 18 cases in `gold_set_v1_drafts.csv` (CIT rates, PIT deductions and household business, late-payment interest, invoice timing, 0% VAT conditions, refund cap, a false premise, 3 leakage-free), each from the clause text and checked to parse. Hung or an expert must verify them before they count; then draft 16 more | M for drafts, L for review | 12 scored cases cannot separate methods or test the filter independently |
 | ~~13~~ | **Done 23/11/2026.** 14 duplicates merged by `merge_duplicate_documents.py` (321 passages removed, backed up), `corpus-v2.1` frozen, ended-document list rebuilt and loaded, baselines identical; 124/2026 confirmed, 2 numbers left for someone with the originals | | [Corpora](#corpora) |

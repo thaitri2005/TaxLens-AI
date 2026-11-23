@@ -249,6 +249,10 @@ resource "azurerm_container_app" "api" {
   template {
     min_replicas = 0
     max_replicas = 1
+    # Stay up 10 idle minutes (default 5) before scaling to zero, so a few questions in a row
+    # skip the cold start. Idle costs about $0.03 an hour at 1 vCPU and 2 GiB (East Asia,
+    # retail price list, 23/11/2026): at most about $0.005 more per use.
+    cooldown_period_in_seconds = 600
 
     container {
       name   = "api"
