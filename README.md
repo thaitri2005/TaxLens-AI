@@ -168,6 +168,7 @@ returns `PROVIDER_UNAVAILABLE`; search and the library still work.
 | [operations.md](docs/operations.md) | Local development, laptop access, growing the corpus, release, costs, logs, troubleshooting |
 | [evaluation-status.md](docs/evaluation-status.md) | **Start here:** what is live, results, known problems, to do |
 | [retrieval-experiments.md](docs/retrieval-experiments.md) | **Already tried:** read before any run, so nothing is paid for twice |
+| [changelog.md](docs/changelog.md) | What each working stint changed, newest first |
 | [corpus-inclusion.md](docs/corpus-inclusion.md) | Rules for what enters the corpus |
 | [annotation-guideline.md](docs/annotation-guideline.md) | How to label cases for the evaluation gold set |
 

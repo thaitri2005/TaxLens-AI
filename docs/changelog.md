@@ -1,0 +1,73 @@
+# Changelog
+
+What each working stint changed, newest first. Current state and the to-do list are in
+[evaluation-status.md](evaluation-status.md); every measurement is in
+[retrieval-experiments.md](retrieval-experiments.md).
+
+## 23/11/2026
+
+Live: code `02a3a36`, settings `62c7755`, corpus `corpus-v2.1`. To-do items 1-11, 13, 14, and 17 done;
+item 12 drafted and waiting for review; items 15-16 wait on it.
+
+### For people using TaxLens
+
+- **Ended law.** Answers leave out documents that a later document repeals or that the Ministry of
+  Finance records as expired (711 today), and flag about 124 that may have ended by inference
+  ([ended documents](retrieval.md#ended-documents)). Answers no longer rest on Law 13/2008,
+  Circular 32/2011, Circular 68/2019, or Decree 119/2018.
+- **Dated questions** ("Tháng 6/2023") are answered with the law of that period. Gold case L2 went from
+  wrong to correct.
+- **Evidence** is the first 5 passages with an article or page, of 20, so old documents without articles
+  no longer crowd out current law.
+- **Feedback.** Answers can be rated 👍/👎 with a comment; questions, answers, and timings are logged in
+  `question_logs`.
+- **Tags** in citations, search, and the library: "Ended 01/07/2022 · by 78/2021/TT-BTC" or "May have
+  ended …", in English and Vietnamese; "In force" is no longer shown beside a passed ending.
+
+### Speed
+
+| | Before | After |
+| --- | --- | --- |
+| Warm answer to a dated question | 62 s at worst | about 5 s |
+| Image pull at cold start | 35 s (1.92 GB) | 13 s (0.77 GB) |
+| Keyword search, 29-term question | 11 s | 2.4 s |
+| Retrieval evaluation run | about 4.5 min | about 3.2 min |
+| API scale-to-zero after idle | 5 min | 10 min (owner's choice) |
+
+Causes found by measuring, not guessing: filters joined into the passage scans led to bad plans (now the
+versions a filter keeps are read first); a parallel worker on the 1-vCore database; the image held the
+embedding model four times; TensorFlow loaded with the model on laptops.
+
+### Quality and evaluation
+
+- `grade_answers.py` grades the site's answers against the gold answers: 9 of 15 by the judge model,
+  8 when read by hand ([answers](evaluation-status.md#answers)).
+- Cautious ended-document filter on the 12 gold cases: recall 0.31, 0.42, 0.45 at K = 5, 10, 20, against
+  0.10, 0.30, 0.41 without.
+- The explicit repeal rule now reads lists split across passages and "tiếp tục có hiệu lực đến ngày"
+  clauses: 29 more documents end.
+- `corpus-v2.1`: 14 duplicated documents merged by a reviewed plan, with a backup of what was removed;
+  recall unchanged. 124/2026/TT-BTC confirmed and dated.
+- 18 draft gold cases from the clause text in `gold_set_v1_drafts.csv`, unverified and not scored.
+
+### Engineering
+
+- Each answer logs its timings (version list, keyword and vector queries, model, tokens) in the API logs.
+- Web: `page.tsx` split into `lib/` and `components/` without code changes; ESLint and 12 Vitest tests run
+  in CI. Backend tests 113 → 189.
+- Security: both CSV exports guard against formula injection (found by the automated review).
+- Releases run from the GitHub CLI; a settings-only release skips the image build.
+
+### Incidents
+
+- An 8-minute evaluation run was lost because the report was uploaded before it was saved; it now saves
+  first.
+- One push failed CI after a signature change tested only in part; the full suite now runs before pushes.
+- One release failed at Azure sign-in (transient); the retry passed.
+- Polling CI through the unauthenticated GitHub API hit its hourly limit; the GitHub CLI is used instead.
+
+### Cost
+
+A few US cents in model calls (two grading runs, a handful of live questions). Evaluations and database
+work are free. Releases and CI stay inside the free GitHub Actions minutes. The 10-minute cooldown adds at
+most about $0.005 per use.

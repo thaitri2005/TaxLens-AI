@@ -1,7 +1,8 @@
 # Status
 
 Where TaxLens stands as of 23/11/2026. Rewritten as things change. What has been tried is in
-[retrieval-experiments.md](retrieval-experiments.md): read it before running anything.
+[retrieval-experiments.md](retrieval-experiments.md): read it before running anything. What each stint
+changed is in [changelog.md](changelog.md).
 
 ## What is live
 
@@ -125,8 +126,20 @@ L = more. Mark each done here when finished.
 | 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, **waits for item 12's reviewed cases** | Half the hardest misses need it |
 | ~~17~~ | **Done 23/11/2026.** `page.tsx` (890 lines) split without code changes into `lib/` (types, copy, format, api) and `components/` (tags, answer, documents, layout); 12 Vitest tests for the helpers and tags run in CI (`npm test`) | | |
 
-**For people, not code:** a tax expert reviews the filter's inferred rules and the 178 documents the
-ministry says are in force but our list ends; tell the professor that all earlier results had the TCVN3
-bug (hybrid fell from 0.41 to 0.30 before the filter brought it to 0.45); the owner removes stale
-database firewall rules (old images are cleared; leave `CreditScorecardWOEIV`, which serves another
-project); install `gh` on the laptop; delete the merged local branches.
+### For people, not code
+
+Waiting on a person (23/11/2026); code items above that depend on one say so.
+
+1. **Review the 18 draft gold cases** in `data/evaluation/gold_set_v1_drafts.csv` (Le Hung or a tax
+   expert), following [the guideline](annotation-guideline.md); then draft 16 more. Unblocks items 15-16
+   and an independent test of the ended-document filter.
+2. **Check two document numbers against the originals:** `93/1998/QĐ/TCKT` (its header reads
+   `91/1998/QĐ-BNN-BVTV`) and `25/2026/TT-BTC` (its OCR'd header reads `85/2026`).
+3. **Tax expert:** review the inferred ending rules (guidance, amendment) and the 178 documents the
+   ministry says are in force but our list ends.
+4. **Tell the professor:** all earlier results had the TCVN3 bug (hybrid fell from 0.41 to 0.30 before the
+   filter brought it to 0.45).
+5. **Azure (owner):** remove stale database firewall rules. Old images are cleared; leave
+   `CreditScorecardWOEIV`, which serves another project.
+6. **Owner's laptop:** the user `Path` has entries joined by spaces instead of separate lines, which hides
+   `winget`, Terraform, and others from shells.
