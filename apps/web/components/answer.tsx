@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ThumbDownIcon, ThumbUpIcon } from "./icons";
 import { CitationLine } from "./tags";
 import { request } from "../lib/api";
 import type { Copy } from "../lib/copy";
@@ -54,15 +55,15 @@ export function AnswerFeedback({ questionId, copy }: { questionId: string; copy:
     }
   }
 
-  if (sent) return <p className="answer-feedback">{copy.feedback.thanks}</p>;
+  if (sent) return <p className="answer-feedback" role="status">{copy.feedback.thanks}</p>;
   return <div className="answer-feedback">
     <span>{copy.feedback.question}</span>
-    <button type="button" className={rating === "up" ? "selected" : ""} onClick={() => { setRating("up"); void send("up"); }}>👍 {copy.feedback.up}</button>
-    <button type="button" className={rating === "down" ? "selected" : ""} onClick={() => setRating("down")}>👎 {copy.feedback.down}</button>
+    <button type="button" aria-pressed={rating === "up"} className={rating === "up" ? "selected" : ""} onClick={() => { setRating("up"); void send("up"); }}><ThumbUpIcon /> {copy.feedback.up}</button>
+    <button type="button" aria-pressed={rating === "down"} className={rating === "down" ? "selected" : ""} onClick={() => setRating("down")}><ThumbDownIcon /> {copy.feedback.down}</button>
     {rating === "down" && <form onSubmit={event => { event.preventDefault(); void send("down", comment.trim()); }}>
-      <input value={comment} maxLength={1000} aria-label={copy.feedback.placeholder} placeholder={copy.feedback.placeholder} onChange={event => setComment(event.target.value)} />
+      <input name="comment" autoComplete="off" value={comment} maxLength={1000} aria-label={copy.feedback.placeholder} placeholder={copy.feedback.placeholder} onChange={event => setComment(event.target.value)} />
       <button type="submit">{copy.feedback.send}</button>
     </form>}
-    {error && <small>{error}</small>}
+    {error && <small role="alert">{error}</small>}
   </div>;
 }

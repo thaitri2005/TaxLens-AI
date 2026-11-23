@@ -63,6 +63,11 @@ export const COPY = {
     indexedPassages: "Indexed passages", documentPassage: "Document passage", pageLabel: "Page", pageUnavailable: "Page unavailable",
     readPassage: "Read indexed passage", noChunks: "No indexed passages", noChunksText: "This document has not produced searchable passages yet.",
     admin: "Admin", signOut: "Sign out", brandTagline: "Regulatory intelligence",
+    skipToContent: "Skip to content", languageLabel: "Language", searching: "Searching…", footerTagline: "Evidence first",
+    announce: {
+      passages: (count: number) => `${count} matching passages`, noPassages: "No matching passages",
+      answer: (status: string): string => status === "ANSWERED" ? "Answer ready" : "No answer: see the closest passages", asking: "Working on an answer…",
+    },
   },
   vi: {
     search: "Tìm kiếm", ask: "Hỏi TaxLens", documents: "Văn bản",
@@ -128,6 +133,11 @@ export const COPY = {
     indexedPassages: "Các đoạn trích đã xử lý", documentPassage: "Đoạn trích văn bản", pageLabel: "Trang", pageUnavailable: "Chưa ghi nhận số trang",
     readPassage: "Xem đoạn trích", noChunks: "Chưa có đoạn trích", noChunksText: "Văn bản này chưa có đoạn trích để tìm kiếm.",
     admin: "Quản trị", signOut: "Đăng xuất", brandTagline: "Thông tin pháp lý",
+    skipToContent: "Bỏ qua đến nội dung", languageLabel: "Ngôn ngữ", searching: "Đang tìm…", footerTagline: "Bằng chứng trước tiên",
+    announce: {
+      passages: (count: number) => `${count} đoạn trích phù hợp`, noPassages: "Không có đoạn trích phù hợp",
+      answer: (status: string): string => status === "ANSWERED" ? "Đã có câu trả lời" : "Chưa trả lời được: xem các đoạn trích gần nhất", asking: "Đang soạn câu trả lời…",
+    },
   },
 };
 

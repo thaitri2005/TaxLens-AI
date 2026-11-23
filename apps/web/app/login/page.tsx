@@ -28,9 +28,9 @@ export default function LoginPage() {
         <h1>Sign in</h1>
         <p>Sign in to search Vietnamese tax regulations and review cited answers.</p>
         <form onSubmit={submit} className="auth-form">
-          <label>Username<input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" required /></label>
-          <label>Password<input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" required /></label>
-          {error && <p className="auth-error">{error}</p>}
+          <label>Username<input name="username" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" autoCapitalize="none" spellCheck={false} required /></label>
+          <label>Password<input name="password" value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" required /></label>
+          {error && <p className="auth-error" role="alert">{error}</p>}
           <button type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
         </form>
       </section>

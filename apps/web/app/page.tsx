@@ -2,6 +2,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { AnswerCard } from "../components/answer";
+import { SearchIcon, SendIcon } from "../components/icons";
 import { DocumentDetailView, FacetGroups, OverviewPanel, Pager } from "../components/documents";
 import { Empty, Heading, ResultState } from "../components/layout";
 import { CitationLine, EndingTag, StatusTag } from "../components/tags";
@@ -49,6 +50,11 @@ export default function Home() {
   const listTop = useRef<HTMLDivElement>(null);
   const searchTop = useRef<HTMLDivElement>(null);
   const copy = COPY[language];
+
+  // Screen readers, hyphenation, and spell-checking follow the page's language.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
   const numberFormat = new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US");
   const listQuery = documentListQuery(documentFilters, documentPageIndex);
 
@@ -232,32 +238,41 @@ export default function Home() {
   ];
   const shownFilters = activeFilters.filter(([, label]) => label);
 
+  // One short, polite announcement when results or an answer arrive, instead of reading them out.
+  const announcement = view === "search"
+    ? searchBusy ? copy.searching : searchResults ? (searchResults.length ? copy.announce.passages(searchResults.length) : copy.announce.noPassages) : ""
+    : view === "ask"
+      ? answerBusy ? copy.announce.asking : answer ? copy.announce.answer(answer.status) : ""
+      : "";
+
   return <>
+    <a className="skip-link" href="#main">{copy.skipToContent}</a>
     <header className="topbar">
-      <a className="brand" href="#search"><img className="brand-mark" src="/logo.svg" alt="" width={34} height={34} /><span><strong>TaxLens</strong><small>{copy.brandTagline}</small></span></a>
+      <a className="brand" href="#search"><img className="brand-mark" src="/logo.svg" alt="" width={34} height={34} /><span><strong translate="no">TaxLens</strong><small>{copy.brandTagline}</small></span></a>
       <div className="topbar-actions">
-        <div className="language-toggle" aria-label="Language">
-          <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
-          <button className={language === "vi" ? "active" : ""} onClick={() => setLanguage("vi")}>VI</button>
+        <div className="language-toggle" role="group" aria-label={copy.languageLabel}>
+          <button type="button" lang="en" aria-label="English" aria-pressed={language === "en"} className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
+          <button type="button" lang="vi" aria-label="Tiếng Việt" aria-pressed={language === "vi"} className={language === "vi" ? "active" : ""} onClick={() => setLanguage("vi")}>VI</button>
         </div>
         {session?.user.role === "admin" && <a className="topbar-link" href="/admin">{copy.admin}</a>}
         <button className="sign-out-button" type="button" onClick={() => signOut({ redirect: false }).then(() => window.location.assign("/login"))}>{copy.signOut}</button>
       </div>
     </header>
-    <main className={`shell ${language === "vi" ? "language-vi" : ""}`}>
+    <main id="main" tabIndex={-1} className="shell">
       <section className="hero"><p className="eyebrow">{copy.heroEyebrow}</p><h1>{copy.heroTitleOne}<br /><em>{copy.heroTitleTwo}</em></h1><p className="hero-copy">{copy.heroCopy}</p></section>
       <nav className="tabs" aria-label="Workspace views">
-        {tabs.map(([key, label]) => <button key={key} className={`tab ${view === key ? "active" : ""}`} onClick={() => setView(key)}>{label}</button>)}
+        {tabs.map(([key, label]) => <button key={key} type="button" aria-current={view === key ? "page" : undefined} className={`tab ${view === key ? "active" : ""}`} onClick={() => setView(key)}>{label}</button>)}
       </nav>
+      <p className="visually-hidden" role="status" aria-live="polite">{announcement}</p>
 
       {view === "search" && <section className="view">
         <Heading eyebrow={copy.retrievalEyebrow} title={copy.searchTitle} chip={copy.hybrid} />
         <form onSubmit={search} className="search-form">
-          <label className="search-box">
-            <span>⌕</span>
-            <input value={searchQuery} onChange={event => setSearchQuery(event.target.value)} required maxLength={500} placeholder={copy.searchPlaceholder} />
-            <button type="submit">{searchBusy ? "…" : copy.searchButton}</button>
-          </label>
+          <div className="search-box">
+            <SearchIcon size={22} />
+            <input type="search" name="q" value={searchQuery} onChange={event => setSearchQuery(event.target.value)} required maxLength={500} autoComplete="off" enterKeyHint="search" placeholder={copy.searchPlaceholder} aria-label={copy.searchTitle} />
+            <button type="submit" disabled={searchBusy} aria-busy={searchBusy}>{searchBusy ? copy.searching : copy.searchButton}</button>
+          </div>
           <div className="form-row">
             <label>{copy.mode}
               <select value={searchMode} onChange={event => setSearchMode(event.target.value)}>
@@ -311,8 +326,8 @@ export default function Home() {
         <Heading eyebrow={copy.askEyebrow} title={copy.askTitle} chip={copy.citedResponse} />
         <form onSubmit={ask} className="chat-form">
           <div className="chat-bar">
-            <input type="text" value={question} onChange={event => setQuestion(event.target.value)} required maxLength={1000} placeholder={copy.askPlaceholder} aria-label={copy.askPlaceholder} />
-            <button type="submit" aria-label={copy.askButton} disabled={answerBusy}>{answerBusy ? "…" : "↑"}</button>
+            <input type="text" name="question" value={question} onChange={event => setQuestion(event.target.value)} required maxLength={1000} autoComplete="off" enterKeyHint="send" placeholder={copy.askPlaceholder} aria-label={copy.askPlaceholder} />
+            <button type="submit" aria-label={copy.askButton} disabled={answerBusy} aria-busy={answerBusy}>{answerBusy ? "…" : <SendIcon size={18} />}</button>
           </div>
           <div className="chat-hint">{copy.pressEnter}</div>
         </form>
@@ -323,7 +338,7 @@ export default function Home() {
 
       {view === "documents" && <section className="view">
         {selectedDocument ? <>
-          <button className="back-button" onClick={closeDocument}>← {isAdmin ? copy.back : copy.backToSearch}</button>
+          <button className="back-button" type="button" onClick={closeDocument}>← {isAdmin ? copy.back : copy.backToSearch}</button>
           {documentBusy ? <Empty title={copy.working} text={copy.readingDocument} />
             : documentError ? <div className="error-state">{documentError}</div>
             : documentDetail && <DocumentDetailView detail={documentDetail} chunks={documentChunks} copy={copy} numberFormat={numberFormat} onLoadMore={loadMoreChunks} loadingMore={chunksBusy} />}
@@ -334,11 +349,11 @@ export default function Home() {
             : <OverviewPanel overview={overview} filters={documentFilters} copy={copy} numberFormat={numberFormat} onFilter={updateDocumentFilters} />}
 
           <form className="library-search" onSubmit={findDocuments}>
-            <label className="search-box">
-              <span>⌕</span>
-              <input value={documentQueryInput} onChange={event => setDocumentQueryInput(event.target.value)} maxLength={200} placeholder={copy.searchDocuments} aria-label={copy.searchDocuments} />
+            <div className="search-box">
+              <SearchIcon size={22} />
+              <input type="search" name="document" value={documentQueryInput} onChange={event => setDocumentQueryInput(event.target.value)} maxLength={200} autoComplete="off" enterKeyHint="search" placeholder={copy.searchDocuments} aria-label={copy.searchDocuments} />
               <button type="submit">{copy.searchDocumentsButton}</button>
-            </label>
+            </div>
           </form>
           {shownFilters.length > 0 && <div className="active-filters">
             <span>{copy.filteredBy}</span>
@@ -376,6 +391,6 @@ export default function Home() {
         </>}
       </section>}
     </main>
-    <footer><span>TaxLens AI</span><span>Evidence first</span></footer>
+    <footer><span translate="no">TaxLens AI</span><span>{copy.footerTagline}</span></footer>
   </>;
 }
