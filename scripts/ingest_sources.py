@@ -80,8 +80,7 @@ def main() -> None:
         if not arguments.include_non_tax:
             relevant = [document for document in discovered if is_tax_relevant(document)]
             print(
-                f"Kept {len(relevant)} of {len(discovered)} discovered document(s) "
-                "as tax-related"
+                f"Kept {len(relevant)} of {len(discovered)} discovered document(s) as tax-related"
             )
             discovered = relevant
         documents = discovered[: arguments.limit]

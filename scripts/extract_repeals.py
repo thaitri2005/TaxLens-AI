@@ -47,9 +47,12 @@ def main() -> None:
     recorded: dict[str, date | None] = {}
     issued_on: dict[str, date | None] = {}
     with SessionLocal() as session:
-        titles = dict(
-            session.execute(select(LegalDocument.document_number, LegalDocument.title)).all()
-        )
+        titles: dict[str, str] = {
+            number: title
+            for number, title in session.execute(
+                select(LegalDocument.document_number, LegalDocument.title)
+            ).all()
+        }
         statement = (
             select(
                 LegalDocument.document_number,

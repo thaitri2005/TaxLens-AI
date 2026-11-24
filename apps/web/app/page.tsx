@@ -1,5 +1,6 @@
 "use client";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
 import { AnswerCard } from "../components/answer";
 import { SearchIcon, SendIcon } from "../components/icons";
@@ -103,11 +104,6 @@ export default function Home() {
     if (view === "documents" && !isAdmin && !selectedDocument) setView("search");
   }, [view, isAdmin, selectedDocument]);
 
-  useEffect(() => {
-    // A changed filter reruns the current search from its first page.
-    if (searchedQuery) void runSearch(searchedQuery, 0);
-  }, [searchFilters]);
-
   function updateDocumentFilters(change: Partial<DocumentFilters>) {
     setDocumentFilters(previous => ({ ...previous, ...change }));
     setDocumentPageIndex(0);
@@ -156,16 +152,16 @@ export default function Home() {
   // One page of passages at a time. The first page also looks up documents whose number or
   // title matches, the same lookup as the Documents tab, so "219/2013" finds the circular
   // itself and not only passages that mention it.
-  async function runSearch(query: string, pageIndex: number) {
+  async function runSearch(query: string, pageIndex: number, filters: FacetFilters = searchFilters) {
     setSearchBusy(true); setSearchError("");
     const offset = pageIndex * SEARCH_PAGE_SIZE;
     try {
       const params = new URLSearchParams({ q: query, mode: searchMode, limit: String(SEARCH_PAGE_SIZE + 1), offset: String(offset) });
       const documentParams = new URLSearchParams({ q: query, limit: String(SEARCH_DOCUMENT_MATCHES) });
       for (const target of [params, documentParams]) {
-        if (searchFilters.source) target.set("source_name", searchFilters.source);
-        if (searchFilters.kind) target.set("kind", searchFilters.kind);
-        if (searchFilters.status) target.set("legal_status", searchFilters.status);
+        if (filters.source) target.set("source_name", filters.source);
+        if (filters.kind) target.set("kind", filters.kind);
+        if (filters.status) target.set("legal_status", filters.status);
       }
       const [results, documents] = await Promise.all([
         request<SearchHit[]>(`/search?${params}`),
@@ -196,8 +192,15 @@ export default function Home() {
     void openDocument(document);
   }
 
+  // A changed filter reruns the current search from its first page. The new filters are
+  // passed along because state set here is not visible until the next render.
+  function applySearchFilters(filters: FacetFilters) {
+    setSearchFilters(filters);
+    if (searchedQuery) void runSearch(searchedQuery, 0, filters);
+  }
+
   function updateSearchFilters(change: Partial<FacetFilters>) {
-    setSearchFilters(previous => ({ ...previous, ...change }));
+    applySearchFilters({ ...searchFilters, ...change });
   }
 
   function closeDocument() {
@@ -248,7 +251,7 @@ export default function Home() {
   return <>
     <a className="skip-link" href="#main">{copy.skipToContent}</a>
     <header className="topbar">
-      <a className="brand" href="#search"><img className="brand-mark" src="/logo.svg" alt="" width={34} height={34} /><span><strong translate="no">TaxLens</strong><small>{copy.brandTagline}</small></span></a>
+      <a className="brand" href="#search"><Image className="brand-mark" src="/logo.svg" alt="" width={34} height={34} priority /><span><strong translate="no">TaxLens</strong><small>{copy.brandTagline}</small></span></a>
       <div className="topbar-actions">
         <div className="language-toggle" role="group" aria-label={copy.languageLabel}>
           <button type="button" lang="en" aria-label="English" aria-pressed={language === "en"} className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
@@ -285,7 +288,7 @@ export default function Home() {
         </form>
         {overview && <FacetGroups overview={overview} filters={searchFilters} copy={copy} numberFormat={numberFormat} onFilter={updateSearchFilters} />}
         {(searchFilters.source || searchFilters.kind || searchFilters.status) && <div className="active-filters">
-          <button className="link-button" type="button" onClick={() => setSearchFilters(NO_FACETS)}>{copy.clearFilters}</button>
+          <button className="link-button" type="button" onClick={() => applySearchFilters(NO_FACETS)}>{copy.clearFilters}</button>
         </div>}
         <ResultState error={searchError} hasResults={searchResults !== null} emptyTitle={copy.searchCorpus} emptyText={copy.searchHelp} />
         {searchPageIndex === 0 && searchDocuments && searchDocuments.items.length > 0 && <div className="search-documents">

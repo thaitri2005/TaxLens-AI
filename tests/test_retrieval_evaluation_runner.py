@@ -2,15 +2,17 @@ from taxlens.evaluation.retrieval_runner import evaluation_status, metrics_summa
 
 
 def test_evaluation_status_separates_missing_and_partial_coverage() -> None:
-    assert evaluation_status(
-        {"expected_document_count": 3, "embedded_document_count": 0}
-    ) == "not_evaluable"
-    assert evaluation_status(
-        {"expected_document_count": 3, "embedded_document_count": 2}
-    ) == "partial_coverage"
-    assert evaluation_status(
-        {"expected_document_count": 3, "embedded_document_count": 3}
-    ) == "ready"
+    assert (
+        evaluation_status({"expected_document_count": 3, "embedded_document_count": 0})
+        == "not_evaluable"
+    )
+    assert (
+        evaluation_status({"expected_document_count": 3, "embedded_document_count": 2})
+        == "partial_coverage"
+    )
+    assert (
+        evaluation_status({"expected_document_count": 3, "embedded_document_count": 3}) == "ready"
+    )
 
 
 def test_metrics_summary_aggregates_a_selected_k() -> None:

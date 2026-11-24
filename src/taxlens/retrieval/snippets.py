@@ -11,9 +11,7 @@ _SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?;:])\s+|\n+")
 def folded_words(text: str) -> set[str]:
     """Distinct words without diacritics, so OCR text that lost accents still compares."""
 
-    return {
-        word for word in re.findall(r"\w+", fold_vietnamese(text).casefold()) if len(word) > 1
-    }
+    return {word for word in re.findall(r"\w+", fold_vietnamese(text).casefold()) if len(word) > 1}
 
 
 def build_excerpt(content: str, query: str, maximum_length: int = 300) -> str:

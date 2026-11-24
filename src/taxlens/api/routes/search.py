@@ -88,9 +88,7 @@ def search(
         issuing_agency=issuing_agency,
         effective_from=effective_from,
         effective_to=effective_to,
-        document_types=(
-            tuple(document_types_of_kind(session, kind)) if kind is not None else None
-        ),
+        document_types=(tuple(document_types_of_kind(session, kind)) if kind is not None else None),
     )
     if mode == "keyword":
         results = keyword_search_chunks(session, q, filters, window)

@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from list_portal_candidates import ASSEMBLY, NORMATIVE
 
-from taxlens.ingestion.connectors import GovernmentPortalSearch, is_tax_title
+from taxlens.ingestion.connectors import GovernmentPortalSearch, SourceDocument, is_tax_title
 from taxlens.retrieval.repeals import normalize
 
 CANDIDATES = Path("data/evaluation/corpus/candidates-v2.json")
@@ -47,7 +47,7 @@ def main() -> None:
     still_capped: list[str] = []
     failed: list[str] = []
 
-    def search(year: str, issuer: str, keyword: str) -> list:
+    def search(year: str, issuer: str, keyword: str) -> list[SourceDocument]:
         for attempt in range(1, 4):
             try:
                 rows, at_cap = portal._post(category="0", year=year, issuer=issuer, keyword=keyword)
@@ -75,7 +75,7 @@ def main() -> None:
     remaining += data.get("failed", [])
     for item in remaining:
         year, issuer, keyword = item.split("/", 2)
-        topics = FEE_TOPICS if keyword == "lệ phí" else TAX_TOPICS
+        topics: tuple[str, ...] = FEE_TOPICS if keyword == "lệ phí" else TAX_TOPICS
         if keyword not in ("thuế", "lệ phí"):
             topics = (keyword,)
         for topic in topics:

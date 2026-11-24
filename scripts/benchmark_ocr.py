@@ -54,9 +54,9 @@ def main() -> None:
         artifact_key = version.raw_artifact_key
     raw_content = get_object_storage().get_bytes(artifact_key)
     reference_pages = extract_pages(raw_content, artifact_key)
-    indices = [
-        index for index, page in enumerate(reference_pages) if _has_usable_text([page])
-    ][: arguments.pages]
+    indices = [index for index, page in enumerate(reference_pages) if _has_usable_text([page])][
+        : arguments.pages
+    ]
     if not indices:
         parser.exit(1, "The document has no usable text layer to compare against\n")
 

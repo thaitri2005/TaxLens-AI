@@ -48,7 +48,10 @@ class AzureBlobStorage:
     def get_bytes(self, key: str) -> bytes:
         return cast(
             bytes,
-            self._container_for_key(key).get_blob_client(self._blob_name(key)).download_blob().readall(),
+            self._container_for_key(key)
+            .get_blob_client(self._blob_name(key))
+            .download_blob()
+            .readall(),
         )
 
     def exists(self, key: str) -> bool:
@@ -66,9 +69,9 @@ class AzureBlobStorage:
         )
 
     def get_metadata(self, key: str) -> ObjectMetadata:
-        properties = self._container_for_key(key).get_blob_client(
-            self._blob_name(key)
-        ).get_blob_properties()
+        properties = (
+            self._container_for_key(key).get_blob_client(self._blob_name(key)).get_blob_properties()
+        )
         return ObjectMetadata(
             key=key,
             content_type=properties.content_settings.content_type,

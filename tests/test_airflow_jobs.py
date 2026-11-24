@@ -9,9 +9,7 @@ import pytest
 JOBS_MODULE = Path(__file__).parents[1] / "airflow/dags/taxlens_jobs.py"
 
 
-def _load_jobs_module(
-    monkeypatch: pytest.MonkeyPatch, handler: Any
-) -> ModuleType:
+def _load_jobs_module(monkeypatch: pytest.MonkeyPatch, handler: Any) -> ModuleType:
     spec = importlib.util.spec_from_file_location("taxlens_jobs", JOBS_MODULE)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)

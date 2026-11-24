@@ -110,9 +110,13 @@ def main() -> None:
             )
             located = [result for result in candidates if has_structural_locator(result)]
             chosen = prefer_not_ended(located or candidates, day)[:EVIDENCE]
-            added = [extra for result in chosen for extra in expand(session, result, arguments.window)]
+            added = [
+                extra for result in chosen for extra in expand(session, result, arguments.window)
+            ]
             provisions = case["essential_provisions"]
-            before = provision_ranks(evaluation._passage_locators(session, chosen, part_counts), provisions)
+            before = provision_ranks(
+                evaluation._passage_locators(session, chosen, part_counts), provisions
+            )
             after = provision_ranks(
                 evaluation._passage_locators(session, chosen + added, part_counts), provisions
             )
@@ -120,7 +124,9 @@ def main() -> None:
                 "case_id": case["case_id"],
                 "found_before": [rank is not None for rank in before],
                 "found_after": [rank is not None for rank in after],
-                "evidence_characters": sum(len(r.chunk.content[: arguments.window]) for r in chosen),
+                "evidence_characters": sum(
+                    len(r.chunk.content[: arguments.window]) for r in chosen
+                ),
                 "added_characters": sum(len(r.chunk.content) for r in added),
             }
             rows.append(row)

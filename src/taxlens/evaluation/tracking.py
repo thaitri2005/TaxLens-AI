@@ -86,9 +86,7 @@ class MlflowRestTracker(ExperimentTracker):
         response.raise_for_status()
 
     def log_params(self, params: Mapping[str, str | int | float | bool]) -> None:
-        self._log_batch(
-            params=[{"key": key, "value": str(value)} for key, value in params.items()]
-        )
+        self._log_batch(params=[{"key": key, "value": str(value)} for key, value in params.items()])
 
     def log_metrics(self, metrics: Mapping[str, float]) -> None:
         self._log_batch(

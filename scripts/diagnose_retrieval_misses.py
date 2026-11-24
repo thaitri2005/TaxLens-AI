@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal
@@ -68,8 +69,10 @@ def main() -> None:
                     rows.append({**row, "cause": "no_passage"})
                     continue
                 row["truncated"] = all(tokens > max_tokens for _, tokens, _ in holding)
-                if as_of and case_date and all(
-                    start is not None and start > case_date for _, _, start in holding
+                if (
+                    as_of
+                    and case_date
+                    and all(start is not None and start > case_date for _, _, start in holding)
                 ):
                     rows.append({**row, "cause": "excluded_by_date"})
                     continue
@@ -114,7 +117,9 @@ def main() -> None:
     )
 
 
-def _holding_passages(session, places: list[list[str | None]]) -> list[tuple[Any, int, Any]]:
+def _holding_passages(
+    session: Session, places: list[list[str | None]]
+) -> list[tuple[Any, int, Any]]:
     """``(chunk id, tokens, known start date)`` of every passage holding one of the places."""
 
     held = []

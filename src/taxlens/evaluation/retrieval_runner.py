@@ -15,18 +15,12 @@ def metrics_summary(reports: list[dict[str, Any]], k: int) -> dict[str, Any]:
     return {
         "case_count": len(metrics),
         "mean_hit_at_k": sum(bool(item["hit_at_k"]) for item in metrics) / len(metrics),
-        "mean_precision_at_k": sum(
-            float(item["precision_at_k"]) for item in metrics
-        )
+        "mean_precision_at_k": sum(float(item["precision_at_k"]) for item in metrics)
         / len(metrics),
-        "mean_recall_at_k": sum(float(item["recall_at_k"]) for item in metrics)
+        "mean_recall_at_k": sum(float(item["recall_at_k"]) for item in metrics) / len(metrics),
+        "mean_reciprocal_rank": sum(float(item["reciprocal_rank"]) for item in metrics)
         / len(metrics),
-        "mean_reciprocal_rank": sum(
-            float(item["reciprocal_rank"]) for item in metrics
-        )
-        / len(metrics),
-        "mean_ndcg_at_k": sum(float(item["ndcg_at_k"]) for item in metrics)
-        / len(metrics),
+        "mean_ndcg_at_k": sum(float(item["ndcg_at_k"]) for item in metrics) / len(metrics),
     }
 
 

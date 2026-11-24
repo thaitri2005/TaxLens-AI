@@ -46,7 +46,7 @@ def test_official_connector_follows_bounded_catalog_pagination() -> None:
     }
 
     def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, text=pages[ str(request.url) ])
+        return httpx.Response(200, text=pages[str(request.url)])
 
     connector = OfficialPortalConnector(
         source_name="test-source",

@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from taxlens.db import SessionLocal
 from taxlens.legal_data.models import DocumentVersion, LegalDocument
@@ -140,7 +141,7 @@ def main() -> None:
     print(output)
 
 
-def _document_index(session) -> tuple[dict[str, str], list[tuple[str, str, date | None]]]:
+def _document_index(session: Session) -> tuple[dict[str, str], list[tuple[str, str, date | None]]]:
     """Folded number → number, and ``(folded title, number, issue date)`` of each law."""
 
     rows = session.execute(
@@ -182,7 +183,11 @@ def _resolve(
     return None
 
 
-def _reach(places, targets, sources) -> tuple[str, str | None]:
+def _reach(
+    places: list[list[str | None]],
+    targets: set[tuple[str, str | None, str | None]],
+    sources: dict[tuple[str, str | None, str | None], str],
+) -> tuple[str, str | None]:
     found: dict[str, str | None] = {}
     for document, article, clause in places:
         base = clause.rstrip("abcdefghijklmnopqrstuvwxyz") if clause else None

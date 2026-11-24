@@ -68,9 +68,7 @@ def _curated_document_numbers() -> set[str]:
     return {entry["document_number"] for entry in json.loads(CURATED_MANIFEST.read_text("utf-8"))}
 
 
-def _documents_to_remove(
-    session: Session, curated: set[str]
-) -> list[tuple[LegalDocument, str]]:
+def _documents_to_remove(session: Session, curated: set[str]) -> list[tuple[LegalDocument, str]]:
     seed_documents = set(
         session.scalars(
             select(DocumentVersion.document_id)
@@ -110,7 +108,9 @@ def _delete_document(session: Session, document: LegalDocument) -> None:
         if source_id is not None
     }
     chunk_ids = select(DocumentChunk.id).where(DocumentChunk.document_version_id.in_(version_ids))
-    session.execute(delete(DocumentEmbedding).where(DocumentEmbedding.document_chunk_id.in_(chunk_ids)))
+    session.execute(
+        delete(DocumentEmbedding).where(DocumentEmbedding.document_chunk_id.in_(chunk_ids))
+    )
     session.execute(delete(DocumentChunk).where(DocumentChunk.document_version_id.in_(version_ids)))
     session.execute(delete(ProcessingJob).where(ProcessingJob.document_version_id.in_(version_ids)))
     session.execute(

@@ -40,9 +40,7 @@ def test_enacting_clause_is_not_a_reference():
 
 def test_law_name_wrapped_across_lines():
     text = "khoản 1 Điều 2 của Luật Thuế tiêu\nthụ đặc biệt là:"
-    assert find_references(text) == [
-        LegalReference("2", "1", law_name="thue tieu thu dac biet")
-    ]
+    assert find_references(text) == [LegalReference("2", "1", law_name="thue tieu thu dac biet")]
 
 
 def test_article_heading_is_not_a_reference():

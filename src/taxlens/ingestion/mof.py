@@ -105,8 +105,7 @@ class MofLegalDocumentConnector:
         documents = [
             document
             for record in records.values()
-            if _is_wanted(record, options)
-            and (document := _to_source_document(record)) is not None
+            if _is_wanted(record, options) and (document := _to_source_document(record)) is not None
         ]
         logger.info(
             "Ministry of Finance: kept %d of %d records (normative documents%s with a "

@@ -323,6 +323,8 @@ _ISSUED_DATE_SPAN_PATTERN = _span_pattern("issued-date")
 def _html_text(fragment: str) -> str:
     text = re.sub(r"<[^>]+>", " ", fragment)
     return " ".join(html_module.unescape(text).split())
+
+
 _ISSUING_AGENCIES = {
     "government-portal": "Government of Vietnam",
     "mof-vbpq": "Ministry of Finance",
@@ -391,7 +393,7 @@ def _extract_links(html: str) -> Iterator[tuple[str, str, str]]:
 
 def _is_pagination_link(href: str, title: str, attributes: str) -> bool:
     normalized_title = title.casefold().strip()
-    if "rel=\"next\"" in attributes.casefold() or "rel='next'" in attributes.casefold():
+    if 'rel="next"' in attributes.casefold() or "rel='next'" in attributes.casefold():
         return True
     if normalized_title in {"next", "sau", ">", "›", "»"}:
         return True
@@ -500,8 +502,7 @@ class GovernmentPortalSearch:
             except httpx.HTTPError as error:
                 skipped.append(year)
                 logger.warning(
-                    "Government portal %d: skipped after %d attempts (%s); the next run "
-                    "retries it",
+                    "Government portal %d: skipped after %d attempts (%s); the next run retries it",
                     year,
                     SEARCH_ATTEMPTS,
                     type(error).__name__,

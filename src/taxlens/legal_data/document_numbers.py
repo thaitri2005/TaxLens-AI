@@ -26,9 +26,7 @@ _ISSUING_AGENCIES_BY_CODE = {
 
 # Cyrillic letters that look identical to Latin ones; source listings contain numbers such
 # as "255/2026/NĐ-CР" with a Cyrillic "Р", which would otherwise never match.
-_LOOKALIKES = str.maketrans(
-    "АВСЕНІЈКМОРЅТХаеорсух", "ABCEHIJKMOPSTXaeopcyx"
-)
+_LOOKALIKES = str.maketrans("АВСЕНІЈКМОРЅТХаеорсух", "ABCEHIJKMOPSTXaeopcyx")
 
 
 def normalize_number_text(text: str) -> str:

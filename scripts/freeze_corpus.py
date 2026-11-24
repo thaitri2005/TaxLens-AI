@@ -1,13 +1,14 @@
 """Freeze the corpus for an experiment, or check that it has not changed since.
 
-    python scripts/freeze_corpus.py --label corpus-v1 --output data/evaluation/corpus/corpus-v1.json
-    python scripts/freeze_corpus.py --check data/evaluation/corpus/corpus-v1.json
+python scripts/freeze_corpus.py --label corpus-v1 --output data/evaluation/corpus/corpus-v1.json
+python scripts/freeze_corpus.py --check data/evaluation/corpus/corpus-v1.json
 """
 
 import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal
@@ -61,7 +62,7 @@ def main() -> None:
         sys.exit(1)
 
 
-def _summary(manifest: dict) -> dict:
+def _summary(manifest: dict[str, Any]) -> dict[str, Any]:
     return {
         key: manifest.get(key)
         for key in (

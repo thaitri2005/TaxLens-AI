@@ -47,9 +47,7 @@ def evaluate_retrieval(
         if chunk_id in relevant_chunk_ids
     )
     ideal_relevant_count = min(len(relevant_chunk_ids), k)
-    ideal_dcg = sum(
-        1 / math.log2(rank + 1) for rank in range(1, ideal_relevant_count + 1)
-    )
+    ideal_dcg = sum(1 / math.log2(rank + 1) for rank in range(1, ideal_relevant_count + 1))
     return RetrievalMetrics(
         hit_at_k=bool(relevant_found),
         precision_at_k=len(relevant_found) / k,
@@ -100,9 +98,7 @@ def provision_coverage(ranks: Sequence[int | None], k: int) -> ProvisionCoverage
     if not ranks:
         return ProvisionCoverage(recall_at_k=0.0, full_coverage_at_k=False)
     found = sum(rank is not None and rank <= k for rank in ranks)
-    return ProvisionCoverage(
-        recall_at_k=found / len(ranks), full_coverage_at_k=found == len(ranks)
-    )
+    return ProvisionCoverage(recall_at_k=found / len(ranks), full_coverage_at_k=found == len(ranks))
 
 
 def _covers(passage: Sequence[Any], provision: Sequence[str | None]) -> bool:

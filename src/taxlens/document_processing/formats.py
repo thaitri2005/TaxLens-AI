@@ -126,11 +126,37 @@ def _clean_word_text(text: str) -> str:
 # RTF: destinations whose content is not document text.
 _RTF_SKIPPED_DESTINATIONS = frozenset(
     {
-        "fonttbl", "colortbl", "stylesheet", "info", "pict", "object", "themedata",
-        "colorschememapping", "latentstyles", "datastore", "xmlnstbl", "listtable",
-        "listoverridetable", "rsidtbl", "generator", "header", "headerl", "headerr",
-        "headerf", "footer", "footerl", "footerr", "footerf", "fldinst", "filetbl",
-        "revtbl", "pgdsctbl", "mmathPr", "wgrffmtfilter", "bkmkstart", "bkmkend",
+        "fonttbl",
+        "colortbl",
+        "stylesheet",
+        "info",
+        "pict",
+        "object",
+        "themedata",
+        "colorschememapping",
+        "latentstyles",
+        "datastore",
+        "xmlnstbl",
+        "listtable",
+        "listoverridetable",
+        "rsidtbl",
+        "generator",
+        "header",
+        "headerl",
+        "headerr",
+        "headerf",
+        "footer",
+        "footerl",
+        "footerr",
+        "footerf",
+        "fldinst",
+        "filetbl",
+        "revtbl",
+        "pgdsctbl",
+        "mmathPr",
+        "wgrffmtfilter",
+        "bkmkstart",
+        "bkmkend",
     }
 )
 _RTF_TOKEN = re.compile(
@@ -142,8 +168,16 @@ _RTF_TOKEN = re.compile(
 # TCVN3 text in ".VnTime" fonts survives for conversion; 163 is the Windows Vietnamese
 # code page, which writes some letters as base letter + combining tone mark.
 _RTF_CHARSET_CODECS = {
-    0: "latin-1", 163: "cp1258", 238: "cp1250", 204: "cp1251", 161: "cp1253",
-    162: "cp1254", 177: "cp1255", 178: "cp1256", 186: "cp1257", 222: "cp874",
+    0: "latin-1",
+    163: "cp1258",
+    238: "cp1250",
+    204: "cp1251",
+    161: "cp1253",
+    162: "cp1254",
+    177: "cp1255",
+    178: "cp1256",
+    186: "cp1257",
+    222: "cp874",
 }
 _RTF_FONT_CHARSET = re.compile(r"\{\\f(\d+)[^{}]*?\\fcharset(\d+)")
 

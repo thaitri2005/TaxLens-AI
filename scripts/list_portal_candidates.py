@@ -15,6 +15,7 @@ import re
 import time
 from dataclasses import asdict
 from pathlib import Path
+from typing import Any
 
 import httpx
 
@@ -62,7 +63,9 @@ def main() -> None:
         if arguments.output.exists()
         else {}
     )
-    found: dict[str, dict[str, dict]] = {rule: saved.get(rule, {}) for rule in ("C4", "C2", "C3")}
+    found: dict[str, dict[str, dict[str, Any]]] = {
+        rule: saved.get(rule, {}) for rule in ("C4", "C2", "C3")
+    }
     capped: list[str] = saved.get("capped", [])
     missing: list[str] = saved.get("cited_not_on_portal", [])
     failed: list[str] = []

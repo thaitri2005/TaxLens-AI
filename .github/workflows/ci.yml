@@ -21,9 +21,11 @@ jobs:
       - name: Install backend dependencies
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
       - name: Ruff
-        run: ruff check src tests scripts
+        run: ruff check src tests scripts data
+      - name: Ruff format
+        run: ruff format --check src tests scripts data
       - name: MyPy
-        run: mypy src
+        run: mypy
       - name: Pytest
         run: pytest
 

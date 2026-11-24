@@ -4,9 +4,10 @@ import json
 import sys
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal
@@ -35,7 +36,7 @@ from taxlens.legal_data.models import (
     DocumentVersion,
     LegalDocument,
 )
-from taxlens.retrieval.embeddings import get_embedding_provider
+from taxlens.retrieval.embeddings import EmbeddingProvider, get_embedding_provider
 from taxlens.retrieval.issues import Issue, issue_guided_search
 from taxlens.retrieval.repeals import RULES, ended_documents
 from taxlens.retrieval.reranking import CrossEncoderReranker
@@ -214,7 +215,7 @@ def main() -> None:
                 },
             }
         )
-    mode: str = arguments.mode
+    mode: SearchMode | Literal["issue-guided"] = arguments.mode
     issues_by_case = _load_issues(arguments.issues) if mode == "issue-guided" else {}
     if mode == "issue-guided":
         undecomposed = [
@@ -612,7 +613,7 @@ def _add_provision_metrics(
 
 
 def _passage_locators(
-    session, results: list[SearchResult], part_counts: dict[tuple[Any, str], int]
+    session: Session, results: list[SearchResult], part_counts: dict[tuple[Any, str], int]
 ) -> list[tuple[str, str, Any]]:
     """``(document, article, clauses)`` of each passage, for provision matching.
 
@@ -701,8 +702,8 @@ def _clause_hit(result: SearchResult, clauses: list[list[str | None]]) -> bool:
 
 
 def _coverage_summary(
-    reports: list[dict[str, Any]], corpus_coverage: dict[str, object]
-) -> dict[str, object]:
+    reports: list[dict[str, Any]], corpus_coverage: dict[str, Any]
+) -> dict[str, Any]:
     expected_count = int(corpus_coverage["expected_document_count"])
     embedded_count = int(corpus_coverage["embedded_document_count"])
     return {
@@ -721,7 +722,7 @@ def _coverage_summary(
     }
 
 
-def _corpus_snapshot(session) -> dict[str, object]:
+def _corpus_snapshot(session: Session) -> dict[str, Any]:
     document_numbers = list(
         session.scalars(
             select(LegalDocument.document_number).order_by(LegalDocument.document_number)
@@ -754,8 +755,8 @@ def _corpus_snapshot(session) -> dict[str, object]:
     }
 
 
-def _corpus_coverage(session, expected_document_numbers: set[str]) -> dict[str, object]:
-    statuses: list[dict[str, object]] = []
+def _corpus_coverage(session: Session, expected_document_numbers: set[str]) -> dict[str, Any]:
+    statuses: list[dict[str, Any]] = []
     for document_number in sorted(expected_document_numbers):
         document = session.scalar(
             select(LegalDocument).where(LegalDocument.document_number == document_number)
@@ -829,9 +830,9 @@ def _file_hash(path: Path) -> str:
 
 
 def _search(
-    session,
+    session: Session,
     query: str,
-    provider,
+    provider: EmbeddingProvider | None,
     mode: SearchMode,
     filters: SearchFilters,
     limit: int,

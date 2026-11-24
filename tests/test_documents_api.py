@@ -287,9 +287,7 @@ def test_admin_can_export_the_document_list_without_document_text() -> None:
         session.add(version)
         session.flush()
         session.add(
-            ProcessingJob(
-                document_version_id=version.id, status="COMPLETED", stage="CHUNKED:v3"
-            )
+            ProcessingJob(document_version_id=version.id, status="COMPLETED", stage="CHUNKED:v3")
         )
         session.add(
             DocumentChunk(

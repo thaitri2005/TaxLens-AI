@@ -11,6 +11,7 @@ import re
 from datetime import date
 from pathlib import Path
 from statistics import mean
+from typing import Any
 
 from taxlens.retrieval.repeals import ended_documents, normalize
 
@@ -25,7 +26,7 @@ def year_of(number: str) -> int:
     return int(match[1]) if match else 0
 
 
-def latest_laws(laws: dict[str, dict]) -> dict[str, dict]:
+def latest_laws(laws: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """The latest law of each name, and amending laws no older than the oldest of those."""
 
     latest: dict[str, tuple[int, str]] = {}
@@ -54,7 +55,7 @@ def main() -> None:
     versions = json.loads(MANIFEST.read_text(encoding="utf-8"))["versions"]
     held = {normalize(version["document_number"]): version for version in versions}
 
-    selected: dict[str, dict] = {}
+    selected: dict[str, dict[str, Any]] = {}
     for rule, rows in (
         ("C2", candidates["C2"]),
         ("C3", candidates["C3"]),

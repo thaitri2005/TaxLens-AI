@@ -19,7 +19,6 @@ import argparse
 import importlib.util
 import json
 import re
-import sys
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -232,7 +231,7 @@ def _summary(cases: list[dict[str, Any]]) -> dict[str, Any]:
     queries = [query for case in cases for query in case.get("queries", [])]
 
     def recall(rank_key: str, k: int) -> float:
-        values = [
+        values: list[float] = [
             sum(r is not None and r <= k for r in case[rank_key]) / len(case[rank_key])
             for case in cases
         ]
@@ -267,4 +266,4 @@ def _summary(cases: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

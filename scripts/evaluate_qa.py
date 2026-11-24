@@ -4,7 +4,7 @@ from pathlib import Path
 
 from taxlens.config import get_settings
 from taxlens.db import SessionLocal
-from taxlens.evaluation.rag import evaluate_rag_answer
+from taxlens.evaluation.rag import RagEvaluationMetrics, evaluate_rag_answer
 from taxlens.evaluation.tracking import get_experiment_tracker
 from taxlens.intelligence.chat import get_chat_provider
 from taxlens.intelligence.qa import answer_question
@@ -24,6 +24,7 @@ def main() -> None:
     tracker = get_experiment_tracker()
     settings = get_settings()
     reports: list[dict[str, object]] = []
+    scores: list[RagEvaluationMetrics] = []
     embedding_provider: EmbeddingProvider | None = None
     if not arguments.keyword_only:
         try:
@@ -59,6 +60,7 @@ def main() -> None:
                     [citation.heading or citation.title or "" for citation in result.citations],
                     len(result.citations),
                 )
+                scores.append(metrics)
                 reports.append(
                     {
                         "question": case["question"],
@@ -74,16 +76,14 @@ def main() -> None:
                     }
                 )
 
-        metric_names = (
-            "faithfulness",
-            "answer_relevancy",
-            "context_precision",
-            "citation_completeness",
-        )
         tracker.log_metrics(
             {
-                name: sum(float(report[name]) for report in reports) / len(reports)
-                for name in metric_names
+                "faithfulness": sum(m.faithfulness for m in scores) / len(scores),
+                "answer_relevancy": sum(m.answer_relevancy for m in scores) / len(scores),
+                "context_precision": sum(m.context_precision for m in scores) / len(scores),
+                "citation_completeness": (
+                    sum(m.citation_completeness for m in scores) / len(scores)
+                ),
             }
         )
 
