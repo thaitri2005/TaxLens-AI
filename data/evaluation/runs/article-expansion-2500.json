@@ -1,0 +1,396 @@
+{
+ "summary": {
+  "window": 2500,
+  "cases": 30,
+  "recall_without": 0.347,
+  "recall_with": 0.431,
+  "cases_up": 3,
+  "cases_down": 0,
+  "mean_evidence_characters": 6513,
+  "mean_added_characters": 2985
+ },
+ "cases": [
+  {
+   "case_id": "A1",
+   "found_before": [
+    false,
+    true,
+    false
+   ],
+   "found_after": [
+    false,
+    true,
+    false
+   ],
+   "evidence_characters": 6596,
+   "added_characters": 3216
+  },
+  {
+   "case_id": "A2",
+   "found_before": [
+    false,
+    false,
+    true,
+    false
+   ],
+   "found_after": [
+    false,
+    false,
+    true,
+    false
+   ],
+   "evidence_characters": 5408,
+   "added_characters": 487
+  },
+  {
+   "case_id": "A3",
+   "found_before": [
+    true,
+    false
+   ],
+   "found_after": [
+    true,
+    false
+   ],
+   "evidence_characters": 6985,
+   "added_characters": 3184
+  },
+  {
+   "case_id": "A4",
+   "found_before": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "found_after": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "evidence_characters": 6571,
+   "added_characters": 943
+  },
+  {
+   "case_id": "A5",
+   "found_before": [
+    false,
+    true
+   ],
+   "found_after": [
+    false,
+    true
+   ],
+   "evidence_characters": 7180,
+   "added_characters": 3279
+  },
+  {
+   "case_id": "A6",
+   "found_before": [
+    false,
+    false,
+    false
+   ],
+   "found_after": [
+    false,
+    false,
+    false
+   ],
+   "evidence_characters": 7111,
+   "added_characters": 2220
+  },
+  {
+   "case_id": "A7",
+   "found_before": [
+    true,
+    false,
+    false
+   ],
+   "found_after": [
+    true,
+    false,
+    false
+   ],
+   "evidence_characters": 7229,
+   "added_characters": 2808
+  },
+  {
+   "case_id": "A8",
+   "found_before": [
+    true,
+    true
+   ],
+   "found_after": [
+    true,
+    true
+   ],
+   "evidence_characters": 6512,
+   "added_characters": 1451
+  },
+  {
+   "case_id": "A9",
+   "found_before": [
+    false,
+    false
+   ],
+   "found_after": [
+    false,
+    false
+   ],
+   "evidence_characters": 6157,
+   "added_characters": 2177
+  },
+  {
+   "case_id": "A10",
+   "found_before": [
+    false,
+    false
+   ],
+   "found_after": [
+    false,
+    false
+   ],
+   "evidence_characters": 7160,
+   "added_characters": 4246
+  },
+  {
+   "case_id": "A11",
+   "found_before": [
+    false
+   ],
+   "found_after": [
+    false
+   ],
+   "evidence_characters": 7151,
+   "added_characters": 3649
+  },
+  {
+   "case_id": "A12",
+   "found_before": [
+    true
+   ],
+   "found_after": [
+    true
+   ],
+   "evidence_characters": 6354,
+   "added_characters": 3421
+  },
+  {
+   "case_id": "A13",
+   "found_before": [
+    false
+   ],
+   "found_after": [
+    false
+   ],
+   "evidence_characters": 7070,
+   "added_characters": 3403
+  },
+  {
+   "case_id": "A14",
+   "found_before": [
+    false,
+    false
+   ],
+   "found_after": [
+    false,
+    false
+   ],
+   "evidence_characters": 6109,
+   "added_characters": 3794
+  },
+  {
+   "case_id": "A15",
+   "found_before": [
+    false,
+    false
+   ],
+   "found_after": [
+    false,
+    false
+   ],
+   "evidence_characters": 7209,
+   "added_characters": 2777
+  },
+  {
+   "case_id": "A16",
+   "found_before": [
+    false,
+    false
+   ],
+   "found_after": [
+    false,
+    false
+   ],
+   "evidence_characters": 6268,
+   "added_characters": 2439
+  },
+  {
+   "case_id": "A17",
+   "found_before": [
+    false
+   ],
+   "found_after": [
+    false
+   ],
+   "evidence_characters": 7400,
+   "added_characters": 2636
+  },
+  {
+   "case_id": "A18",
+   "found_before": [
+    false
+   ],
+   "found_after": [
+    true
+   ],
+   "evidence_characters": 7348,
+   "added_characters": 1824
+  },
+  {
+   "case_id": "A19",
+   "found_before": [
+    false
+   ],
+   "found_after": [
+    true
+   ],
+   "evidence_characters": 7262,
+   "added_characters": 2740
+  },
+  {
+   "case_id": "A20",
+   "found_before": [
+    false
+   ],
+   "found_after": [
+    false
+   ],
+   "evidence_characters": 6439,
+   "added_characters": 1760
+  },
+  {
+   "case_id": "A21",
+   "found_before": [
+    false,
+    true
+   ],
+   "found_after": [
+    true,
+    true
+   ],
+   "evidence_characters": 5965,
+   "added_characters": 4692
+  },
+  {
+   "case_id": "A22",
+   "found_before": [
+    false
+   ],
+   "found_after": [
+    false
+   ],
+   "evidence_characters": 7076,
+   "added_characters": 1830
+  },
+  {
+   "case_id": "A23",
+   "found_before": [
+    true
+   ],
+   "found_after": [
+    true
+   ],
+   "evidence_characters": 7302,
+   "added_characters": 2899
+  },
+  {
+   "case_id": "R4",
+   "found_before": [
+    false,
+    false,
+    false
+   ],
+   "found_after": [
+    false,
+    false,
+    false
+   ],
+   "evidence_characters": 4325,
+   "added_characters": 4658
+  },
+  {
+   "case_id": "R5",
+   "found_before": [
+    true
+   ],
+   "found_after": [
+    true
+   ],
+   "evidence_characters": 4665,
+   "added_characters": 2583
+  },
+  {
+   "case_id": "L2",
+   "found_before": [
+    true
+   ],
+   "found_after": [
+    true
+   ],
+   "evidence_characters": 7144,
+   "added_characters": 2905
+  },
+  {
+   "case_id": "L3",
+   "found_before": [
+    true,
+    false
+   ],
+   "found_after": [
+    true,
+    false
+   ],
+   "evidence_characters": 7232,
+   "added_characters": 2146
+  },
+  {
+   "case_id": "L4",
+   "found_before": [
+    false,
+    true
+   ],
+   "found_after": [
+    false,
+    true
+   ],
+   "evidence_characters": 6331,
+   "added_characters": 4071
+  },
+  {
+   "case_id": "L5",
+   "found_before": [
+    true,
+    true
+   ],
+   "found_after": [
+    true,
+    true
+   ],
+   "evidence_characters": 6042,
+   "added_characters": 4326
+  },
+  {
+   "case_id": "L6",
+   "found_before": [
+    true
+   ],
+   "found_after": [
+    true
+   ],
+   "evidence_characters": 3796,
+   "added_characters": 6976
+  }
+ ]
+}
