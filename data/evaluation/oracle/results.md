@@ -1,7 +1,7 @@
-# Oracle issue experiment: results (draft queries)
+# Oracle issue experiment: results
 
-Run 24/11/2026 with `scripts/measure_oracle.py`, plan in [plan.md](plan.md). **Draft**: the queries in
-`oracle-queries.json` still await Le Hung's review; the result counts only after it. Correction to the
+Run 24/11/2026 with `scripts/measure_oracle.py`, plan in [plan.md](plan.md). **The result is the counted run
+with reviewed queries, at the end of this page**; the sections before it are the draft runs. Correction to the
 plan: the 17 cases hold **32** provisions outside the top 20, not 30 (a miscount when writing it).
 
 ## Runs
@@ -15,7 +15,7 @@ plan: the 17 cases hold **32** provisions outside the top 20, not 30 (a miscount
 Baseline (the question alone): 0.31 / 0.47 / 0.53. M2 against it, case by case: K = 5 none up, one down;
 K = 10 two up, two down; K = 20 four up, one down.
 
-## Reading
+## Reading of the draft run (superseded by the counted run)
 
 **By the plan's rule (M1 at K = 10 of 25% or less) the bottleneck is retrieval, not naming the issue.**
 Told the right issue, search still leaves 75% of the missed provisions out of the top 10 and 17 of 32 out
@@ -32,8 +32,8 @@ Why named issues still fail, from the top results of the unrecovered queries:
    (0.50 against 0.47 at K = 20).
 
 So item 16 (naming the governing law) would not pay before retrieval keeps superseded law out of the
-way. The next step is the endings list's reach to old documents (for example, a document replaced by a
-later one on the same subject from the same issuer), then this oracle again.
+way. The next step was the endings list's reach to old documents, then this oracle again: both done
+below (item 19, then the counted run).
 
 ## After item 19 (24/11/2026)
 

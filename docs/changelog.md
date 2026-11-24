@@ -6,12 +6,11 @@ What each working stint changed, newest first. Current state and the to-do list 
 
 ## 24/11/2026
 
-- **Oracle issue experiment** (Prof. Thanh's suggestion), draft queries pending Le Hung's review: told
-  the right legal issue, search finds only 25% of the missed provisions in the top 10. Retrieval, not
-  naming the issue, is the bottleneck; superseded law outranked current law
-  ([results](../data/evaluation/oracle/results.md)).
+- **Oracle issue experiment** (Prof. Thanh's suggestion), first run with draft queries, superseded by
+  the counted run below: told the right legal issue, search found 25% of the missed provisions in the
+  top 10, and superseded law outranked current law ([results](../data/evaluation/oracle/results.md)).
 - **Oracle queries, first-pass review** by a Claude agent briefed as a tax practitioner, at Le Hung's
-  request and awaiting his check: 14 kept, 16 rewritten (7 were over 20 words), 1 added, and 6 doubts
+  request: 14 kept, 16 rewritten (7 were over 20 words), 1 added, and 6 doubts
   about gold cases ([review](../data/evaluation/oracle/review.md)). Le Hung accepted it.
 - **Oracle, counted run** (reviewed queries): named well, an issue finds 28%, 38%, 69% of the missed
   provisions at K = 5, 10, 20. Both causes count; fusing issue lists into the question's adds nothing at

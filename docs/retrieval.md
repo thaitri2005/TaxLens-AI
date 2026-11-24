@@ -120,8 +120,9 @@ document only when too few others are found. An explicit statement may end a run
 thế các Thông tư số X ngày …, Thông tư số Y … và Thông tư số Z", or "các Nghị định: số X …, số Y"): the
 run continues through items separated only by a date, an issuer, and a comma or "và", so a title or a
 part stops it. A law said to end "as amended by Luật số A, Luật số B" ends A and B too, but only those
-whose title amends that law alone: amending laws often change other laws in passing. In evaluation it gives recall
-0.31, 0.42, 0.45 at K = 5, 10, 20, against 0.10, 0.30, 0.41 without it ([status](evaluation-status.md#results)). Search pages show the same tags but leave nothing out, since
+whose title amends that law alone: amending laws often change other laws in passing. On the 30 scored gold
+cases, recall is 0.31, 0.47, 0.53 at K = 5, 10, 20 ([status](evaluation-status.md#results)); on the
+earlier 12 cases the filter took it from 0.10, 0.30, 0.41 to 0.31, 0.42, 0.45. Search pages show the same tags but leave nothing out, since
 looking up an old document is a normal use.
 
 ## 6. Answers (`intelligence/qa.py`)
@@ -156,7 +157,7 @@ Results are in [evaluation-status.md](evaluation-status.md), and past runs in
 | `tax_retrieval_current.json`, `tax_retrieval.json` | Older smoke sets |
 | `qa.json` | Five questions for `evaluate_qa.py` |
 | `issues/gold_set_v1.json` | Stored issue decompositions |
-| `gold_set_v1_drafts.csv` | 18 drafted cases waiting for an annotator; not scored ([guideline](annotation-guideline.md)) |
+| `gold_set_v1_drafts.csv` | Holding file for new drafted cases, empty now; not scored ([guideline](annotation-guideline.md)) |
 | `repeals/corpus-v2.1-ministry.json` | Current list of ended documents |
 
 Run a frozen comparison:

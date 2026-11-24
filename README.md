@@ -23,8 +23,8 @@ says so when the indexed documents do not answer the question.
   citations carry verbatim source excerpts and a link to the official source.
 - **The law of the right date.** A question about "tháng 6/2023" is answered with the rules
   in force then. Documents a later document repeals, or that the Ministry of Finance records as
-  expired, are left out; those that may have ended are flagged ("Ended 01/07/2022 · by
-  78/2021/TT-BTC").
+  expired, are left out; both are tagged ("Ended 01/07/2022 · by 78/2021/TT-BTC"), and those that
+  may have ended are flagged ("May have ended …") and used last.
 - **Explicit refusals**: out-of-scope questions, missing evidence, superseded-only
   evidence, and model failures each return their own status instead of a guess.
 - **Search** by document number, title, or content, filtered by source, kind, and legal
@@ -86,10 +86,10 @@ with documents labelled to the clause:
 | --- | --- |
 | Essential provisions found in the top 5 / 10 / 20 passages | 0.31 / 0.47 / 0.53 |
 | Answers to 15 gold questions, judged against the gold answers | 8 correct, 2 wrong, 5 refused |
-| Time for a warm answer | about 5.5 s (retrieval 4 s, model 1.5 s) |
+| Time for a warm answer | about 5.5 s (retrieval 4 s, model 1.6 s) |
 
 Answers were graded on the first 15 questions. 30 cases still separate only large differences,
-and neither grader is a tax expert. Details, known problems, and what is next: [docs/evaluation-status.md](docs/evaluation-status.md).
+and neither grader is a tax expert. Details and known problems: [docs/evaluation-status.md](docs/evaluation-status.md).
 
 ## Architecture
 

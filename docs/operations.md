@@ -222,7 +222,7 @@ October 2026: $17.76. Answers cost about $0.002 each in model calls; a grading r
 **Images clean themselves up.** After a release that builds and applies, `release.yml` keeps the 2 newest
 images of each TaxLens repository and deletes the rest, and skips a repository if a lookup fails. Deleting a
 tag leaves its data behind in untagged manifests, and **the kept images depend on some untagged manifests**, so
-never delete all untagged ones. The first automatic run will be the next release, so check its log. To delete
+never delete all untagged ones. It runs after each release; check its log. To delete
 old tags by hand in Git Bash on Windows, strip carriage returns, or every delete fails:
 
 ```bash

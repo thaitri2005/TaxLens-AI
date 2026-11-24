@@ -1,4 +1,8 @@
-# Oracle queries: first-pass review, for Le Hung to check
+# Oracle queries: first-pass review
+
+**Checked 24/11/2026 by Le Hung and accepted as proposed; the counted run is in
+[results.md](results.md).** The gold-set doubts below were checked against the corpus the same day:
+see the end of this page.
 
 24/11/2026. Le Hung was to review the 30 draft queries ([plan](plan.md)). Short of time, he asked for a
 first pass that he then checks. **This is that first pass, done by a Claude agent briefed as a Vietnamese
@@ -69,10 +73,8 @@ Found in passing and not resolved. These matter beyond the oracle, since the sam
 
 ## Next
 
-1. Le Hung checks this page and edits `oracle-queries-reviewed.json` as he sees fit.
-2. `python scripts/measure_oracle.py --queries data/evaluation/oracle/oracle-queries-reviewed.json
-   --output data/evaluation/runs/oracle-reviewed.json` (minutes, no model calls, needs the database).
-   Run it once, after his check, so the queries are not changed after a counted run (plan).
+Done: Le Hung accepted the queries; one wording was changed by the copy check (A2.2); the counted run
+is `oracle-reviewed.json` ([results](results.md)).
 
 ## Each query
 
@@ -109,3 +111,14 @@ Found in passing and not resolved. These matter beyond the oracle, since the sam
 | A22.1 | 181/2025/NĐ-CP 26(3) | rewrite | mua hàng nhiều lần trong ngày của cùng một người bán, trả tiền mặt, thuế đầu vào có được trừ không → **nhiều lần mua trong ngày từ một người bán bằng tiền mặt, thuế đầu vào có được khấu trừ không** | 21 words. Decree 181 Art 26(3) governs several same-day purchases from one taxpayer, so the issue is right. Reordered to avoid the statutory run 'mua nhiều lần trong cùng một ngày' and to use 'khấu trừ' rather than 'trừ'. |  |
 | R4.1 | 67/2025/QH15 10(1)-(3) | keep | các mức thuế suất thuế thu nhập doanh nghiệp hiện hành theo quy mô doanh thu | CIT Law Art 10(1)-(3) sets the standard rate and the two revenue-based rates; the query names the set of rates by revenue size without stating any. | 'Hiện hành' is a time word but not a date; I read it as allowed under rule 2. |
 | L4.1 | 48/2024/QH15 14(2) | rewrite | ngưỡng giá trị hàng mua phải trả qua ngân hàng mới được khấu trừ thuế giá trị gia tăng đầu vào → **điều kiện thanh toán qua ngân hàng để được khấu trừ thuế giá trị gia tăng đầu vào** | 21 words, and the issue is mis-stated for the target: VAT Law Art 14(2) contains no value threshold. The threshold is in the opening sentence of Decree 181 Art 26. Art 14(2)(b) governs the non-cash-payment condition itself, which the rewrite names. | A practitioner searching the threshold would expect the Decree, not the Law. If the threshold issue should stay as a query, aim it at Decree 181 Art 26, which is essential for L4 but not in its missed list. |
+
+## Gold-set doubts checked against the corpus (24/11/2026)
+
+| Doubt | Corpus text | Outcome |
+| --- | --- | --- |
+| 1. A7 | Law 64/2025 Art 58 is one passage: (1) a document applies from its effective date; (2) it applies to acts that happened while it was in force. Decree 181/2025 Art 38(1) is only the effective date; Art 39 covers investment projects and the 5% rate | The gold already lists Art 58(1)-(2). **Open for the expert:** the answer's "may choose the refund policy" has no provision behind it |
+| 2. A14 | PIT Law 109/2025 Art 29(2): rules on business and employment income apply from the 2026 tax year | **Settled:** Art 7(4) governs a 2026 rental income question |
+| 3. L4, A5 | Decree 181/2025 Art 26 opens with the 5 million threshold, before clause 1 (held in the clause 1 passage) | A5 lists all of Art 26: settled. **Open for the expert:** L4 lists Art 26(2)-(3), the special cases, not the opening sentence with the threshold its answer rests on |
+| 4. A2 | Decree 359/2025 Art 1(1) inserts Art 4(1b) into Decree 181/2025 (trading-stage sale to enterprises: no VAT declaration), effective 01/01/2026; Circular 84/2025 Art 20(1)(c) inserts the definition of "gỗ sơ chế thông thường" | **Settled:** the gold already lists both |
+| 5. A10, A11, R4 | CIT Law 67/2025 Art 10 is one passage holding clauses 1-4 and the revenue-basis sentence | **Settled:** any clause of Art 10 is matched |
+| 6. A9 | Decree 310/2025 amends Decree 125/2020 Art 9(3) (not 9(2)), effective 16/01/2026, after the case date (15/03/2024) | **Settled:** the gold stands |
