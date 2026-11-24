@@ -136,7 +136,7 @@ def main() -> None:
     )
 
 
-def _listed_query(path: Path) -> Select[tuple[DocumentVersion]]:
+def _listed_query(path: Path) -> Select[DocumentVersion]:
     numbers = json.loads(path.read_text(encoding="utf-8"))["documents"]
     return (
         select(DocumentVersion)
@@ -146,7 +146,7 @@ def _listed_query(path: Path) -> Select[tuple[DocumentVersion]]:
     )
 
 
-def _legacy_text_query(storage: ObjectStorage) -> Select[tuple[DocumentVersion]]:
+def _legacy_text_query(storage: ObjectStorage) -> Select[DocumentVersion]:
     """Versions to extract again, found by reading every stored text.
 
     They are extracted from the raw file because stored text can mix converted and unconverted
@@ -163,7 +163,7 @@ def _legacy_text_query(storage: ObjectStorage) -> Select[tuple[DocumentVersion]]
             ).where(DocumentVersion.normalized_artifact_key.is_not(None))
         ).all()
 
-    def holds_legacy_text(row: Row[tuple[uuid.UUID, str, str]]) -> bool:
+    def holds_legacy_text(row: Row[uuid.UUID, str, str]) -> bool:
         _, text_key, raw_key = row
         if not storage.exists(text_key):
             return False
@@ -186,7 +186,7 @@ def _legacy_text_query(storage: ObjectStorage) -> Select[tuple[DocumentVersion]]
     )
 
 
-def _outdated_query() -> Select[tuple[DocumentVersion]]:
+def _outdated_query() -> Select[DocumentVersion]:
     current_job = select(ProcessingJob.id).where(
         ProcessingJob.document_version_id == DocumentVersion.id,
         ProcessingJob.stage.endswith(CHUNKER_STAGE_SUFFIX),
@@ -199,7 +199,7 @@ def _outdated_query() -> Select[tuple[DocumentVersion]]:
     )
 
 
-def _scanned_query() -> Select[tuple[DocumentVersion]]:
+def _scanned_query() -> Select[DocumentVersion]:
     """Versions whose text came from OCR, or whose OCR failed and may now succeed."""
 
     ocr_job = select(ProcessingJob.id).where(
@@ -214,7 +214,7 @@ def _scanned_query() -> Select[tuple[DocumentVersion]]:
     )
 
 
-def _candidate_query(reprocess_all: bool, retry_failed: bool) -> Select[tuple[DocumentVersion]]:
+def _candidate_query(reprocess_all: bool, retry_failed: bool) -> Select[DocumentVersion]:
     query = select(DocumentVersion).join(LegalDocument).order_by(DocumentVersion.created_at)
     if not reprocess_all:
         query = query.where(DocumentVersion.normalized_content_hash.is_(None))

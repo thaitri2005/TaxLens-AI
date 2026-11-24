@@ -10,6 +10,7 @@ an input to frozen runs: make it once and commit it, as with issue decomposition
 
 import argparse
 import json
+import uuid
 from datetime import date
 from pathlib import Path
 
@@ -41,8 +42,8 @@ def main() -> None:
     amending: list[tuple[str, str, str]] = []
     sunsets: list[tuple[str, str, date]] = []
     # A list split by size continues in other passages of its clause, in no stored order.
-    list_opened: set[tuple[object, str | None, str | None]] = set()
-    continued: dict[tuple[object, str | None, str | None], set[tuple[str, str]]] = {}
+    list_opened: set[tuple[uuid.UUID, str | None, str | None]] = set()
+    continued: dict[tuple[uuid.UUID, str | None, str | None], set[tuple[str, str]]] = {}
     stated: dict[str, tuple[int, date]] = {}
     recorded: dict[str, date | None] = {}
     issued_on: dict[str, date | None] = {}
