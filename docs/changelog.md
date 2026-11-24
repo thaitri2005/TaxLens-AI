@@ -19,6 +19,10 @@ What each working stint changed, newest first. Current state and the to-do list 
 - **Item 16 dropped:** planned first, then measured from the saved run. Slots per hand-named issue give
   0.33 against 0.31 with the answers' 5 passages, under the plan's +0.05 floor
   ([results](../data/evaluation/issue-slots/results.md)).
+- **The 10 provisions missed even when named,** studied: content-free clauses, sibling clauses found
+  instead, different wording, old law, one long OCR'd part. If a passage's whole article counted, recall
+  at K = 5 would be 0.43 instead of 0.31: new item 20, article expansion
+  ([study](../data/evaluation/misses/ten-misses.md)).
 - **Item 19:** 30 more endings read from the corpus (lists after a colon, lists of replaced laws, laws
   ending as amended), loaded on Azure: 753 documents left out, 119 flagged. Recall identical; oracle
   25% → 28% at K = 10. The rest of the old law in the way has no ending stated in the corpus.

@@ -1,0 +1,370 @@
+{
+ "summary": {
+  "5": {
+   "clause": 0.308,
+   "article": 0.425
+  },
+  "10": {
+   "clause": 0.469,
+   "article": 0.553
+  },
+  "20": {
+   "clause": 0.531,
+   "article": 0.575
+  }
+ },
+ "cases": [
+  {
+   "case": "A1",
+   "clause": [
+    null,
+    11,
+    null
+   ],
+   "article": [
+    15,
+    11,
+    null
+   ],
+   "articles_in_top5": 3
+  },
+  {
+   "case": "A2",
+   "clause": [
+    null,
+    null,
+    1,
+    null
+   ],
+   "article": [
+    null,
+    null,
+    1,
+    null
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "A3",
+   "clause": [
+    1,
+    null
+   ],
+   "article": [
+    1,
+    null
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "A4",
+   "clause": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "article": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "articles_in_top5": 2
+  },
+  {
+   "case": "A5",
+   "clause": [
+    null,
+    1
+   ],
+   "article": [
+    null,
+    1
+   ],
+   "articles_in_top5": 3
+  },
+  {
+   "case": "A6",
+   "clause": [
+    null,
+    null,
+    null
+   ],
+   "article": [
+    null,
+    null,
+    null
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "A7",
+   "clause": [
+    9,
+    null,
+    null
+   ],
+   "article": [
+    9,
+    null,
+    null
+   ],
+   "articles_in_top5": 5
+  },
+  {
+   "case": "A8",
+   "clause": [
+    5,
+    7
+   ],
+   "article": [
+    5,
+    7
+   ],
+   "articles_in_top5": 5
+  },
+  {
+   "case": "A9",
+   "clause": [
+    null,
+    null
+   ],
+   "article": [
+    null,
+    null
+   ],
+   "articles_in_top5": 5
+  },
+  {
+   "case": "A10",
+   "clause": [
+    null,
+    null
+   ],
+   "article": [
+    null,
+    null
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "A11",
+   "clause": [
+    null
+   ],
+   "article": [
+    null
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "A12",
+   "clause": [
+    1
+   ],
+   "article": [
+    1
+   ],
+   "articles_in_top5": 5
+  },
+  {
+   "case": "A13",
+   "clause": [
+    7
+   ],
+   "article": [
+    7
+   ],
+   "articles_in_top5": 5
+  },
+  {
+   "case": "A14",
+   "clause": [
+    null,
+    9
+   ],
+   "article": [
+    9,
+    9
+   ],
+   "articles_in_top5": 5
+  },
+  {
+   "case": "A15",
+   "clause": [
+    null,
+    null
+   ],
+   "article": [
+    null,
+    null
+   ],
+   "articles_in_top5": 3
+  },
+  {
+   "case": "A16",
+   "clause": [
+    null,
+    null
+   ],
+   "article": [
+    null,
+    null
+   ],
+   "articles_in_top5": 2
+  },
+  {
+   "case": "A17",
+   "clause": [
+    15
+   ],
+   "article": [
+    3
+   ],
+   "articles_in_top5": 2
+  },
+  {
+   "case": "A18",
+   "clause": [
+    8
+   ],
+   "article": [
+    2
+   ],
+   "articles_in_top5": 2
+  },
+  {
+   "case": "A19",
+   "clause": [
+    9
+   ],
+   "article": [
+    4
+   ],
+   "articles_in_top5": 3
+  },
+  {
+   "case": "A20",
+   "clause": [
+    null
+   ],
+   "article": [
+    null
+   ],
+   "articles_in_top5": 5
+  },
+  {
+   "case": "A21",
+   "clause": [
+    15,
+    3
+   ],
+   "article": [
+    6,
+    3
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "A22",
+   "clause": [
+    null
+   ],
+   "article": [
+    null
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "A23",
+   "clause": [
+    4
+   ],
+   "article": [
+    4
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "R4",
+   "clause": [
+    null,
+    null,
+    null
+   ],
+   "article": [
+    null,
+    null,
+    null
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "R5",
+   "clause": [
+    3
+   ],
+   "article": [
+    3
+   ],
+   "articles_in_top5": 5
+  },
+  {
+   "case": "L2",
+   "clause": [
+    4
+   ],
+   "article": [
+    4
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "L3",
+   "clause": [
+    2,
+    7
+   ],
+   "article": [
+    2,
+    6
+   ],
+   "articles_in_top5": 5
+  },
+  {
+   "case": "L4",
+   "clause": [
+    null,
+    3
+   ],
+   "article": [
+    2,
+    3
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "L5",
+   "clause": [
+    2,
+    3
+   ],
+   "article": [
+    2,
+    2
+   ],
+   "articles_in_top5": 4
+  },
+  {
+   "case": "L6",
+   "clause": [
+    2
+   ],
+   "article": [
+    2
+   ],
+   "articles_in_top5": 5
+  }
+ ]
+}
