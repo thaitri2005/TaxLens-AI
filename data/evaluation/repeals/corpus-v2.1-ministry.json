@@ -1,11 +1,11 @@
 {
   "document_count": 2986,
-  "ended_count": 859,
+  "ended_count": 875,
   "rules": {
-    "explicit": 557,
-    "guidance": 79,
-    "ministry": 175,
-    "amendment": 48
+    "explicit": 584,
+    "guidance": 72,
+    "ministry": 172,
+    "amendment": 47
   },
   "repeals": {
     "004/2025/TT-BNV": {
@@ -158,6 +158,11 @@
       "rule": "explicit",
       "by": "51/1999/NĐ-CP"
     },
+    "07/2003/QH11": {
+      "ended_on": "2009-01-01",
+      "rule": "explicit",
+      "by": "13/2008/QH12"
+    },
     "07/2011/TT-BTC": {
       "ended_on": "2011-02-24",
       "rule": "explicit",
@@ -264,9 +269,9 @@
       "by": "79/2000/NĐ-CP"
     },
     "102/2002/TT-BTC": {
-      "ended_on": "2004-01-01",
+      "ended_on": "2003-12-22",
       "rule": "guidance",
-      "by": "82/2002/TT-BTC"
+      "by": "122/2000/TT-BTC"
     },
     "102/2008/TT-BTC": {
       "ended_on": "2017-01-01",
@@ -334,9 +339,9 @@
       "by": "125/2003/ttlt-btc-btnmt"
     },
     "106/2010/NĐ-CP": {
-      "ended_on": "2013-07-01",
-      "rule": "guidance",
-      "by": "100/2008/NĐ-CP"
+      "ended_on": "2013-09-15",
+      "rule": "explicit",
+      "by": "83/2013/NĐ-CP"
     },
     "106/2010/TT-BTC": {
       "ended_on": "2014-02-17",
@@ -382,6 +387,11 @@
       "ended_on": "2014-01-01",
       "rule": "explicit",
       "by": "164/2013/TT-BTC"
+    },
+    "108/2002/NĐ-CP": {
+      "ended_on": "2004-01-01",
+      "rule": "explicit",
+      "by": "158/2003/NĐ-CP"
     },
     "108/2006/NĐ-CP": {
       "ended_on": "2015-12-27",
@@ -485,8 +495,8 @@
     },
     "113/2011/NĐ-CP": {
       "ended_on": "2016-01-01",
-      "rule": "guidance",
-      "by": "26/2009/NĐ-CP"
+      "rule": "explicit",
+      "by": "108/2015/NĐ-CP"
     },
     "113/2011/TT-BTC": {
       "ended_on": "2013-07-01",
@@ -553,6 +563,11 @@
       "rule": "explicit",
       "by": "120/2016/NĐ-CP"
     },
+    "116/2002/TT-BTC": {
+      "ended_on": "2004-01-01",
+      "rule": "ministry",
+      "by": "ministry status"
+    },
     "116/2008/TT-BTC": {
       "ended_on": "2011-08-15",
       "rule": "explicit",
@@ -572,6 +587,11 @@
       "ended_on": "2019-11-22",
       "rule": "explicit",
       "by": "71/2019/TT-BTC"
+    },
+    "116/2013/TT-BTC": {
+      "ended_on": "2021-04-25",
+      "rule": "explicit",
+      "by": "18/2021/NĐ-CP"
     },
     "117/2009/TT-BTC": {
       "ended_on": "2011-07-01",
@@ -700,8 +720,8 @@
     },
     "122/2011/NĐ-CP": {
       "ended_on": "2014-02-15",
-      "rule": "guidance",
-      "by": "124/2008/NĐ-CP"
+      "rule": "explicit",
+      "by": "218/2013/NĐ-CP"
     },
     "123/2007/TT-BTC": {
       "ended_on": "2014-01-17",
@@ -769,12 +789,12 @@
       "by": "206/2025/NĐ-CP"
     },
     "128/2003/TT-BTC": {
-      "ended_on": "2007-02-14",
-      "rule": "ministry",
-      "by": "ministry status"
+      "ended_on": "2007-11-23",
+      "rule": "explicit",
+      "by": "134/2007/TT-BTC"
     },
     "128/2004/TT-BTC": {
-      "ended_on": "2007-02-14",
+      "ended_on": "2007-11-23",
       "rule": "guidance",
       "by": "88/2004/TT-BTC"
     },
@@ -830,8 +850,8 @@
     },
     "13/2009/NĐ-CP": {
       "ended_on": "2013-12-15",
-      "rule": "amendment",
-      "by": "98/2007/nd-cp"
+      "rule": "explicit",
+      "by": "129/2013/NĐ-CP"
     },
     "13/2011/TT-BTC": {
       "ended_on": "2013-07-01",
@@ -1023,6 +1043,11 @@
       "rule": "amendment",
       "by": "12/2015/NĐ-CP"
     },
+    "148/2004/NĐ-CP": {
+      "ended_on": "2009-01-01",
+      "rule": "explicit",
+      "by": "123/2008/NĐ-CP"
+    },
     "148/2009/TT-BTC": {
       "ended_on": "2009-09-21",
       "rule": "explicit",
@@ -1123,6 +1148,11 @@
       "rule": "explicit",
       "by": "118/2022/NĐ-CP"
     },
+    "154/2005/NĐ-CP": {
+      "ended_on": "2015-03-15",
+      "rule": "explicit",
+      "by": "08/2015/NĐ-CP"
+    },
     "155/2005/NĐ-CP": {
       "ended_on": "2007-03-16",
       "rule": "explicit",
@@ -1192,6 +1222,11 @@
       "ended_on": "2022-12-30",
       "rule": "explicit",
       "by": "119/2022/NĐ-CP"
+    },
+    "158/2003/NĐ-CP": {
+      "ended_on": "2009-01-01",
+      "rule": "explicit",
+      "by": "123/2008/NĐ-CP"
     },
     "158/2009/TT-BTC": {
       "ended_on": "2012-04-01",
@@ -1385,8 +1420,8 @@
     },
     "177/2013/TT-BTC": {
       "ended_on": "2016-12-02",
-      "rule": "guidance",
-      "by": "24/2013/TT-BTC"
+      "rule": "explicit",
+      "by": "316/2016/TT-BTC"
     },
     "177/2016/TT-BTC": {
       "ended_on": "2018-05-14",
@@ -1427,6 +1462,11 @@
       "ended_on": "2004-01-07",
       "rule": "explicit",
       "by": "128/2003/TT-BTC"
+    },
+    "18/2009/NĐ-CP": {
+      "ended_on": "2013-12-15",
+      "rule": "explicit",
+      "by": "127/2013/NĐ-CP"
     },
     "18/2011/TT-BTC": {
       "ended_on": "2012-09-10",
@@ -1748,6 +1788,11 @@
       "rule": "explicit",
       "by": "38/2021/TT-BTC"
     },
+    "21/2012/QH13": {
+      "ended_on": "2020-07-01",
+      "rule": "explicit",
+      "by": "38/2019/QH14"
+    },
     "21/2026/TT-BTC": {
       "ended_on": "2026-07-01",
       "rule": "explicit",
@@ -2023,6 +2068,11 @@
       "rule": "guidance",
       "by": "30/1998/NĐ-CP"
     },
+    "26/2004/QH11": {
+      "ended_on": "2012-07-01",
+      "rule": "explicit",
+      "by": "02/2011/QH13"
+    },
     "26/2007/QĐ-BTC": {
       "ended_on": "2008-05-05",
       "rule": "explicit",
@@ -2089,7 +2139,7 @@
       "by": "79/2000/NĐ-CP"
     },
     "28/2011/TT-BTC": {
-      "ended_on": "2020-07-01",
+      "ended_on": "2013-09-15",
       "rule": "guidance",
       "by": "85/2007/NĐ-CP"
     },
@@ -2153,6 +2203,11 @@
       "rule": "explicit",
       "by": "47/2024/QH15"
     },
+    "30/2009/TT-BTC": {
+      "ended_on": "2009-02-19",
+      "rule": "explicit",
+      "by": "33/2009/TT-BTC"
+    },
     "30/2014/TT-BTC": {
       "ended_on": "2016-01-01",
       "rule": "explicit",
@@ -2193,6 +2248,11 @@
       "rule": "amendment",
       "by": "216/2009/TT-BTC"
     },
+    "31/2013/QH13": {
+      "ended_on": "2025-07-01",
+      "rule": "explicit",
+      "by": "48/2024/QH15"
+    },
     "31/2014/TT-BTC": {
       "ended_on": "2026-01-01",
       "rule": "guidance",
@@ -2227,6 +2287,11 @@
       "ended_on": "2022-07-01",
       "rule": "explicit",
       "by": "78/2021/TT-BTC"
+    },
+    "32/2013/QH13": {
+      "ended_on": "2025-10-01",
+      "rule": "explicit",
+      "by": "67/2025/QH15"
     },
     "32/2020/TT-BTC": {
       "ended_on": "2025-07-20",
@@ -2382,6 +2447,11 @@
       "ended_on": "2012-09-10",
       "rule": "explicit",
       "by": "123/2012/TT-BTC"
+    },
+    "40/2013/QH13": {
+      "ended_on": "2025-07-01",
+      "rule": "explicit",
+      "by": "55/2024/QH15"
     },
     "40/2016/TT-BTC": {
       "ended_on": "2017-09-12",
@@ -2618,6 +2688,11 @@
       "rule": "explicit",
       "by": "320/2025/NĐ-CP"
     },
+    "58/2005/QH11": {
+      "ended_on": "2012-07-01",
+      "rule": "explicit",
+      "by": "02/2011/QH13"
+    },
     "58/2010/TT-BTC": {
       "ended_on": "2012-03-16",
       "rule": "explicit",
@@ -2777,6 +2852,11 @@
       "ended_on": "2016-01-01",
       "rule": "explicit",
       "by": "182/2015/TT-BTC"
+    },
+    "63/2020/QH14": {
+      "ended_on": "2025-04-01",
+      "rule": "explicit",
+      "by": "64/2025/QH15"
     },
     "64/2000/TT-BTC": {
       "ended_on": "2002-10-25",
@@ -2975,8 +3055,8 @@
     },
     "76/2002/NĐ-CP": {
       "ended_on": "2004-01-01",
-      "rule": "guidance",
-      "by": "79/2000/NĐ-CP"
+      "rule": "explicit",
+      "by": "158/2003/NĐ-CP"
     },
     "76/2006/QĐ-BTC": {
       "ended_on": "2017-01-01",
@@ -3128,6 +3208,11 @@
       "rule": "explicit",
       "by": "89/2026/TT-BTC"
     },
+    "81/2013/TT-BTC": {
+      "ended_on": "2021-04-25",
+      "rule": "explicit",
+      "by": "18/2021/NĐ-CP"
+    },
     "82/2002/TT-BTC": {
       "ended_on": "2004-01-01",
       "rule": "ministry",
@@ -3194,9 +3279,9 @@
       "by": "49/2010/TT-BTC"
     },
     "85/2007/NĐ-CP": {
-      "ended_on": "2020-07-01",
-      "rule": "guidance",
-      "by": "78/2006/QH11"
+      "ended_on": "2013-09-15",
+      "rule": "explicit",
+      "by": "83/2013/NĐ-CP"
     },
     "85/2007/TT-BTC": {
       "ended_on": "2012-07-01",
@@ -3234,9 +3319,9 @@
       "by": "232/2016/TT-BTC"
     },
     "88/2004/TT-BTC": {
-      "ended_on": "2007-02-14",
-      "rule": "ministry",
-      "by": "ministry status"
+      "ended_on": "2007-11-23",
+      "rule": "explicit",
+      "by": "134/2007/TT-BTC"
     },
     "88/2007/TT-BTC": {
       "ended_on": "2009-03-30",
@@ -3415,8 +3500,8 @@
     },
     "95/2002/NĐ-CP": {
       "ended_on": "2004-01-01",
-      "rule": "guidance",
-      "by": "79/2000/NĐ-CP"
+      "rule": "explicit",
+      "by": "158/2003/NĐ-CP"
     },
     "95/2008/TT-BTC": {
       "ended_on": "2016-01-01",
@@ -3467,6 +3552,11 @@
       "ended_on": "2014-02-17",
       "rule": "explicit",
       "by": "02/2014/TT-BTC"
+    },
+    "97/2007/NĐ-CP": {
+      "ended_on": "2013-12-15",
+      "rule": "explicit",
+      "by": "127/2013/NĐ-CP"
     },
     "97/2010/TT-BTC": {
       "ended_on": "2017-07-01",
@@ -3635,11 +3725,6 @@
     },
     "116/2000/TT-BTC": {
       "ended_on": "2006-05-03",
-      "rule": "ministry",
-      "by": "ministry status"
-    },
-    "116/2002/TT-BTC": {
-      "ended_on": "2004-01-01",
       "rule": "ministry",
       "by": "ministry status"
     },
@@ -3920,11 +4005,6 @@
     },
     "28/2001/TT-BTC": {
       "ended_on": "2005-05-24",
-      "rule": "ministry",
-      "by": "ministry status"
-    },
-    "30/2009/TT-BTC": {
-      "ended_on": "2009-02-19",
       "rule": "ministry",
       "by": "ministry status"
     },

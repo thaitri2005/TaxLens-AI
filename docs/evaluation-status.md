@@ -9,8 +9,8 @@ changed is in [changelog.md](changelog.md).
 - **Site:** `76bfdfa`, released 23/11/2026 (questions logged and rated, keyword search 30% faster, the
   accessible interface in both languages), answering with `openai/gpt-oss-120b`. Answers leave out
   documents whose end is confirmed and flag inferred endings ([ended documents](retrieval.md#ended-documents)):
-  the `corpus-v2.1` list (rebuilt 23/11/2026 to read runs of replaced documents) is loaded, leaving out
-  729 documents and flagging 127 as of 23/11/2026. Checked on the 5 answer questions against the live database, and the
+  the `corpus-v2.1` list (rebuilt 24/11/2026, item 19) is loaded, leaving out 753 documents and
+  flagging 119 as of 24/11/2026. Checked on the 5 answer questions against the live database, and the
   tags by eye in the app ("Ended 01/07/2022 · by 78/2021/TT-BTC"; no "In force" beside them).
 - **Corpus:** `corpus-v2.1`, frozen 23/11/2026: 2,986 documents, 2,986 versions, 144,279 passages, all
   embedded. `corpus-v2` with 14 duplicates merged; recall is identical on all three baselines.
@@ -98,8 +98,10 @@ Manifests are in `data/evaluation/corpus/`. Runs against an older corpus stop at
 1. **Ended law the list does not know.** A document ends only if the corpus or the ministry says so.
    Runs of replaced documents (`thay thế các Thông tư số X …, Y … và Z`) are read since `8829e78`, which
    ended 33 more (59/2007, 79/2000, 26/2009, 45/2014 …) and confirmed 14 guesses, Decree 123/2008 among
-   them. Still unknown when the replacing document is not held: 194/2010/TT-BTC, replaced by 128/2013,
-   stays in force for the site.
+   them. Since item 19 (24/11/2026), lists after a colon with bare numbers, lists of replaced laws, and
+   laws ending as amended end 30 more (158/2003, 07/2003, 18/2009, 21/2012 …). Still unknown when the
+   replacing document is not held or says nothing: 194/2010/TT-BTC (replaced by 128/2013), 166/2013/TT-BTC,
+   and 1990s ministry texts stay in force for the site, and outrank current law on several questions.
 2. **Most essential provisions are still missed.** About half of the hardest need a legal step the
    question does not state ([diagnosis](retrieval-experiments.md#retrieval)).
 3. **Answer model trade-offs:** the faster model costs about $0.002 an answer, against $0.0003, and can
@@ -151,8 +153,8 @@ L = more. Mark each done here when finished.
 | ~~13~~ | **Done 23/11/2026.** 14 duplicates merged by `merge_duplicate_documents.py` (321 passages removed, backed up), `corpus-v2.1` frozen, ended-document list rebuilt and loaded, baselines identical; 124/2026 confirmed, 2 numbers left for someone with the originals | | [Corpora](#corpora) |
 | ~~14~~ | **Done 23/11/2026.** ESLint 9 with Next's `core-web-vitals` and `typescript` rules (`eslint.config.mjs`); CI runs `npm run lint` and `next build` lints too. Fixed 2 errors (page links in the admin view); 3 warnings remain (two `<img>` logos, one effect's dependency list) | | |
 | ~~15~~ | **Tried 23/11/2026, rejected.** Cross-encoders over the top 100: `bge-reranker-v2-m3` 0.31, 0.43, 0.58 (reaches 4 never-found provisions at K = 20 but loses the reworded cases, and needs about 110 s a question on the site's CPU); a small multilingual one is worse alone or fused. `--reranker` stays in the evaluation for later models | | [Already tried](retrieval-experiments.md#retrieval) |
-| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, **on hold** | The oracle (draft) shows that even a named issue recovers only 25% at K = 10: superseded law must be kept out first ([results](../data/evaluation/oracle/results.md)) |
-| 19 | Extend the endings list to old documents replaced by later ones on the same subject (158/2003, 07/2003, 129/2013 …), then rerun the oracle | M | The oracle's main failure |
+| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, **on hold** | The oracle (draft) shows that even a named issue recovers only 28% at K = 10 (25% before item 19): decide after the reviewed oracle run ([results](../data/evaluation/oracle/results.md)) |
+| ~~19~~ | **Done 24/11/2026.** The superseded law in the oracle's way did have explicit endings, in shapes the rules missed: `các Nghị định: số X …, số Y` (158/2003, 18/2009), `thay thế các luật sau đây` (07/2003), and laws ending "as amended by" laws (21/2012, 31/2013, 32/2013). 30 entries, each read against its sentence, loaded on Azure. Baseline identical case by case; oracle M1 0.19, 0.25, 0.47 → 0.25, 0.28, 0.53. What remains in the way has no ending stated in the corpus (166/2013, 194/2010, 123/2004, 1990s ministry texts) | | [Results](../data/evaluation/oracle/results.md) |
 | ~~17~~ | **Done 23/11/2026.** `page.tsx` (890 lines) split without code changes into `lib/` (types, copy, format, api) and `components/` (tags, answer, documents, layout); 12 Vitest tests for the helpers and tags run in CI (`npm test`) | | |
 | ~~18~~ | **Done 23/11/2026.** Known problems 1 and 8: runs of replaced documents read (33 more ended, recall with confirmed rules identical case by case, all rules 0.38 at K = 5), and documents that may have ended used last in answers (wrong 4 → 2, refused 2 → 5). A newest-first ranking was tried and rejected | | [Already tried](retrieval-experiments.md#retrieval) |
 

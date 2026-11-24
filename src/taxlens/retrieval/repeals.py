@@ -30,7 +30,16 @@ from taxlens.retrieval.text import fold_vietnamese
 _NUMBER = r"\d{1,4}/\d{4}/[a-z0-9]+(?:-[a-z0-9]+)*|\d{1,4}/[a-z]+(?:-[a-z]+)+"
 _NUMBER_PATTERN = re.compile(rf"(?<![\d/])(?:{_NUMBER})")
 _TYPE = r"(?:thong tu(?: lien tich| lien bo)?|nghi dinh|luat|phap lenh|nghi quyet|quyet dinh)"
-_NAMED = rf"{_TYPE}\s+(?:so\s+)?(?:\d+\s+)?(?P<number>{_NUMBER})"
+# "Nghị định số X", or after a plural, "các Nghị định: số X".
+_NAMED = rf"{_TYPE}\s*:?\s+(?:so\s+)?(?:\d+\s+)?(?P<number>{_NUMBER})"
+# A later document of a run may give its number alone ("..., số Y và số Z").
+_RUN_ITEM = re.compile(rf"{_NAMED}|so\s+(?P<bare>{_NUMBER})")
+# "Luật sửa đổi, bổ sung một số điều của Luật thuế GTGT số X": X is the amending law.
+_AMENDING_LAW = (
+    r"luat sua doi,?\s+bo sung(?: mot so dieu)? cua (?:cac )?luat\b"
+    # The law's name only: another document or "và" means the number is someone else's.
+    rf"(?:(?!{_TYPE}\b|\bva\b)[^;:]){{0,80}}?\bso\s+(?P<amending>{_NUMBER})"
+)
 # The ending verb, then the document it ends.
 _ENDS_NEXT = re.compile(
     rf"(?:\bbai bo\s+(?:cac\s+)?|{_TYPE} nay thay the\s+(?:cho\s+)?(?:cac\s+)?"
@@ -53,10 +62,12 @@ _ENDS_PREVIOUS = re.compile(
 # "... hết hiệu lực:" or "Nghị định này thay thế:" opens a list of ended documents.
 _LIST_OPENER = re.compile(
     rf"(?:het hieu luc(?: thi hanh)?|bai bo|{_TYPE} nay thay the(?: cho)?)"
-    rf"(?:\s+(?:cac|nhung) van ban(?: sau(?: day)?)?)?\s*:\s*"
+    rf"(?:\s+(?:cac|nhung) (?:van ban|{_TYPE})(?: sau(?: day)?)?)?\s*:\s*"
 )
 # An item may start with a page number left by OCR ("16 j) Thông tư số ...").
-_LIST_ITEM = re.compile(rf"^\W*(?:\d{{1,3}}\W+)?(?:[a-z0-9][.)]\s*)?\W*{_NAMED}")
+_LIST_ITEM = re.compile(
+    rf"^\W*(?:\d{{1,3}}\W+)?(?:[a-z0-9][.)]\s*)?\W*(?:{_NAMED}|{_AMENDING_LAW})"
+)
 # A numbered clause ("4. Thông tư này ...") ends a list.
 _NEXT_CLAUSE = re.compile(r"(?:^|\s)\d{1,2}\.\s+[a-z]")
 # "... tiếp tục có hiệu lực thi hành đến (hết) ngày 30 tháng 6 năm 2022": ends the next day.
@@ -80,6 +91,15 @@ _EFFECTIVE_FROM = re.compile(
     r"(?:co hieu luc|hieu luc thi hanh)[^.;]{0,40}?(?:tu|ke tu)\s+ngay\s+"
     r"(?P<day>\d{1,2})\s*(?:/|-|thang)\s*(?P<month>\d{1,2})\s*(?:/|-|nam)\s*(?P<year>\d{4})"
 )
+# "Luật Quản lý thuế số X đã được sửa đổi, bổ sung một số điều theo Luật số A, Luật số B ...
+# hết hiệu lực": the ended law's name, then its amending laws. OCR writes "bể sung" and bars.
+_AMENDED_BY = re.compile(
+    rf"\b(?P<law>luat\s(?:(?!(?<!phap )luat\b)[^.;:]){{1,80}}?)\s+(?:so\s+)?(?<![\d/])(?:{_NUMBER})"
+    rf"\s+(?:da duoc\s+)?sua doi,?\s+b[oe] sung(?:\s+mot so dieu)?[\s|]*(?:theo|bang)\s+"
+    rf"(?={_TYPE})"
+)
+# The title of a law amending one law: "Luật sửa đổi, bổ sung một số điều của Luật quản lý thuế".
+_AMENDS_LAW = re.compile(r"^luat sua doi,? bo sung (?:mot so dieu )?cua (?P<law>luat .+)$")
 _GUIDES = re.compile(r"\b(?:huong dan|quy dinh chi tiet)\b")
 _AMENDS = re.compile(r"\bsua doi\b")
 
@@ -198,6 +218,44 @@ def explicit_targets(text: str) -> set[str]:
     return targets
 
 
+def amending_law_targets(text: str) -> dict[str, str]:
+    """Amending laws, folded, of a law this passage says ends as amended, with that law's name.
+
+    The ended law itself is found by ``explicit_targets``. An amending law often also amends
+    other laws in passing, so it ends with this one only if its title amends this law alone
+    (``amends_only``), which the caller checks.
+    """
+
+    targets: dict[str, str] = {}
+    for sentence in re.split(r"(?<=[.;])\s", normalize(text)):
+        if _STILL_APPLIES.search(sentence):
+            continue
+        for match in _AMENDED_BY.finditer(sentence):
+            first = _NAMED_PATTERN.match(sentence, match.end())
+            if not first:
+                continue
+            run = {first["number"]} | _run_after(sentence, first.end())
+            if re.match(r"[^.;:]{0,80}?\bhet hieu luc\b", sentence[_run_end(sentence, first) :]):
+                targets.update(dict.fromkeys(run, match["law"]))
+    return targets
+
+
+def _run_end(sentence: str, first: re.Match[str]) -> int:
+    position = first.end()
+    while (gap := _RUN_GAP.match(sentence, position)) and (
+        named := _RUN_ITEM.match(sentence, gap.end())
+    ):
+        position = named.end()
+    return position
+
+
+def amends_only(title: str, law: str) -> bool:
+    """Whether a title is that of a law amending only the law named ``law`` (folded)."""
+
+    match = _AMENDS_LAW.match(normalize(title))
+    return match is not None and match["law"] == law
+
+
 def opens_list(text: str) -> bool:
     """Whether this passage opens a list of ended documents."""
 
@@ -223,7 +281,7 @@ def _list_items(folded_list: str) -> set[str]:
     for item in re.split(r";\s*|\.\s+", folded_list[: end.start() if end else None]):
         item_match = _LIST_ITEM.match(item)
         if item_match:
-            targets.add(item_match["number"])
+            targets.add(item_match["number"] or item_match["amending"])
             targets |= _run_after(item, item_match.end())
     return targets
 
@@ -236,10 +294,10 @@ def _run_after(text: str, position: int) -> set[str]:
         gap = _RUN_GAP.match(text, position)
         if not gap:
             return numbers
-        named = _NAMED_PATTERN.match(text, gap.end())
+        named = _RUN_ITEM.match(text, gap.end())
         if not named:
             return numbers
-        numbers.add(named["number"])
+        numbers.add(named["number"] or named["bare"])
         position = named.end()
 
 

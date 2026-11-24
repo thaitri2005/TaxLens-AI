@@ -18,10 +18,13 @@ from sqlalchemy import select
 from taxlens.db import SessionLocal
 from taxlens.legal_data.models import DocumentChunk, DocumentVersion, LegalDocument
 from taxlens.retrieval.repeals import (
+    amending_law_targets,
+    amends_only,
     effective_date_in,
     explicit_targets,
     infer_repeals,
     list_continuation_targets,
+    normalize,
     opens_list,
     sunset_targets,
 )
@@ -33,6 +36,9 @@ def main() -> None:
     arguments = parser.parse_args()
 
     found: list[tuple[str, str]] = []
+    # Amending laws named with a law that ends as amended, with that law's name and the
+    # ending document; kept if they amend that law alone.
+    amending: list[tuple[str, str, str]] = []
     sunsets: list[tuple[str, str, date]] = []
     # A list split by size continues in other passages of its clause, in no stored order.
     list_opened: set[tuple[object, str | None, str | None]] = set()
@@ -63,6 +69,9 @@ def main() -> None:
             recorded[number] = effective
             issued_on[number] = issued
             found.extend((target, number) for target in explicit_targets(content))
+            amending.extend(
+                (target, law, number) for target, law in amending_law_targets(content).items()
+            )
             sunsets.extend((target, number, day) for target, day in sunset_targets(content).items())
             part = (version, article, clause)
             if opens_list(content):
@@ -80,6 +89,12 @@ def main() -> None:
         chosen = recorded.get(by) or (own[1] if own else None) or issued
         return max(chosen, issued) if chosen and issued else chosen
 
+    by_folded = {normalize(number): number for number in titles}
+    found.extend(
+        (target, by)
+        for target, law, by in amending
+        if amends_only(titles.get(by_folded.get(target, "")) or "", law)
+    )
     for part, pairs in continued.items():
         if part in list_opened:
             found.extend(pairs)

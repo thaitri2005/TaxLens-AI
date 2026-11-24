@@ -233,3 +233,70 @@ def test_a_list_item_naming_two_documents_ends_both() -> None:
         "đ) Thông tư số 19/2021/TT-BTC và Thông tư số 46/2024/TT-BTC; e) Thông tư số 1/2020/TT-BTC."
     )
     assert list_continuation_targets(rest) == {"19/2021/tt-btc", "46/2024/tt-btc", "1/2020/tt-btc"}
+
+
+def test_a_run_after_a_colon_with_bare_numbers_ends_each_of_them() -> None:
+    replaced = (
+        "1. Nghị định này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2009 và thay thế các "
+        "Nghị định: số 158/2003/NĐ-CP ngày 10 tháng 12 năm 2003, số 148/2004/NĐ-CP ngày 23 "
+        "tháng 7 năm 2004 và số 156/2004/NĐ-CP ngày 09 tháng 8 năm 2004."
+    )
+    assert explicit_targets(replaced) == {"158/2003/nd-cp", "148/2004/nd-cp", "156/2004/nd-cp"}
+    # OCR writes "sô" for "số".
+    repealed = (
+        "2. Bãi bỏ các Nghị định: số 97/2007/NĐ-CP ngày 07 tháng 6 năm 2007 và sô 18/2009/NĐ-CP "
+        "ngày 18 tháng 2 năm 2009 của Chính phủ quy định về xử phạt vi phạm hành chính."
+    )
+    assert explicit_targets(repealed) == {"97/2007/nd-cp", "18/2009/nd-cp"}
+
+
+def test_a_list_of_replaced_laws_ends_the_amending_law() -> None:
+    text = (
+        "2. Luật này thay thế các luật sau đây: a) Luật thuế giá trị gia tăng năm 1997; b) Luật "
+        "sửa đổi, bổ sung một số điều của Luật thuế giá trị gia tăng số 07/2003/QH11; 3. Bãi bỏ "
+        "Điều 2 của Luật sửa đổi, bổ sung một số điều của Luật thuế tiêu thụ đặc biệt."
+    )
+    assert explicit_targets(text) == {"07/2003/qh11"}
+
+
+def test_a_list_item_guiding_another_document_ends_only_the_guide() -> None:
+    text = (
+        "Bãi bỏ các văn bản sau: a) Thông tư hướng dẫn Nghị định số 158/2003/NĐ-CP; "
+        "b) Thông tư số 1/2020/TT-BTC."
+    )
+    assert explicit_targets(text) == {"1/2020/tt-btc"}
+
+
+def test_a_title_naming_an_amending_law_and_a_decree_ends_neither() -> None:
+    text = (
+        "Bãi bỏ các văn bản sau: a) Thông tư số 156/2013/TT-BTC ngày 06/11/2013 hướng dẫn thi hành "
+        "một số điều của Luật quản lý thuế; Luật sửa đổi, bổ sung một số điều của Luật quản lý "
+        "thuế và Nghị định số 83/2013/NĐ-CP ngày 22/7/2013 của Chính phủ; "
+        "b) Thông tư số 1/2020/TT-BTC."
+    )
+    assert explicit_targets(text) == {"156/2013/tt-btc", "1/2020/tt-btc"}
+
+
+def test_a_law_ending_as_amended_names_its_amending_laws() -> None:
+    from taxlens.retrieval.repeals import amending_law_targets, amends_only
+
+    text = (
+        "3. Luật Quản lý thuế số 78/2006/QH11 đã được sửa đổi, bể sung một số điều | theo Luật "
+        "số 21/2012/QH13, Luật số 71/2014/QH13 và Luật số 106/2016/QH13 hết hiệu lực kể từ ngày "
+        "Luật này có hiệu lực thi hành."
+    )
+    assert explicit_targets(text) == {"78/2006/qh11"}
+    law = "luat quan ly thue"
+    assert amending_law_targets(text) == dict.fromkeys(
+        ["21/2012/qh13", "71/2014/qh13", "106/2016/qh13"], law
+    )
+    unended = "Luật số 78/2006/QH11 đã được sửa đổi, bổ sung theo Luật số 21/2012/QH13."
+    assert not amending_law_targets(unended)
+    # Only a law amending that law alone ends with it.
+    assert amends_only("LUẬT SỬA ĐỔI, BỔ SUNG MỘT SỐ ĐIỀU CỦA LUẬT QUẢN LÝ THUẾ", law)
+    assert not amends_only("Luật sửa đổi, bổ sung một số điều của Luật sở hữu trí tuệ", law)
+    assert not amends_only(
+        "Luật sửa đổi, bổ sung một số điều của Luật thuế giá trị gia tăng, Luật thuế tiêu thụ "
+        "đặc biệt và Luật quản lý thuế",
+        law,
+    )

@@ -115,10 +115,12 @@ future ending takes effect by itself.
 | `amendment` | It amends a document that ended (`ended_by`) | Kept, noted | "May have ended" |
 
 Only the first two act, as no legal expert has validated the inferred rules. On `corpus-v2.1`, as of
-23/11/2026, that leaves out 729 documents (3 more end later) and flags 127; answers use a flagged
+24/11/2026, that leaves out 753 documents (3 more end later) and flags 119; answers use a flagged
 document only when too few others are found. An explicit statement may end a run of documents ("thay
-thế các Thông tư số X ngày …, Thông tư số Y … và Thông tư số Z"): the run continues through items
-separated only by a date, an issuer, and a comma or "và", so a title or a part stops it. In evaluation it gives recall
+thế các Thông tư số X ngày …, Thông tư số Y … và Thông tư số Z", or "các Nghị định: số X …, số Y"): the
+run continues through items separated only by a date, an issuer, and a comma or "và", so a title or a
+part stops it. A law said to end "as amended by Luật số A, Luật số B" ends A and B too, but only those
+whose title amends that law alone: amending laws often change other laws in passing. In evaluation it gives recall
 0.31, 0.42, 0.45 at K = 5, 10, 20, against 0.10, 0.30, 0.41 without it ([status](evaluation-status.md#results)). Search pages show the same tags but leave nothing out, since
 looking up an old document is a normal use.
 

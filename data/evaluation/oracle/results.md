@@ -10,6 +10,7 @@ plan: the 17 cases hold **32** provisions outside the top 20, not 30 (a miscount
 | --- | --- | --- | --- |
 | `oracle-draft-unchecked` | First drafts; 17 of 30 copied 4-5 words, mostly terms of art | 0.19 / 0.25 / 0.50 | 0.31 / 0.47 / 0.64 |
 | **`oracle-draft`** | All 30 within the copy rule | **0.19 / 0.25 / 0.47** | **0.29 / 0.47 / 0.62** |
+| `oracle-draft-item19` | The same, endings list after item 19 (24/11/2026) | 0.25 / 0.28 / 0.53 | 0.31 / 0.47 / 0.64 |
 
 Baseline (the question alone): 0.31 / 0.47 / 0.53. M2 against it, case by case: K = 5 none up, one down;
 K = 10 two up, two down; K = 20 four up, one down.
@@ -33,3 +34,14 @@ Why named issues still fail, from the top results of the unrecovered queries:
 So item 16 (naming the governing law) would not pay before retrieval keeps superseded law out of the
 way. The next step is the endings list's reach to old documents (for example, a document replaced by a
 later one on the same subject from the same issuer), then this oracle again.
+
+## After item 19 (24/11/2026)
+
+Most of that superseded law had an explicit ending the rules could not read (158/2003, 07/2003, 18/2009,
+21/2012; 129/2013 is ended only in part, rightly kept). With 30 more endings, the baseline is identical
+case by case, and M1 at K = 10 is 28%: now just inside the plan's middle band (25-50%), so both causes
+count. L4 and A7 recover provisions; 15 of 32 stay outside the top 20. Their top 10 is now held by
+documents with no ending stated anywhere in the corpus: the 2013 penalties circular 166/2013, the 2010
+customs circular 194/2010, 123/2004, 176/2010, and 1990s ministry texts (`27/TCT`, `101 TC/TCT`), plus
+current law on neighbouring subjects. Only an outside status source, or the inferred rules once a tax
+expert validates them, can end these.

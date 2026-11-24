@@ -4,6 +4,16 @@ What each working stint changed, newest first. Current state and the to-do list 
 [evaluation-status.md](evaluation-status.md); every measurement is in
 [retrieval-experiments.md](retrieval-experiments.md).
 
+## 24/11/2026
+
+- **Oracle issue experiment** (Prof. Thanh's suggestion), draft queries pending Le Hung's review: told
+  the right legal issue, search finds only 25% of the missed provisions in the top 10. Retrieval, not
+  naming the issue, is the bottleneck; superseded law outranked current law
+  ([results](../data/evaluation/oracle/results.md)).
+- **Item 19:** 30 more endings read from the corpus (lists after a colon, lists of replaced laws, laws
+  ending as amended), loaded on Azure: 753 documents left out, 119 flagged. Recall identical; oracle
+  25% → 28% at K = 10. The rest of the old law in the way has no ending stated in the corpus.
+
 ## 23/11/2026 (stint report)
 
 Live: release `7662082` (code as of `e32fe74`), corpus `corpus-v2.1`, endings list rebuilt 23/11/2026.
