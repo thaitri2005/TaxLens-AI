@@ -163,6 +163,10 @@ L = more. Mark each done here when finished. **No numbered item is open (24/11/2
 
 ### For people, not code
 
+An, a tax expert introduced by Prof. Thanh (24/11/2026), has a review page for items 1, 4 and the
+answer grades: 25 flagged endings, 13 old documents with no recorded ending, the essential provisions of
+the 17 hard cases, and the 16 graded answers ([packet](../data/evaluation/expert-review/README.md)).
+
 Waiting on a person (24/11/2026); code items above that depend on one say so.
 
 1. ~~Check the oracle queries~~ **done 24/11/2026** by Le Hung (first pass accepted as proposed). Of the
