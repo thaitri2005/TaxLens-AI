@@ -26,3 +26,6 @@ infra/terraform/.terraform-local/
 .DS_Store
 .vscode/
 *.tsbuildinfo
+
+# Cross-encoder score caches (scripts/evaluate_tax_retrieval.py --rerank-cache), rebuilt on demand
+data/evaluation/runs/rerank-cache-*.json
