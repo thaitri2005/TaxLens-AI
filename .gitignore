@@ -29,3 +29,6 @@ infra/terraform/.terraform-local/
 
 # Cross-encoder score caches (scripts/evaluate_tax_retrieval.py --rerank-cache), rebuilt on demand
 data/evaluation/runs/rerank-cache-*.json
+
+# Email drafts (private correspondence)
+emails/
