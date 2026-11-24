@@ -54,6 +54,9 @@ def main() -> None:
     parser.add_argument("--judge-model", default="Qwen/Qwen3-235B-A22B-Instruct-2507")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--regrade", type=Path, help="A report whose ungraded cases to grade")
+    parser.add_argument(
+        "--cases-from", type=Path, help="Answer only the cases of this earlier report, to compare"
+    )
     arguments = parser.parse_args()
 
     settings = get_settings()
@@ -68,7 +71,11 @@ def main() -> None:
                 report["verdict"], report["reason"] = _grade(judge, report)
                 print(f"{report['case_id']}: {report['verdict']}", flush=True)
     else:
-        answer_model, reports = settings.hf_chat_model, _answer(arguments.dataset)
+        only = None
+        if arguments.cases_from:
+            earlier = json.loads(arguments.cases_from.read_text(encoding="utf-8"))["cases"]
+            only = {case["case_id"] for case in earlier}
+        answer_model, reports = settings.hf_chat_model, _answer(arguments.dataset, only)
         for report in reports:
             report["verdict"], report["reason"] = _grade(judge, report)
             print(f"{report['case_id']}: {report['status']}, {report['verdict']}", flush=True)
@@ -89,10 +96,14 @@ def main() -> None:
     print("summary:", summary)
 
 
-def _answer(dataset: Path) -> list[dict[str, Any]]:
-    """Each gold case answered as the site answers it."""
+def _answer(dataset: Path, only: set[str] | None = None) -> list[dict[str, Any]]:
+    """Each gold case (or those in ``only``) answered as the site answers it."""
 
-    rows = list(csv.DictReader(dataset.open(encoding="utf-8-sig")))
+    rows = [
+        row
+        for row in csv.DictReader(dataset.open(encoding="utf-8-sig"))
+        if only is None or row["case_id"] in only
+    ]
     embedding_provider = get_embedding_provider()
     reports: list[dict[str, Any]] = []
     with SessionLocal() as session:

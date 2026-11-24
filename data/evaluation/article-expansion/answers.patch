@@ -1,0 +1,317 @@
+diff --git a/src/taxlens/intelligence/qa.py b/src/taxlens/intelligence/qa.py
+index f8818e3..066b236 100644
+--- a/src/taxlens/intelligence/qa.py
++++ b/src/taxlens/intelligence/qa.py
+@@ -2,12 +2,13 @@ import json
+ import logging
+ import re
+ from collections.abc import Sequence
+-from dataclasses import dataclass, field
++from dataclasses import dataclass, field, replace
+ from datetime import date
+ from enum import StrEnum
+ from functools import lru_cache
+ from time import perf_counter
+ from typing import Any, TypedDict
++from uuid import UUID
+ 
+ from langchain_core.prompts import PromptTemplate
+ from langgraph.graph import END, START, StateGraph
+@@ -24,6 +25,7 @@ from taxlens.intelligence.evidence import (
+ from taxlens.intelligence.planning import QueryIntent, QueryPlan, plan_query
+ from taxlens.retrieval.citations import Citation, build_citation
+ from taxlens.retrieval.embeddings import EmbeddingProvider
++from taxlens.retrieval.expansion import PASSAGE_WINDOW, Window, article_windows
+ from taxlens.retrieval.repeals import ending_note, today_in_vietnam
+ from taxlens.retrieval.search import SearchResult, hybrid_search_chunks
+ from taxlens.retrieval.snippets import lexical_support
+@@ -108,6 +110,7 @@ class QuestionGraphState(TypedDict, total=False):
+     retrieval_limit: int
+     query_plan: QueryPlan
+     results: list[SearchResult]
++    windows: dict[UUID, Window]
+     evidence: EvidenceAssessment
+     citations: list[Citation]
+     result: QuestionAnswer
+@@ -170,7 +173,8 @@ def _retrieve_evidence_node(state: QuestionGraphState) -> dict[str, object]:
+         query_plan.filters.current_on,
+         query_plan.filters.as_of,
+     )
+-    return {"results": chosen[:limit]}
++    evidence = chosen[:limit]
++    return {"results": evidence, "windows": article_windows(state["session"], evidence)}
+ 
+ 
+ def prefer_not_ended(results: Sequence[SearchResult], on: date | None) -> list[SearchResult]:
+@@ -197,12 +201,21 @@ def _assess_evidence_node(state: QuestionGraphState) -> dict[str, object]:
+     # Generation only sees the selected evidence, so citation numbers must follow it too.
+     cited_results = list(evidence.results) if evidence.is_sufficient else results
+     question = state["query_plan"].original_query
++    windows = state.get("windows", {})
+     return {
+         "evidence": evidence,
+-        "citations": [build_citation(result, question) for result in cited_results],
++        "citations": [
++            _cite(build_citation(result, question), windows.get(result.chunk.id))
++            for result in cited_results
++        ],
+     }
+ 
+ 
++def _cite(citation: Citation, window: Window | None) -> Citation:
++    # A window holding other clauses of the article supports a fact only at article level.
++    return replace(citation, clause_number=None) if window and window.expanded else citation
++
++
+ def _route_supported_query(state: QuestionGraphState) -> str:
+     return "unsupported" if state["query_plan"].intent is QueryIntent.UNSUPPORTED else "assess"
+ 
+@@ -239,9 +252,10 @@ def _generate_answer_node(state: QuestionGraphState) -> dict[str, object]:
+     evidence = state["evidence"]
+     results = list(evidence.results)
+     citations = state.get("citations", [])
++    windows = state.get("windows", {})
+     try:
+         completion = state["chat_provider"].complete(
+-            ChatRequest(messages=_build_messages(query_plan, results, citations))
++            ChatRequest(messages=_build_messages(query_plan, results, citations, windows))
+         )
+     except ChatProviderError:
+         result = _safe_answer(
+@@ -276,7 +290,9 @@ def _generate_answer_node(state: QuestionGraphState) -> dict[str, object]:
+             )
+         }
+ 
+-    supported_facts = [fact for fact in generated.confirmed_facts if _is_supported(fact, results)]
++    supported_facts = [
++        fact for fact in generated.confirmed_facts if _is_supported(fact, results, windows)
++    ]
+     omitted = generated.omitted_fact_count + len(generated.confirmed_facts) - len(supported_facts)
+     uncertainties = [*generated.uncertainties, *evidence.notes]
+     if omitted:
+@@ -334,7 +350,11 @@ def parse_generated_answer(content: str, citation_count: int) -> GeneratedAnswer
+     )
+ 
+ 
+-def _is_supported(fact: CitedClaim, results: Sequence[SearchResult]) -> bool:
++def _is_supported(
++    fact: CitedClaim,
++    results: Sequence[SearchResult],
++    windows: dict[UUID, Window] | None = None,
++) -> bool:
+     """Whether the cited passages contain most of the fact's words (diacritics ignored).
+ 
+     Range checks alone let a model attach any citation number to any statement; this
+@@ -342,20 +362,26 @@ def _is_supported(fact: CitedClaim, results: Sequence[SearchResult]) -> bool:
+     """
+ 
+     cited_text = " ".join(
+-        f"{results[number - 1].chunk.heading or ''} {results[number - 1].chunk.content[:2500]}"
++        f"{results[number - 1].chunk.heading or ''} {_window_text(results[number - 1], windows)}"
+         for number in fact.citation_numbers
+         if 1 <= number <= len(results)
+     )
+     return lexical_support(fact.text, cited_text) >= get_settings().qa_min_fact_support
+ 
+ 
++def _window_text(result: SearchResult, windows: dict[UUID, Window] | None) -> str:
++    window = (windows or {}).get(result.chunk.id)
++    return window.text if window else result.chunk.content[:PASSAGE_WINDOW]
++
++
+ def _build_messages(
+     query_plan: QueryPlan,
+     results: Sequence[SearchResult],
+     citations: Sequence[Citation],
++    windows: dict[UUID, Window] | None = None,
+ ) -> list[ChatMessage]:
+     evidence_blocks = "\n\n".join(
+-        _evidence_block(index, result, citation)
++        _evidence_block(index, result, citation, windows)
+         for index, (result, citation) in enumerate(zip(results, citations, strict=True), start=1)
+     )
+     system_prompt = (
+@@ -404,11 +430,20 @@ def _build_messages(
+     ]
+ 
+ 
+-def _evidence_block(index: int, result: SearchResult, citation: Citation) -> str:
++def _evidence_block(
++    index: int,
++    result: SearchResult,
++    citation: Citation,
++    windows: dict[UUID, Window] | None = None,
++) -> str:
++    window = (windows or {}).get(result.chunk.id)
++    clause = result.chunk.clause_number or "n/a"
++    if window and window.expanded:
++        clause += ", with neighbouring clauses of the article"
+     header = (
+         f"[{index}] {citation.document_number} | {citation.legal_status} | "
+         f"Article {citation.article_number or 'n/a'} | "
+-        f"Clause {citation.clause_number or 'n/a'} | "
++        f"Clause {clause} | "
+         f"Pages {citation.page_start or 'n/a'}-{citation.page_end or 'n/a'}"
+     )
+     # Clause-level chunks do not repeat the article title, so pass it explicitly.
+@@ -421,7 +456,7 @@ def _evidence_block(index: int, result: SearchResult, citation: Citation) -> str
+         today_in_vietnam(),
+     )
+     ending = f"\nEnding: {note}" if note else ""
+-    return f"{header}{heading}{ending}\n{result.chunk.content[:2500]}"
++    return f"{header}{heading}{ending}\n{_window_text(result, windows)}"
+ 
+ 
+ def _safe_answer(
+diff --git a/tests/test_qa.py b/tests/test_qa.py
+index 4022d13..93559c7 100644
+--- a/tests/test_qa.py
++++ b/tests/test_qa.py
+@@ -264,3 +264,57 @@ def test_parse_generated_answer_keeps_bounded_practical_advice() -> None:
+ 
+     assert answer.practical_advice[0] == "Kiểm tra hàm lượng đường trên nhãn."
+     assert len(answer.practical_advice) == 4
++
++
++def test_fill_window_adds_neighbours_nearest_first_each_whole() -> None:
++    from taxlens.retrieval.expansion import fill_window
++
++    # Clause 2 found; clause 3 fits, clause 1 then does not, clause 4 does.
++    assert fill_window([900, 1000, 800, 300], 1, 2500) == [1, 2, 3]
++    assert fill_window([400, 3000], 1, 2500) == [1]
++    assert fill_window([100, 100, 100], 0, 2500) == [0, 1, 2]
++
++
++def test_answer_reads_the_neighbouring_clause_and_cites_the_article() -> None:
++    engine = _create_engine_with_evidence()
++    with Session(engine) as session:
++        version_id = session.query(DocumentChunk.document_version_id).scalar()
++        session.add_all(
++            [
++                DocumentChunk(
++                    document_version_id=version_id,
++                    article_number="2",
++                    clause_number="1",
++                    page_start=2,
++                    page_end=2,
++                    content="1. Late payment interest applies when taxpayers pay late.",
++                    token_count=9,
++                ),
++                DocumentChunk(
++                    document_version_id=version_id,
++                    article_number="2",
++                    clause_number="2",
++                    page_start=2,
++                    page_end=2,
++                    content="2. The rate is 0.03 percent per day of the unpaid amount.",
++                    token_count=11,
++                ),
++            ]
++        )
++        session.commit()
++    provider = FakeChatProvider(
++        '{"answer":"0.03% a day.","confirmed_facts":[{"text":"The rate is 0.03 percent per '
++        'day of the unpaid amount.","citation_numbers":[1]}],"uncertainties":[],'
++        '"review_actions":[]}'
++    )
++
++    with Session(engine) as session:
++        answer = answer_question(session, "late payment interest", provider, retrieval_limit=1)
++
++    prompt = provider.requests[0].messages[1].content
++    assert "Clause 1, with neighbouring clauses of the article" in prompt
++    assert "0.03 percent per day" in prompt
++    assert [fact.text for fact in answer.confirmed_facts] == [
++        "The rate is 0.03 percent per day of the unpaid amount."
++    ]
++    assert [(c.article_number, c.clause_number) for c in answer.citations] == [("2", None)]
+diff --git a/src/taxlens/retrieval/expansion.py b/src/taxlens/retrieval/expansion.py
+new file mode 100644
+index 0000000..628c3a0
+--- /dev/null
++++ b/src/taxlens/retrieval/expansion.py
+@@ -0,0 +1,84 @@
++"""Article expansion: fill an evidence passage's window with the rest of its article.
++
++Search finds clauses, and the clause a question needs is often the next one of the same article
++(the rate after the cases, the exception after the rule), or a clause with little text of its
++own ("10% applies to goods not in clauses 1 and 2"). Answers send each passage cut to a window;
++most clauses fill a fraction of it, so the rest of the window takes the article's other passages,
++nearest first, each whole or not at all. Measured in data/evaluation/article-expansion.
++"""
++
++from collections.abc import Sequence
++from dataclasses import dataclass
++from uuid import UUID
++
++from sqlalchemy import func, select
++from sqlalchemy.orm import Session
++
++from taxlens.legal_data.models import DocumentChunk
++from taxlens.retrieval.search import SearchResult
++
++# The characters of each passage answers send to the model and check facts against.
++PASSAGE_WINDOW = 2500
++
++
++@dataclass(frozen=True)
++class Window:
++    text: str
++    expanded: bool
++    """Whether text from other passages of the article was added."""
++
++
++def fill_window(sizes: Sequence[int], position: int, window: int) -> list[int]:
++    """Indexes, in reading order, of the passages that fit with the one at ``position``.
++
++    Neighbours are tried nearest first (next, then previous, then outward), each whole.
++    """
++
++    chosen = [position]
++    used = sizes[position]
++    for step in range(1, len(sizes)):
++        for index in (position + step, position - step):
++            if 0 <= index < len(sizes) and used + sizes[index] <= window:
++                used += sizes[index]
++                chosen.append(index)
++    return sorted(chosen)
++
++
++def article_windows(
++    session: Session, results: Sequence[SearchResult], window: int = PASSAGE_WINDOW
++) -> dict[UUID, Window]:
++    """Each result's window text, by passage id."""
++
++    windows = {}
++    for result in results:
++        chunk = result.chunk
++        passages = _article_passages(session, chunk) if chunk.article_number else []
++        ids = [passage.id for passage in passages]
++        if chunk.id not in ids:
++            windows[chunk.id] = Window(chunk.content[:window], False)
++            continue
++        chosen = fill_window([len(p.content) for p in passages], ids.index(chunk.id), window)
++        text = "\n".join(passages[index].content for index in chosen)
++        windows[chunk.id] = Window(text[:window], len(chosen) > 1)
++    return windows
++
++
++def _article_passages(session: Session, chunk: DocumentChunk) -> list[DocumentChunk]:
++    """The article's passages in reading order, as the document view orders them."""
++
++    return list(
++        session.scalars(
++            select(DocumentChunk)
++            .where(
++                DocumentChunk.document_version_id == chunk.document_version_id,
++                DocumentChunk.article_number == chunk.article_number,
++            )
++            .order_by(
++                DocumentChunk.page_start.asc().nulls_last(),
++                DocumentChunk.clause_number.is_not(None),
++                func.length(DocumentChunk.clause_number),
++                DocumentChunk.clause_number,
++                DocumentChunk.id,
++            )
++        )
++    )

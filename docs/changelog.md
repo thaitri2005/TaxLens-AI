@@ -26,6 +26,11 @@ What each working stint changed, newest first. Current state and the to-do list 
 - **Item 19:** 30 more endings read from the corpus (lists after a colon, lists of replaced laws, laws
   ending as amended), loaded on Azure: 753 documents left out, 119 flagged. Recall identical; oracle
   25% → 28% at K = 10. The rest of the old law in the way has no ending stated in the corpus.
+- **Item 20, article expansion, rejected:** filling each evidence passage's window with its article
+  raises the share of essential provisions in the answers' 5 passages from 0.35 to 0.43, but graded
+  answers fall from 8 correct, 2 wrong to 6 correct, 3 wrong. Kept out of answers; the patch is saved
+  ([results](../data/evaluation/article-expansion/results.md)). `grade_answers.py --cases-from` answers
+  only an earlier report's cases, so runs stay comparable as the gold set grows.
 
 ## 23/11/2026 (stint report)
 
