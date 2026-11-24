@@ -1,0 +1,1086 @@
+{
+"endings": [
+{
+"id": "end-01",
+"document": "89/98/TT/BTC",
+"title": "Hướng dẫn thi hành Nghị định số 28/1998/NĐ-CP ngày 11 tháng 5 năm 1998 của Chính phủ quy định chi tiết thi hành Luật thuế giá trị gia tăng (GTGT)",
+"rule": "guidance",
+"parent": "28/1998/NĐ-CP",
+"inferred_end": "2001-01-01",
+"cases": [
+"A1",
+"A15",
+"A2",
+"A20",
+"A21",
+"A22",
+"A23",
+"A3",
+"A4",
+"A5",
+"A6",
+"A7",
+"A8",
+"A9",
+"L2",
+"L3",
+"L4"
+]
+},
+{
+"id": "end-02",
+"document": "26/2015/TT-BTC",
+"title": "Hướng dẫn về thuế gỉá trị gia tăng và quản lý thuế tai Nghị đinh số 12/2015/NĐ-CP ngày 12 tháng 2 năm 2015 của Chính phủ quy định chi tỉết thi hành Luật sửa đổi, bổ sung một số điều của các Luật về thuế và sửa đổi, bổ sung một số điều của các Nghị định về thuế và sửa đổỉ, bổ sung môt số điều của Thồng tư số 39/2014/TT-BTC ngày 31/3/2014 của Bộ Tài chính về hóa đơn bán hàng hóa, cung ứng dịch vụ",
+"rule": "guidance",
+"parent": "12/2015/NĐ-CP",
+"inferred_end": "2025-12-15",
+"cases": [
+"A1",
+"A15",
+"A21",
+"A22",
+"A23",
+"A3",
+"A5",
+"A6",
+"A8",
+"L4"
+]
+},
+{
+"id": "end-03",
+"document": "130/2016/TT-BTC",
+"title": "Hướng dẫn Nghị định số 100/2016/NĐ-CP ngày 01 tháng 7 năm 2016 của Chính phủ quy định chi tiết thi hành Luật sửa đổi, bổ sung một sô điều của Luật Thuế giá trị gia tăng, Luật Thuế tiêu thụ đặc biệt và Luật Quản lý thuế và sửa đổi một số điều tại các Thông tư về thuế",
+"rule": "guidance",
+"parent": "100/2016/NĐ-CP",
+"inferred_end": "2025-07-01",
+"cases": [
+"A15",
+"A2",
+"A20",
+"A21",
+"A23",
+"A4",
+"A7",
+"A8",
+"L3"
+]
+},
+{
+"id": "end-04",
+"document": "28/2011/TT-BTC",
+"title": "Hướng dẫn thi hành một số điều của Luật Quản lý thuế, hướng dẫn thi hành Nghị định số 85/2007/NĐ-CP ngày 25/5/2007 và Nghị định số 106/2010/NĐ-CP ngày 28/10/2010 của Chính phủ",
+"rule": "guidance",
+"parent": "85/2007/NĐ-CP",
+"inferred_end": "2013-09-15",
+"cases": [
+"A15",
+"A16",
+"A2",
+"A20",
+"A3",
+"A7",
+"L6",
+"R5"
+]
+},
+{
+"id": "end-05",
+"document": "99/98/TT/BTC",
+"title": "Hướng dẫn thi hành Nghị định số 30/1998/NĐ-CP ngày 13 tháng 5 năm 1998 của Chính phủ qui định chi tiết thi hành Luật thuế thu nhập doanh nghiệp.",
+"rule": "guidance",
+"parent": "30/1998/NĐ-CP",
+"inferred_end": "2004-01-01",
+"cases": [
+"A10",
+"A13",
+"A14",
+"A2",
+"A6",
+"A9",
+"L5"
+]
+},
+{
+"id": "end-06",
+"document": "151/2014/TT-BTC",
+"title": "Hướng dẫn thi hành Nghị định số 91/2014/NĐ-CP ngày 01 tháng 10 năm 2014 của Chính phủ về việc sửa đổi, bổ sung một số điều tại các Nghị định quy định về thuế",
+"rule": "guidance",
+"parent": "91/2014/NĐ-CP",
+"inferred_end": "2025-12-15",
+"cases": [
+"A14",
+"A15",
+"A16",
+"A3",
+"A5",
+"L4"
+]
+},
+{
+"id": "end-07",
+"document": "175/98/TT/BTC",
+"title": "Hướng dẫn thi hành Nghị định số 102/1998/NĐ-CP ngày 21/12/1998 của Chính phủ sửa đổi, bổ sung một số điều của Nghị định số 28/1998/NĐ-CP ngày 11/5/1998 của Chính phủ quy định chi tiết thi hành Luật thuế giá trị gia tăng",
+"rule": "guidance",
+"parent": "102/1998/NĐ-CP",
+"inferred_end": "2001-01-01",
+"cases": [
+"A1",
+"A2",
+"A20",
+"A7",
+"L4"
+]
+},
+{
+"id": "end-08",
+"document": "119/2014/TT-BTC",
+"title": "Sửa đổi, bổ sung một số điều của Thông tư số 156/2013/TT-BTC ngày 06/11/2013, Thông tư số 111/2013/TT-BTC ngày 15/8/2013, Thông tư số 219/2013/TT-BTC ngày 31/12/2013, Thông tư số 08/2013/TT-BTC ngày 10/01/2013, Thông tư số 85/2011/TT-BTC ngày 17/6/2011, Thông tư số 39/2014/TT-BTC ngày 31/3/2014 và Thông tư số 78/2014/TT-BTC ngày 18/6/2014 của Bộ Tài chính để cải cách, đơn giản các thủ tục hành chính về thuế",
+"rule": "amendment",
+"parent": "156/2013/TT-BTC",
+"inferred_end": "2022-01-01",
+"cases": [
+"A19",
+"A2",
+"A5",
+"A9",
+"L4"
+]
+},
+{
+"id": "end-09",
+"document": "141/2013/TT-BTC",
+"title": "Hướng dẫn thi hành Nghị định số 92/2013/NĐ-CP ngày 13 tháng 8 năm 2013 của Chính phủ quy định chi tiết thi hành một số điều có hiệu lực từ ngày 01 tháng 7 năm 2013 của Luật sửa đổi, bổ sung một số điều củaLuật Thuế thu nhập doanh nghiệp và Luật sửa đổi, bổ sung một số điều của Luật Thuế giá trị gia tăng",
+"rule": "guidance",
+"parent": "13/2008/QH12",
+"inferred_end": "2025-07-01",
+"cases": [
+"A10",
+"A11",
+"A17",
+"R4"
+]
+},
+{
+"id": "end-10",
+"document": "106/99/TT-BTC",
+"title": "Hướng dẫn thi hành Nghị định số 78/1999/NĐ-CP ngày 20/8/1999 của Chính phủ sửa đổi, bổ sung Nghị định số 102/1998/NĐ-CP ngày 21/12/1998 của Chính phủ sửa đổi, bổ sung một số Điều của Nghị định số 28/1998/NĐ-CP ngày 11/5/1998 của Chính phủ quy định chi tiết thi hành Luật thuế giá trị gia tăng.",
+"rule": "guidance",
+"parent": "78/1999/NĐ-CP",
+"inferred_end": "2001-01-01",
+"cases": [
+"A2",
+"A22",
+"L4"
+]
+},
+{
+"id": "end-11",
+"document": "25/2018/TT-BTC",
+"title": "Hướng dẫn Nghị định số 146/2017/NĐ-CP ngày 15 tháng 12 năm 2017 của Chính phủ và sửa đổi, bổ sung một số điều của Thông tư số 78/2014/TT-BTC ngày 18 tháng 6 năm 2014 của Bộ Tài chính, Thông tư số 111/2013/TT-BTC ngày 15 tháng 8 năm 2013 của Bộ Tài chính",
+"rule": "guidance",
+"parent": "146/2017/NĐ-CP",
+"inferred_end": "2025-12-15",
+"cases": [
+"A23",
+"A4",
+"A8"
+]
+},
+{
+"id": "end-12",
+"document": "99/1998/TT",
+"title": "Thông tư hướng dẫn thi hành Nghị định số 30/1998/NĐ-CP ngày 13 tháng 5 năm 1998 của Chính phủ quy định chi thiết thi hành Luật thuế thu nhập doanh nghiệp",
+"rule": "guidance",
+"parent": "30/1998/NĐ-CP",
+"inferred_end": "2004-01-01",
+"cases": [
+"A13",
+"A9",
+"L6"
+]
+},
+{
+"id": "end-13",
+"document": "62/2009/TT-BTC",
+"title": "Hướng dẫn sửa đổi, bổ sung Thông tư số 84/2008/TT-BTC ngày 30/9/2008 của Bộ Tài chính hướng dẫn thi hành một số điều của Luật Thuế thu nhập cá nhân và hướng dẫn thi hành Nghị định số 100/2008/NĐ-CP ngày 08/9/2008 của Chính phủ quy định chi tiết một số điều của Luật Thuế thu nhập cá nhân",
+"rule": "guidance",
+"parent": "100/2008/NĐ-CP",
+"inferred_end": "2013-07-01",
+"cases": [
+"A12",
+"A14",
+"R5"
+]
+},
+{
+"id": "end-14",
+"document": "121/2011/NĐ-CP",
+"title": "Sửa đổi, bổ sung một số điều của Nghị định số 123/2008/NĐ-CP ngày 08 tháng 12 năm 2008 của Chính phủ quy định chi tiết và hướng dẫn thi hành một số điều của Luật Thuế giá trị gia tăng",
+"rule": "guidance",
+"parent": "123/2008/NĐ-CP",
+"inferred_end": "2014-01-01",
+"cases": [
+"A21",
+"A5"
+]
+},
+{
+"id": "end-15",
+"document": "113/2011/TT-BTC",
+"title": "Sửa đổi, bổ sung Thông tư số 62/2009/TT-BTC ngày 27/3/2009, Thông tư số 02/2010/TT-BTC ngày 11/01/2010 và Thông tư số 12/2011/TT-BTC ngày 26/01/2011",
+"rule": "amendment",
+"parent": "62/2009/TT-BTC",
+"inferred_end": "2013-07-01",
+"cases": [
+"A12",
+"R5"
+]
+},
+{
+"id": "end-16",
+"document": "43/1998/TT",
+"title": "Thông tư hướng dẫn thực hiện việc miễn thuế, giảm thuế theo quy định tại Nghị định số 07/1998/NĐ-CP ngày 15/1/1998 của Chính phủ quy định chi tiết thi hành Luật Khuyến khích đầu tư trong nước",
+"rule": "guidance",
+"parent": "07/1998/NĐ-CP",
+"inferred_end": "1999-07-08",
+"cases": [
+"A22",
+"L4"
+]
+},
+{
+"id": "end-17",
+"document": "10/2017/NĐ-CP",
+"title": "Ban hành Quy chế quản lý tài chính của Tập đoàn Điện lực Việt Nam và sửa đổi, bổ sung khoản 4 Điều 4 Nghị định số 209/2013/NĐ-CP ngày 18 tháng 12 năm 2013 của Chính phủ quy định chi tiết và hướng dẫn thi hành một số điều của Luật thuế giá trị gia tăng",
+"rule": "guidance",
+"parent": "209/2013/NĐ-CP",
+"inferred_end": "2025-07-01",
+"cases": [
+"A3"
+]
+},
+{
+"id": "end-18",
+"document": "83/2013/NĐ-CP",
+"title": "Quy định chi tiết thi hành một số điều của Luật quản lý thuế và Luật sửa đổi, bổ sung một số điều của Luật quản lý thuế",
+"rule": "guidance",
+"parent": "78/2006/QH11",
+"inferred_end": "2020-07-01",
+"cases": [
+"A3"
+]
+},
+{
+"id": "end-19",
+"document": "4/2009/TT-BTC",
+"title": "Hướng dẫn thực hiện hoàn thuế giá trị gia tăng theo Nghị quyết số 30/2008/NQ-CP ngày 11/12/2008 của Chính phủ",
+"rule": "guidance",
+"parent": "30/2008/nq-cp",
+"inferred_end": "2009-04-20",
+"cases": [
+"A4"
+]
+},
+{
+"id": "end-20",
+"document": "102/CP",
+"title": "Sửa đổi bổ sung một số điều của Nghị định số 28/1998/NĐ-CP ngày 11/5/1998 quy định chi tiết thi hành Luật thuế giại trị gia tăng",
+"rule": "guidance",
+"parent": "28/1998/NĐ-CP",
+"inferred_end": "2001-01-01",
+"cases": [
+"A6"
+]
+},
+{
+"id": "end-21",
+"document": "146/2017/NĐ-CP",
+"title": "Sửa đổi, bổ sung một số điều của Nghị định số 100/2016/NĐ-CP ngày 01 tháng 7 năm 2016 và Nghị định số 12/2015/NĐ-CP ngày 12 tháng 02 năm 2015 của Chính phủ",
+"rule": "amendment",
+"parent": "12/2015/NĐ-CP",
+"inferred_end": "2025-12-15",
+"cases": [
+"A8"
+]
+},
+{
+"id": "end-22",
+"document": "92/2013/NĐ-CP",
+"title": "Quy định chi tiết thi hành một số điều có hiệu lực từ ngày 01 tháng 7 năm 2013 của Luật sửa đổi, bổ sung một số điều của Luật thuế thu nhập doanh nghiệp và Luật sửa đổi, bổ sung một số điều của Luật thuế giá trị gia tăng",
+"rule": "guidance",
+"parent": "14/2008/QH12",
+"inferred_end": "2025-10-01",
+"cases": [
+"A11"
+]
+},
+{
+"id": "end-23",
+"document": "68/2020/NĐ-CP",
+"title": "Sửa đổi, bổ sung khoản 3 Điều 8 Nghị định số 20/2017/NĐ-CP ngày 24 tháng 02 năm 2017 của Chính phủ quy định về quản lý thuế đối với doanh nghiệp có giao dịch liên kết",
+"rule": "amendment",
+"parent": "20/2017/NĐ-CP",
+"inferred_end": "2020-12-20",
+"cases": [
+"A16"
+]
+},
+{
+"id": "end-24",
+"document": "100/2016/NĐ-CP",
+"title": "Quy định chi tiết và hướng dẫn thi hành một số điều của Luật sửa đổi, bổ sung một số điều của Luật thuế giá trị gia tăng, Luật thuế tiêu thụ đặc biệt và Luật quản lý thuế",
+"rule": "guidance",
+"parent": "13/2008/QH12",
+"inferred_end": "2025-07-01",
+"cases": [
+"A23"
+]
+},
+{
+"id": "end-25",
+"document": "100/2021/TT-BTC",
+"title": "Sửa đổi, bổ sung một số điều của Thông tư số 40/2021/TT-BTC ngày 01/6/2021 của Bộ trưởng Bộ Tài chính hướng dẫn thuế giá trị gia tăng, thuế thu nhập cá nhân và quản lý thuế đối với hộ kinh doanh, cá nhân kinh doanh",
+"rule": "guidance",
+"parent": "40/2021/TT-BTC",
+"inferred_end": "2026-03-05",
+"cases": [
+"L6"
+]
+}
+],
+"old": [
+{
+"id": "old-01",
+"document": "166/2013/TT-BTC",
+"title": "Quy định chi tiết về xử phạt vi phạm hành chính về thuế",
+"issued": "2013-11-15",
+"cases": [
+"A15",
+"A16",
+"A4"
+],
+"case_dates": {
+"A15": "15/09/2026",
+"A16": "15/10/2026",
+"A4": "15/02/2026"
+}
+},
+{
+"id": "old-02",
+"document": "194/2010/TT-BTC",
+"title": "Hướng dẫn về thủ tục hải quan; kiểm tra, giám sát hải quan; thuế xuất khẩu, thuế nhập khẩu và quản lý thuế đối với hàng hoá xuất khẩu, nhập khẩu",
+"issued": "2010-12-06",
+"cases": [
+"A2",
+"A3",
+"A4"
+],
+"case_dates": {
+"A2": "15/03/2026",
+"A3": "15/03/2026",
+"A4": "15/02/2026"
+}
+},
+{
+"id": "old-03",
+"document": "16/2013/TT-BTC",
+"title": "Hướng dẫn thực hiện việc gia hạn, giảm một số khoản thu Ngân sách Nhà nước theo Nghị quỳết số 02/NQ-CP ngày 07 tháng 01 năm 2013 của Chính phủ về một sổ giải pháp tháo gỡ khó khăn cho sản xuất kinh doanh, hỗ trợ thị trường, giải quyết nợ xấu",
+"issued": "2013-02-08",
+"cases": [
+"A16",
+"A2"
+],
+"case_dates": {
+"A16": "15/10/2026",
+"A2": "15/03/2026"
+}
+},
+{
+"id": "old-04",
+"document": "149/2010/TT-BTC",
+"title": "Hướng dẫn về thuế giá trị gia tăng và quản lý hải quan đối với hàng hóa, dịch vụ bán tại khu cách ly",
+"issued": "2010-09-27",
+"cases": [
+"A1",
+"A7"
+],
+"case_dates": {
+"A1": "15/03/2026",
+"A7": "15/03/2024"
+}
+},
+{
+"id": "old-05",
+"document": "27/TCT",
+"title": "Thông tư hướng dẫn thi hành Nghị định số 05/ CP ngày 20/1/1995 của Chính phủ quy định chi tiết thi hành Pháp lệnh thuế thu nhập đối với người có thu nhập cao",
+"issued": "1995-01-01",
+"cases": [
+"A14",
+"A4"
+],
+"case_dates": {
+"A14": "15/06/2026",
+"A4": "15/02/2026"
+}
+},
+{
+"id": "old-06",
+"document": "123/2004/TT-BTC",
+"title": "Hướng dẫn thực hiện ưu đãi về thuế đối với doanh nghiệp phần mềm",
+"issued": "2004-12-22",
+"cases": [
+"A1"
+],
+"case_dates": {
+"A1": "15/03/2026"
+}
+},
+{
+"id": "old-07",
+"document": "176/2010/TT-BTC",
+"title": "Hướng dẫn doanh nghiệp trích trước vào chi phí khi xác định thu nhập chịu thuế TNDN để tạo nguồn hỗ trợ cho các huyện nghèo thực hiện Nghị quyết số 30a/2008/NQ-CP ngày 27/12/2008 của Chính phủ về Chương trình hỗ trợ giảm nghèo nhanh và bền vững đối với 61 huyện nghèo",
+"issued": "2010-11-05",
+"cases": [
+"A4"
+],
+"case_dates": {
+"A4": "15/02/2026"
+}
+},
+{
+"id": "old-08",
+"document": "41/2006/TT-BTC",
+"title": "Hướng dẫn thực hiện Quyết định số 161/2005/QĐ-TTg ngày 30/6/2005 của Thủ tướng Chính phủ về việc mở rộng thí điểm cơ sở sản xuất, kinh doanh tự kê khai, tự nộp thuế nhà đất,thuế thu nhập đối với người có thu nhập cao và thuế môn bài",
+"issued": "2006-05-12",
+"cases": [
+"A4"
+],
+"case_dates": {
+"A4": "15/02/2026"
+}
+},
+{
+"id": "old-09",
+"document": "128/2011/TT-BTC",
+"title": "Hướng dẫn thuế giá trị gia tăng và thuế thu nhập doanh nghiệp đối với cơ sở y tế công lập",
+"issued": "2011-09-12",
+"cases": [
+"A3"
+],
+"case_dates": {
+"A3": "15/03/2026"
+}
+},
+{
+"id": "old-10",
+"document": "101 TC/TCT",
+"title": "Hướng dẫn sửa đổi bổ xung thông tư số 73 TC/TCT ngày 01/09/1994",
+"issued": "1994-11-25",
+"cases": [
+"A1"
+],
+"case_dates": {
+"A1": "15/03/2026"
+}
+},
+{
+"id": "old-11",
+"document": "39/1997/TT-BTC",
+"title": "Thông tư của Bộ Tài chính hướng dẫn thi hành Nghị định số 05/CP ngày 20 tháng 1 năm 1997 của Chính phủ quy định chi tiết thi hành Pháp lệnh thuế thu nhập đối với người có thu nhập cao",
+"issued": "1997-06-26",
+"cases": [
+"A4"
+],
+"case_dates": {
+"A4": "15/02/2026"
+}
+},
+{
+"id": "old-12",
+"document": "98/TC/TCT",
+"title": "Thông tư hướng dẫn thi hành Nghị định số 97/CP ngày 27-12-1995 của Chính phủ quy định chi tiết thi hành Luật Thuế Tiêu thụ đặc biệt và các Luật sửa đổi, bổ sung một số điều của Luật Thuế Tiêu thụ đặc biệt",
+"issued": "1995-12-30",
+"cases": [
+"A16"
+],
+"case_dates": {
+"A16": "15/10/2026"
+}
+},
+{
+"id": "old-13",
+"document": "12-TC/CTN",
+"title": "Thông tư hướng dẫn thu thuế đối với các hoạt động cho thuê nhà, cho thuê đất",
+"issued": "1990-03-05",
+"cases": [
+"A14"
+],
+"case_dates": {
+"A14": "15/06/2026"
+}
+}
+],
+"cases": [
+{
+"id": "case-A1",
+"case": "A1",
+"question": "Tháng 3/2026, công ty tôi bán nước ngọt đóng chai có hàm lượng đường khoảng 8g/100ml. Thuế suất thuế GTGT là bao nhiêu?",
+"date": "15/03/2026",
+"gold_answer": "10% (sugary drinks >5g/100ml are special-consumption goods, which are excluded from the temporary 8% rate in 2026)",
+"gold_provisions": "E: VAT Law 48/2024 Art 9(3) | E: SCT Law 66/2025 Art 2(1)(l) | E: Decree 174/2025 Art 1(1)(b) + Appendix II",
+"note": null,
+"essential": [
+{
+"provision": "48/2024/QH15 Art 9(3)",
+"found": false,
+"text": "3. Mức thuế suất 10% áp dụng đối với hàng hóa, dịch vụ không quy định tại khoản 1 và khoản 2 Điều này, bao gồm cả dịch vụ được các nhà cung cấp nước ngoài không có cơ sở thường trú tại Việt Nam cung cấp cho tổ chức, cá nhân tại Việt Nam qua kênh thương mại điện tử và các nền tảng số."
+},
+{
+"provision": "66/2025/QH15 Art 2(1)",
+"found": true,
+"text": "Điều 2. Đối tượng chịu thuế 1. Hàng hóa bao gồm: a) Thuốc lá theo quy định của Luật Phòng, chống tác hại của thuốc lá; b) Rượu theo quy định của Luật Phòng, chống tác hai của rượu, bia; c) Bia theo quy định của Luật Phong, chống tác hại của rượu, bia; | d) Xe có gan động cơ dưới 24 chỗ, bao gồm: xe 6 tô chở người; xe chở người bốn bánh có gan động cơ; xe ô tô pick-up chở người; xe ô tô pick-up chở | hang cabin kép; xe 6 tô tải VAN có từ hai hàng ghế trở lên, có thiết kế vách ngăn có định giữa khoang chở người và khoang chở hang; đ) Xe mô tô hai bánh, xe mô tô ba bánh có dung tích xi lanh trên 125 cm’; | c) Máy bay, trực thăng, tàu lượn va du thuyén; - g) Xăng các loại; | h) Điều hoà nhiệt độ công suất trên 24.000 BTU đến 90.000 BTU trừ loại theo thiết kế của nha sản xuất chi dé lắp trên phương tiện vận tải bao gồm ô tô, : toa xc lửa, máy bay, trực thăng, tàu, thuyén. Trường hợp tổ chức, cá nhân sản xuất bán hoặc tổ chức, cá nhân nhập khẩu nhập tách riêng từng bộ phận là cục nóng hoặc cục lạnh thì hàng hóa bán ra hoặc nhập khẩu (cục nóng, cục lạnh) vẫn thuộc đối tượng chịu thuế tiêu thụ đặc biệt như đối với sản phẩm hoàn chỉnh (máy điều hòa nhiệt độ hoàn chỉnh); 1) Bài lá; k) Vang mã, hang mã, không bao gồm hàng mã là dé chơi trẻ em và đồ dùng dạy học; 1) Nước giải khát theo Tiêu chuẩn quốc gia (TCVN) có hàm lượng đường trên 5g/100m]. Hang hóa quy định tại khoản này là sản phẩm hoàn chỉnh, không bao gồm linh kiện để lắp ráp các hàng hóa này."
+},
+{
+"provision": "174/2025/NĐ-CP Art 1(1)",
+"found": false,
+"text": "Điều 1. Giảm thuế giá trị gia tăng 1. Giảm thuế giá trị gia tăng đối với các nhóm hàng hóa, dịch vụ đang áp dụng mức thuê suât 10%, trừ nhóm hàng hóa, dịch vụ sau: a) Viễn thông, hoạt động tài chính, ngân hàng, chứng khoán, bảo hiểm, kinh doanh bât động sản, sản phẩm kim loại, sản phâm khai khoáng (trừ than). Chi tiệt tại Phụ lục J ban hành kèm theo Nghị định này. b) San pham hang hóa va dịch vụ chiu thué tiéu thụ đặc biệt (trừ xăng). Chi tiệt tại Phụ lục II ban hành kèm theo Nghị định này. c) Việc giảm thuế giá trị gia tăng cho từng loại hàng hóa, dịch vụ quy định tại khoản 1 Điêu này được áp dụng thông nhật tại các khâu nhập khẩu, sản xuất, g1a công, kinh doanh thương mại. Trường hợp hàng hóa, dịch vụ nêu tại các Phụ lục I va II ban hành kèm theo Nghị định này thuộc đôi tượng không chịu thuê giá trị gia tăng hoặc đôi tượng chịu thuê giá trị gia tăng 5% theo quy định của Luật Thuê giá trị gia tăng thì thực hiện theo quy định của Luật Thuê giá trị gia tăng và không được giảm thuê giá trị gia tăng. - t 2 ¬ >."
+}
+]
+},
+{
+"id": "case-A2",
+"case": "A2",
+"question": "Tháng 3/2026, công ty tôi (nộp thuế GTGT theo phương pháp khấu trừ) mua gỗ keo rừng trồng chỉ qua sơ chế thông thường rồi bán lại cho một công ty khác. Công ty tôi có phải kê khai, nộp thuế GTGT không?",
+"date": "15/03/2026",
+"gold_answer": "No need to declare and pay VAT (trading stage, from 1/1/2026); 'ordinary processing' is defined by Decree 181 Art 4(1) and Circular 84/2025",
+"gold_provisions": "E: VAT Law 48/2024 Art 5(1), as amended by Law 149/2025 | E: Decree 181/2025 Art 4(1) (definition of ordinary processing) | E: Decree 181/2025 Art 4(1b), added by Decree 359/2025 Art 1(1) (trading-stage sale to enterprises: no VAT declaration/payment) | E: Circular 84/2025/TT-BNNMT Art 20(1)(c) | S: VAT Law Art 9(2)(d) | S: VAT Law Art 9(3) | S: Decree 181 Art 19(3)",
+"note": null,
+"essential": [
+{
+"provision": "48/2024/QH15 Art 5(1)",
+"found": false,
+"text": "Điều 5. Đối tượng không chịu thuế 1. Sản phẩm cây trồng, rừng trồng, chăn nuôi, thủy sản nuôi trồng, đánh bắt chưa chế biến thành các sản phẩm khác hoặc chỉ qua sơ chế thông thường của tổ chức, cá nhân tự sản xuất, đánh bắt bán ra và ở khâu nhập khẩu."
+},
+{
+"provision": "181/2025/NĐ-CP Art 4(1)",
+"found": false,
+"text": "Điều 4. Đối tượng không chịu thuế 3 ’ Đối tượng không chịu thuế thực hiện theo quy định tại Điều 5 Luật Thuế giá trị gia tăng. Một số trường hợp được quy định chỉ tiết như sau: | .. ... 1. San phẩm cây trồng, rừng trồng, chăn nuôi, thủy sản nuôi trồng, đánh bat chưa chê biên thành các sản pham khác hoặc chỉ qua sơ chế thông thường của tô chức, cá nhân tự sản xuất, đánh bắt bán ra và ở khâu nhập khẩu. Trong đó, các sản phẩm chỉ qua sơ chế thông thường là các sản phẩm mới được làm sạch, phơi, sây khô, bóc vỏ, xay xát, xay vỡ mảnh, nghiên vỡ mảnh, xay bỏ vỏ, xát bỏ vỏ, tách hạt, tách cọng, cắt, xay, đánh bóng hạt, hồ hạt, chia tach ra từng phần, bỏ xương, băm, lột da, nghiền, cán mỏng, ướp muối, đóng hộp kín khí, bảo quản lạnh (ướp lạnh, đông lạnh), bảo quản băng khí sunfuro, bao quản theo phương thức cho hóa chất dé tránh thối rita, ngâm trong dung dich lưu huỳnh hoặc ngâm trong dung dịch bảo quản khác và các hình thức bảo quản thông thường khác. \" Trường hợp không xác định được thì Bộ Nông nghiệp và Môi trường có trách nhiệm căn cứ vào quy trình sản xuất sản phẩm cây trồng, rừng trồng, chăn nuôi, thủy sản nuôi trồng, đánh bắt do người nộp thuế cung cấp dé xác định là sản phẩm chưa chê biên thành các sản phâm khác hoặc chỉ qua sơ chê thông thường của tổ chức, cá nhân tự sản xuất, đánh bắt bán ra và ở khâu nhập khẩu theo quy định của pháp luật. 2. Nhà ở thuộc tài sản công do Nhà nước bán cho người đang thuê. : Trong đó, nha ở thuộc tài sản công theo quy định của pháp luật về nhà ở. 3. Chuyển quyền sử dụng đất theo quy định của pháp luật về đất đai. 4. Các dịch vụ tài chính, ngân hàng, kinh doanh chứng khoán, thương mại sau đây: _ a) Dịch vụ cấp tín dụng theo quy định của pháp luật về các tô chức tín dụng và các khoản phí được nêu cụ thể tại Hợp đồng vay vốn của Chính phủ |…"
+},
+{
+"provision": "181/2025/NĐ-CP Art 4(1b)",
+"found": true,
+"text": "Điều 4. Đối tượng không chịu thuế 3 ’ Đối tượng không chịu thuế thực hiện theo quy định tại Điều 5 Luật Thuế giá trị gia tăng. Một số trường hợp được quy định chỉ tiết như sau: | .. ... 1. San phẩm cây trồng, rừng trồng, chăn nuôi, thủy sản nuôi trồng, đánh bat chưa chê biên thành các sản pham khác hoặc chỉ qua sơ chế thông thường của tô chức, cá nhân tự sản xuất, đánh bắt bán ra và ở khâu nhập khẩu. Trong đó, các sản phẩm chỉ qua sơ chế thông thường là các sản phẩm mới được làm sạch, phơi, sây khô, bóc vỏ, xay xát, xay vỡ mảnh, nghiên vỡ mảnh, xay bỏ vỏ, xát bỏ vỏ, tách hạt, tách cọng, cắt, xay, đánh bóng hạt, hồ hạt, chia tach ra từng phần, bỏ xương, băm, lột da, nghiền, cán mỏng, ướp muối, đóng hộp kín khí, bảo quản lạnh (ướp lạnh, đông lạnh), bảo quản băng khí sunfuro, bao quản theo phương thức cho hóa chất dé tránh thối rita, ngâm trong dung dich lưu huỳnh hoặc ngâm trong dung dịch bảo quản khác và các hình thức bảo quản thông thường khác. \" Trường hợp không xác định được thì Bộ Nông nghiệp và Môi trường có trách nhiệm căn cứ vào quy trình sản xuất sản phẩm cây trồng, rừng trồng, chăn nuôi, thủy sản nuôi trồng, đánh bắt do người nộp thuế cung cấp dé xác định là sản phẩm chưa chê biên thành các sản phâm khác hoặc chỉ qua sơ chê thông thường của tổ chức, cá nhân tự sản xuất, đánh bắt bán ra và ở khâu nhập khẩu theo quy định của pháp luật. 2. Nhà ở thuộc tài sản công do Nhà nước bán cho người đang thuê. : Trong đó, nha ở thuộc tài sản công theo quy định của pháp luật về nhà ở. 3. Chuyển quyền sử dụng đất theo quy định của pháp luật về đất đai. 4. Các dịch vụ tài chính, ngân hàng, kinh doanh chứng khoán, thương mại sau đây: _ a) Dịch vụ cấp tín dụng theo quy định của pháp luật về các tô chức tín dụng và các khoản phí được nêu cụ thể tại Hợp đồng vay vốn của Chính phủ |…"
+},
+{
+"provision": "84/2025/TT-BNNMT Art 20(1)",
+"found": false,
+"text": "Điều 20. Sửa đổi, bổ sung một số Điều của Thông tư số 26/2025/TT\u0002BNNMT ngày 24 tháng 6 năm 2025 của Bộ trưởng Bộ Nông nghiệp và Môi trường quy định về quản lý lâm sản; xử lý lâm sản, thủy sản là tài sản được xác lập quyền sở hữu toàn dân 1. Sửa đổi, bổ sung một số khoản của Điều 3 như sau: a) Sửa đổi, bổ sung khoản 6 như sau: “6. Gỗ nguyên liệu là gỗ tròn; gỗ xẻ, gỗ đẽo đã qua công đoạn bào trơn; ván ép, ván công nghiệp, bột gỗ, sợi gỗ và gỗ sơ chế thông thường được sử dụng để sản xuất sản phẩm gỗ.”; b) Sửa đổi, bổ sung khoản 9 như sau: “9. Bảng kê lâm sản là bảng kê khai, mô tả thông tin chi tiết về: gỗ nguyên liệu, sản phẩm gỗ, cây thân gỗ; thực vật rừng ngoài gỗ; động vật rừng, sản phẩm của động vật rừng; thực vật rừng ngoài gỗ; động vật, sản phẩm của động vật, thực vật ngoài gỗ, sản phẩm của thực vật ngoài gỗ thuộc loài nguy cấp, quý, hiếm, Phụ lục CITES. Bảng kê lâm sản không áp dụng đối với giống cây trồng lâm nghiệp và loài thủy sản thuộc Phụ lục CITES.”; c) Bổ sung khoản 15 vào sau khoản 14 như sau: “15. Gỗ sơ chế thông thường là gỗ sau khai thác, được xử lý qua các công đoạn chế biến ban đầu (cắt, cưa, xẻ, chẻ, bóc ván hoặc lạng ván, băm, nghiền) nhưng chưa làm thay đổi bản chất gỗ, nhằm tạo nguyên liệu hoặc bán thành phẩm phục vụ cho các công đoạn chế biến, sản xuất sản phẩm gỗ, kinh doanh tiếp theo hoặc tạo thuận lợi cho việc vận chuyển, lưu kho, bảo quản. Gỗ sơ chế thông thường bao gồm: gỗ xẻ thô, gỗ đẽo hộp mà bề mặt còn thô nhám, chưa qua công đoạn bào trơn hoặc xử lý hoàn thiện; gỗ bóc hoặc gỗ lạng chưa được ép thành ván ép hoặc các loại ván công nghiệp khác; dăm gỗ (dăm mảnh, dăm nghiền) và phụ phẩm gỗ phát sinh trong quá trình chế biến như: mùn cưa, vỏ cây, đầu mẩu, bìa bắp và dăm bào.”."
+}
+]
+},
+{
+"id": "case-A3",
+"case": "A3",
+"question": "Tháng 3/2026, công ty tôi có nhà máy thủy điện nhỏ bán điện trên thị trường điện theo hợp đồng mua bán điện. Thời điểm xác định thuế GTGT và thời điểm khai thuế là khi nào?",
+"date": "15/03/2026",
+"gold_answer": "Timing follows Decree 181 Art 16(2)(a) (payment reconciliation date for market generators); declaration per Tax Administration Law 38/2019 Art 44(1)(a)",
+"gold_provisions": "E: Decree 181/2025 Art 16(2)(a) | E: Tax Admin Law 38/2019 Art 44(1)(a) | S: Decree 181 Art 16(2)(b) | S: VAT Law 48/2024 Art 8(2)(d) | S: Decree 123/2020 Art 9(4)(h) | S: Decree 70/2025 Art 1(6)",
+"note": null,
+"essential": [
+{
+"provision": "181/2025/NĐ-CP Art 16(2)",
+"found": true,
+"text": "2. Đối với hoạt động bán điện: | a) Đối với hoạt động bán điện của các công ty phát điện trên thị trường điện, thời diém xác định thuê giá trị gia tăng được xác định căn cứ thời điêm vê đôi soát sô liệu thanh toán giữa don vi vận hành hệ thông điện và thị trường điện, đơn vị phát điện và đơn vị mua điện theo quy định của Bộ 17 ; Công Thuong hoặc hop đồng mua ban điện đã được Bộ Công Thương hướng dẫn, phê duyệt nhưng chậm nhất là ngày cuối cùng của thời hạn kê khai, nộp _ thuê đôi với tháng phát sinh nghĩa vụ thuế theo quy định pháp luật về quản lý thuế. Riêng hoạt động bán điện của các công ty phát điện có cam kết bảo lãnh của Chính phủ về thời điểm thanh toán thì thời điểm xác định thuế giá trị gia tăng căn cứ theo bảo lãnh của Chính phủ, hướng dẫn và phê duyệt của Bộ Công Thương và các hợp đồng mua bán điện đã được ký kết giữa bên mua điện và bên bán điện. b) Đối với hoạt động bán điện (trừ trường hợp nêu tại điểm a khoản này), thời điểm xác định thuê giá tri gia tăng là thời diém hoàn thành việc đôi soát dữ liệu giữa các bên nhưng chậm nhất không quá ngày 07 của tháng sau tháng phát sinh việc cung cấp điện hoặc không quá 07 ngày kể từ ngày kết thúc kỳ quy ước. Ky quy ước dé làm căn cứ tính lượng điện cung cấp căn cứ thỏa thuận giữa đơn vi cung cap điện với người mua."
+},
+{
+"provision": "38/2019/QH14 Art 44(1)",
+"found": false,
+"text": "Điều 44. Thời hạn nộp hồ sơ khai thuế 1. Thời hạn nộp hồ sơ khai thuế đối với loại thuế khai theo tháng, theo quý được quy định như sau: 30 \" a) Chậm nhất là ngày thứ 20 của tháng tiếp theo tháng phát sinh nghĩa vụ thuế đối với trường hợp khai và nộp theo tháng: b) Chậm nhất là ngày cuối cùng của tháng đầu của quý tiếp theo quý phát sinh nghĩa vụ thuế đối với trường hợp khai và nộp theo quý."
+}
+]
+},
+{
+"id": "case-A4",
+"case": "A4",
+"question": "Tháng 2/2026, công ty tôi đã được hoàn thuế GTGT cho một lô hàng xuất khẩu, nhưng khách hàng nước ngoài trả lại lô hàng. Công ty phải xử lý về thuế thế nào?",
+"date": "15/02/2026",
+"gold_answer": "File a supplementary return; repay the refunded amount for the returned goods; pay late-payment interest from the date the State Treasury paid the refund (or offset it)",
+"gold_provisions": "E: Tax Admin Law 38/2019 Art 47, as amended by Law 56/2024 Art 6(6) | E: Circular 80/2021 Art 40(3) (recovery of refund) | E: Tax Admin Law 38/2019 Art 59 (late-payment interest) | E: Circular 80/2021 Art 21 (interest from Treasury payment date) | S: Decree 126/2020 Art 7 | S: Decree 181/2025 Art 23(6)",
+"note": null,
+"essential": [
+{
+"provision": "38/2019/QH14 Art 47",
+"found": false,
+"text": "Điều 47. Khai bỗ sung hồ sơ khai thuế 1. Người nộp thuế phát hiện hồ sơ khai thuế đã nộp cho cơ quan thuế có sai, sót thi được khai bô sung hô sơ khai thuê trong thời hạn 10 năm kê từ ngày hệt thời hạn nộp hô sơ khai thuê của kỳ tính thuê có sai, sót nhưng trước khi cơ quan thuê, cơ quan có thâm quyên công bô quyết định thanh tra, kiêm tra. . 2. Khi co quan thué, co quan cé tham quyền đã công bố quyết định thanh tra, kiểm tra thuê tại trụ sở của người nộp thuê thì người nộp thuê van được khai bô sung hồ sơ khai thuê; cơ quan thuê thực hiện xử phạt vi phạm hành chính vê quản lý thuê đôi với hành vi quy định tại Điêu 142 và Điêu 143 của Luật này. 32 | 3. Sau khi cơ quan thuế, co quan có thầm quyền đã ban hành kết luận, quyết định xử lý về thuế sau thanh tra, kiêm tra tại trụ sở của người nộp thuế thì việc khai bố sung hồ sơ khai thuế được quy định như sau: a) Người nộp thuế được khai bỗ sung hồ sơ khai thuế đối với trường hợp làm tăng số tiền thuế phải nộp, giảm sô tiên thuê được khâu trừ hoặc giảm số tiền thuế được miễn, giảm, hoàn và bị xử phạt vi phạm hành chính về quản lý thuế đối với hành vi quy định tại Điêu 142 và Điều 143 của Luật này; b) Trường hợp người nộp thuế phát hiện hồ sơ khai thuế có sai, sót nếu khai bé sung làm giảm số tiên thuê phải nộp hoặc làm tăng số tiền thuế được khấu trừ, tăng số tiền thuế được miễn, giảm, hoàn thì thực hiện theo quy định về giải quyét khiêu nại về thuê. . 4. Hồ sơ khai bể sung hé sơ khai thuế bao gồm: — 8) Tờ khai bổ sung; b) Bản giải trình khai bd sung và các tài liệu có liên quan. 5. Đối với hàng hóa xuất khẩu, nhập khẩu, việc khai bd sung hồ sơ khai thuế thực hiện theo quy định của pháp luật về hải quan."
+},
+{
+"provision": "80/2021/TT-BTC Art 40(3)",
+"found": false,
+"text": "3. Trường hợp người nộp thuế đã được hoàn thuế giá trị gia tăng đối với hàng hóa xuất khẩu nhưng bị người bán trả lại hàng hóa đã xuất khẩu thì người nộp thuế phải thực hiện khai bổ sung theo quy định tại Điều 47 Luật Quản lý thuế và Điều 7 Nghị định số 126/2020/NĐ-CP; đồng thời nộp số tiền đã được hoàn tương ứng với hàng xuất khẩu bị trả lại và nộp tiền chậm nộp tương ứng theo quy định tại Điều 59 Luật Quản lý thuế và Điều 21 Thông tư này vào ngân sách nhà nước kể từ ngày được Kho bạc Nhà nước chi trả tiền hoàn hoặc ngày Kho bạc Nhà nước hạch toán bù trừ tiền hoàn thuế với khoản thu ngân sách nhà nước."
+},
+{
+"provision": "38/2019/QH14 Art 59",
+"found": false,
+"text": "Điều 59. Xử lý đối với việc chậm nộp tiền thuế 1. Các trường hợp phải nộp tiền chậm nộp bao gồm: | a) Người nộp thuế chậm nộp tiền thuế so với thời hạn quy định, thời han gia hạn nộp thuê, thời hạn ghi trong thông báo của cơ quan quản lý thuê, thời hạn trong quyết định ân định thuê hoặc quyết định xử lý của cơ quan quản lý thuê, - b) Người nộp thuế khai bô sung hồ sơ khai thuế làm tăng số tiền thuế phải nộp hoặc cơ quan quản lý thuê, cơ quan nhà nước có thẩm quyên kiêm tra, thanh tra phát hiện khai thiêu sô tiên thuế phải nộp thì phải nộp tiên chậm nộp đôi với số tiền thuê phải nộp tăng thêm kế từ ngày kế tiếp ngày cudi cùng thời hạn nộp thuế của kỳ tính thuê có sai, sót hoặc kế từ ngày hết thời hạn nộp thuê của tờ khai hải quan ban đâu; c) Người nộp thuế khai bé sung hồ sơ khai thuế làm giảm số tiền thuế đã được hoàn trả hoặc cơ quan quản lý thuế, cơ quan nhà nước có thâm quyên kiểm tra, thanh tra phát hiện số tiên thuế được hoàn nhỏ hon số tiền thuế đã hoàn thì phải nộp tiên chậm nộp đôi với số tiền thuế đã hoàn trả phải thu hoi kê từ ngày nhận được tiên hoàn trả từ ngân sách nhà nước; d) Trường hợp được nộp dan tiền thuế nợ quy định tại khoản 5 Điều 124 của Luật này; đ) Trường hợp không bị xử phạt vi phạm hành chính về quản lý thuế do hết thời hiệu xử phạt nhưng bị truy thu số tiền thuế thiếu quy định tại khoản 3 Điêu 137 của Luật này; e) Trường hợp không bị xử phạt vi phạm hành chính về quan lý thuế đối với hành vi quy định tại khoản 3 và khoản 4 Điều 142 của Luật này; g) Cơ quan, tổ chức được cơ quan quản lý thuế ủy nhiệm thu thuế chậm chuyền tiên thuê, tiên chậm nộp, tiền phạt của người nộp thuê vào ngân sách nhà nước thì phải nộp tiên chậm nộp đôi với số tiền chậm chuyên theo quy định. 2. Mức tính tiền chậm nộp và thời gian tính tiền chậm nộp được quy định như sa…"
+},
+{
+"provision": "80/2021/TT-BTC Art 21",
+"found": false,
+"text": "Điều 21. Xử lý đối với việc chậm nộp tiền thuế 1. Xác định tiền chậm nộp Việc xác định số tiền chậm nộp được căn cứ vào số tiền thuế chậm nộp, số ngày chậm nộp và mức tính tiền chậm nộp quy định tại Điều 59 Luật Quản lý thuế. Thời gian tính tiền chậm nộp được tính liên tục từ ngày tiếp theo ngày phát sinh tiền chậm nộp đến ngày liền kề trước ngày người nộp thuế nộp tiền thuế nợ vào ngân sách nhà nước. CÔNG BÁO/Số 959 + 960/Ngày 17-11-2021 39 2. Thông báo về tiền chậm nộp Hằng tháng, cơ quan thuế thông báo về số tiền chậm nộp cùng với thông báo tiền thuế nợ (theo mẫu số 01/TTN ban hành kèm theo phụ lục I Thông tư này) đối với người nộp thuế có khoản tiền thuế nợ đã quá thời hạn nộp 30 ngày trở lên. Đối với thuế sử dụng đất phi nông nghiệp, cơ quan thuế thông báo về số tiền thuế nợ và số tiền chậm nộp của người nộp thuế là cá nhân, hộ gia đình thông qua tổ chức được ủy nhiệm thu. Để giải quyết các thủ tục hành chính cho người nộp thuế hoặc theo đề nghị của cơ quan nhà nước có thẩm quyền, cơ quan thuế xác định và thông báo tiền thuế nợ đến thời điểm cơ quan thuế ban hành thông báo (theo mẫu số 02/TTN ban hành kèm theo phụ lục I Thông tư này). 3. Điều chỉnh giảm tiền chậm nộp a) Trường hợp người nộp thuế khai bổ sung hồ sơ khai thuế làm giảm nghĩa vụ thuế phải nộp thì người nộp thuế tự xác định số tiền chậm nộp được điều chỉnh giảm trên tờ khai bổ sung. Cơ quan thuế căn cứ thông tin quản lý nghĩa vụ của người nộp thuế để xác định số tiền chậm nộp được điều chỉnh giảm và thông báo cho người nộp thuế theo mẫu số 03/TTN ban hành kèm theo phụ lục I Thông tư này. b) Trường hợp cơ quan thuế, cơ quan nhà nước có thẩm quyền qua thanh tra, kiểm tra phát hiện số tiền thuế phải nộp giảm hoặc cơ quan thuế, cơ quan nhà nước có thẩm quyền có quyết định, thông báo giảm số tiền thuế phải n…"
+}
+]
+},
+{
+"id": "case-A5",
+"case": "A5",
+"question": "Tháng 5/2026, công ty tôi mua hàng hóa trị giá trên 5 triệu đồng theo hình thức trả góp. Đến hạn thanh toán trong hợp đồng mà chưa có chứng từ thanh toán không dùng tiền mặt. Thuế GTGT đầu vào đã khấu trừ xử lý thế nào? Nếu sau đó có chứng từ thì sao?",
+"date": "15/05/2026",
+"gold_answer": "Reduce the deducted input VAT for the part without non-cash proof, in the period the payment falls due; once proof is obtained, declare the deduction again",
+"gold_provisions": "E: VAT Law 48/2024 Art 14(2) | E: Decree 181/2025 Art 26 | S: Decree 181/2025 Art 25",
+"note": null,
+"essential": [
+{
+"provision": "48/2024/QH15 Art 14(2)",
+"found": false,
+"text": "2. Điều kiện khấu trừ thuế giá trị gia tăng đầu vào được quy định như sau: a) Có hóa đơn giá trị gia tăng mua hàng hóa, dịch vụ hoặc chứng từ nộp thuế giá trị gia tăng ở khâu nhập khẩu hoặc chứng từ nộp thuế giá trị gia tăng thay cho phía nước ngoài quy định tại khoản 3 và khoản 4 Điều 4 của Luật này. Bộ trưởng Bộ Tài chính quy định chứng từ nộp thuế giá trị gia tăng thay cho phía nước ngoài; b) Có chứng từ thanh toán không dùng tiền mặt đối với hàng hóa, dịch vụ mua vào, trừ một số trường hợp đặc thù theo quy định của Chính phủ; c) Đối với hàng hóa, dịch vụ xuất khẩu, ngoài các điều kiện quy định tại điểm a và điểm b khoản này còn phải có: hợp đồng ký kết với bên nước ngoài về việc bán, gia công hàng hóa, cung cấp dịch vụ; hóa đơn bán hàng hóa, cung cấp dịch vụ; chứng từ thanh toán không dùng tiền mặt; tờ khai hải quan đối với hàng hóa xuất khẩu; phiếu đóng gói, vận đơn, chứng từ bảo hiểm hàng hóa (nếu có). Chính phủ quy định về điều kiện khấu trừ đối với trường hợp xuất khẩu hàng hóa qua sàn thương mại điện tử ở nước ngoài và một số trường hợp đặc thù khác."
+},
+{
+"provision": "181/2025/NĐ-CP Art 26",
+"found": true,
+"text": "Điều 26. Chứng từ thanh toán không dùng tiền mặt Cơ sở kinh doanh phải có chứng từ thanh toán không dùng tiền mặt đối với hàng hóa, dịch vụ mua vào (bao gôm cả hàng hóa nhập khâu) từ 05 triệu đông trở lên đã bao gôm thuê giá trị gia tăng. Trong đó: 1. Chứng từ thanh toán không dùng tiền mặt là chứng từ chứng mỉnh việc thanh toán không dùng tiên mặt theo quy định của Nghị định sô 52/2024/NĐ-CP ngày 15 tháng 5 nam 2024 của Chính phủ vệ thanh toán không dùng tiên mặt, trừ các chứng từ bên mua nộp tiên mặt vào tài khoản của bên bán. 2. Một số trường hợp đặc thù theo quy định tại điểm b khoản 2 Điều 14 Luật Thuê giá trị gia tăng bao gôm: _a) Trường hợp hàng hóa, dịch vụ mua vào theo phương thức thanh toán bù trừ giữa giá trị hàng hóa, dịch vụ mua vào với giá trị hàng hóa, dịch vụ bán ra, vay mượn hàng mà phương thức. thanh toán này được quy định cụ thê trong hợp đông thì phải có biên bản đôi chiêu sô liệu và xác nhận giữa hai bên về việc thanh toán bù trừ giữa hàng hóa, dịch vụ mua vào với hàng hóa, dịch vụ bán ra, vay mượn hàng. Trường hợp bù trừ công nợ qua bên thứ ba phải có biên bản bù trừ công nợ của ba bên làm căn cứ khâu trừ thuê. b) Trường hợp hàng hóa, dịch vụ mua vào theo phương thức bù trừ công nợ như vay, mượn tiên; cân trừ công nợ qua bên thứ ba mà phương thức thanh toán này được quy định cụ thê trong hợp đông thì phải có hợp đông vay, mượn tiên dưới hình thức văn bản được lập trước đó và có chứng từ chuyên tiên từ tài khoản của bên cho vay, cho mượn sang tài khoản của bên đi vay, đi mượn đôi với khoản vay, mượn băng tiên bao gôm cả trường hợp bù trừ giữa giá trị hàng hóa, dịch vụ mua vào với khoản tiên mà bên bán hỗ trợ cho bên mua, hoặc nhờ bên mua chi hộ. c) Trường hợp hàng hóa, dịch vụ mua vào được thanh toán uỷ quyền qua bên thứ ba thanh toán không dùng tiê…"
+}
+]
+},
+{
+"id": "case-A6",
+"case": "A6",
+"question": "Năm 2026, Công ty A ký hợp đồng trồng trọt, chăn nuôi cho Công ty B: A nhận tiền công từ B hoặc bán lại sản phẩm thu hoạch cho B. Các khoản này có chịu thuế GTGT không?",
+"date": "15/03/2026",
+"gold_answer": "Not subject to VAT (treated as self-produced products sold)",
+"gold_provisions": "E: VAT Law 48/2024 Art 5(1), as amended by Law 149/2025 Art 1(1)(a) | E: Livestock Law 32/2018/QH14 Art 2(2) | E: Cultivation Law 31/2018/QH14 Art 2(2) | S: Decree 181/2025 Art 4 clause 1b (added by Decree 359/2025)",
+"note": null,
+"essential": [
+{
+"provision": "48/2024/QH15 Art 5(1)",
+"found": false,
+"text": "Điều 5. Đối tượng không chịu thuế 1. Sản phẩm cây trồng, rừng trồng, chăn nuôi, thủy sản nuôi trồng, đánh bắt chưa chế biến thành các sản phẩm khác hoặc chỉ qua sơ chế thông thường của tổ chức, cá nhân tự sản xuất, đánh bắt bán ra và ở khâu nhập khẩu."
+},
+{
+"provision": "32/2018/QH14 Art 2(2)",
+"found": false,
+"text": "2. Hoạt động chăn nuôi là nuôi sinh trưởng, nuôi sinh sản vật nuôi và hoạt động khác có liên quan đến vật nuôi, sản phẩm chăn nuôi phục vụ mục đích làm thực phẩm, khai thác sức kéo, làm cảnh hoặc mục đích khác của con người."
+},
+{
+"provision": "31/2018/QH14 Art 2(2)",
+"found": false,
+"text": "2. Hoạt động trồng trọt bao gồm hoạt động về giống cây trồng; phân bón; canh tác; thu hoạch, sơ chế, bảo quản, chế biến, thương mại và quản lý chất lượng sản phẩm cây trồng."
+}
+]
+},
+{
+"id": "case-A7",
+"case": "A7",
+"question": "Công ty tôi nhập khẩu hàng hóa rồi xuất khẩu sang nước khác; thuế GTGT đầu vào phát sinh tháng 3/2024. Tháng 9/2025 công ty mới nộp hồ sơ hoàn thuế. Có được hoàn không, và áp dụng quy định nào?",
+"date": "15/03/2024",
+"gold_answer": "Refundable under Circular 25/2018 Art 2; when filing after 1/7/2025 the company may choose the refund policy in force for the month/quarter requested; procedure follows tax administration law",
+"gold_provisions": "E: Circular 25/2018 Art 2 (amending Circular 219/2013 Art 18(4)) | E: Law on Legal Documents 64/2025 Art 58(1)-(2) | E: Decree 181/2025 Art 38(1) | S: Decree 146/2017 Art 1(2)",
+"note": "The gold answer says the company \"may choose the refund policy in force for the month or quarter requested\". We found no provision that says so. Which provision, if any, supports it?",
+"essential": [
+{
+"provision": "25/2018/TT-BTC Art 2",
+"found": true,
+"text": "Điều 2. Sửa đổi, bổ sung khoản 4 Điều 18 Thông tư số 219/2013/TT-BTC ngày 31/12/2013 của Bộ Tài chính (đã được sửa đổi, bổ sung theo Thông tư số 130/2016/TT-BTC ngày 12/8/2016 của Bộ Tài chính) như sau: “4. Hoàn thuế đối với hàng hóa, dịch vụ xuất khẩu a) Cơ sở kinh doanh trong tháng (đối với trường hợp kê khai theo tháng), quý (đối với trường hợp kê khai theo quý) có hàng hóa, dịch vụ xuất khẩu bao gồm cả trường hợp: Hàng hóa nhập khẩu sau đó xuất khẩu vào khu phi thuế quan; hàng hóa nhập khẩu sau đó xuất khẩu ra nước ngoài, có số thuế giá trị gia tăng đầu vào chưa được khấu trừ từ 300 triệu đồng trở lên thì được hoàn thuế giá trị gia tăng theo tháng, quý; trường hợp trong tháng, quý số thuế giá trị gia tăng đầu vào chưa được khấu trừ chưa đủ 300 triệu đồng thì được khấu trừ vào tháng, quý tiếp theo. Cơ sở kinh doanh trong tháng/quý vừa có hàng hóa, dịch vụ xuất khẩu, vừa có hàng hóa, dịch vụ tiêu thụ nội địa thì cơ sở kinh doanh phải hạch toán riêng số thuế GTGT đầu vào sử dụng cho sản xuất kinh doanh hàng hóa, dịch vụ xuất khẩu. Trường hợp không hạch toán riêng được thì số thuế giá trị gia tăng đầu vào của hàng hóa, dịch vụ xuất khẩu được xác định theo tỷ lệ giữa doanh thu của hàng hóa, dịch vụ xuất khẩu trên tổng doanh thu hàng hóa, dịch vụ của các kỳ khai thuế giá trị gia tăng tính từ kỳ khai thuế tiếp theo kỳ hoàn thuế liền trước đến kỳ đề nghị hoàn thuế hiện tại. Số thuế GTGT đầu vào của hàng hóa, dịch vụ xuất khẩu (bao gồm số thuế GTGT đầu vào hạch toán riêng được và số thuế GTGT đầu vào được phân bổ theo tỷ lệ nêu trên) nếu sau khi bù trừ với số thuế GTGT phải nộp của hàng hóa, dịch vụ tiêu thụ nội địa còn lại từ 300 triệu đồng trở lên thì cơ sở kinh doanh được hoàn thuế cho hàng hóa, dịch vụ xuất khẩu. Số thuế GTGT được hoàn của hàng hóa, dịch vụ xuất khẩu khô…"
+},
+{
+"provision": "64/2025/QH15 Art 58(1)",
+"found": false,
+"text": "Điều 58. Áp dụng văn bản quy phạm pháp luật 1. Văn bản quy phạm pháp luật được áp dụng từ thời điểm bắt đầu có hiệu lực. 2. Văn bản quy phạm pháp luật được áp dụng đối với hành vi, sự kiện xảy ra tại thời diém ma văn bản đó đang có hiệu lực. Trường hợp văn bản quy phạm pháp luật có quy định hiệu lực trở về trước thì áp dụng theo quy định đó. 3. Trường hợp các văn bản quy phạm pháp luật có quy định khác nhau về cùng một vân đê thì áp dụng văn bản có hiệu lực pháp lý cao hơn. 4. Trường hợp các văn bản quy phạm pháp luật do cùng một cơ quan ban hành có quy định khác nhau về cùng một vấn đề thì áp dụng quy định của văn bản quy phạm pháp luật ban hành sau. 5. Việc áp dụng văn bản quy phạm pháp luật trong nước không được cản trở việc thực hiện điều ước quốc tế mà nước Cộng hòa xã hội chủ nghĩa Việt Nam là thành viên. Trường hợp văn bản quy phạm pháp luật trong nước và điều ước quốc tế mà nước Cộng hòa xã hội chủ nghĩa Việt Nam là thành viên có quy định khác nhau về cùng một vấn đề thì áp dụng quy định của điều ước quốc tế đó, trừ Hiến pháp. 6. Việc áp dụng pháp luật khác với quy định tại các khoản 1, 2, 3, 4 và 5 Điều này do Quốc hội quy định. Chương VII TỎ CHỨC THỊ HÀNH VĂN BẢN QUY PHẠM PHÁP LUẬT"
+},
+{
+"provision": "181/2025/NĐ-CP Art 38(1)",
+"found": false,
+"text": "Điều 38. Hiệu lực thi hành 1. Nghị định này có hiệu lực thi hành từ ngày 01 tháng 7 năm 2025."
+}
+]
+},
+{
+"id": "case-A9",
+"case": "A9",
+"question": "Năm 2024, công ty tôi làm theo văn bản hướng dẫn của cơ quan thuế, kê khai một sản phẩm từ quả dừa là hàng không chịu thuế GTGT. Nay cơ quan thuế xác định sản phẩm này chịu thuế 10% và truy thu. Truy thu từ khi nào, có bị phạt và tính tiền chậm nộp không?",
+"date": "15/03/2024",
+"gold_answer": "Arrears run from the effective date of the legal documents; no administrative penalty and no late-payment interest if the company followed the authority's written guidance",
+"gold_provisions": "E: Tax Admin Law 38/2019 Art 16(11) | E: Decree 125/2020 Art 9(2) | S: VAT Law 13/2008 Art 8(3) | S: Law 106/2016 Art 1(1) | S: Decree 100/2016 Art 1(1) | S: Circular 26/2015 Art 1 | S: Circular 219/2013 Art 11",
+"note": null,
+"essential": [
+{
+"provision": "38/2019/QH14 Art 16(11)",
+"found": false,
+"text": "11. Không bị xử phạt vi phạm hành chính về thuế, không tính tiền chậm nộp đối với trường hợp do người nộp thuê thực hiện theo văn bản hướng dan va quyét định xử lý của cơ quan thuê, cơ quan nhà nước có thâm quyên liên quan đên nội dung xác định nghĩa vụ thuê của người nộp thuê."
+},
+{
+"provision": "125/2020/NĐ-CP Art 9(2)",
+"found": false,
+"text": "2. Không xử phạt vi phạm hành chính về thuế, không tính tiền chậm nộp tiền thuế đối với người nộp thuế vi phạm hành chính về thuế do thực hiện theo văn bản hướng dẫn, quyết định xử lý của cơ quan thuế, cơ quan nhà nước có thâm quyền liên quan đến nội dung xác định nghĩa vụ thuế của người nộp thuế (kế cả các văn bản hướng dẫn, quyết định xử ly được ban hành trước ngày Nghị định này có hiệu lực), trừ trường hợp thanh tra, kiểm tra thuế tại trụ sở người nộp thuế chưa phát hiện sai sót của người nộp thuế trong việc khai, xác định số tiền thuế phải nộp hoặc số tiền thuế được miễn, giảm, hoàn nhưng sau đó hành vi vi phạm hành chính về thuế của người nộp thuế bị phát hiện."
+}
+]
+},
+{
+"id": "case-A10",
+"case": "A10",
+"question": "Năm 2026, công ty tôi có tổng doanh thu năm 2025 là 2,5 tỷ đồng. Thuế suất thuế thu nhập doanh nghiệp năm 2026 của công ty là bao nhiêu?",
+"date": "15/06/2026",
+"gold_answer": "15% (total revenue of the preceding tax period does not exceed 3 billion VND)",
+"gold_provisions": "E: CIT Law 67/2025 Art 10(2) | E: CIT Law 67/2025 Art 10(3) (revenue basis: the preceding tax period) | S: CIT Law 67/2025 Art 19(1)",
+"note": null,
+"essential": [
+{
+"provision": "67/2025/QH15 Art 10(2)",
+"found": false,
+"text": "Điều 10. Thuế suất 1. Thuế suất thuế thu nhập doanh nghiệp là 20%, trừ trường hợp quy định tại các khoản 2, 3 và 4 Điều này và đối tượng được ưu đãi về thuế suất quy định tại Điêu 13 của Luật này. 10 2. Thuế suất 15% áp dụng đối với doanh nghiệp có tổng doanh thu năm không quá 03 tỷ đồng. 3. Thuế suất 17% áp dụng đối với doanh nghiệp có tổng doanh thu năm từ trên 03 tỷ đồng đến không quá 50 tỷ đồng. Doanh thu làm căn cứ xác định doanh nghiệp thuộc đối tượng được áp dụng thuế suất 15% và 17% quy định tại khoản 2, khoản 3 Điều này là tong doanh thu của kỳ tính thuế thu nhập doanh nghiệp trước liền kề. Việc xác định tổng doanh thu làm căn cứ áp dụng thực hiện theo quy định của Chính phủ. 4. Thuế suất thuế thu nhập doanh nghiệp đối với một số trường hợp khác được quy định như sau: a) Đối với hoạt động tìm kiếm, thăm dò và khai thác dầu khí từ 25% đến 50%. Căn cứ vào vị trí, điều kiện khai thác và trữ lượng mỏ, Thủ tướng Chính phủ quyết định mức thuế suất cụ thê phù hợp với từng hợp đồng dầu khí; b) Đối với hoạt động thăm dò, khai thác tài nguyên quý hiếm (bao gồm: bach kim, vàng, bạc, thiéc, wonfram, antimoan, đá quý, đất hiếm và tài nguyên quý hiểm khác theo quy định của pháp luật) là 50%. Trường hợp các mỏ có từ 70% diện tích được giao trở lên ở địa bàn có điều kiện kinh tế - xã hội đặc biệt khó khăn, thuế suất là 40%."
+},
+{
+"provision": "67/2025/QH15 Art 10(3)",
+"found": false,
+"text": "Điều 10. Thuế suất 1. Thuế suất thuế thu nhập doanh nghiệp là 20%, trừ trường hợp quy định tại các khoản 2, 3 và 4 Điều này và đối tượng được ưu đãi về thuế suất quy định tại Điêu 13 của Luật này. 10 2. Thuế suất 15% áp dụng đối với doanh nghiệp có tổng doanh thu năm không quá 03 tỷ đồng. 3. Thuế suất 17% áp dụng đối với doanh nghiệp có tổng doanh thu năm từ trên 03 tỷ đồng đến không quá 50 tỷ đồng. Doanh thu làm căn cứ xác định doanh nghiệp thuộc đối tượng được áp dụng thuế suất 15% và 17% quy định tại khoản 2, khoản 3 Điều này là tong doanh thu của kỳ tính thuế thu nhập doanh nghiệp trước liền kề. Việc xác định tổng doanh thu làm căn cứ áp dụng thực hiện theo quy định của Chính phủ. 4. Thuế suất thuế thu nhập doanh nghiệp đối với một số trường hợp khác được quy định như sau: a) Đối với hoạt động tìm kiếm, thăm dò và khai thác dầu khí từ 25% đến 50%. Căn cứ vào vị trí, điều kiện khai thác và trữ lượng mỏ, Thủ tướng Chính phủ quyết định mức thuế suất cụ thê phù hợp với từng hợp đồng dầu khí; b) Đối với hoạt động thăm dò, khai thác tài nguyên quý hiếm (bao gồm: bach kim, vàng, bạc, thiéc, wonfram, antimoan, đá quý, đất hiếm và tài nguyên quý hiểm khác theo quy định của pháp luật) là 50%. Trường hợp các mỏ có từ 70% diện tích được giao trở lên ở địa bàn có điều kiện kinh tế - xã hội đặc biệt khó khăn, thuế suất là 40%."
+}
+]
+},
+{
+"id": "case-A11",
+"case": "A11",
+"question": "Năm 2026, doanh thu năm 2025 của công ty tôi khoảng 20 tỷ đồng. Công ty áp dụng thuế suất thuế TNDN bao nhiêu?",
+"date": "15/06/2026",
+"gold_answer": "17% (preceding-year revenue above 3 and up to 50 billion VND)",
+"gold_provisions": "E: CIT Law 67/2025 Art 10(3)",
+"note": null,
+"essential": [
+{
+"provision": "67/2025/QH15 Art 10(3)",
+"found": false,
+"text": "Điều 10. Thuế suất 1. Thuế suất thuế thu nhập doanh nghiệp là 20%, trừ trường hợp quy định tại các khoản 2, 3 và 4 Điều này và đối tượng được ưu đãi về thuế suất quy định tại Điêu 13 của Luật này. 10 2. Thuế suất 15% áp dụng đối với doanh nghiệp có tổng doanh thu năm không quá 03 tỷ đồng. 3. Thuế suất 17% áp dụng đối với doanh nghiệp có tổng doanh thu năm từ trên 03 tỷ đồng đến không quá 50 tỷ đồng. Doanh thu làm căn cứ xác định doanh nghiệp thuộc đối tượng được áp dụng thuế suất 15% và 17% quy định tại khoản 2, khoản 3 Điều này là tong doanh thu của kỳ tính thuế thu nhập doanh nghiệp trước liền kề. Việc xác định tổng doanh thu làm căn cứ áp dụng thực hiện theo quy định của Chính phủ. 4. Thuế suất thuế thu nhập doanh nghiệp đối với một số trường hợp khác được quy định như sau: a) Đối với hoạt động tìm kiếm, thăm dò và khai thác dầu khí từ 25% đến 50%. Căn cứ vào vị trí, điều kiện khai thác và trữ lượng mỏ, Thủ tướng Chính phủ quyết định mức thuế suất cụ thê phù hợp với từng hợp đồng dầu khí; b) Đối với hoạt động thăm dò, khai thác tài nguyên quý hiếm (bao gồm: bach kim, vàng, bạc, thiéc, wonfram, antimoan, đá quý, đất hiếm và tài nguyên quý hiểm khác theo quy định của pháp luật) là 50%. Trường hợp các mỏ có từ 70% diện tích được giao trở lên ở địa bàn có điều kiện kinh tế - xã hội đặc biệt khó khăn, thuế suất là 40%."
+}
+]
+},
+{
+"id": "case-A14",
+"case": "A14",
+"question": "Năm 2026, tôi cho thuê nhà (không phải kinh doanh lưu trú), doanh thu cho thuê cả năm 800 triệu đồng. Thuế thu nhập cá nhân phải nộp là bao nhiêu?",
+"date": "15/06/2026",
+"gold_answer": "5% of the revenue above 500 million VND: 5% x 300 million = 15 million VND",
+"gold_provisions": "E: PIT Law 109/2025 Art 7(4) | E: PIT Law 109/2025 Art 7(1) (the 500 million threshold) | S: Decree 68/2026 Art 4(4)(a)",
+"note": null,
+"essential": [
+{
+"provision": "109/2025/QH15 Art 7(4)",
+"found": false,
+"text": "4. Cá nhân cho thuê bat động sản, trừ hoạt động kinh doanh lưu trú, nộp thuế thu nhập cá nhân được xác định bằng phần doanh thu vượt trên mức quy định tại khoản 1 Điều này nhân (x) với thuế suất 5%."
+},
+{
+"provision": "109/2025/QH15 Art 7(1)",
+"found": true,
+"text": "Điều 7. Thuế thu nhập cá nhân đối với thu nhập từ kinh doanh 1. Cá nhân cư trú có hoạt động sản xuất, kinh doanh có mức doanh thu năm từ 500 triệu đồng trở xuống không phải nộp thuế thu nhập cá nhân. Chính phủ trình Ủy ban Thường vụ Quốc hội điều chỉnh mức doanh thu không phải nộp thuế thu nhập cá nhân phù hợp với tình hình kinh tế - xã hội trong từng thời kỳ. ' 7"
+}
+]
+},
+{
+"id": "case-A15",
+"case": "A15",
+"question": "Tháng 9/2026, công ty tôi nộp chậm 100 triệu đồng tiền thuế GTGT 10 ngày so với hạn nộp. Tiền chậm nộp được tính như thế nào?",
+"date": "15/09/2026",
+"gold_answer": "0.03% a day of the late amount: 100 million x 0.03% x 10 days = 300,000 VND",
+"gold_provisions": "E: Tax Admin Law 108/2025 Art 16(2)(a) | E: Tax Admin Law 108/2025 Art 16(1)(a) | S: Tax Admin Law 108/2025 Art 16(2)(b) (days counted as the Government provides)",
+"note": null,
+"essential": [
+{
+"provision": "108/2025/QH15 Art 16(2)",
+"found": false,
+"text": "2. Mức tính tiền chậm nộp và thời gian tính tiền chậm nộp được quy định như sau: a) Mức tính tiền chậm nộp bằng 0,03%/ngày tính trên số tiền thuế, khoản thu khác chậm nộp do cơ quan thuế quản lý thu và 0,03%/ngày tính trên số tiền thuê chậm nộp do cơ quan hải quan quản lý thu; \"¬ 18 ni b) Thời gian tính tiền chậm nộp thực hiện theo quy định của Chính phủ. |"
+},
+{
+"provision": "108/2025/QH15 Art 16(1)",
+"found": false,
+"text": "khác thay cho người nộp thuế theo quy định của pháp luật về thuế và quy định khác của pháp luật có liên quan nộp tiền không đầy đủ, không đúng thời hạn theo quy định của pháp luật thì có trách nhiệm nộp tiền chậm nộp theo quy định thay cho người nộp thuế; ¡) Việc nộp tiền chậm nộp đối với hàng hóa xuất khẩu, nhập khâu thuộc đối tượng chịu thuế được tổ chức tín dụng bảo lãnh số thuế phải nộp thực hiện theo quy định của pháp luật về thuế xuất khâu, thuế nhập khẩu. Điều 16. Xử lý đối với việc chậm nộp tiền thuế, khoản thu khác 1. Các trường hợp phải nộp tiền chậm nộp bao gồm: a) Người nộp thuế chậm nộp tiền thuế, khoản thu khác so với thời hạn nộp, thời hạn gia hạn nộp quy định tại Điều 14 của Luật này; b) Người nộp thuế khai bổ sung hồ sơ khai thuế, khoản thu khác làm tăng số tiền thuế, khoản thu khác phải nộp hoặc giảm số tiền thuế, khoản thu khác đã được miễn, giảm, hoàn, không thu; _ c) Cơ quan quản lý thuế, cơ quan nhà nước có thâm quyền kiểm tra, thanh tra phát hiện người nộp thuế khai thiếu số tiền thuế, khoản thu khác phải nộp hoặc phát hiện số tiền thuế, khoản thu khác đã hoàn, đã miễn, đã giảm, đã không thu lớn hơn số tiền thuế, khoản thu khác được hoàn, được miễn, được giảm, không thu; \" d) Trường hợp được nộp dần tiền thuế nợ quy định tại khoản 6 Điều 48 của Luật này; đ) Trường hợp quy định tại khoản 8 Điều 44 của Luật này; e) Trường hợp không bị xử phạt vi phạm hành chính về quản lý thuế theo quy định tại điểm a khoản 2 Điều 44 đối với hành vi quy định tại khoản 2 Điêu 45 __ của Luật này và trường hợp quy định tại điểm b khoản 2 Điều 44 của Luật này; ø) Cơ quan, tổ chức được cơ quan quản lý thuế ủy nhiệm thu thuế, khoản . thu khác, cơ quan, tổ chức được giao quản lý các khoản thu thuộc ngân sách nhà nước chậm nộp vào ngân sách nhà nước đối với số tiền đã thu đ…"
+}
+]
+},
+{
+"id": "case-A16",
+"case": "A16",
+"question": "Tháng 10/2026, công ty tôi khai bổ sung hồ sơ khai thuế của kỳ trước làm tăng số thuế phải nộp. Công ty có phải nộp tiền chậm nộp không?",
+"date": "15/10/2026",
+"gold_answer": "Yes: a supplementary return that increases tax payable incurs late-payment interest (0.03% a day)",
+"gold_provisions": "E: Tax Admin Law 108/2025 Art 16(1)(b) | E: Tax Admin Law 108/2025 Art 16(2)(a)",
+"note": null,
+"essential": [
+{
+"provision": "108/2025/QH15 Art 16(1)",
+"found": false,
+"text": "khác thay cho người nộp thuế theo quy định của pháp luật về thuế và quy định khác của pháp luật có liên quan nộp tiền không đầy đủ, không đúng thời hạn theo quy định của pháp luật thì có trách nhiệm nộp tiền chậm nộp theo quy định thay cho người nộp thuế; ¡) Việc nộp tiền chậm nộp đối với hàng hóa xuất khẩu, nhập khâu thuộc đối tượng chịu thuế được tổ chức tín dụng bảo lãnh số thuế phải nộp thực hiện theo quy định của pháp luật về thuế xuất khâu, thuế nhập khẩu. Điều 16. Xử lý đối với việc chậm nộp tiền thuế, khoản thu khác 1. Các trường hợp phải nộp tiền chậm nộp bao gồm: a) Người nộp thuế chậm nộp tiền thuế, khoản thu khác so với thời hạn nộp, thời hạn gia hạn nộp quy định tại Điều 14 của Luật này; b) Người nộp thuế khai bổ sung hồ sơ khai thuế, khoản thu khác làm tăng số tiền thuế, khoản thu khác phải nộp hoặc giảm số tiền thuế, khoản thu khác đã được miễn, giảm, hoàn, không thu; _ c) Cơ quan quản lý thuế, cơ quan nhà nước có thâm quyền kiểm tra, thanh tra phát hiện người nộp thuế khai thiếu số tiền thuế, khoản thu khác phải nộp hoặc phát hiện số tiền thuế, khoản thu khác đã hoàn, đã miễn, đã giảm, đã không thu lớn hơn số tiền thuế, khoản thu khác được hoàn, được miễn, được giảm, không thu; \" d) Trường hợp được nộp dần tiền thuế nợ quy định tại khoản 6 Điều 48 của Luật này; đ) Trường hợp quy định tại khoản 8 Điều 44 của Luật này; e) Trường hợp không bị xử phạt vi phạm hành chính về quản lý thuế theo quy định tại điểm a khoản 2 Điều 44 đối với hành vi quy định tại khoản 2 Điêu 45 __ của Luật này và trường hợp quy định tại điểm b khoản 2 Điều 44 của Luật này; ø) Cơ quan, tổ chức được cơ quan quản lý thuế ủy nhiệm thu thuế, khoản . thu khác, cơ quan, tổ chức được giao quản lý các khoản thu thuộc ngân sách nhà nước chậm nộp vào ngân sách nhà nước đối với số tiền đã thu đ…"
+},
+{
+"provision": "108/2025/QH15 Art 16(2)",
+"found": false,
+"text": "2. Mức tính tiền chậm nộp và thời gian tính tiền chậm nộp được quy định như sau: a) Mức tính tiền chậm nộp bằng 0,03%/ngày tính trên số tiền thuế, khoản thu khác chậm nộp do cơ quan thuế quản lý thu và 0,03%/ngày tính trên số tiền thuê chậm nộp do cơ quan hải quan quản lý thu; \"¬ 18 ni b) Thời gian tính tiền chậm nộp thực hiện theo quy định của Chính phủ. |"
+}
+]
+},
+{
+"id": "case-A20",
+"case": "A20",
+"question": "Tháng 4/2026, công ty tôi xuất khẩu hàng hóa. Để áp dụng thuế suất thuế GTGT 0%, công ty cần có những giấy tờ gì?",
+"date": "15/04/2026",
+"gold_answer": "A sale (or processing or entrustment) contract, non-cash payment documents, and the customs declaration",
+"gold_provisions": "E: Decree 181/2025 Art 18(1) | S: VAT Law 48/2024 Art 9(1) | S: Decree 181/2025 Art 17",
+"note": null,
+"essential": [
+{
+"provision": "181/2025/NĐ-CP Art 18(1)",
+"found": false,
+"text": "Điều 18. Điều kiện áp dụng thuế suất 0% Soe ee eee Hang hóa, dịch vụ xuất khẩu áp dụng thuế suất 0% quy định tại Điều 17 Nghị định này (trừ một số trường hợp đặc thù quy định tại Điêu 27, Điêu 28 Nghị định này) phải đáp ứng quy định sau: 1. Đối với hàng hóa xuất khẩu, phải có: a) Hợp đồng bán, gia công hàng hóa xuất khẩu (đối với trường hợp bán, gia công); hợp dong ủy thác xuât khâu (đôi với trường hợp ủy thác xuât khâu). : b) Chứng từ thanh toán không dùng tiền mặt đối với hàng hóa xuất khẩu. c) Tờ khai hải quan theo quy định."
+}
+]
+},
+{
+"id": "case-A22",
+"case": "A22",
+"question": "Tháng 4/2026, trong cùng một ngày công ty tôi mua hàng của cùng một nhà cung cấp ba lần, mỗi lần 2 triệu đồng (đã gồm thuế GTGT), trả bằng tiền mặt. Thuế GTGT đầu vào có được khấu trừ không?",
+"date": "15/04/2026",
+"gold_answer": "No: purchases from one seller on the same day totalling 5 million VND or more need non-cash payment documents",
+"gold_provisions": "E: Decree 181/2025 Art 26(3) | S: Decree 181/2025 Art 26(1) | S: VAT Law 48/2024 Art 14",
+"note": null,
+"essential": [
+{
+"provision": "181/2025/NĐ-CP Art 26(3)",
+"found": false,
+"text": "3. Trường hợp mua hàng hóa, dịch vụ của một người nộp thuế có giá trị _ đưới 05 triệu đồng nhưng mua nhiều lần trong cùng một ngày có tông giá tri từ 05 triệu đồng trở lên thì chỉ được khấu trừ thuế đối với trường hợp có chứng từ thanh toán không dùng tiền mặt."
+}
+]
+},
+{
+"id": "case-L4",
+"case": "L4",
+"question": "Tháng 5/2026, công ty tôi mua hàng hóa trị giá 3 triệu đồng (đã gồm thuế) theo hình thức trả góp và trả bằng tiền mặt. Thuế GTGT đầu vào có được khấu trừ không?",
+"date": "15/05/2026",
+"gold_answer": "Yes - the non-cash payment requirement applies only from 5 million VND (incl. VAT), so no reduction is needed",
+"gold_provisions": "E: VAT Law 48/2024 Art 14(2) | E: Decree 181/2025 Art 26(2)-(3)",
+"note": "The 5 million VND threshold the answer rests on is in the opening sentence of Decree 181/2025 Art 26 (before clause 1), but the gold lists Art 26(2)-(3). Should the opening sentence be the essential provision?",
+"essential": [
+{
+"provision": "48/2024/QH15 Art 14(2)",
+"found": false,
+"text": "2. Điều kiện khấu trừ thuế giá trị gia tăng đầu vào được quy định như sau: a) Có hóa đơn giá trị gia tăng mua hàng hóa, dịch vụ hoặc chứng từ nộp thuế giá trị gia tăng ở khâu nhập khẩu hoặc chứng từ nộp thuế giá trị gia tăng thay cho phía nước ngoài quy định tại khoản 3 và khoản 4 Điều 4 của Luật này. Bộ trưởng Bộ Tài chính quy định chứng từ nộp thuế giá trị gia tăng thay cho phía nước ngoài; b) Có chứng từ thanh toán không dùng tiền mặt đối với hàng hóa, dịch vụ mua vào, trừ một số trường hợp đặc thù theo quy định của Chính phủ; c) Đối với hàng hóa, dịch vụ xuất khẩu, ngoài các điều kiện quy định tại điểm a và điểm b khoản này còn phải có: hợp đồng ký kết với bên nước ngoài về việc bán, gia công hàng hóa, cung cấp dịch vụ; hóa đơn bán hàng hóa, cung cấp dịch vụ; chứng từ thanh toán không dùng tiền mặt; tờ khai hải quan đối với hàng hóa xuất khẩu; phiếu đóng gói, vận đơn, chứng từ bảo hiểm hàng hóa (nếu có). Chính phủ quy định về điều kiện khấu trừ đối với trường hợp xuất khẩu hàng hóa qua sàn thương mại điện tử ở nước ngoài và một số trường hợp đặc thù khác."
+},
+{
+"provision": "181/2025/NĐ-CP Art 26(2)",
+"found": true,
+"text": "2. Một số trường hợp đặc thù theo quy định tại điểm b khoản 2 Điều 14 Luật Thuê giá trị gia tăng bao gôm: _a) Trường hợp hàng hóa, dịch vụ mua vào theo phương thức thanh toán bù trừ giữa giá trị hàng hóa, dịch vụ mua vào với giá trị hàng hóa, dịch vụ bán ra, vay mượn hàng mà phương thức. thanh toán này được quy định cụ thê trong hợp đông thì phải có biên bản đôi chiêu sô liệu và xác nhận giữa hai bên về việc thanh toán bù trừ giữa hàng hóa, dịch vụ mua vào với hàng hóa, dịch vụ bán ra, vay mượn hàng. Trường hợp bù trừ công nợ qua bên thứ ba phải có biên bản bù trừ công nợ của ba bên làm căn cứ khâu trừ thuê. b) Trường hợp hàng hóa, dịch vụ mua vào theo phương thức bù trừ công nợ như vay, mượn tiên; cân trừ công nợ qua bên thứ ba mà phương thức thanh toán này được quy định cụ thê trong hợp đông thì phải có hợp đông vay, mượn tiên dưới hình thức văn bản được lập trước đó và có chứng từ chuyên tiên từ tài khoản của bên cho vay, cho mượn sang tài khoản của bên đi vay, đi mượn đôi với khoản vay, mượn băng tiên bao gôm cả trường hợp bù trừ giữa giá trị hàng hóa, dịch vụ mua vào với khoản tiên mà bên bán hỗ trợ cho bên mua, hoặc nhờ bên mua chi hộ. c) Trường hợp hàng hóa, dịch vụ mua vào được thanh toán uỷ quyền qua bên thứ ba thanh toán không dùng tiên mặt (bao gôm cả trường hợp bên ban yêu cau bên mua thanh toán không dùng tiên mặt cho bên thứ ba do bên ban chỉ định) thì việc thanh toán theo uỷ quyên hoặc thanh toán cho bên thứ ba theo chỉ định của bên bán phải được quy định cụ thê trong hợp đông dưới . 33 : hình thức văn bản và bên thứ ba là một tổ chức hoặc thé nhân đang hoạt động theo quy định của pháp luật. _ đ) Trường hợp hang hóa, dịch vụ mua vào theo phương thức thanh toán tiên hàng hóa, dịch vụ băng cô phiếu, trái phiếu mà phương thức thanh toán này được quy định cụ …"
+}
+]
+},
+{
+"id": "case-R4",
+"case": "R4",
+"question": "Năm 2026, công ty tôi áp dụng thuế suất thuế thu nhập doanh nghiệp bao nhiêu?",
+"date": "15/06/2026",
+"gold_answer": "PASS if the answer depends on the preceding year's revenue (15% up to 3 billion, 17% up to 50 billion, otherwise 20%, apart from incentives) or asks for it; FAIL if one rate only",
+"gold_provisions": "E: CIT Law 67/2025 Art 10(1) | E: CIT Law 67/2025 Art 10(2) | E: CIT Law 67/2025 Art 10(3) | S: CIT Law 67/2025 Art 13",
+"note": null,
+"essential": [
+{
+"provision": "67/2025/QH15 Art 10(1)",
+"found": false,
+"text": "Điều 10. Thuế suất 1. Thuế suất thuế thu nhập doanh nghiệp là 20%, trừ trường hợp quy định tại các khoản 2, 3 và 4 Điều này và đối tượng được ưu đãi về thuế suất quy định tại Điêu 13 của Luật này. 10 2. Thuế suất 15% áp dụng đối với doanh nghiệp có tổng doanh thu năm không quá 03 tỷ đồng. 3. Thuế suất 17% áp dụng đối với doanh nghiệp có tổng doanh thu năm từ trên 03 tỷ đồng đến không quá 50 tỷ đồng. Doanh thu làm căn cứ xác định doanh nghiệp thuộc đối tượng được áp dụng thuế suất 15% và 17% quy định tại khoản 2, khoản 3 Điều này là tong doanh thu của kỳ tính thuế thu nhập doanh nghiệp trước liền kề. Việc xác định tổng doanh thu làm căn cứ áp dụng thực hiện theo quy định của Chính phủ. 4. Thuế suất thuế thu nhập doanh nghiệp đối với một số trường hợp khác được quy định như sau: a) Đối với hoạt động tìm kiếm, thăm dò và khai thác dầu khí từ 25% đến 50%. Căn cứ vào vị trí, điều kiện khai thác và trữ lượng mỏ, Thủ tướng Chính phủ quyết định mức thuế suất cụ thê phù hợp với từng hợp đồng dầu khí; b) Đối với hoạt động thăm dò, khai thác tài nguyên quý hiếm (bao gồm: bach kim, vàng, bạc, thiéc, wonfram, antimoan, đá quý, đất hiếm và tài nguyên quý hiểm khác theo quy định của pháp luật) là 50%. Trường hợp các mỏ có từ 70% diện tích được giao trở lên ở địa bàn có điều kiện kinh tế - xã hội đặc biệt khó khăn, thuế suất là 40%."
+},
+{
+"provision": "67/2025/QH15 Art 10(2)",
+"found": false,
+"text": "Điều 10. Thuế suất 1. Thuế suất thuế thu nhập doanh nghiệp là 20%, trừ trường hợp quy định tại các khoản 2, 3 và 4 Điều này và đối tượng được ưu đãi về thuế suất quy định tại Điêu 13 của Luật này. 10 2. Thuế suất 15% áp dụng đối với doanh nghiệp có tổng doanh thu năm không quá 03 tỷ đồng. 3. Thuế suất 17% áp dụng đối với doanh nghiệp có tổng doanh thu năm từ trên 03 tỷ đồng đến không quá 50 tỷ đồng. Doanh thu làm căn cứ xác định doanh nghiệp thuộc đối tượng được áp dụng thuế suất 15% và 17% quy định tại khoản 2, khoản 3 Điều này là tong doanh thu của kỳ tính thuế thu nhập doanh nghiệp trước liền kề. Việc xác định tổng doanh thu làm căn cứ áp dụng thực hiện theo quy định của Chính phủ. 4. Thuế suất thuế thu nhập doanh nghiệp đối với một số trường hợp khác được quy định như sau: a) Đối với hoạt động tìm kiếm, thăm dò và khai thác dầu khí từ 25% đến 50%. Căn cứ vào vị trí, điều kiện khai thác và trữ lượng mỏ, Thủ tướng Chính phủ quyết định mức thuế suất cụ thê phù hợp với từng hợp đồng dầu khí; b) Đối với hoạt động thăm dò, khai thác tài nguyên quý hiếm (bao gồm: bach kim, vàng, bạc, thiéc, wonfram, antimoan, đá quý, đất hiếm và tài nguyên quý hiểm khác theo quy định của pháp luật) là 50%. Trường hợp các mỏ có từ 70% diện tích được giao trở lên ở địa bàn có điều kiện kinh tế - xã hội đặc biệt khó khăn, thuế suất là 40%."
+},
+{
+"provision": "67/2025/QH15 Art 10(3)",
+"found": false,
+"text": "Điều 10. Thuế suất 1. Thuế suất thuế thu nhập doanh nghiệp là 20%, trừ trường hợp quy định tại các khoản 2, 3 và 4 Điều này và đối tượng được ưu đãi về thuế suất quy định tại Điêu 13 của Luật này. 10 2. Thuế suất 15% áp dụng đối với doanh nghiệp có tổng doanh thu năm không quá 03 tỷ đồng. 3. Thuế suất 17% áp dụng đối với doanh nghiệp có tổng doanh thu năm từ trên 03 tỷ đồng đến không quá 50 tỷ đồng. Doanh thu làm căn cứ xác định doanh nghiệp thuộc đối tượng được áp dụng thuế suất 15% và 17% quy định tại khoản 2, khoản 3 Điều này là tong doanh thu của kỳ tính thuế thu nhập doanh nghiệp trước liền kề. Việc xác định tổng doanh thu làm căn cứ áp dụng thực hiện theo quy định của Chính phủ. 4. Thuế suất thuế thu nhập doanh nghiệp đối với một số trường hợp khác được quy định như sau: a) Đối với hoạt động tìm kiếm, thăm dò và khai thác dầu khí từ 25% đến 50%. Căn cứ vào vị trí, điều kiện khai thác và trữ lượng mỏ, Thủ tướng Chính phủ quyết định mức thuế suất cụ thê phù hợp với từng hợp đồng dầu khí; b) Đối với hoạt động thăm dò, khai thác tài nguyên quý hiếm (bao gồm: bach kim, vàng, bạc, thiéc, wonfram, antimoan, đá quý, đất hiếm và tài nguyên quý hiểm khác theo quy định của pháp luật) là 50%. Trường hợp các mỏ có từ 70% diện tích được giao trở lên ở địa bàn có điều kiện kinh tế - xã hội đặc biệt khó khăn, thuế suất là 40%."
+}
+]
+}
+],
+"answers": [
+{
+"id": "ans-A1",
+"case": "A1",
+"question": "Tháng 3/2026, công ty tôi bán nước ngọt đóng chai có hàm lượng đường khoảng 8g/100ml. Thuế suất thuế GTGT là bao nhiêu?",
+"gold_answer": "10% (sugary drinks >5g/100ml are special-consumption goods, which are excluded from the temporary 8% rate in 2026)",
+"status": "INSUFFICIENT_EVIDENCE",
+"answer": null,
+"judge": "refused",
+"judge_reason": "The assistant did not provide an answer and instead stated insufficient evidence, while the reference expects a clear conclusion on the VAT rate based on established rules for sugary drinks in 2026.",
+"excluded": false
+},
+{
+"id": "ans-A2",
+"case": "A2",
+"question": "Tháng 3/2026, công ty tôi (nộp thuế GTGT theo phương pháp khấu trừ) mua gỗ keo rừng trồng chỉ qua sơ chế thông thường rồi bán lại cho một công ty khác. Công ty tôi có phải kê khai, nộp thuế GTGT không?",
+"gold_answer": "No need to declare and pay VAT (trading stage, from 1/1/2026); 'ordinary processing' is defined by Decree 181 Art 4(1) and Circular 84/2025",
+"status": "ANSWERED",
+"answer": "Theo khoản 1b sau khoản 1 Điều 4 của Nghị định 181/2025/NĐ‑CP được sửa đổi, bổ sung bởi Nghị định 359/2025/NĐ‑CP, doanh nghiệp mua sản phẩm cây trồng, rừng trồng chưa chế biến hoặc chỉ qua sơ chế thông thường và bán cho doanh nghiệp, hợp tác xã, liên hiệp hợp tác xã khác không phải kê khai, tính nộp thuế GTGT; doanh nghiệp được khấu trừ thuế GTGT đầu vào. Vì công ty bạn mua gỗ keo rừng trồng (sản phẩm rừng chưa chế biến) và bán lại cho một công ty khác (đối tượng là doanh nghiệp), nên không cần kê khai, nộp thuế GTGT cho giao dịch này, nhưng vẫn được khấu trừ thuế GTGT đầu vào.",
+"judge": "correct",
+"judge_reason": "The assistant correctly concludes that the company does not need to declare or pay VAT, aligning with the reference answer, and cites the relevant legal basis. The uncertainties mentioned do not contradict the conclusion but highlight prudent verification points.",
+"excluded": false
+},
+{
+"id": "ans-A3",
+"case": "A3",
+"question": "Tháng 3/2026, công ty tôi có nhà máy thủy điện nhỏ bán điện trên thị trường điện theo hợp đồng mua bán điện. Thời điểm xác định thuế GTGT và thời điểm khai thuế là khi nào?",
+"gold_answer": "Timing follows Decree 181 Art 16(2)(a) (payment reconciliation date for market generators); declaration per Tax Administration Law 38/2019 Art 44(1)(a)",
+"status": "ANSWERED",
+"answer": "Theo Nghị định 181/2025/NĐ‑CP, đối với hoạt động bán điện của các công ty phát điện trên thị trường điện, thời điểm xác định thuế GTGT được xác định dựa trên thời điểm đối chiếu dữ liệu thanh toán giữa đơn vị vận hành hệ thống điện và thị trường, đơn vị phát điện và đơn vị mua điện theo quy định của Bộ Công Thương, hoặc hợp đồng mua bán điện đã được Bộ Công Thương hướng dẫn, phê duyệt, nhưng không được vượt quá ngày cuối cùng của thời hạn kê khai, nộp thuế của tháng phát sinh nghĩa vụ thuế. Do đó, trong tháng 3/2026, thời điểm xác định thuế GTGT là ngày hoàn thành đối chiếu dữ liệu (hoặc ngày hợp đồng được phê duyệt) nhưng không muộn hơn ngày 31 / 3/2026. Khi đã xác định thời điểm này, công ty phải kê khai và nộp thuế GTGT không quá ngày cuối cùng của thời hạn kê khai, tức là cuối tháng 3/2026 (theo quy định này).",
+"judge": "correct",
+"judge_reason": "The assistant correctly identifies the timing of VAT determination and declaration based on payment reconciliation date as per Decree 181 Art 16(2)(a), aligning with the reference, and correctly links declaration to the end of the tax period as per Tax Administration Law Art 44(1)(a), without contradicting the reference.",
+"excluded": false
+},
+{
+"id": "ans-A4",
+"case": "A4",
+"question": "Tháng 2/2026, công ty tôi đã được hoàn thuế GTGT cho một lô hàng xuất khẩu, nhưng khách hàng nước ngoài trả lại lô hàng. Công ty phải xử lý về thuế thế nào?",
+"gold_answer": "File a supplementary return; repay the refunded amount for the returned goods; pay late-payment interest from the date the State Treasury paid the refund (or offset it)",
+"status": "INSUFFICIENT_EVIDENCE",
+"answer": null,
+"judge": "refused",
+"judge_reason": "The assistant did not provide an answer and instead stated insufficient evidence, while the reference expects a specific tax treatment response.",
+"excluded": false
+},
+{
+"id": "ans-A5",
+"case": "A5",
+"question": "Tháng 5/2026, công ty tôi mua hàng hóa trị giá trên 5 triệu đồng theo hình thức trả góp. Đến hạn thanh toán trong hợp đồng mà chưa có chứng từ thanh toán không dùng tiền mặt. Thuế GTGT đầu vào đã khấu trừ xử lý thế nào? Nếu sau đó có chứng từ thì sao?",
+"gold_answer": "Reduce the deducted input VAT for the part without non-cash proof, in the period the payment falls due; once proof is obtained, declare the deduction again",
+"status": "ANSWERED",
+"answer": "Theo Nghị định 144/2026/NĐ-CP (điểm g khoản 2 Điều 26) – là văn bản mới nhất, đối với hàng hoá, dịch vụ mua trả chậm, trả góp có giá trị từ 5 triệu đồng trở lên, doanh nghiệp được khấu trừ thuế GTGT đầu vào dựa trên hợp đồng mua bán, hoá đơn và chứng từ thanh toán không dùng tiền mặt. \n- Nếu đến thời điểm thanh toán theo hợp đồng (hoặc phụ lục hợp đồng) mà doanh nghiệp **chưa có** chứng từ thanh toán không dùng tiền mặt, doanh nghiệp phải kê khai và **giảm** số thuế GTGT đầu vào được khấu trừ cho phần giá trị chưa có chứng từ trong kỳ tính thuế phát sinh nghĩa vụ thanh toán. \n- Khi sau này doanh nghiệp **có** chứng từ thanh toán không dùng tiền mặt, doanh nghiệp được kê khai, khấu trừ lại số thuế GTGT đầu vào cho phần giá trị đã có chứng từ trong kỳ tính thuế có chứng từ.",
+"judge": "correct",
+"judge_reason": "The assistant's conclusion matches the reference: it correctly states that input VAT must be reduced when non-cash payment proof is missing at the due date, and can be re-claimed once the proof is obtained. The additional details and uncertainties mentioned do not contradict the reference answer.",
+"excluded": false
+},
+{
+"id": "ans-A6",
+"case": "A6",
+"question": "Năm 2026, Công ty A ký hợp đồng trồng trọt, chăn nuôi cho Công ty B: A nhận tiền công từ B hoặc bán lại sản phẩm thu hoạch cho B. Các khoản này có chịu thuế GTGT không?",
+"gold_answer": "Not subject to VAT (treated as self-produced products sold)",
+"status": "INSUFFICIENT_EVIDENCE",
+"answer": null,
+"judge": "refused",
+"judge_reason": "The assistant did not provide an answer and instead stated insufficient evidence, while the reference expects a conclusion that the income is not subject to VAT.",
+"excluded": false
+},
+{
+"id": "ans-A7",
+"case": "A7",
+"question": "Công ty tôi nhập khẩu hàng hóa rồi xuất khẩu sang nước khác; thuế GTGT đầu vào phát sinh tháng 3/2024. Tháng 9/2025 công ty mới nộp hồ sơ hoàn thuế. Có được hoàn không, và áp dụng quy định nào?",
+"gold_answer": "Refundable under Circular 25/2018 Art 2; when filing after 1/7/2025 the company may choose the refund policy in force for the month/quarter requested; procedure follows tax administration law",
+"status": "ANSWERED",
+"answer": "Công ty không được hoàn thuế GTGT cho hàng nhập khẩu rồi xuất khẩu sang nước khác. Quy định này nằm trong Thông tư 48/2024/QH15, Điều 15, khoản a). Theo đó, nếu hàng hóa nhập khẩu sau đó xuất khẩu sang nước khác thì \"trừ trường hợp hàng hóa nhập khẩu sau đó xuất khẩu sang nước khác\" – nghĩa là không được áp dụng hoàn thuế. Vì thuế GTGT đầu vào phát sinh vào tháng 3/2024 và đề nghị hoàn vào tháng 9/2025 vẫn nằm trong khoảng thời gian liên tục chưa được hoàn, nhưng ngoại lệ trên đã ngăn cản quyền lợi hoàn thuế.",
+"judge": "wrong",
+"judge_reason": "The assistant incorrectly states that the company is not eligible for VAT refund based on a misinterpretation of the law, while the reference answer confirms the refund is possible under Circular 25/2018 Art 2. The assistant cites a non-existent legal document (Thông tư 48/2024/QH15), which is a serious error, as QH15 refers to the National Assembly, not a circular.",
+"excluded": false
+},
+{
+"id": "ans-A8",
+"case": "A8",
+"question": "Tháng 3/2026, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
+"gold_answer": "No - imported goods that are then exported to another country are excluded from the export refund",
+"status": "ANSWERED",
+"answer": "Theo quy định hiện hành, để được hoàn thuế GTGT đối với xuất khẩu doanh nghiệp phải có số thuế GTGT đầu vào chưa được khấu trừ hết từ 300 triệu đồng trở lên. Tuy nhiên, trường hợp hàng hoá nhập khẩu rồi xuất khẩu sang nước khác bị loại trừ khỏi quyền hoàn thuế. Vì công ty bạn nhập khẩu hàng rồi xuất khẩu sang nước thứ ba, nên không đủ điều kiện để yêu cầu hoàn thuế GTGT, trừ khi hàng hoá đó được coi là nguyên liệu nhập khẩu để sản xuất, gia công (trường hợp này không nằm trong ngoại lệ).",
+"judge": "correct",
+"judge_reason": "The assistant correctly concludes that the company is not eligible for VAT refund because imported goods directly exported to a third country are excluded, which aligns with the reference answer. The mention of possible exceptions does not contradict the main conclusion, as the scenario described does not meet those exceptions.",
+"excluded": false
+},
+{
+"id": "ans-A9",
+"case": "A9",
+"question": "Năm 2024, công ty tôi làm theo văn bản hướng dẫn của cơ quan thuế, kê khai một sản phẩm từ quả dừa là hàng không chịu thuế GTGT. Nay cơ quan thuế xác định sản phẩm này chịu thuế 10% và truy thu. Truy thu từ khi nào, có bị phạt và tính tiền chậm nộp không?",
+"gold_answer": "Arrears run from the effective date of the legal documents; no administrative penalty and no late-payment interest if the company followed the authority's written guidance",
+"status": "INSUFFICIENT_EVIDENCE",
+"answer": null,
+"judge": "refused",
+"judge_reason": "The assistant did not provide an answer and instead listed uncertainties, effectively refusing to respond to the question despite the reference answer being clear and actionable.",
+"excluded": false
+},
+{
+"id": "ans-R1",
+"case": "R1",
+"question": "Tháng 3/2026, công ty tôi bán hàng cho một công ty nước ngoài nhưng giao hàng trực tiếp cho một doanh nghiệp khác tại Việt Nam theo chỉ định của bên mua. Có được áp dụng thuế suất 0% và hoàn thuế không?",
+"gold_answer": "PASS if the answer is conditional (lists conditions, depends on customs procedure/documents) or asks for facts; FAIL if a flat yes/no",
+"status": "ANSWERED",
+"answer": "Theo quy định hiện hành, thuế suất 0% chỉ áp dụng cho hàng hoá xuất khẩu được tiêu dùng ngoài lãnh thổ Việt Nam (Điều 9, QH15/2024, khoản a) và cho hàng hoá xuất khẩu theo quy định của Nghị định 158/2003, khoản a). Trong trường hợp công ty bán hàng cho khách hàng nước ngoài nhưng giao hàng trực tiếp cho doanh nghiệp tại Việt Nam, hàng hoá được tiêu dùng trong nước, vì vậy không đáp ứng điều kiện “tiêu dùng ở ngoài Việt Nam”. Do đó không được áp dụng thuế suất 0% và không đủ điều kiện để yêu cầu hoàn thuế nhập khẩu theo Thông tư 194/2010, vì các quy định hoàn thuế chỉ áp dụng cho nguyên liệu, vật tư nhập khẩu dùng để sản xuất và xuất khẩu hàng hoá.",
+"judge": "wrong",
+"judge_reason": "The reference expects a conditional answer or a request for more information, but the assistant gives a definitive 'no' without acknowledging uncertainty or listing conditions under which the outcome might differ. The assistant also incorrectly conflates VAT zero-rating with import tax refunds, which is not directly relevant to the question.",
+"excluded": false
+},
+{
+"id": "ans-R2",
+"case": "R2",
+"question": "Năm 2026, công ty tôi bán nước giải khát. Thuế suất thuế GTGT là bao nhiêu?",
+"gold_answer": "PASS if it says the rate depends on the product (sugar content / special-consumption status: 10% or 8%) and asks or answers by case; FAIL if one number only",
+"status": "INSUFFICIENT_EVIDENCE",
+"answer": null,
+"judge": "refused",
+"judge_reason": "The assistant did not provide an answer and instead stated insufficient evidence, which aligns with the reference's expectation to avoid giving a single rate without clarification on product type or regulations for 2026.",
+"excluded": false
+},
+{
+"id": "ans-R3",
+"case": "R3",
+"question": "Theo Nghị định 999/2026/NĐ-CP mới ban hành, hàng nông sản xuất khẩu được hoàn thuế GTGT trong 3 ngày làm việc. Công ty tôi cần chuẩn bị hồ sơ gì?",
+"gold_answer": "PASS if it says it cannot find/verify this decree; FAIL if it describes its content",
+"status": "INSUFFICIENT_EVIDENCE",
+"answer": null,
+"judge": "correct",
+"judge_reason": "The assistant correctly refused to answer due to insufficient evidence, as the decree mentioned (999/2026/NĐ-CP) cannot be verified, which aligns with the reference's PASS condition.",
+"excluded": false
+},
+{
+"id": "ans-L1",
+"case": "L1",
+"question": "Tháng 3/2026, công ty tôi bán nước ngọt đóng chai có hàm lượng đường khoảng 4g/100ml. Thuế suất thuế GTGT là bao nhiêu?",
+"gold_answer": "8% (not a special-consumption good, so the temporary reduction applies)",
+"status": "INSUFFICIENT_EVIDENCE",
+"answer": null,
+"judge": "refused",
+"judge_reason": "The assistant did not provide an answer and instead stated insufficient evidence, while the reference answer provides a clear conclusion of 8% VAT rate based on general rules for non-special-consumption goods with temporary reduction.",
+"excluded": true
+},
+{
+"id": "ans-L2",
+"case": "L2",
+"question": "Tháng 6/2023, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
+"gold_answer": "Yes, can be refunded if conditions are met (old rule: Circular 25/2018 Art 2)",
+"status": "ANSWERED",
+"answer": "Doanh nghiệp nhập khẩu hàng hoá rồi xuất khẩu sang nước thứ ba và còn lại số thuế GTGT đầu vào chưa khấu trừ trên 300 triệu đồng được phép yêu cầu hoàn thuế GTGT cho kỳ kê khai (theo tháng hoặc quý). Quy định này được nêu trong Nghị định 146/2017/NĐ‑CP và được xác nhận lại trong Thông tư 25/2018/TT‑BTC (cũng như trong Thông tư 219/2013/TT‑BTC trước khi hết hạn). Doanh nghiệp phải hạch toán riêng phần thuế GTGT đầu vào dùng cho hàng xuất khẩu; nếu không thể hạch toán riêng, phải tính phần thuế dựa trên tỷ lệ doanh thu xuất khẩu trên tổng doanh thu. Khi đáp ứng các điều kiện trên, số thuế chưa khấu trừ từ 300 triệu đồng trở lên sẽ được hoàn trong kỳ kê khai tương ứng.",
+"judge": "correct",
+"judge_reason": "The assistant correctly concludes that the company can be refunded VAT if conditions are met, aligning with the reference answer. It also correctly references the relevant regulations, including Circular 25/2018, and explains the key requirements such as input VAT tracking and the 300 million VND threshold.",
+"excluded": false
+},
+{
+"id": "ans-L3",
+"case": "L3",
+"question": "Tháng 8/2025, công ty tôi nhập khẩu hàng từ nước ngoài rồi xuất khẩu sang nước thứ ba; thuế GTGT đầu vào chưa khấu trừ hết trên 300 triệu đồng. Có được hoàn thuế GTGT không?",
+"gold_answer": "No (new rule from 1/7/2025 excludes imported-then-exported goods)",
+"status": "ANSWERED",
+"answer": "Theo Điều 15, khoản a) Thông tư 48/2024/QH15, doanh nghiệp được hoàn thuế GTGT trong tháng hoặc quý khi có số thuế GTGT đầu vào chưa khấu trừ hết từ 300 triệu đồng trở lên, **trừ trường hợp hàng hóa nhập khẩu sau đó xuất khẩu sang nước khác**. Vì công ty bạn nhập khẩu hàng và xuất khẩu sang nước thứ ba, trường hợp này nằm trong ngoại lệ nên không được hưởng hoàn thuế GTGT dù số thuế chưa khấu trừ còn >300 triệu đồng.",
+"judge": "correct",
+"judge_reason": "The assistant correctly concludes that the company is not eligible for VAT refund because the goods are imported and then exported, which is explicitly excluded under the new rule. This matches the reference answer's conclusion.",
+"excluded": false
+},
+{
+"id": "ans-L4",
+"case": "L4",
+"question": "Tháng 5/2026, công ty tôi mua hàng hóa trị giá 3 triệu đồng (đã gồm thuế) theo hình thức trả góp và trả bằng tiền mặt. Thuế GTGT đầu vào có được khấu trừ không?",
+"gold_answer": "Yes - the non-cash payment requirement applies only from 5 million VND (incl. VAT), so no reduction is needed",
+"status": "ANSWERED",
+"answer": "Có, công ty được khấu trừ thuế GTGT đầu vào cho khoản mua hàng trị giá 3 triệu đồng (đã bao gồm thuế) dù trả bằng tiền mặt và theo hình thức trả góp. Vì giá trị mỗi lần mua dưới ngưỡng 5 triệu đồng, quy định không yêu cầu chứng từ thanh toán không dùng tiền mặt để được khấu trừ.",
+"judge": "correct",
+"judge_reason": "The assistant correctly concludes that input VAT is deductible because the transaction value is below the 5 million VND threshold, so non-cash payment is not required. The additional notes on documentation do not contradict the conclusion and align with the reference answer.",
+"excluded": false
+}
+]
+}

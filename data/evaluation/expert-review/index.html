@@ -1,0 +1,454 @@
+<title>TaxLens Expert Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reviewer's desk. Fixed section rail on wide screens, one column on phones; each item is a
+   numbered case file with the source text set as statute (serif) and the question in plain sans. */
+:root {
+  --bg: #f3f4f1;
+  --surface: #ffffff;
+  --ink: #1c2433;
+  --muted: #5b6474;
+  --line: #d9dcd6;
+  --accent: #23466e;
+  --accent-soft: #e3eaf3;
+  --done: #2f6b4f;
+  --done-soft: #e2efe7;
+  --warn: #8a5a12;
+  --warn-soft: #f6ead3;
+  --quote: #f7f6f2;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-text: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --surface: #1a1f28; --ink: #e6e9ee; --muted: #9aa3b2; --line: #2e3542;
+    --accent: #8fb3dd; --accent-soft: #223247; --done: #7cc39d; --done-soft: #1d3329;
+    --warn: #e0b56a; --warn-soft: #3a2e1a; --quote: #161b23; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161d; --surface: #1a1f28; --ink: #e6e9ee; --muted: #9aa3b2; --line: #2e3542;
+  --accent: #8fb3dd; --accent-soft: #223247; --done: #7cc39d; --done-soft: #1d3329;
+  --warn: #e0b56a; --warn-soft: #3a2e1a; --quote: #161b23; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 15px/1.55 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 64px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (max-width: 820px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.25; }
+h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; font-weight: 600; }
+h3 { font-size: 1rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+a { color: var(--accent); }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Rail */
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); display: grid; gap: 16px; }
+@media (max-width: 820px) { .rail { position: static; } }
+.brand { display: grid; gap: 4px; }
+.brand strong { font-size: 1.05rem; }
+.nav { display: grid; gap: 4px; }
+@media (max-width: 820px) { .nav { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); } }
+.nav a {
+  display: flex; justify-content: space-between; gap: 8px; align-items: baseline;
+  padding: 8px 10px; border-radius: 6px; text-decoration: none; color: var(--ink);
+}
+.nav a:hover { background: var(--accent-soft); }
+.nav a[aria-current="page"] { background: var(--accent); color: var(--surface); }
+.count { font: 0.8rem var(--font-mono); font-variant-numeric: tabular-nums; opacity: 0.85; white-space: nowrap; }
+.status { font-size: 0.85rem; color: var(--muted); display: grid; gap: 8px; }
+.status .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.78rem; font-weight: 500; }
+.pill.shared { background: var(--done-soft); color: var(--done); }
+.pill.local { background: var(--warn-soft); color: var(--warn); }
+.pill.wait { background: var(--accent-soft); color: var(--accent); }
+.copy-btn { justify-self: start; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+
+/* Main */
+main { display: grid; gap: 20px; min-width: 0; }
+.intro { display: grid; gap: 12px; }
+.intro p { color: var(--muted); }
+.section-head { display: grid; gap: 6px; padding-bottom: 4px; }
+.section-head p { color: var(--muted); }
+.meter { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; max-width: 320px; }
+.meter span { display: block; height: 100%; background: var(--done); width: 0; transition: width 0.3s; }
+@media (prefers-reduced-motion: reduce) { .meter span { transition: none; } }
+.items { display: grid; gap: 14px; }
+.item { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; display: grid; gap: 12px; min-width: 0; }
+.item.answered { border-left: 4px solid var(--done); }
+.item-head { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; justify-content: space-between; }
+.doc { font: 500 0.95rem var(--font-mono); }
+.tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.tag.found { background: var(--done-soft); color: var(--done); }
+.tag.missed { background: var(--warn-soft); color: var(--warn); }
+.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; font-size: 0.9rem; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.quote { font-family: var(--font-text); background: var(--quote); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; font-size: 0.95rem; line-height: 1.6; overflow-wrap: anywhere; }
+details > summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+details[open] > summary { margin-bottom: 8px; }
+.ask { font-weight: 500; }
+.note-flag { background: var(--warn-soft); color: var(--ink); border-radius: 6px; padding: 10px 12px; font-size: 0.92rem; }
+fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+legend { padding: 0; margin-bottom: 8px; font-weight: 500; }
+.choice { position: relative; }
+.choice input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.choice span { display: inline-block; padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 0.9rem; }
+.choice input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.choice input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+label.note { display: grid; gap: 6px; font-size: 0.88rem; color: var(--muted); }
+textarea { width: 100%; min-height: 64px; resize: vertical; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; background: var(--surface); font-size: 0.92rem; }
+.saved { font-size: 0.8rem; color: var(--muted); min-height: 1.2em; }
+.judge { font-size: 0.9rem; border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 6px; }
+.hidden-note { color: var(--muted); font-size: 0.85rem; font-style: italic; }
+.answer-text { white-space: pre-wrap; }
+.loading { color: var(--muted); }
+.intro-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); max-width: 68ch; }
+</style>
+
+<div class="wrap">
+  <aside class="rail">
+    <div class="brand">
+      <span class="eyebrow">TaxLens · VinUniversity</span>
+      <strong>Expert review</strong>
+    </div>
+    <nav class="nav" aria-label="Sections" id="nav"></nav>
+    <div class="status" id="status">
+      <span><span class="pill wait" id="save-pill">Connecting…</span></span>
+      <span id="save-text">Your answers save as you go.</span>
+      <button class="copy-btn" type="button" id="copy">Copy all my answers</button>
+      <span id="copy-result" aria-live="polite"></span>
+    </div>
+  </aside>
+
+  <main id="main">
+    <section class="intro" id="intro">
+      <span class="eyebrow">For the domain expert</span>
+      <h1>Checking the law behind TaxLens</h1>
+      <p>TaxLens searches Vietnamese tax law and answers questions with citations. Before we trust its scores,
+        we need a tax expert to check four things only an expert can judge. Each section stands alone; answer
+        as many items as you have time for, in any order, and skip anything you are unsure of.</p>
+      <ul class="intro-list">
+        <li><strong>Endings</strong> (about 25 minutes): did these documents really stop applying when our rule guesses?</li>
+        <li><strong>Old documents</strong> (about 15 minutes): were these still in force on the case dates?</li>
+        <li><strong>Essential provisions</strong> (about 50 minutes): are these the provisions a practitioner needs for each question?</li>
+        <li><strong>Graded answers</strong> (about 45 minutes): your own grade for each of the system's answers.</li>
+      </ul>
+    </section>
+    <div id="view" class="items"><p class="loading">Loading the review items…</p></div>
+  </main>
+</div>
+
+<script>
+const SECTIONS = [
+  {
+    key: "endings", title: "Endings", data: "endings",
+    lead: "Our system guesses that these documents ended, because the document they guide or amend ended (the \"guidance\" or \"amendment\" rule). Until an expert confirms the rule, the site only flags them. For each one: did it stop applying by the date shown?",
+    options: [["ended", "Yes, ended by then"], ["in-force", "No, still in force then"], ["partly", "Partly ended"], ["unsure", "Not sure"]],
+    notePrompt: "If you know: which document ended it, and from when?",
+  },
+  {
+    key: "old", title: "Old documents", data: "old",
+    lead: "These old documents have no ending recorded anywhere in our corpus, and they keep outranking current law in search. For each one: was it still in force on the case dates shown?",
+    options: [["ended", "Ended before these dates"], ["in-force", "In force on these dates"], ["partly", "Partly in force"], ["unsure", "Not sure"]],
+    notePrompt: "If ended: by which document, and from when?",
+  },
+  {
+    key: "cases", title: "Essential provisions", data: "cases",
+    lead: "Each case is a practitioner's question with the provisions we marked essential to answer it. Our search scores itself against these lists, so a wrong list makes a miss look real when it is not. Are these the provisions that decide the answer?",
+    options: [["right", "The list is right"], ["change", "Something is missing or wrong"], ["unsure", "Not sure"]],
+    notePrompt: "What should be added or removed? A document and article is enough.",
+  },
+  {
+    key: "answers", title: "Graded answers", data: "answers",
+    lead: "These are the system's answers to the first 15 gold questions. A language model graded them against our reference answers; we would like your grade instead. Give yours first: the model's grade is shown after you answer.",
+    options: [["correct", "Correct"], ["partly", "Partly right"], ["wrong", "Wrong"], ["refused-wrongly", "Refused, but should answer"], ["refusal-right", "Refusal is right"]],
+    notePrompt: "Anything the answer gets wrong or misses?",
+  },
+];
+const RULE_TEXT = { guidance: "It guides", amendment: "It amends" };
+const state = { packet: null, answers: {}, db: null, userId: null, mode: "wait", view: "endings" };
+const DRAFT_KEY = "taxlens-expert-review-draft";
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key === "class") node.className = value;
+    else if (key === "text") node.textContent = value;
+    else node.setAttribute(key, value);
+  }
+  for (const child of children) if (child != null) node.append(child);
+  return node;
+}
+
+function loadDraft() {
+  try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || "{}"); } catch { return {}; }
+}
+function saveDraft() {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(state.answers)); } catch { /* storage unavailable */ }
+}
+
+function setMode(mode, text) {
+  state.mode = mode;
+  const pill = document.getElementById("save-pill");
+  pill.className = "pill " + (mode === "shared" ? "shared" : mode === "local" ? "local" : "wait");
+  pill.textContent = mode === "shared" ? "Saving to the team" : mode === "local" ? "Saving in this browser" : "Connecting…";
+  document.getElementById("save-text").textContent = text;
+}
+
+function sectionItems(section) { return state.packet ? state.packet[section.data] : []; }
+function doneCount(section) { return sectionItems(section).filter(item => state.answers[item.id]?.verdict).length; }
+
+function renderNav() {
+  const nav = document.getElementById("nav");
+  nav.replaceChildren(...SECTIONS.map(section => {
+    const link = el("a", { href: "#" + section.key }, el("span", { text: section.title }),
+      el("span", { class: "count", text: `${doneCount(section)} / ${sectionItems(section).length}` }));
+    if (state.view === section.key) link.setAttribute("aria-current", "page");
+    return link;
+  }));
+}
+
+function facts(pairs) {
+  const list = el("dl", { class: "facts" });
+  for (const [term, value] of pairs) {
+    if (value == null || value === "") continue;
+    list.append(el("dt", { text: term }), el("dd", { text: value }));
+  }
+  return list;
+}
+
+function choiceGroup(section, item) {
+  const group = el("fieldset");
+  group.append(el("legend", { text: "Your answer" }));
+  for (const [value, label] of section.options) {
+    const input = el("input", { type: "radio", name: item.id, value, id: `${item.id}-${value}` });
+    if (state.answers[item.id]?.verdict === value) input.checked = true;
+    input.addEventListener("change", () => record(section, item, { verdict: value }));
+    group.append(el("label", { class: "choice", for: `${item.id}-${value}` }, input, el("span", { text: label })));
+  }
+  return group;
+}
+
+const noteTimers = {};
+function noteField(section, item) {
+  const area = el("textarea", { id: `${item.id}-note`, rows: "2" });
+  area.value = state.answers[item.id]?.note || "";
+  area.addEventListener("input", () => {
+    clearTimeout(noteTimers[item.id]);
+    noteTimers[item.id] = setTimeout(() => record(section, item, { note: area.value }), 1200);
+  });
+  area.addEventListener("blur", () => {
+    clearTimeout(noteTimers[item.id]);
+    if ((state.answers[item.id]?.note || "") !== area.value) record(section, item, { note: area.value });
+  });
+  return el("label", { class: "note", for: `${item.id}-note` }, el("span", { text: section.notePrompt }), area);
+}
+
+function savedLine(item) {
+  const entry = state.answers[item.id];
+  return el("p", { class: "saved", id: `${item.id}-saved`, "aria-live": "polite",
+    text: entry?.at ? `Saved ${new Date(entry.at).toLocaleString()}` : "" });
+}
+
+function endingCard(section, item, index) {
+  const card = el("article", { class: "item" + (state.answers[item.id]?.verdict ? " answered" : ""), id: item.id });
+  card.append(
+    el("div", { class: "item-head" }, el("h3", { class: "doc", text: `${index}. ${item.document}` }),
+      el("span", { class: "tag", text: item.rule === "guidance" ? "Guidance rule" : "Amendment rule" })),
+    el("p", { text: item.title }),
+    facts([
+      ["Our guess", `${RULE_TEXT[item.rule] || "It follows"} ${item.parent}, which ended on ${formatDate(item.inferred_end)}, so it ended then too.`],
+      ["Seen in cases", item.cases.join(", ")],
+    ]),
+    el("p", { class: "ask", text: `Did ${item.document} stop applying by ${formatDate(item.inferred_end)}?` }),
+    choiceGroup(section, item), noteField(section, item), savedLine(item));
+  return card;
+}
+
+function oldCard(section, item, index) {
+  const card = el("article", { class: "item" + (state.answers[item.id]?.verdict ? " answered" : ""), id: item.id });
+  const dates = Object.entries(item.case_dates).map(([c, d]) => `${c} (${d})`).join(", ");
+  card.append(
+    el("div", { class: "item-head" }, el("h3", { class: "doc", text: `${index}. ${item.document}` }),
+      el("span", { class: "tag", text: item.issued ? `Issued ${formatDate(item.issued)}` : "Issue date unknown" })),
+    el("p", { text: item.title }),
+    facts([["Outranks current law in", dates]]),
+    el("p", { class: "ask", text: "Was it still in force on those dates?" }),
+    choiceGroup(section, item), noteField(section, item), savedLine(item));
+  return card;
+}
+
+function caseCard(section, item) {
+  const card = el("article", { class: "item" + (state.answers[item.id]?.verdict ? " answered" : ""), id: item.id });
+  const provisions = el("div", { class: "items" });
+  for (const p of item.essential) {
+    const block = el("details");
+    block.append(el("summary", {}, el("span", { class: "doc", text: p.provision + " " }),
+      el("span", { class: "tag " + (p.found ? "found" : "missed"), text: p.found ? "found by search" : "not found by search" })),
+      el("div", { class: "quote", text: p.text || "(text not in the corpus)" }));
+    provisions.append(block);
+  }
+  card.append(
+    el("div", { class: "item-head" }, el("h3", { text: `Case ${item.case}` }), el("span", { class: "tag", text: `As of ${item.date}` })),
+    el("div", { class: "quote", text: item.question }),
+    facts([["Reference answer", item.gold_answer], ["Listed provisions", item.gold_provisions]]),
+    item.note ? el("p", { class: "note-flag", text: item.note }) : null,
+    el("p", { class: "eyebrow", text: "Essential provisions, with their text in our corpus" }),
+    provisions,
+    el("p", { class: "ask", text: "Are these the provisions that decide the answer?" }),
+    choiceGroup(section, item), noteField(section, item), savedLine(item));
+  return card;
+}
+
+function answerCard(section, item) {
+  const entry = state.answers[item.id];
+  const card = el("article", { class: "item" + (entry?.verdict ? " answered" : ""), id: item.id });
+  const judge = el("div", { class: "judge" });
+  if (entry?.verdict) {
+    judge.append(el("p", {}, el("strong", { text: "Model judge's grade: " }), document.createTextNode(item.judge)),
+      el("p", { text: item.judge_reason || "" }));
+  } else {
+    judge.append(el("p", { class: "hidden-note", text: "The model judge's grade appears here after you give yours." }));
+  }
+  card.append(
+    el("div", { class: "item-head" }, el("h3", { text: `Case ${item.case}` }),
+      el("span", { class: "tag", text: item.excluded ? "Marked uncertain, not counted" : item.status === "ANSWERED" ? "Answered" : "Refused" })),
+    el("div", { class: "quote", text: item.question }),
+    facts([["Reference answer", item.gold_answer]]),
+    el("p", { class: "eyebrow", text: "The system's answer" }),
+    el("div", { class: "quote answer-text", text: item.answer || "(No answer: the system said the evidence was not enough.)" }),
+    choiceGroup(section, item), noteField(section, item), savedLine(item), judge);
+  return card;
+}
+
+function formatDate(iso) {
+  const [y, m, d] = String(iso).split("-");
+  return d ? `${d}/${m}/${y}` : String(iso);
+}
+
+function renderView() {
+  renderNav();
+  const view = document.getElementById("view");
+  if (!state.packet) return;
+  // Re-rendering replaces the cards: keep the focused control, and leave a note being typed alone.
+  const focused = document.activeElement;
+  if (focused?.tagName === "TEXTAREA" && view.contains(focused)) { state.renderPending = true; return; }
+  const focusId = focused && view.contains(focused) ? focused.id : null;
+  const section = SECTIONS.find(s => s.key === state.view) || SECTIONS[0];
+  const items = sectionItems(section);
+  const done = doneCount(section);
+  const meter = el("div", { class: "meter", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(items.length), "aria-valuenow": String(done) }, el("span"));
+  meter.firstChild.style.width = `${items.length ? (100 * done) / items.length : 0}%`;
+  const head = el("div", { class: "section-head" }, el("h2", { text: section.title }), el("p", { text: section.lead }),
+    el("p", { class: "count", text: `${done} of ${items.length} answered` }), meter);
+  const cards = items.map((item, i) => section.key === "endings" ? endingCard(section, item, i + 1)
+    : section.key === "old" ? oldCard(section, item, i + 1)
+    : section.key === "cases" ? caseCard(section, item) : answerCard(section, item));
+  view.replaceChildren(head, ...cards);
+  state.renderPending = false;
+  if (focusId) document.getElementById(focusId)?.focus({ preventScroll: true });
+}
+
+document.addEventListener("focusout", event => {
+  if (event.target.tagName === "TEXTAREA" && state.renderPending) setTimeout(renderView, 0);
+});
+
+async function record(section, item, change) {
+  const previous = state.answers[item.id] || {};
+  const entry = { ...previous, ...change, section: section.key,
+    item: item.document || item.case, at: new Date().toISOString() };
+  state.answers[item.id] = entry;
+  saveDraft();
+  const verdictChanged = "verdict" in change;
+  if (verdictChanged) renderView();
+  else {
+    const line = document.getElementById(`${item.id}-saved`);
+    if (line) line.textContent = `Saved ${new Date(entry.at).toLocaleString()}`;
+  }
+  if (state.mode === "shared" && state.db) {
+    try {
+      await state.db.collection("reviews").doc(item.id).set({ ...entry, by: state.userId });
+    } catch (error) {
+      setMode("local", "The team store refused this save, so answers stay in this browser. Use \"Copy all my answers\" and send them to us.");
+    }
+  }
+}
+
+function route() {
+  const key = location.hash.replace("#", "");
+  state.view = SECTIONS.some(s => s.key === key) ? key : state.view;
+  renderView();
+}
+
+document.getElementById("copy").addEventListener("click", async () => {
+  const result = document.getElementById("copy-result");
+  const text = JSON.stringify(state.answers, null, 1);
+  try {
+    await navigator.clipboard.writeText(text);
+    result.textContent = "Copied. Paste it into an email to the team.";
+  } catch {
+    const area = el("textarea", { rows: "6", "aria-label": "All answers" });
+    area.value = text;
+    result.replaceChildren(el("span", { text: "Copy this text:" }), area);
+    area.select();
+  }
+});
+
+window.addEventListener("hashchange", route);
+
+async function start() {
+  state.answers = loadDraft();
+  try {
+    const response = await fetch("packet.json");
+    state.packet = await response.json();
+  } catch {
+    document.getElementById("view").replaceChildren(el("p", { text: "The review items could not be loaded. Reload the page to try again." }));
+    return;
+  }
+  route();
+
+  const claude = window.claude;
+  const [db, user] = await Promise.all([claude?.use?.("db") ?? null, claude?.use?.("user") ?? null]);
+  if (!db) {
+    setMode("local", "Answers are saved in this browser only. When you finish, use \"Copy all my answers\" and send them to us.");
+    return;
+  }
+  state.db = db;
+  state.userId = user ? await user.id() : null;
+  const canWrite = user ? await user.can("data.write") : null;
+  if (canWrite === false) {
+    setMode("local", "You can read this page but not save to the team store. Answers stay in this browser; use \"Copy all my answers\" to send them.");
+    return;
+  }
+  setMode("shared", "Answers save to the team as you go, and stay here when you come back.");
+  const timer = setTimeout(() => {
+    if (state.mode === "shared") document.getElementById("save-text").textContent = "The team store is slow to answer; your answers are kept in this browser meanwhile.";
+  }, 10000);
+  db.collection("reviews").onSnapshot(snapshot => {
+    if (!snapshot.metadata.fromCache) clearTimeout(timer);
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      if (!data) continue;
+      const local = state.answers[doc.id];
+      if (!local || (data.at && (!local.at || data.at > local.at))) state.answers[doc.id] = { ...data };
+    }
+    saveDraft();
+    renderView();
+  }, () => {
+    clearTimeout(timer);
+    setMode("local", "The team store stopped answering. Answers stay in this browser; use \"Copy all my answers\" to send them.");
+  });
+}
+start();
+</script>
