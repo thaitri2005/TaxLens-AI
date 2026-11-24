@@ -4,10 +4,13 @@
 
 **Search Vietnamese tax law and get answers cited to the exact article.**
 
-TaxLens collects official tax documents back to 1990 (2,986 documents, 144,279 passages),
-splits them by article and clause, and answers only from those passages. Each answer cites the
-document, article and clause, applies the law in force on the date asked about, and says so
-when the documents do not answer the question.
+TaxLens is both an engineering project and a research project:
+
+- **The system** collects official tax documents back to 1990 (2,986 documents, 144,279
+  passages), splits them by article and clause, and answers only from those passages, citing
+  each one and applying the law in force on the date asked about.
+- **The research** builds a benchmark of real practitioner questions and uses it to find out
+  what stops a search system from finding the provisions that decide an answer.
 
 **Live development site:**
 [taxlens-dev-web…azurecontainerapps.io](https://taxlens-dev-web.wonderfulfield-8256aab7.eastasia.azurecontainerapps.io)
@@ -17,7 +20,7 @@ when the documents do not answer the question.
 | --- | --- |
 | <img src="docs/assets/ask.png" width="400" alt="Ask TaxLens: a cited answer to a VAT refund question"> | <img src="docs/assets/search.png" width="400" alt="Search: filters by source, kind and status, then matching passages with citations"> |
 
-## Features
+## The system
 
 - **Cited answers** in the question's language, with verbatim excerpts and official links;
   facts not supported by their cited passage are removed.
@@ -26,10 +29,7 @@ when the documents do not answer the question.
 - **Refusals instead of guesses** when a question is out of scope or the evidence is missing.
 - **Search** by number, title or content, filtered by source, kind and status; tolerates missing
   diacritics and OCR errors.
-- **Measured**: a clause-labelled gold set, frozen corpus versions, an answer grader, and a
-  record of every experiment.
-
-## How it works
+- **Fast**: a warm answer takes about 5.5 seconds.
 
 ```mermaid
 flowchart LR
@@ -51,17 +51,27 @@ fusion; the five best passages become the evidence. Details: [retrieval.md](docs
 **Stack:** Next.js 15 and Auth.js · FastAPI and PostgreSQL (full-text + pgvector) · Hugging Face
 Inference Providers · Tesseract OCR · Airflow · Azure Container Apps, Terraform, GitHub Actions.
 
-## Results so far
+## The research
 
-On 30 scored gold cases (`corpus-v2.1`):
+Tax questions rarely name the provisions that decide them. A question about a returned export,
+for example, depends on rules about refunds, declarations and late interest that it never
+mentions. The research asks how far retrieval can close that gap.
 
-| Measure | Result |
-| --- | --- |
-| Essential provisions in the top 5 / 10 / 20 passages | 0.31 / 0.47 / 0.53 |
-| Answers to 15 gold questions | 8 correct, 2 wrong, 5 refused |
-| Warm answer time | about 5.5 s |
+So far:
 
-Details and known problems: [evaluation-status.md](docs/evaluation-status.md).
+- **A benchmark**: 34 practitioner questions from tax-authority letters and the law text, each
+  with a reference answer and its essential provisions labelled to the clause, over frozen
+  corpus versions, with answers graded against the references.
+- **The cause of misses**: when the missing legal issue is named by hand, search recovers about
+  two thirds of the provisions it missed (top 20), so both retrieval and recognising the issue
+  matter.
+- **Discipline**: every method is tested against the baseline with its plan and decision rule
+  written first, and every result is kept, including rejected ones
+  ([retrieval-experiments.md](docs/retrieval-experiments.md)).
+- **Expert validation**: a tax expert is reviewing the gold provisions, the answer grades and
+  which old documents have ended.
+
+Status, results and next steps: [evaluation-status.md](docs/evaluation-status.md).
 
 ## Run locally
 
@@ -93,5 +103,4 @@ Open <http://localhost:3000>. Building a corpus, checks, release and deploy:
 ## Limitations
 
 A research tool, **not legal or tax advice**. Official letters (*công văn*) and provincial
-documents are not collected, many sources are OCR'd scans, and accuracy is measured on few
-cases. More in [evaluation-status.md](docs/evaluation-status.md).
+documents are not collected, and many sources are OCR'd scans.
