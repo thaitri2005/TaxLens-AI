@@ -15,7 +15,10 @@ What each working stint changed, newest first. Current state and the to-do list 
   about gold cases ([review](../data/evaluation/oracle/review.md)). Le Hung accepted it.
 - **Oracle, counted run** (reviewed queries): named well, an issue finds 28%, 38%, 69% of the missed
   provisions at K = 5, 10, 20. Both causes count; fusing issue lists into the question's adds nothing at
-  K = 5, so item 16 is redesigned around evidence slots per issue.
+  K = 5, so item 16 was redesigned around evidence slots per issue.
+- **Item 16 dropped:** planned first, then measured from the saved run. Slots per hand-named issue give
+  0.33 against 0.31 with the answers' 5 passages, under the plan's +0.05 floor
+  ([results](../data/evaluation/issue-slots/results.md)).
 - **Item 19:** 30 more endings read from the corpus (lists after a colon, lists of replaced laws, laws
   ending as amended), loaded on Azure: 753 documents left out, 119 flagged. Recall identical; oracle
   25% → 28% at K = 10. The rest of the old law in the way has no ending stated in the corpus.

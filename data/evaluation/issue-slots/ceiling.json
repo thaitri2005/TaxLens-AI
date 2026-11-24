@@ -1,0 +1,8 @@
+{
+ "B=5 question only": 0.308,
+ "B=5 q=2 s=1": "0.333 (up 2, down 0)",
+ "B=5 q=3 s=1": "0.325 (up 1, down 0)",
+ "B=8 question only": 0.408,
+ "B=8 q=4 s=1": "0.433 (up 2, down 0)",
+ "B=8 q=3 s=2": "0.461 (up 4, down 0)"
+}
