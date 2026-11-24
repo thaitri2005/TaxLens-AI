@@ -12,7 +12,10 @@ What each working stint changed, newest first. Current state and the to-do list 
   ([results](../data/evaluation/oracle/results.md)).
 - **Oracle queries, first-pass review** by a Claude agent briefed as a tax practitioner, at Le Hung's
   request and awaiting his check: 14 kept, 16 rewritten (7 were over 20 words), 1 added, and 6 doubts
-  about gold cases ([review](../data/evaluation/oracle/review.md)). Not run yet.
+  about gold cases ([review](../data/evaluation/oracle/review.md)). Le Hung accepted it.
+- **Oracle, counted run** (reviewed queries): named well, an issue finds 28%, 38%, 69% of the missed
+  provisions at K = 5, 10, 20. Both causes count; fusing issue lists into the question's adds nothing at
+  K = 5, so item 16 is redesigned around evidence slots per issue.
 - **Item 19:** 30 more endings read from the corpus (lists after a colon, lists of replaced laws, laws
   ending as amended), loaded on Azure: 753 documents left out, 119 flagged. Recall identical; oracle
   25% → 28% at K = 10. The rest of the old law in the way has no ending stated in the corpus.

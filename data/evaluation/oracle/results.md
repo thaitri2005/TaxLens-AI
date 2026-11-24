@@ -50,5 +50,42 @@ expert validates them, can end these.
 
 A first-pass review by a Claude agent, blind to the runs above, is in [review.md](review.md): 7 drafts
 broke the 20-word rule, 9 more mis-stated the issue or its term, and one provision had no query. The
-proposed queries (`oracle-queries-reviewed.json`) have not been run. Le Hung checks them first, then one
-run gives the result.
+proposed queries (`oracle-queries-reviewed.json`) were accepted by Le Hung and run once, below. The draft
+readings above are superseded by it.
+
+## Counted run: reviewed queries (24/11/2026)
+
+**This is the experiment's result.** Le Hung accepted the first-pass review as proposed, open points
+left as written. Before the run the copy check found one 4-word run (A2.2), reworded; the queries were
+then frozen (`9d9fc97`) and run once: `oracle-reviewed.json`, endings list after item 19.
+
+| | K = 5 | K = 10 | K = 20 |
+| --- | --- | --- | --- |
+| M1: the 32 missed provisions found by the named issue alone | 28% | **38%** | 69% |
+| M2: question and issues fused, recall over 30 cases | 0.31 | 0.49 | 0.60 |
+| Baseline, the question alone | 0.31 | 0.47 | 0.53 |
+
+M2 against the baseline, case by case: K = 5 none up or down; K = 10 three up, two down; K = 20 four up,
+one down.
+
+**Reading.**
+
+1. **M1 at K = 10 is 38%, in the plan's middle band (25-50%): both causes count.** Named correctly, an
+   issue finds 12 of the 32 in the top 10 and 22 in the top 20. 10 are not found even then: VAT Law 9(3)
+   and 5(1), Decree 181/2025 4(1) and 38(1), Tax Administration Law 44(1) and 59, Law 64/2025 58(1), PIT
+   Law 7(4), and Law 108/2025 16(1) (twice). Those are retrieval failures.
+2. **The legal term matters more than the draft suggested.** Against the same queries in their draft
+   wording (`oracle-draft-item19`), M1 rises from 25%, 28%, 53%. Most of the gain is the term of art:
+   "tiền chậm nộp" instead of "lãi phạt nộp thuế muộn" (A15, A16), "hàng xuất khẩu" (A20), "khai bổ
+   sung" (A4), "không bị phạt" instead of "miễn xử phạt" (A9).
+3. **Fusing issue searches into one list barely moves what answers use.** M2, the ceiling of item 16 as
+   planned, leaves K = 5 at 0.31 and adds 0.02 at K = 10; the gain is at K = 20. Answers take their
+   evidence from the first located passages of 20, so item 16 as an equal-weight fused list would not
+   pay. The issue searches themselves put 28% of the missed provisions in their own top 5: what fusion
+   loses is their top few. A design that gives each named issue its own evidence slots would use that,
+   and needs its own plan and ceiling.
+
+The split by miss category the plan asks for in the middle band: of the 7 provisions the earlier
+diagnosis said need an unstated legal step, 2 are found in the top 10 when named (Decree 174/2025 1(1),
+Circular 80/2021 21); of the 8 buried by the case's facts (A2, A6, A9), 4; the 1 worded differently (A3)
+is not found. The 16 provisions of the newer cases were not categorised.

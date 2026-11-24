@@ -153,7 +153,7 @@ L = more. Mark each done here when finished.
 | ~~13~~ | **Done 23/11/2026.** 14 duplicates merged by `merge_duplicate_documents.py` (321 passages removed, backed up), `corpus-v2.1` frozen, ended-document list rebuilt and loaded, baselines identical; 124/2026 confirmed, 2 numbers left for someone with the originals | | [Corpora](#corpora) |
 | ~~14~~ | **Done 23/11/2026.** ESLint 9 with Next's `core-web-vitals` and `typescript` rules (`eslint.config.mjs`); CI runs `npm run lint` and `next build` lints too. Fixed 2 errors (page links in the admin view); 3 warnings remain (two `<img>` logos, one effect's dependency list) | | |
 | ~~15~~ | **Tried 23/11/2026, rejected.** Cross-encoders over the top 100: `bge-reranker-v2-m3` 0.31, 0.43, 0.58 (reaches 4 never-found provisions at K = 20 but loses the reworded cases, and needs about 110 s a question on the site's CPU); a small multilingual one is worse alone or fused. `--reranker` stays in the evaluation for later models | | [Already tried](retrieval-experiments.md#retrieval) |
-| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, **on hold** | The oracle (draft) shows that even a named issue recovers only 28% at K = 10 (25% before item 19): decide after the reviewed oracle run ([results](../data/evaluation/oracle/results.md)) |
+| 16 | Step that names the legal issues a question depends on and gives each its own evidence slots (not one fused list: the oracle's fused ceiling is 0.31, 0.49 at K = 5, 10, against 0.31, 0.47). Plan and measure the slot ceiling from saved runs first | L | The counted oracle: named well, an issue finds 38% of the missed provisions in its top 10 ([results](../data/evaluation/oracle/results.md)) |
 | ~~19~~ | **Done 24/11/2026.** The superseded law in the oracle's way did have explicit endings, in shapes the rules missed: `các Nghị định: số X …, số Y` (158/2003, 18/2009), `thay thế các luật sau đây` (07/2003), and laws ending "as amended by" laws (21/2012, 31/2013, 32/2013). 30 entries, each read against its sentence, loaded on Azure. Baseline identical case by case; oracle M1 0.19, 0.25, 0.47 → 0.25, 0.28, 0.53. What remains in the way has no ending stated in the corpus (166/2013, 194/2010, 123/2004, 1990s ministry texts) | | [Results](../data/evaluation/oracle/results.md) |
 | ~~17~~ | **Done 23/11/2026.** `page.tsx` (890 lines) split without code changes into `lib/` (types, copy, format, api) and `components/` (tags, answer, documents, layout); 12 Vitest tests for the helpers and tags run in CI (`npm test`) | | |
 | ~~18~~ | **Done 23/11/2026.** Known problems 1 and 8: runs of replaced documents read (33 more ended, recall with confirmed rules identical case by case, all rules 0.38 at K = 5), and documents that may have ended used last in answers (wrong 4 → 2, refused 2 → 5). A newest-first ranking was tried and rejected | | [Already tried](retrieval-experiments.md#retrieval) |
@@ -162,11 +162,9 @@ L = more. Mark each done here when finished.
 
 Waiting on a person (23/11/2026); code items above that depend on one say so.
 
-1. **Check the first-pass review of the oracle queries** (Le Hung):
-   [review.md](../data/evaluation/oracle/review.md). A Claude agent briefed as a tax practitioner did the
-   first pass on 24/11/2026 at his request (14 kept, 16 rewritten, 1 added) and raised 6 doubts about
-   gold cases A2, A5, A7, A9, A10, A11, A14, L4, R4. The oracle result counts only after his check and
-   the run that follows it.
+1. ~~Check the oracle queries~~ **done 24/11/2026** by Le Hung (first pass accepted as proposed). The
+   review's 6 doubts about gold cases A2, A5, A7, A9, A10, A11, A14, L4, R4 are still open
+   ([review.md](../data/evaluation/oracle/review.md)): they matter for retrieval scores too.
 2. ~~Review the 18 draft gold cases~~ **done 23/11/2026** by the owner. A tax expert's second reading would
    still strengthen them, and 16 more cases would reach 50.
 2. **Check two document numbers against the originals:** `93/1998/QĐ/TCKT` (its header reads

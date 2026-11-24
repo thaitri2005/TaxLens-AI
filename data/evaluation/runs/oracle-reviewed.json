@@ -1,0 +1,1369 @@
+{
+  "queries": "data\\evaluation\\oracle\\oracle-queries-reviewed.json",
+  "queries_status": "reviewed",
+  "baseline": "data\\evaluation\\runs\\hybrid-asof-ministry-v2.1-gold34-item19.json",
+  "summary": {
+    "missed_provisions": 32,
+    "queries": 31,
+    "queries_over_copy_limit": [],
+    "m1_recovered": {
+      "5": 0.281,
+      "10": 0.375,
+      "20": 0.688
+    },
+    "m1_unrecovered_at_20": [
+      "A1#0",
+      "A2#0",
+      "A2#1",
+      "A3#1",
+      "A4#2",
+      "A7#1",
+      "A7#2",
+      "A14#0",
+      "A15#1",
+      "A16#0"
+    ],
+    "scored_cases": 30,
+    "baseline_recall": {
+      "5": 0.308,
+      "10": 0.469,
+      "20": 0.531
+    },
+    "m2_merged_recall": {
+      "5": 0.308,
+      "10": 0.486,
+      "20": 0.603
+    },
+    "m2_cases_against_baseline": {
+      "5": {
+        "up": 0,
+        "down": 0,
+        "same": 30
+      },
+      "10": {
+        "up": 3,
+        "down": 2,
+        "same": 25
+      },
+      "20": {
+        "up": 4,
+        "down": 1,
+        "same": 25
+      }
+    }
+  },
+  "cases": [
+    {
+      "case_id": "A1",
+      "provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "9",
+            "3"
+          ]
+        ],
+        [
+          [
+            "66/2025/QH15",
+            "2",
+            "1"
+          ]
+        ],
+        [
+          [
+            "174/2025/NĐ-CP",
+            "1",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        11,
+        null
+      ],
+      "queries": [
+        {
+          "query": "mức thuế suất thuế giá trị gia tăng phổ thông cho các hàng hóa còn lại",
+          "targets": "48/2024/QH15 9(3)",
+          "ranks": [
+            null,
+            null,
+            null
+          ],
+          "copied_run": [
+            "muc",
+            "thue",
+            "suat"
+          ]
+        },
+        {
+          "query": "hàng hóa chịu thuế tiêu thụ đặc biệt có được giảm thuế giá trị gia tăng không",
+          "targets": "174/2025/NĐ-CP 1(1)",
+          "ranks": [
+            null,
+            null,
+            2
+          ],
+          "copied_run": [
+            "hang",
+            "hoa"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        null,
+        null,
+        2
+      ],
+      "merged_ranks": [
+        null,
+        null,
+        7
+      ]
+    },
+    {
+      "case_id": "A2",
+      "provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "5",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "4",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "4",
+            "1b"
+          ],
+          [
+            "359/2025/NĐ-CP",
+            "1",
+            "1"
+          ]
+        ],
+        [
+          [
+            "84/2025/TT-BNNMT",
+            "20",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        null,
+        1,
+        null
+      ],
+      "queries": [
+        {
+          "query": "sản phẩm rừng trồng chỉ bóc vỏ, phơi khô có phải chịu thuế giá trị gia tăng không",
+          "targets": "48/2024/QH15 5(1)",
+          "ranks": [
+            null,
+            null,
+            6,
+            null
+          ],
+          "copied_run": [
+            "san",
+            "pham"
+          ]
+        },
+        {
+          "query": "mua nông sản, lâm sản bán lại cho công ty khác có phải kê khai thuế giá trị gia tăng",
+          "targets": "48/2024/QH15 5(1); 181/2025/NĐ-CP 4(1b)",
+          "ranks": [
+            null,
+            null,
+            9,
+            null
+          ],
+          "copied_run": [
+            "phai",
+            "ke",
+            "khai"
+          ]
+        },
+        {
+          "query": "gỗ chỉ cưa xẻ, bóc vỏ có được coi là gỗ sơ chế trong quy định về lâm sản",
+          "targets": "84/2025/TT-BNNMT 20(1)",
+          "ranks": [
+            null,
+            null,
+            null,
+            1
+          ],
+          "copied_run": [
+            "quy",
+            "dinh",
+            "ve"
+          ]
+        },
+        {
+          "query": "những công đoạn nào được coi là sơ chế nông sản, lâm sản khi xét thuế giá trị gia tăng",
+          "targets": "181/2025/NĐ-CP 4(1)",
+          "ranks": [
+            null,
+            null,
+            9,
+            null
+          ],
+          "copied_run": [
+            "san",
+            "lam",
+            "san"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        null,
+        null,
+        6,
+        1
+      ],
+      "merged_ranks": [
+        null,
+        null,
+        1,
+        null
+      ]
+    },
+    {
+      "case_id": "A3",
+      "provisions": [
+        [
+          [
+            "181/2025/NĐ-CP",
+            "16",
+            "2"
+          ]
+        ],
+        [
+          [
+            "38/2019/QH14",
+            "44",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        1,
+        null
+      ],
+      "queries": [
+        {
+          "query": "hạn chót nộp tờ khai thuế giá trị gia tăng hằng tháng là ngày nào",
+          "targets": "38/2019/QH14 44(1)",
+          "ranks": [
+            null,
+            null
+          ],
+          "copied_run": [
+            "la",
+            "ngay"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        null,
+        null
+      ],
+      "merged_ranks": [
+        3,
+        null
+      ]
+    },
+    {
+      "case_id": "A4",
+      "provisions": [
+        [
+          [
+            "38/2019/QH14",
+            "47",
+            null
+          ],
+          [
+            "56/2024/QH15",
+            "6",
+            "6"
+          ]
+        ],
+        [
+          [
+            "80/2021/TT-BTC",
+            "40",
+            "3"
+          ]
+        ],
+        [
+          [
+            "38/2019/QH14",
+            "59",
+            null
+          ]
+        ],
+        [
+          [
+            "80/2021/TT-BTC",
+            "21",
+            null
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "queries": [
+        {
+          "query": "khai bổ sung tờ khai đã gửi cơ quan thuế khi thấy có sai sót",
+          "targets": "38/2019/QH14 47",
+          "ranks": [
+            18,
+            null,
+            null,
+            null
+          ],
+          "copied_run": [
+            "khai",
+            "bo",
+            "sung"
+          ]
+        },
+        {
+          "query": "lô hàng xuất khẩu được hoàn thuế giá trị gia tăng rồi bị trả về thì xử lý ra sao",
+          "targets": "80/2021/TT-BTC 40(3)",
+          "ranks": [
+            null,
+            2,
+            null,
+            null
+          ],
+          "copied_run": [
+            "hang",
+            "xuat",
+            "khau"
+          ]
+        },
+        {
+          "query": "khi nào người nộp thuế bị tính lãi chậm nộp",
+          "targets": "38/2019/QH14 59",
+          "ranks": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "copied_run": [
+            "nguoi",
+            "nop",
+            "thue"
+          ]
+        },
+        {
+          "query": "cách xác định số ngày và số tiền lãi chậm nộp thuế",
+          "targets": "80/2021/TT-BTC 21",
+          "ranks": [
+            null,
+            null,
+            null,
+            6
+          ],
+          "copied_run": [
+            "xac",
+            "dinh",
+            "so"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        18,
+        2,
+        null,
+        6
+      ],
+      "merged_ranks": [
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "case_id": "A5",
+      "provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "14",
+            "2"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "26",
+            null
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        1
+      ],
+      "queries": [
+        {
+          "query": "chưa thanh toán qua ngân hàng thì có được khấu trừ thuế giá trị gia tăng đầu vào không",
+          "targets": "48/2024/QH15 14(2)",
+          "ranks": [
+            5,
+            2
+          ],
+          "copied_run": [
+            "duoc",
+            "khau",
+            "tru"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        5,
+        2
+      ],
+      "merged_ranks": [
+        7,
+        2
+      ]
+    },
+    {
+      "case_id": "A6",
+      "provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "5",
+            "1"
+          ],
+          [
+            "149/2025/QH15",
+            "1",
+            "1"
+          ]
+        ],
+        [
+          [
+            "32/2018/QH14",
+            "2",
+            "2"
+          ]
+        ],
+        [
+          [
+            "31/2018/QH14",
+            "2",
+            "2"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        null,
+        null
+      ],
+      "queries": [
+        {
+          "query": "sản phẩm trồng trọt, chăn nuôi tự sản xuất bán ra có chịu thuế giá trị gia tăng không",
+          "targets": "48/2024/QH15 5(1)",
+          "ranks": [
+            4,
+            null,
+            null
+          ],
+          "copied_run": [
+            "tu",
+            "san",
+            "xuat"
+          ]
+        },
+        {
+          "query": "luật chăn nuôi coi những hoạt động nào là chăn nuôi",
+          "targets": "32/2018/QH14 2(2)",
+          "ranks": [
+            null,
+            14,
+            null
+          ],
+          "copied_run": [
+            "chan",
+            "nuoi"
+          ]
+        },
+        {
+          "query": "luật trồng trọt coi những hoạt động nào là trồng trọt",
+          "targets": "31/2018/QH14 2(2)",
+          "ranks": [
+            null,
+            null,
+            10
+          ],
+          "copied_run": [
+            "trong",
+            "trot"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        4,
+        14,
+        10
+      ],
+      "merged_ranks": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "case_id": "A7",
+      "provisions": [
+        [
+          [
+            "25/2018/TT-BTC",
+            "2",
+            null
+          ]
+        ],
+        [
+          [
+            "64/2025/QH15",
+            "58",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "38",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        9,
+        null,
+        null
+      ],
+      "queries": [
+        {
+          "query": "quy định thay đổi giữa lúc phát sinh và lúc nộp hồ sơ thì dùng văn bản pháp luật nào",
+          "targets": "64/2025/QH15 58(1)",
+          "ranks": [
+            null,
+            null,
+            null
+          ],
+          "copied_run": [
+            "dung",
+            "van",
+            "ban"
+          ]
+        },
+        {
+          "query": "ngày có hiệu lực của nghị định hướng dẫn luật thuế giá trị gia tăng mới",
+          "targets": "181/2025/NĐ-CP 38(1)",
+          "ranks": [
+            null,
+            null,
+            null
+          ],
+          "copied_run": [
+            "co",
+            "hieu",
+            "luc"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        null,
+        null,
+        null
+      ],
+      "merged_ranks": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "case_id": "A8",
+      "provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "15",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "29",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        5,
+        7
+      ],
+      "merged_ranks": [
+        5,
+        7
+      ]
+    },
+    {
+      "case_id": "A9",
+      "provisions": [
+        [
+          [
+            "38/2019/QH14",
+            "16",
+            "11"
+          ]
+        ],
+        [
+          [
+            "125/2020/NĐ-CP",
+            "9",
+            "2"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        null
+      ],
+      "queries": [
+        {
+          "query": "làm đúng công văn hướng dẫn của cục thuế nhưng sau bị xác định sai thì có bị phạt không",
+          "targets": "38/2019/QH14 16(11)",
+          "ranks": [
+            null,
+            null
+          ],
+          "copied_run": [
+            "huong",
+            "dan"
+          ]
+        },
+        {
+          "query": "trường hợp nào không bị phạt về thuế khi làm theo hướng dẫn của nhà nước",
+          "targets": "125/2020/NĐ-CP 9(2)",
+          "ranks": [
+            20,
+            1
+          ],
+          "copied_run": [
+            "ve",
+            "thue"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        20,
+        1
+      ],
+      "merged_ranks": [
+        null,
+        7
+      ]
+    },
+    {
+      "case_id": "A10",
+      "provisions": [
+        [
+          [
+            "67/2025/QH15",
+            "10",
+            "2"
+          ]
+        ],
+        [
+          [
+            "67/2025/QH15",
+            "10",
+            "3"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        null
+      ],
+      "queries": [
+        {
+          "query": "thuế suất thuế thu nhập doanh nghiệp cho doanh nghiệp nhỏ theo doanh thu năm",
+          "targets": "67/2025/QH15 10(2)",
+          "ranks": [
+            null,
+            null
+          ],
+          "copied_run": [
+            "doanh",
+            "thu",
+            "nam"
+          ]
+        },
+        {
+          "query": "doanh thu năm nào dùng làm căn cứ chọn thuế suất thuế thu nhập doanh nghiệp",
+          "targets": "67/2025/QH15 10(3)",
+          "ranks": [
+            18,
+            18
+          ],
+          "copied_run": [
+            "doanh",
+            "thu",
+            "nam"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        18,
+        18
+      ],
+      "merged_ranks": [
+        null,
+        null
+      ]
+    },
+    {
+      "case_id": "A11",
+      "provisions": [
+        [
+          [
+            "67/2025/QH15",
+            "10",
+            "3"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null
+      ],
+      "queries": [
+        {
+          "query": "thuế suất thuế thu nhập doanh nghiệp cho doanh nghiệp vừa căn cứ doanh thu năm trước",
+          "targets": "67/2025/QH15 10(3)",
+          "ranks": [
+            5
+          ],
+          "copied_run": [
+            "doanh",
+            "thu",
+            "nam"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        5
+      ],
+      "merged_ranks": [
+        11
+      ]
+    },
+    {
+      "case_id": "A12",
+      "provisions": [
+        [
+          [
+            "109/2025/QH15",
+            "10",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        1
+      ],
+      "merged_ranks": [
+        1
+      ]
+    },
+    {
+      "case_id": "A13",
+      "provisions": [
+        [
+          [
+            "109/2025/QH15",
+            "7",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        7
+      ],
+      "merged_ranks": [
+        7
+      ]
+    },
+    {
+      "case_id": "A14",
+      "provisions": [
+        [
+          [
+            "109/2025/QH15",
+            "7",
+            "4"
+          ]
+        ],
+        [
+          [
+            "109/2025/QH15",
+            "7",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        9
+      ],
+      "queries": [
+        {
+          "query": "cách tính thuế thu nhập cá nhân khi cho thuê nhà ở",
+          "targets": "109/2025/QH15 7(4)",
+          "ranks": [
+            null,
+            null
+          ],
+          "copied_run": [
+            "cach",
+            "tinh"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        null,
+        null
+      ],
+      "merged_ranks": [
+        null,
+        19
+      ]
+    },
+    {
+      "case_id": "A15",
+      "provisions": [
+        [
+          [
+            "108/2025/QH15",
+            "16",
+            "2"
+          ]
+        ],
+        [
+          [
+            "108/2025/QH15",
+            "16",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        null
+      ],
+      "queries": [
+        {
+          "query": "mức tiền chậm nộp thuế tính theo ngày là bao nhiêu phần trăm",
+          "targets": "108/2025/QH15 16(2)",
+          "ranks": [
+            5,
+            null
+          ],
+          "copied_run": [
+            "tien",
+            "cham",
+            "nop"
+          ]
+        },
+        {
+          "query": "những trường hợp phải trả tiền chậm nộp thuế",
+          "targets": "108/2025/QH15 16(1)",
+          "ranks": [
+            null,
+            null
+          ],
+          "copied_run": [
+            "tien",
+            "cham",
+            "nop"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        5,
+        null
+      ],
+      "merged_ranks": [
+        null,
+        null
+      ]
+    },
+    {
+      "case_id": "A16",
+      "provisions": [
+        [
+          [
+            "108/2025/QH15",
+            "16",
+            "1"
+          ]
+        ],
+        [
+          [
+            "108/2025/QH15",
+            "16",
+            "2"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        null
+      ],
+      "queries": [
+        {
+          "query": "khai bổ sung làm tăng tiền thuế cần nộp có bị tính lãi chậm nộp không",
+          "targets": "108/2025/QH15 16(1)",
+          "ranks": [
+            null,
+            null
+          ],
+          "copied_run": [
+            "khai",
+            "bo",
+            "sung"
+          ]
+        },
+        {
+          "query": "tiền chậm nộp thuế tính theo tỷ lệ bao nhiêu mỗi ngày",
+          "targets": "108/2025/QH15 16(2)",
+          "ranks": [
+            null,
+            15
+          ],
+          "copied_run": [
+            "tien",
+            "cham",
+            "nop"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        null,
+        15
+      ],
+      "merged_ranks": [
+        null,
+        null
+      ]
+    },
+    {
+      "case_id": "A17",
+      "provisions": [
+        [
+          [
+            "254/2026/NĐ-CP",
+            "9",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        15
+      ],
+      "merged_ranks": [
+        15
+      ]
+    },
+    {
+      "case_id": "A18",
+      "provisions": [
+        [
+          [
+            "254/2026/NĐ-CP",
+            "9",
+            "2"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        8
+      ],
+      "merged_ranks": [
+        8
+      ]
+    },
+    {
+      "case_id": "A19",
+      "provisions": [
+        [
+          [
+            "254/2026/NĐ-CP",
+            "9",
+            "3"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        9
+      ],
+      "merged_ranks": [
+        9
+      ]
+    },
+    {
+      "case_id": "A20",
+      "provisions": [
+        [
+          [
+            "181/2025/NĐ-CP",
+            "18",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null
+      ],
+      "queries": [
+        {
+          "query": "hàng xuất khẩu cần những chứng từ gì để được hưởng thuế suất 0%",
+          "targets": "181/2025/NĐ-CP 18(1)",
+          "ranks": [
+            13
+          ],
+          "copied_run": [
+            "thue",
+            "suat",
+            "0"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        13
+      ],
+      "merged_ranks": [
+        null
+      ]
+    },
+    {
+      "case_id": "A21",
+      "provisions": [
+        [
+          [
+            "181/2025/NĐ-CP",
+            "18",
+            "2"
+          ]
+        ],
+        [
+          [
+            "48/2024/QH15",
+            "9",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        15,
+        3
+      ],
+      "merged_ranks": [
+        15,
+        3
+      ]
+    },
+    {
+      "case_id": "A22",
+      "provisions": [
+        [
+          [
+            "181/2025/NĐ-CP",
+            "26",
+            "3"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null
+      ],
+      "queries": [
+        {
+          "query": "nhiều lần mua trong ngày từ một người bán bằng tiền mặt, thuế đầu vào có được khấu trừ không",
+          "targets": "181/2025/NĐ-CP 26(3)",
+          "ranks": [
+            10
+          ],
+          "copied_run": [
+            "duoc",
+            "khau",
+            "tru"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        10
+      ],
+      "merged_ranks": [
+        null
+      ]
+    },
+    {
+      "case_id": "A23",
+      "provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "15",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        4
+      ],
+      "merged_ranks": [
+        4
+      ]
+    },
+    {
+      "case_id": "R4",
+      "provisions": [
+        [
+          [
+            "67/2025/QH15",
+            "10",
+            "1"
+          ]
+        ],
+        [
+          [
+            "67/2025/QH15",
+            "10",
+            "2"
+          ]
+        ],
+        [
+          [
+            "67/2025/QH15",
+            "10",
+            "3"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        null,
+        null
+      ],
+      "queries": [
+        {
+          "query": "các mức thuế suất thuế thu nhập doanh nghiệp hiện hành theo quy mô doanh thu",
+          "targets": "67/2025/QH15 10(1)-(3)",
+          "ranks": [
+            16,
+            16,
+            16
+          ],
+          "copied_run": [
+            "muc",
+            "thue",
+            "suat"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        16,
+        16,
+        16
+      ],
+      "merged_ranks": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "case_id": "R5",
+      "provisions": [
+        [
+          [
+            "109/2025/QH15",
+            "10",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        3
+      ],
+      "merged_ranks": [
+        3
+      ]
+    },
+    {
+      "case_id": "L2",
+      "provisions": [
+        [
+          [
+            "25/2018/TT-BTC",
+            "2",
+            null
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        4
+      ],
+      "merged_ranks": [
+        4
+      ]
+    },
+    {
+      "case_id": "L3",
+      "provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "15",
+            "1"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "29",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        2,
+        7
+      ],
+      "merged_ranks": [
+        2,
+        7
+      ]
+    },
+    {
+      "case_id": "L4",
+      "provisions": [
+        [
+          [
+            "48/2024/QH15",
+            "14",
+            "2"
+          ]
+        ],
+        [
+          [
+            "181/2025/NĐ-CP",
+            "26",
+            "2"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        null,
+        3
+      ],
+      "queries": [
+        {
+          "query": "điều kiện thanh toán qua ngân hàng để được khấu trừ thuế giá trị gia tăng đầu vào",
+          "targets": "48/2024/QH15 14(2)",
+          "ranks": [
+            2,
+            13
+          ],
+          "copied_run": [
+            "duoc",
+            "khau",
+            "tru"
+          ]
+        }
+      ],
+      "oracle_best_ranks": [
+        2,
+        13
+      ],
+      "merged_ranks": [
+        11,
+        2
+      ]
+    },
+    {
+      "case_id": "L5",
+      "provisions": [
+        [
+          [
+            "109/2025/QH15",
+            "7",
+            "2"
+          ]
+        ],
+        [
+          [
+            "109/2025/QH15",
+            "7",
+            "3"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        2,
+        3
+      ],
+      "merged_ranks": [
+        2,
+        3
+      ]
+    },
+    {
+      "case_id": "L6",
+      "provisions": [
+        [
+          [
+            "109/2025/QH15",
+            "7",
+            "1"
+          ]
+        ]
+      ],
+      "baseline_ranks": [
+        2
+      ],
+      "merged_ranks": [
+        2
+      ]
+    }
+  ]
+}
