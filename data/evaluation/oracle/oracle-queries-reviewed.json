@@ -1,7 +1,7 @@
 {
-  "status": "first-pass review, awaiting Le Hung's check",
+  "status": "reviewed",
   "drafted": "Claude, 24/11/2026, from the gold answers and the missed provisions (plan.md)",
-  "reviewed": "First pass by a Claude agent briefed as a tax practitioner, 24/11/2026, blind to the draft runs (review.md). Not yet checked by Le Hung; the copy check (rule 3) has not been run on the rewrites.",
+  "reviewed": "First pass by a Claude agent briefed as a tax practitioner, 24/11/2026, blind to the draft runs (review.md). Checked by Le Hung, 24/11/2026 (accepted as proposed, open points left as written). Copy check run before the counted run: only A2.2 failed ('cho doanh nghiệp khác', 4 words) and was reworded to 'cho công ty khác'.",
   "allowed_names": [
     "thuế giá trị gia tăng",
     "thuế thu nhập doanh nghiệp",
@@ -36,7 +36,7 @@
         {
           "targets": "48/2024/QH15 5(1); 181/2025/NĐ-CP 4(1b)",
           "issue": "A trading company reselling unprocessed farm or forest products to another company",
-          "query": "mua nông sản, lâm sản bán lại cho doanh nghiệp khác có phải kê khai thuế giá trị gia tăng"
+          "query": "mua nông sản, lâm sản bán lại cho công ty khác có phải kê khai thuế giá trị gia tăng"
         },
         {
           "targets": "84/2025/TT-BNNMT 20(1)",
