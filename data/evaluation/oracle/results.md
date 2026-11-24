@@ -45,3 +45,10 @@ documents with no ending stated anywhere in the corpus: the 2013 penalties circu
 customs circular 194/2010, 123/2004, 176/2010, and 1990s ministry texts (`27/TCT`, `101 TC/TCT`), plus
 current law on neighbouring subjects. Only an outside status source, or the inferred rules once a tax
 expert validates them, can end these.
+
+## Review (24/11/2026)
+
+A first-pass review by a Claude agent, blind to the runs above, is in [review.md](review.md): 7 drafts
+broke the 20-word rule, 9 more mis-stated the issue or its term, and one provision had no query. The
+proposed queries (`oracle-queries-reviewed.json`) have not been run. Le Hung checks them first, then one
+run gives the result.

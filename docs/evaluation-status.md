@@ -162,8 +162,11 @@ L = more. Mark each done here when finished.
 
 Waiting on a person (23/11/2026); code items above that depend on one say so.
 
-1. **Review the 30 oracle queries** in `data/evaluation/oracle/oracle-queries.json` (Le Hung) against the
-   rules in its plan; the oracle result counts only after it.
+1. **Check the first-pass review of the oracle queries** (Le Hung):
+   [review.md](../data/evaluation/oracle/review.md). A Claude agent briefed as a tax practitioner did the
+   first pass on 24/11/2026 at his request (14 kept, 16 rewritten, 1 added) and raised 6 doubts about
+   gold cases A2, A5, A7, A9, A10, A11, A14, L4, R4. The oracle result counts only after his check and
+   the run that follows it.
 2. ~~Review the 18 draft gold cases~~ **done 23/11/2026** by the owner. A tax expert's second reading would
    still strengthen them, and 16 more cases would reach 50.
 2. **Check two document numbers against the originals:** `93/1998/QĐ/TCKT` (its header reads

@@ -54,3 +54,9 @@ the gold answer and the missed provisions, then reviewed by Le Hung against thes
 Each run takes minutes on a laptop and makes no model calls. The draft queries are run once and
 reported as **draft**. The result is the run after Le Hung's review; both are kept. The queries are not
 changed after the reviewed run.
+
+## Change after writing (24/11/2026)
+
+Le Hung, short of time, asked for a first-pass review by a Claude agent, which he then checks
+([review.md](review.md)). The agent did not see the draft runs. The reviewed run is still the one after
+his check, and it is run once.

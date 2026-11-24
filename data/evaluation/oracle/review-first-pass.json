@@ -1,0 +1,641 @@
+{
+  "queries": [
+    {
+      "id": "A1.1",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "VAT Law Art 9(3) is the residual standard-rate clause (goods and services not listed in clauses 1 and 2). The query names that issue without the rate; 'thuế suất phổ thông' is normal practitioner wording.",
+      "for_human_expert": null
+    },
+    {
+      "id": "A1.2",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Decree 174/2025 Art 1(1)(b) excludes goods and services subject to special consumption tax (except petrol) from the VAT reduction. The query names exactly that issue.",
+      "for_human_expert": null
+    },
+    {
+      "id": "A2.1",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Art 5(1) (as replaced by Law 149/2025) governs non-taxable unprocessed or ordinarily processed crop, planted-forest, livestock and aquatic products. The query names it through two examples of ordinary processing.",
+      "for_human_expert": "The term of art 'sơ chế thông thường' is itself four words, so rule 3 forbids it; the draft uses the examples 'bóc vỏ, phơi khô' (which come from Decree 181 Art 4(1), not the Law). Decide whether the term should be added to the allowed names; if so, 'sản phẩm rừng trồng chỉ qua sơ chế thông thường có chịu thuế giá trị gia tăng không' would be the natural query."
+    },
+    {
+      "id": "A2.2",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "mua nông sản, lâm sản bán lại cho doanh nghiệp khác có phải kê khai thuế giá trị gia tăng",
+      "new_word_count": 20,
+      "reason": "26 words. Also mis-targeted: Decree 181 Art 4(1) (original text) only restates the exemption and defines ordinary processing; the trading-stage rule this query names sits in VAT Law Art 5(1) second paragraph (added by Law 149/2025) and in Decree 181 Art 4 clause 1b (added by Decree 359/2025).",
+      "for_human_expert": "Retarget this query to 48/2024 Art 5(1) (and 181 Art 4(1b) if it is in the corpus). A separate query for the Art 4(1) definition is proposed under coverage. I did not see the text of clause 1b (Decree 359), so the rewrite is not checked for 4-word runs against it."
+    },
+    {
+      "id": "A2.3",
+      "verdict": "rewrite",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": "gỗ chỉ cưa xẻ, bóc vỏ có được coi là gỗ sơ chế trong quy định về lâm sản",
+      "new_word_count": 19,
+      "reason": "Circular 84/2025 Art 20(1)(c) inserts the definition of 'gỗ sơ chế thông thường' into Circular 26/2025. The draft asks about 'gỗ thô', which is not the defined concept (the text only has 'gỗ xẻ thô' as one example); 'gỗ sơ chế' names the right concept without the 4-word term.",
+      "for_human_expert": "The full term 'gỗ sơ chế thông thường' is blocked by rule 3 (4 words). Confirm 'gỗ sơ chế' is acceptable shorthand."
+    },
+    {
+      "id": "A3.1",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Tax Administration Law 38/2019 Art 44(1)(a) sets the deadline for monthly returns. The statutory term 'thời hạn nộp hồ sơ khai thuế' is the article title and cannot be used under rule 3; 'hạn chót nộp tờ khai' is a fair paraphrase.",
+      "for_human_expert": null
+    },
+    {
+      "id": "A4.1",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "khai bổ sung tờ khai đã gửi cơ quan thuế khi thấy có sai sót",
+      "new_word_count": 15,
+      "reason": "Art 47 is 'khai bổ sung'; no practitioner searches 'sửa lại tờ khai'. The 3-word term of art can be used without breaking rule 3 (checked against Art 47(1): no 4-word run).",
+      "for_human_expert": "Judgement call: the draft is not legally wrong, only lay wording. Not checked against the text of Law 56/2024 Art 6(6)."
+    },
+    {
+      "id": "A4.2",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Circular 80/2021 Art 40(3) is specifically about VAT already refunded on exported goods that are then returned, so the scenario is the legal issue, not just the case's facts.",
+      "for_human_expert": "This query is close to a paraphrase of the user's question; that is unavoidable because the clause is that specific. It tests retrieval more than issue-naming."
+    },
+    {
+      "id": "A4.3",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Art 59(1) lists the cases in which late-payment money is due; the query names that issue.",
+      "for_human_expert": "'lãi chậm nộp' is colloquial; the statutory term is 'tiền chậm nộp'. A direct swap creates the statutory run 'tính tiền chậm nộp'. If you want the term of art: 'khi nào người nộp thuế phải chịu tiền chậm nộp' (10 words; Art 59 does not contain 'người nộp thuế phải chịu')."
+    },
+    {
+      "id": "A4.4",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Circular 80/2021 Art 21(1) governs how the late-payment amount is determined (amount, number of days, rate, period). The query names it.",
+      "for_human_expert": "Same 'lãi chậm nộp' vs 'tiền chậm nộp' point as A4.3. Note 'số ngày chậm nộp' and 'xác định số tiền chậm nộp' are statutory runs, so the term-of-art version must avoid them, e.g. 'cách xác định số ngày và khoản tiền chậm nộp thuế' (unverified by the script)."
+    },
+    {
+      "id": "A5.1",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1,
+        4
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "chưa thanh toán qua ngân hàng thì có được khấu trừ thuế giá trị gia tăng đầu vào không",
+      "new_word_count": 19,
+      "reason": "21 words. VAT Law Art 14(2)(b) states only the general non-cash-payment condition for deduction; the instalment/deferred-payment rule is in Decree 181 Art 26, so 'mua hàng trả dần' is a case fact pointing at the decree, not at the target.",
+      "for_human_expert": "If you prefer to keep the instalment fact, the minimal trim is 'mua trả dần chưa thanh toán qua ngân hàng có được khấu trừ thuế giá trị gia tăng đầu vào' (20 words); note the term of art is 'trả chậm, trả góp', not 'trả dần'."
+    },
+    {
+      "id": "A6.1",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Art 5(1) first paragraph covers products of growers and breeders who sell what they produce; the query names that issue correctly.",
+      "for_human_expert": null
+    },
+    {
+      "id": "A6.2",
+      "verdict": "rewrite",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": "luật chăn nuôi coi những hoạt động nào là chăn nuôi",
+      "new_word_count": 11,
+      "reason": "The target is Art 2(2), the definition of 'hoạt động chăn nuôi'. 'Định nghĩa chăn nuôi' names Art 2(1) instead ('Chăn nuôi là ngành kinh tế - kỹ thuật...').",
+      "for_human_expert": "The defined term 'hoạt động chăn nuôi' is itself four words, so rule 3 blocks the natural query 'hoạt động chăn nuôi là gì theo luật chăn nuôi'. Decide whether to exempt the defined term; otherwise use the rewrite. Low stakes: both clauses are in the same article."
+    },
+    {
+      "id": "A6.3",
+      "verdict": "rewrite",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": "luật trồng trọt coi những hoạt động nào là trồng trọt",
+      "new_word_count": 11,
+      "reason": "Same as A6.2: the target Art 2(2) lists what 'hoạt động trồng trọt' covers; 'định nghĩa trồng trọt' names Art 2(1).",
+      "for_human_expert": "Same question as A6.2 for the 4-word defined term 'hoạt động trồng trọt'."
+    },
+    {
+      "id": "A7.1",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "quy định thay đổi giữa lúc phát sinh và lúc nộp hồ sơ thì dùng văn bản pháp luật nào",
+      "new_word_count": 20,
+      "reason": "21 words; dropped the leading 'khi'. The issue (which legal document applies over time) is what Art 58 of the 2025 Law on Promulgation of Legal Documents governs. 'Áp dụng văn bản' is the article title (4 words), so 'dùng' stays.",
+      "for_human_expert": "Art 58(1) only says a document applies from when it takes effect; the rule for events that happened while a document was in force is Art 58(2). The query fits clause 2 better than the missed clause 1."
+    },
+    {
+      "id": "A7.2",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "ngày có hiệu lực của nghị định hướng dẫn luật thuế giá trị gia tăng mới",
+      "new_word_count": 16,
+      "reason": "21 words. Decree 181 Art 38(1) only states the effective date. Transitional rules are Art 39 (and concern investment projects and the 5% refund, not this case), so 'chuyển tiếp hoàn thuế' named a different article and is removed.",
+      "for_human_expert": "Confirm that Art 38(1) (effective date only) is the essential provision meant here; see gold-set doubts."
+    },
+    {
+      "id": "A9.1",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "làm đúng công văn hướng dẫn của cục thuế nhưng sau bị xác định sai thì có bị phạt không",
+      "new_word_count": 20,
+      "reason": "21 words; dropped 'đó'. Art 16(11) (taxpayer's right not to be penalised or charged late-payment money when following written guidance) is the right provision. 'Cục thuế' is kept because 'của cơ quan thuế' is a statutory 4-word run.",
+      "for_human_expert": null
+    },
+    {
+      "id": "A9.2",
+      "verdict": "rewrite",
+      "rules_broken": [],
+      "legal_check": "from memory",
+      "rewrite": "trường hợp nào không bị phạt về thuế khi làm theo hướng dẫn của nhà nước",
+      "new_word_count": 16,
+      "reason": "Decree 125/2020 Art 9 is about 'không xử phạt' (no penalty at all). 'Miễn xử phạt' is a different institution (miễn tiền phạt, a later article of the same decree) and would pull the search there.",
+      "for_human_expert": "Art 9(2) content confirmed only from memory and a secondary summary, not the official text; the rewrite is therefore not checked for 4-word runs. 'Những trường hợp không' is the article title's opening and was avoided."
+    },
+    {
+      "id": "A10.1",
+      "verdict": "rewrite",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": "thuế suất thuế thu nhập doanh nghiệp cho doanh nghiệp nhỏ theo doanh thu năm",
+      "new_word_count": 15,
+      "reason": "The rate in CIT Law Art 10(2) is not a 'thuế suất ưu đãi'; Art 10(1) itself separates it from incentive rates under Art 13. 'Ưu đãi' names the incentive regime, so it is removed.",
+      "for_human_expert": "'Doanh nghiệp nhỏ' is not the Law's wording (it uses total annual revenue only); acceptable as practitioner shorthand?"
+    },
+    {
+      "id": "A10.2",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "The revenue-basis sentence (revenue of the immediately preceding tax period) follows clause 3 of Art 10; the query names that issue without the answer.",
+      "for_human_expert": "In the published text this sentence is an unnumbered paragraph after clause 3, before clause 4. Check how the corpus chunks it."
+    },
+    {
+      "id": "A11.1",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Art 10(3) holds both the middle rate and the preceding-period revenue basis; the query names both without the rate or the thresholds.",
+      "for_human_expert": "'Doanh nghiệp vừa' is not a statutory category in the CIT Law (and differs from the SME-support definition). 'Căn cứ doanh thu năm trước' hints at the revenue-basis rule but states no amount; I read it as issue, not answer."
+    },
+    {
+      "id": "A14.1",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "PIT Law 109/2025 Art 7(4) sets how PIT is computed for individuals letting real estate. The query names it; 'nhà ở' is narrower than 'bất động sản' but natural.",
+      "for_human_expert": "See gold-set doubt on the PIT Law's effective date and a possible 2026 amendment of Art 7(1)."
+    },
+    {
+      "id": "A15.1",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "mức tiền chậm nộp thuế tính theo ngày là bao nhiêu phần trăm",
+      "new_word_count": 13,
+      "reason": "'Lãi phạt nộp thuế muộn' is not a tax term and mixes two different things (a penalty and late-payment money). Law 108/2025 Art 16(2) is about 'tiền chậm nộp'. The rewrite avoids the statutory run 'mức tính tiền chậm nộp'.",
+      "for_human_expert": null
+    },
+    {
+      "id": "A15.2",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Law 108/2025 Art 16(1) opens with the list of cases in which late-payment money is due; the query names it with the correct term.",
+      "for_human_expert": "'Phải trả' is slightly unnatural, but the natural 'phải nộp tiền chậm nộp' is a statutory run, so it cannot be improved without copying."
+    },
+    {
+      "id": "A16.1",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "Law 108/2025 Art 16(1)(b) is exactly the supplementary return that increases tax payable. This is the legal issue, not merely the case's facts; 'khai bổ sung' is used correctly.",
+      "for_human_expert": "'Lãi chậm nộp' is colloquial for 'tiền chậm nộp'. Term-of-art alternative: 'khai bổ sung làm tăng tiền thuế cần nộp có phải chịu tiền chậm nộp không' (16 words). The query nearly restates the question, which is unavoidable here."
+    },
+    {
+      "id": "A16.2",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "tiền chậm nộp thuế tính theo tỷ lệ bao nhiêu mỗi ngày",
+      "new_word_count": 12,
+      "reason": "Same defect as A15.1: 'lãi phạt nộp thuế muộn' is off-term; the provision is about 'tiền chậm nộp'.",
+      "for_human_expert": null
+    },
+    {
+      "id": "A20.1",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "hàng xuất khẩu cần những chứng từ gì để được hưởng thuế suất 0%",
+      "new_word_count": 14,
+      "reason": "Decree 181 Art 18(1) is the conditions for the 0% rate for exported goods. 'Hàng bán ra nước ngoài' is not how anyone names exports; 'hàng xuất khẩu' is the term and does not copy four words.",
+      "for_human_expert": "Low stakes. The query contains '0%': I read it as the name of the regime (it is in the article title and in the user's question), not as the answer, so not a rule 4 breach. Confirm."
+    },
+    {
+      "id": "A22.1",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "nhiều lần mua trong ngày từ một người bán bằng tiền mặt, thuế đầu vào có được khấu trừ không",
+      "new_word_count": 20,
+      "reason": "21 words. Decree 181 Art 26(3) governs several same-day purchases from one taxpayer, so the issue is right. Reordered to avoid the statutory run 'mua nhiều lần trong cùng một ngày' and to use 'khấu trừ' rather than 'trừ'.",
+      "for_human_expert": null
+    },
+    {
+      "id": "R4.1",
+      "verdict": "keep",
+      "rules_broken": [],
+      "legal_check": "verified against text",
+      "rewrite": null,
+      "new_word_count": null,
+      "reason": "CIT Law Art 10(1)-(3) sets the standard rate and the two revenue-based rates; the query names the set of rates by revenue size without stating any.",
+      "for_human_expert": "'Hiện hành' is a time word but not a date; I read it as allowed under rule 2."
+    },
+    {
+      "id": "L4.1",
+      "verdict": "rewrite",
+      "rules_broken": [
+        1
+      ],
+      "legal_check": "verified against text",
+      "rewrite": "điều kiện thanh toán qua ngân hàng để được khấu trừ thuế giá trị gia tăng đầu vào",
+      "new_word_count": 18,
+      "reason": "21 words, and the issue is mis-stated for the target: VAT Law Art 14(2) contains no value threshold. The threshold is in the opening sentence of Decree 181 Art 26. Art 14(2)(b) governs the non-cash-payment condition itself, which the rewrite names.",
+      "for_human_expert": "A practitioner searching the threshold would expect the Decree, not the Law. If the threshold issue should stay as a query, aim it at Decree 181 Art 26, which is essential for L4 but not in its missed list."
+    }
+  ],
+  "coverage": [
+    {
+      "case": "A1",
+      "missed_provision": "48/2024/QH15 Art 9(3)",
+      "covered_by": "A1.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A1",
+      "missed_provision": "174/2025/NĐ-CP Art 1(1)",
+      "covered_by": "A1.2",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A2",
+      "missed_provision": "48/2024/QH15 Art 5(1)",
+      "covered_by": "A2.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "A2.1 covers the exemption paragraph; A2.2 (rewritten) names the trading-stage paragraph of the same clause and should also be credited to it."
+    },
+    {
+      "case": "A2",
+      "missed_provision": "181/2025/NĐ-CP Art 4(1)",
+      "covered_by": null,
+      "proposed_query": "những công đoạn nào được coi là sơ chế nông sản, lâm sản khi xét thuế giá trị gia tăng",
+      "proposed_issue": "What counts as ordinary preliminary processing of farm and forest products for VAT",
+      "reason": "A2.2 is aimed here but names the trading-stage rule, which Art 4(1) does not contain. Art 4(1) is the definition of ordinary processing; an extra query (20 words, case would then have 4) is warranted. Checked for 4-word runs only against the first sentences of Art 4(1); the tail of the clause was not seen."
+    },
+    {
+      "case": "A2",
+      "missed_provision": "84/2025/TT-BNNMT Art 20(1)",
+      "covered_by": "A2.3",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, after the rewrite."
+    },
+    {
+      "case": "A3",
+      "missed_provision": "38/2019/QH14 Art 44(1)",
+      "covered_by": "A3.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A4",
+      "missed_provision": "38/2019/QH14 Art 47 OR 56/2024/QH15 Art 6(6)",
+      "covered_by": "A4.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct; one query serves either alternative."
+    },
+    {
+      "case": "A4",
+      "missed_provision": "80/2021/TT-BTC Art 40(3)",
+      "covered_by": "A4.2",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A4",
+      "missed_provision": "38/2019/QH14 Art 59",
+      "covered_by": "A4.3",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct. The point that actually governs this case is Art 59(1)(c) (late-payment money on a refund to be recovered, from the day the refund was received); A4.3 names the article generally, which is acceptable for an article-level target."
+    },
+    {
+      "case": "A4",
+      "missed_provision": "80/2021/TT-BTC Art 21",
+      "covered_by": "A4.4",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A5",
+      "missed_provision": "48/2024/QH15 Art 14(2)",
+      "covered_by": "A5.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, after the rewrite."
+    },
+    {
+      "case": "A6",
+      "missed_provision": "48/2024/QH15 Art 5(1) OR 149/2025/QH15 Art 1(1)",
+      "covered_by": "A6.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A6",
+      "missed_provision": "32/2018/QH14 Art 2(2)",
+      "covered_by": "A6.2",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, after the rewrite."
+    },
+    {
+      "case": "A6",
+      "missed_provision": "31/2018/QH14 Art 2(2)",
+      "covered_by": "A6.3",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, after the rewrite."
+    },
+    {
+      "case": "A7",
+      "missed_provision": "64/2025/QH15 Art 58(1)",
+      "covered_by": "A7.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, though the query fits clause 2 of the same article better."
+    },
+    {
+      "case": "A7",
+      "missed_provision": "181/2025/NĐ-CP Art 38(1)",
+      "covered_by": "A7.2",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, after the rewrite."
+    },
+    {
+      "case": "A9",
+      "missed_provision": "38/2019/QH14 Art 16(11)",
+      "covered_by": "A9.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A9",
+      "missed_provision": "125/2020/NĐ-CP Art 9(2)",
+      "covered_by": "A9.2",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, after the rewrite."
+    },
+    {
+      "case": "A10",
+      "missed_provision": "67/2025/QH15 Art 10(2)",
+      "covered_by": "A10.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A10",
+      "missed_provision": "67/2025/QH15 Art 10(3)",
+      "covered_by": "A10.2",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct (the revenue-basis sentence after clause 3)."
+    },
+    {
+      "case": "A11",
+      "missed_provision": "67/2025/QH15 Art 10(3)",
+      "covered_by": "A11.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A14",
+      "missed_provision": "109/2025/QH15 Art 7(4)",
+      "covered_by": "A14.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A15",
+      "missed_provision": "108/2025/QH15 Art 16(2)",
+      "covered_by": "A15.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, after the rewrite."
+    },
+    {
+      "case": "A15",
+      "missed_provision": "108/2025/QH15 Art 16(1)",
+      "covered_by": "A15.2",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A16",
+      "missed_provision": "108/2025/QH15 Art 16(1)",
+      "covered_by": "A16.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A16",
+      "missed_provision": "108/2025/QH15 Art 16(2)",
+      "covered_by": "A16.2",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, after the rewrite."
+    },
+    {
+      "case": "A20",
+      "missed_provision": "181/2025/NĐ-CP Art 18(1)",
+      "covered_by": "A20.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "A22",
+      "missed_provision": "181/2025/NĐ-CP Art 26(3)",
+      "covered_by": "A22.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct."
+    },
+    {
+      "case": "R4",
+      "missed_provision": "67/2025/QH15 Art 10(1)",
+      "covered_by": "R4.1",
+      "proposed_query": "mức thuế suất thuế thu nhập doanh nghiệp phổ thông",
+      "proposed_issue": "The standard CIT rate",
+      "reason": "No query of its own. R4.1 names all the rates of Art 10 and reasonably covers it; the extra query is optional, only if you want one query per clause."
+    },
+    {
+      "case": "R4",
+      "missed_provision": "67/2025/QH15 Art 10(2)",
+      "covered_by": "R4.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "R4.1 is aimed at clauses 1 to 3 together."
+    },
+    {
+      "case": "R4",
+      "missed_provision": "67/2025/QH15 Art 10(3)",
+      "covered_by": "R4.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "No query of its own; R4.1 covers it. Because the case is conditional on the unstated revenue, a second query on which period's revenue decides the rate (as A10.2: 'doanh thu năm nào dùng làm căn cứ chọn thuế suất thuế thu nhập doanh nghiệp') would be legitimate but is not required."
+    },
+    {
+      "case": "L4",
+      "missed_provision": "48/2024/QH15 Art 14(2)",
+      "covered_by": "L4.1",
+      "proposed_query": null,
+      "proposed_issue": null,
+      "reason": "Direct, after the rewrite."
+    }
+  ],
+  "gold_set_doubts": [
+    {
+      "case": "A2",
+      "doubt": "The published text of Decree 181 Art 4 has clause 1 then clause 2; clause 1b exists only through Decree 359/2025. The missed list names Art 4(1) but the operative trading-stage rule is clause 1b and VAT Law Art 5(1) second paragraph. Check whether the corpus holds clause 1b and whether 'Art 4(1)' in the missed list means the definition clause or has absorbed 1b."
+    },
+    {
+      "case": "A7",
+      "doubt": "Decree 181 Art 38(1) only says the decree takes effect on its start date; the transitional article is Art 39 and does not address import-then-export refunds. Law 64/2025 Art 58(1) is the 'applies from when it takes effect' sentence, while the rule for events occurring while a document was in force is Art 58(2). Confirm these are the clauses the answer rests on, and that the 'may choose the policy in force' part of the answer has a source."
+    },
+    {
+      "case": "A14",
+      "doubt": "PIT Law 109/2025 takes effect generally on a date after this case's as_of_date; I believe (memory, not verified) that its business-income provisions apply from the start of the 2026 tax year. A secondary source also says Art 7(1) was amended by a 2026 law (cited as 09/2026/QH16); I could not verify this or whether the threshold in the gold answer still stood on the as_of_date."
+    },
+    {
+      "case": "L4 and A5",
+      "doubt": "VAT Law Art 14(2) has no money threshold. The threshold is in the opening sentence of Decree 181 Art 26, before its numbered clauses; L4's gold cites Art 26(2)-(3). Check that the chunk holding the opening sentence is counted. I did not read the deferred/instalment clause of Art 26, so A5's reliance on it is not verified."
+    },
+    {
+      "case": "A10, A11, R4",
+      "doubt": "In CIT Law 67/2025 Art 10 the sentence fixing the revenue basis (preceding tax period) is an unnumbered paragraph after clause 3. Check that the corpus attaches it to clause 3, since A10's gold relies on 'Art 10(3)' for it."
+    },
+    {
+      "case": "A9",
+      "doubt": "Decree 125/2020 was amended by a later decree effective in January 2026 (secondary source, cited as 310/2025). Not relevant if the 2024 as_of_date governs, but the question is asked from the present ('nay ... truy thu'), so confirm which version of Art 9 the penalty question should be read against. Art 9(2) itself not verified against official text."
+    },
+    {
+      "case": "A2",
+      "doubt": "Circular 84/2025 Art 20(1)(c) is an amending clause that inserts a definition into Circular 26/2025 (forest-product management). It is a forestry definition, not a tax one; its effective date was confirmed only from a secondary source."
+    },
+    {
+      "case": "all",
+      "doubt": "The plan says the 17 cases hold 30 missed provisions; the dossier lists 32 (counted per case). The difference of two matches R4, which has three missed clauses and one query."
+    }
+  ],
+  "sources_consulted": [
+    "https://ketoanthienung.net/luat-thue-gia-tri-gia-tang-sua-doi-so-149-2025-qh15.htm",
+    "https://ketoanthienung.net/nghi-dinh-181-2025-nd-cp-huong-dan-luat-thue-gtgt.htm",
+    "https://xaydungchinhsach.chinhphu.vn/nghi-dinh-181-2025-nd-cp-quy-dinh-chi-tiet-thi-hanh-mot-so-dieu-cua-luat-thue-gia-tri-gia-tang-119250707172930626.htm",
+    "https://hethongphapluat.com/luat-thue-gia-tri-gia-tang-2024/dieu-9",
+    "https://hethongphapluat.com/luat-thue-gia-tri-gia-tang-2024/dieu-14",
+    "https://hethongphapluat.com/luat-thue-thu-nhap-doanh-nghiep-2025/dieu-10",
+    "https://hethongphapluat.com/luat-thue-thu-nhap-ca-nhan-2025/dieu-7",
+    "https://hethongphapluat.com/luat-ban-hanh-van-ban-quy-pham-phap-luat-2025/dieu-58",
+    "https://hethongphapluat.com/luat-chan-nuoi-2018/dieu-2",
+    "https://hethongphapluat.com/luat-trong-trot-2018/dieu-2",
+    "https://hethongphapluat.com/luat-quan-ly-thue-2025/dieu-16",
+    "https://hethongphapluat.com/luat-quan-ly-thue-2019/dieu-16",
+    "https://hethongphapluat.com/luat-quan-ly-thue-2019/dieu-44",
+    "https://hethongphapluat.com/luat-quan-ly-thue-2019/dieu-47",
+    "https://hethongphapluat.com/luat-quan-ly-thue-2019/dieu-59",
+    "https://hethongphapluat.com/thong-tu-80-2021-tt-btc-huong-dan-luat-quan-ly-thue-va-nghi-dinh-126-2020-nd-cp-huong-dan-luat-quan-ly-thue-do-bo-truong-bo-tai-chinh-ban-hanh/dieu-21",
+    "https://hethongphapluat.com/thong-tu-80-2021-tt-btc-huong-dan-luat-quan-ly-thue-va-nghi-dinh-126-2020-nd-cp-huong-dan-luat-quan-ly-thue-do-bo-truong-bo-tai-chinh-ban-hanh/dieu-40",
+    "https://hethongphapluat.com/nghi-dinh-174-2025-nd-cp-quy-dinh-chinh-sach-giam-thue-gia-tri-gia-tang-theo-nghi-quyet-204-2025-qh15.html",
+    "https://luatvietnam.vn/nong-nghiep/thong-tu-84-2025-tt-bnnmt-quy-dinh-chi-tiet-luat-lam-nghiep-va-sua-doi-bo-sung-423442-d1.html",
+    "Note: thuvienphapluat.vn refused automated fetches and the consolidated VAT Law PDF on datafiles.chinhphu.vn could not be read, so texts were read on the mirror sites above (not official gazette copies), through a page reader that returns the text in short quoted segments. Decree 125/2020 Art 9(2), Law 56/2024 Art 6(6) and Decree 181 Art 4 clause 1b were not read."
+  ]
+}

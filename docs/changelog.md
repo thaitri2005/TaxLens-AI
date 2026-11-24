@@ -10,6 +10,9 @@ What each working stint changed, newest first. Current state and the to-do list 
   the right legal issue, search finds only 25% of the missed provisions in the top 10. Retrieval, not
   naming the issue, is the bottleneck; superseded law outranked current law
   ([results](../data/evaluation/oracle/results.md)).
+- **Oracle queries, first-pass review** by a Claude agent briefed as a tax practitioner, at Le Hung's
+  request and awaiting his check: 14 kept, 16 rewritten (7 were over 20 words), 1 added, and 6 doubts
+  about gold cases ([review](../data/evaluation/oracle/review.md)). Not run yet.
 - **Item 19:** 30 more endings read from the corpus (lists after a colon, lists of replaced laws, laws
   ending as amended), loaded on Azure: 753 documents left out, 119 flagged. Recall identical; oracle
   25% → 28% at K = 10. The rest of the old law in the way has no ending stated in the corpus.
