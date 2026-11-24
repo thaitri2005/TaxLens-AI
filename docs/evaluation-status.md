@@ -151,7 +151,8 @@ L = more. Mark each done here when finished.
 | ~~13~~ | **Done 23/11/2026.** 14 duplicates merged by `merge_duplicate_documents.py` (321 passages removed, backed up), `corpus-v2.1` frozen, ended-document list rebuilt and loaded, baselines identical; 124/2026 confirmed, 2 numbers left for someone with the originals | | [Corpora](#corpora) |
 | ~~14~~ | **Done 23/11/2026.** ESLint 9 with Next's `core-web-vitals` and `typescript` rules (`eslint.config.mjs`); CI runs `npm run lint` and `next build` lints too. Fixed 2 errors (page links in the admin view); 3 warnings remain (two `<img>` logos, one effect's dependency list) | | |
 | ~~15~~ | **Tried 23/11/2026, rejected.** Cross-encoders over the top 100: `bge-reranker-v2-m3` 0.31, 0.43, 0.58 (reaches 4 never-found provisions at K = 20 but loses the reworded cases, and needs about 110 s a question on the site's CPU); a small multilingual one is worse alone or fused. `--reranker` stays in the evaluation for later models | | [Already tried](retrieval-experiments.md#retrieval) |
-| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, unblocked | Half the hardest misses need it |
+| 16 | Step that works out which law a question depends on, as its own lower-weight list in fusion | L, **on hold** | The oracle (draft) shows that even a named issue recovers only 25% at K = 10: superseded law must be kept out first ([results](../data/evaluation/oracle/results.md)) |
+| 19 | Extend the endings list to old documents replaced by later ones on the same subject (158/2003, 07/2003, 129/2013 …), then rerun the oracle | M | The oracle's main failure |
 | ~~17~~ | **Done 23/11/2026.** `page.tsx` (890 lines) split without code changes into `lib/` (types, copy, format, api) and `components/` (tags, answer, documents, layout); 12 Vitest tests for the helpers and tags run in CI (`npm test`) | | |
 | ~~18~~ | **Done 23/11/2026.** Known problems 1 and 8: runs of replaced documents read (33 more ended, recall with confirmed rules identical case by case, all rules 0.38 at K = 5), and documents that may have ended used last in answers (wrong 4 → 2, refused 2 → 5). A newest-first ranking was tried and rejected | | [Already tried](retrieval-experiments.md#retrieval) |
 
@@ -159,7 +160,9 @@ L = more. Mark each done here when finished.
 
 Waiting on a person (23/11/2026); code items above that depend on one say so.
 
-1. ~~Review the 18 draft gold cases~~ **done 23/11/2026** by the owner. A tax expert's second reading would
+1. **Review the 30 oracle queries** in `data/evaluation/oracle/oracle-queries.json` (Le Hung) against the
+   rules in its plan; the oracle result counts only after it.
+2. ~~Review the 18 draft gold cases~~ **done 23/11/2026** by the owner. A tax expert's second reading would
    still strengthen them, and 16 more cases would reach 50.
 2. **Check two document numbers against the originals:** `93/1998/QĐ/TCKT` (its header reads
    `91/1998/QĐ-BNN-BVTV`) and `25/2026/TT-BTC` (its OCR'd header reads `85/2026`).
